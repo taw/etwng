@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+$i=0
+
+def extract(fn)
+  data = File.read(fn)
+  hcnt, = data.unpack("V")
+  ofs = data[4, 4 + hcnt*4].unpack("V*")
+  raise "FAIL" unless ofs[0] == 4*hcnt+8 and ofs[-1] == data.size # Sanity check
+  hcnt.times{|i|
+    part = data[ofs[i]...ofs[i+1]]
+    sza,szb = part.unpack("VV")
+    unless sza+szb+8 == part.size
+      warn "FAIL #{[sza, szb, part.size, fn].inspect}" # More sanity check
+      return
+    end
+    parta=part[8,sza]
+    partb=part[8+sza,szb]
+    $i+=1
+    File.open("farm_jpegs/%05d_a.jpg" % $i, "w"){|fh| fh.write parta}
+    File.open("farm_jpegs/%05d_b.jpg" % $i, "w"){|fh| fh.write partb}
+  }
+end
+
+if File.exist?("farm_jpegs")
+  STDERR.print "Please move farm_jpegs directory or it will get overwritten"
+  exit
+end
+system "mkdir", "-p", "farm_jpegs"
+
+Dir["unpacked/**/*.farm_fields_tile_texture"].sort.each{|fn|
+  extract(fn)
+}
