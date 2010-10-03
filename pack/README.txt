@@ -1,3 +1,20 @@
+== UNPACKER ==
+
+etw_unpacker.py is a straightforward unpacker for .pack files
+
+== FUSE DRIVER ==
+
+fuse/ directory contains filesystem driver which lets you mount
+.pack files and groups of .pack files directly as image,
+without unpacking.
+
+Extremely alpha quality code.
+
+OSX only at the moment. FUSE works on everything except Windows,
+so Linux/etc. ports should be easy.
+
+== FORMAT ==
+
 .pack format consists of:
 
 Header:
