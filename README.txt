@@ -14,13 +14,23 @@ What it does not contain:
 * Anything related to high-level game-balance issues etc.
   The focus is just getting data out and moddable.
   It's up to you what you do with it.
+* Encrypted files - they might have identical extension,
+  but if they're encrypted, you're out of luck, even
+  if you purchased relevant DLC.
 
 A lot of information and code recently became available but it's
 highly disorganized, and it's difficult to keep up with all the progress.
 
+This project is very messy, with different parts ranging from mature
+and fully documented to quick nasty hacks and wild guesses.
+This is to be expected given rapid progress of our knowledge of
+ETW formats.
+
+
+
 = Status of file formats =
 
-Not ETW-specific, easily moddable:
+Not ETW-specific, easily moddable, outside scope of this project:
 * .tga - raster data
 * .jpg - raster data
 * .dds - raster data
@@ -28,16 +38,19 @@ Not ETW-specific, easily moddable:
 * .mp3 - audio
 * .wav - audio
 
-More or less ETW-specific:
+
+More or less ETW-specific, details in individual directories
+when present:
+
 * .pack - file container, fully known, and widely supported
-* db - relational tables, schema external, mostly known,
-       modding tools lack a few features but are usually adequate
-* .lua - lua 5.1 code, ETW interface weakly documented
+* db    - relational tables, schema external, mostly known,
+          modding tools lack a few features but are usually adequate
+* .lua  - lua 5.1 code, ETW interface weakly documented
 * .luac - compiled .lua - mostly recoverable with difficulty
-* .esf - serialized hierarchical data (binary XML),
+* .esf  - serialized hierarchical data (binary XML),
          mostly known, modding support weak
 * .farm_fields_tile_texture - list of pairs of JPEG files,
-  very recently understood
+                              only very recently understood
 * .farm_template_tile - ESF
 
 Status to be investimaged:
