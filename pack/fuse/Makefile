@@ -3,7 +3,7 @@ TARGETS = packfs
 CC = gcc
 CXX = g++
 CFLAGS_MACFUSE = -D__FreeBSD__=10 -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=26 -I/usr/local/include/fuse
-CFLAGS_EXTRA = -Wall -g
+CFLAGS_EXTRA = -Wall -g -Wno-deprecated
 ARCHS = -arch i386 -arch ppc
 LIBS = -lfuse
 
