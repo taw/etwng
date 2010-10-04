@@ -1,3 +1,14 @@
+Just run build_luadec script to fetch, patch, and build luadec
+capable of dealing with ETW .luac
+
+There are problems in both luadec and
+in my quick hacks to make lua use single precision floats instead of doubles.
+Further work needed but it will do for now.
+
+Script targets OSX but it should be trivial to support other platforms.
+
+== Manual build ==
+
 If you want to decode more .luac files, here's what you do:
 
     * You need C compiler, clue about programming etc. This is not for everyone.

@@ -1,0 +1,18 @@
+#!/bin/sh
+
+mkdir -p src
+wget -nc http://www.lua.org/ftp/lua-5.1.4.tar.gz -O src/lua-5.1.4.tar.gz
+wget -nc http://luaforge.net/frs/download.php/4008/luadec51_2.0.tgz -O src/luadec51_2.0.tgz
+
+rm -rf build
+
+mkdir -p build
+
+tar -C build -xz <src/lua-5.1.4.tar.gz
+tar -C build -xz <src/luadec51_2.0.tgz
+
+patch -p0 <lua_etw.diff
+
+(cd build/lua-5.1.4; make macosx)
+(cd build/luadec; gcc -Wall -I../lua-5.1.4/src *.c -c)
+(cd build/luadec; gcc -Wall *.o ../lua-5.1.4/src/liblua.a -o ../../luadec)
