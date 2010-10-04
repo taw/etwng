@@ -28,6 +28,26 @@ ETW formats.
 
 
 
+= How to recognize encrypted data =
+
+This is easy - just compress it with gzip and see if it got smaller.
+Encrypted data by its nature is impossible to compress without a key.
+Almost every other data type in ETW has a lot of redundancy.
+Even compressed types like .mp3, .jpg, .bik, etc. usually
+have uncompressed parts like headers.
+
+gzip is really good at turning itself on and off for different
+parts of file, so even if such data is just 1%, compressed file
+size will be reliably slightly smaller.
+
+Fully encrypted files have no such redundancy, so gzipping
+them makes them *larger* (as does gzipping gzipped files).
+
+If something compresses - even just 1%, it is definitely not encrypted.
+(it might still contain mix of encrypted and unencrypted parts)
+If something doesn't compress, it is very likely to be encrypted.
+Difference between 99% and 100% might seem small, but it's not.
+
 = Status of file formats =
 
 Not ETW-specific, easily moddable, outside scope of this project:
