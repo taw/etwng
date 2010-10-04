@@ -1,0 +1,4 @@
+*.dSYM
+*.o
+.DS_Store
+pack/fuse/packfs
