@@ -1,7 +1,7 @@
-/*
- * TODO: packs specified as cmdline options, not predefined
- *       268 lines is too many
- *       Dependencies
+/* TODO: 
+ *       306 lines is one hundred or so too many
+ *       Real dependencies
+ *       Don't break fuse cmdline
  */
 
 #include <errno.h>
@@ -55,11 +55,7 @@ struct packfs_file {
 struct pack_archive {
   const char *path;
   int fh;
-
   uint32_t pack_type;
-  uint32_t deps_size, deps_count;
-  uint32_t files_size, files_count;
-
   std::vector<char *> dep_names;
   std::vector<packfs_file *> files;  
   
@@ -71,6 +67,10 @@ struct pack_archive {
   }
 
 private:
+
+  uint32_t deps_size, deps_count;
+  uint32_t files_size, files_count;
+
   void load_header() {
     uint32_t header[6];
     force_read((char*)header, 24);
@@ -204,19 +204,12 @@ public:
   dictionary<packfs_file > files;
   dictionary<std::vector<char*> > dirs;
   
-  void add_pack_archive(pack_archive *pack) {
-    for(uint i=0; i<pack->files_count; i++)
-      add_file(pack->files[i]);
-  }
-  
   void add_file(packfs_file *file){
     if(files[file->path]) {
       files[file->path]->shadowed_by = file;
       files.set(file->path, file);
-      // printf("Override file %s go!\n", file->path);
     } else {
       files.set(file->path, file);
-      // printf("File %s go!\n", file->path);
       add_path(strdup(file->path));
     }
   }
@@ -227,29 +220,33 @@ public:
       part = strdup(part+1);
       if(dirs[path]){
         dirs[path]->push_back(part);
-        // printf("Dir[%s]@%d << File[%s]\n", path, (uint32_t)dirs[path]->size(), part);
         break;
       } else {
         dirs.set(path, new std::vector<char*>());
         dirs[path]->push_back(part);
-        // printf("Dir[%s]!! << File[%s]\n", path, part);
       }
     }
     free(path);
   }
   
   packfs() {
-    packs.push_back(new pack_archive("etw_packs/main.pack"));
-    packs.push_back(new pack_archive("etw_packs/patch.pack"));
-    packs.push_back(new pack_archive("etw_packs/patch2.pack"));
     std::vector<char*> *root = new std::vector<char*>();
     dirs.set("", root);
     dirs.set("/", root);
+  }
 
+  void process_pack_archive(pack_archive *pack) {
+    printf("Loading pack %s\n", pack->path);
+    for(uint i=0; i<pack->files.size(); i++)
+      add_file(pack->files[i]);
+  }
+
+  /* Respect pack type order, then follow cmdline order */
+  void process_packs() {
     for(uint pt=0; pt<=5; pt++)
       for(uint j=0; j<packs.size(); j++)
         if(pt == packs[j]->pack_type)
-          add_pack_archive(packs[j]);
+          process_pack_archive(packs[j]);
   }
 };
 
@@ -257,8 +254,6 @@ public:
 packfs *fs;
 
 int packfs_readdir(__const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
-  // printf("Readdir[%s]\n", path);
-  
   std::vector<char*> *dir = fs->dirs[path];
   if(!dir) return -2;
   filler(buf, ".", NULL, 0);
@@ -269,7 +264,6 @@ int packfs_readdir(__const char *path, void *buf, fuse_fill_dir_t filler, off_t 
 }
 
 int packfs_getattr(const char *path, struct stat *stbuf) {
-  // printf("Getattr[%s]\n", path);
   memset((void*)stbuf, 0, sizeof(struct stat));
   if(fs->dirs[path]){
     stbuf->st_mode = S_IFDIR | 0555;
@@ -282,14 +276,12 @@ int packfs_getattr(const char *path, struct stat *stbuf) {
 }
 
 int packfs_open(const char *path, struct fuse_file_info *fi) {
-  // printf("Open[%s]\n", path);
   if (!fs->files[path]) return -ENOENT;
   if ((fi->flags & O_ACCMODE) != O_RDONLY) return -EACCES;
   return 0;
 }
 
 int packfs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
-  // printf("Read[%s]\n", path);
   packfs_file *file = fs->files[path];
   if (!file) return -ENOENT;
   return file->xread(buf, size, offset);
@@ -297,6 +289,12 @@ int packfs_read(const char *path, char *buf, size_t size, off_t offset, struct f
 
 int main(int argc, char **argv) {
   fs = new packfs();
+  char *fuse_argv[2] = {argv[0], argv[argc-1]};
+  for(int i=1; i<argc-1; i++) {
+    fs->packs.push_back(new pack_archive(argv[i]));
+  }
+  fs->process_packs();
+  
   struct fuse_operations packfs_ops;
   memset((void*)&packfs_ops, 0, sizeof(struct fuse_operations));
   packfs_ops.readdir = packfs_readdir;
@@ -304,5 +302,5 @@ int main(int argc, char **argv) {
   packfs_ops.open    = packfs_open;
   packfs_ops.read    = packfs_read;
   
-  return fuse_main(argc, argv, &packfs_ops, NULL);
+  return fuse_main(2, fuse_argv, &packfs_ops, NULL);
 }
