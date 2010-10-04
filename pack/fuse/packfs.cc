@@ -1,3 +1,9 @@
+/*
+ * TODO: packs specified as cmdline options, not predefined
+ *       268 lines is too many
+ *       Dependencies
+ */
+
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -7,24 +13,46 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/types.h>
+#include <vector>
 
-#include <hash_map.h>
+typedef char *cstr;
 
-struct packfs_file
-{
+struct packfs_file {
   char *path;
   int fh;
   off_t  ofs;
   size_t size;
-  time_t atime;
-  time_t ctime;
-  time_t mtime;
+  packfs_file *shadowed_by;
+
+  int xread(char *buf, size_t req_size, off_t req_ofs) {
+    if(req_ofs >= size) return 0;
+    if(req_size > size - req_ofs) req_size = size - req_ofs;
+    if(-1 == lseek(fh, ofs+req_ofs, SEEK_SET)) return -EIO;
+    return read(fh, buf, req_size);
+  }  
+
+  int getattr(struct stat *stbuf) {
+    struct stat stbuf_archive;
+    if(0 != fstat(fh, &stbuf_archive)) return -EIO;
+    stbuf->st_mode  = S_IFREG | 0444;
+    stbuf->st_nlink = 1;
+    stbuf->st_size  = size;
+    stbuf->st_ctime = stbuf_archive.st_ctime;
+    stbuf->st_mtime = stbuf_archive.st_mtime;
+    stbuf->st_atime = stbuf_archive.st_atime;
+    return 0;
+  }
+  
+  packfs_file(char *_path, int _fh, off_t _ofs, size_t _size) {
+    path = _path;
+    fh = _fh;
+    ofs = _ofs;
+    size = _size;
+    shadowed_by = NULL;
+  }
 };
 
-class pack_file
-{
-public:
-
+struct pack_archive {
   const char *path;
   int fh;
 
@@ -32,28 +60,14 @@ public:
   uint32_t deps_size, deps_count;
   uint32_t files_size, files_count;
 
-  char **dep_names;
-  struct packfs_file *files;  
-
-  struct stat stbuf;
+  std::vector<char *> dep_names;
+  std::vector<packfs_file *> files;  
   
-  pack_file(const char *_path) {
-    path = _path;
-
+  pack_archive(const char *_path) : path(_path) {
     fh = force_open(path);
-    if(0 != fstat(fh, &stbuf)) {
-      fprintf(stderr, "Error getting pack file metadata %s: %s\n", path, strerror(errno));
-      exit(1);
-    }
-
     load_header();
     load_deps();
     load_files();
-  }
-
-  ~pack_file() {
-    free(files);
-    free(dep_names);
   }
 
 private:
@@ -73,46 +87,42 @@ private:
   }
   
   void load_deps() {
-    char *deps_header_data = (char*)malloc(deps_size);
+    char *deps_header_data = new char[deps_size];
     force_read(deps_header_data, deps_size);
-    dep_names = (char**)malloc(sizeof(char*) * deps_count);
     
     for(uint i=0,j=0; i<deps_count; i++) {
-      dep_names[i] = strdup(deps_header_data+j);
+      dep_names.push_back(strdup(deps_header_data+j));
       j += strlen(dep_names[i]) + 1;
     }
-    free(deps_header_data);
+    delete[] deps_header_data;
   }
   
   void load_files() {
-    char *files_header_data = (char*)malloc(files_size);
+    char *files_header_data = new char[files_size];
     force_read(files_header_data, files_size);
-    files = (struct packfs_file *)malloc(sizeof(struct  packfs_file) * files_count);
 
     off_t ofs = 24 + deps_size + files_size;
     for(uint i=0, j=0; i<files_count; i++) {
-      files[i].fh = fh;
-      files[i].ofs =  ofs;
-      files[i].atime = stbuf.st_atime;
-      files[i].mtime = stbuf.st_mtime;
-      files[i].ctime = stbuf.st_ctime;
-      files[i].size =  *(uint32_t*)(files_header_data+j);
-      files[i].path =  strdup(files_header_data+j+4);
-      ofs += files[i].size;
-      j += strlen(files[i].path) + 5;
-      adjust_slashes(files[i].path);
+      int f_sz       = *(uint32_t*)(files_header_data+j);
+      int f_path_len = strlen(files_header_data+j+4);
+
+      char *f_path     = (char*)malloc(f_path_len+2);
+      f_path[0] = '/';
+      strcpy(f_path+1, files_header_data+j+4);
+      adjust_slashes(f_path);
+
+      files.push_back(new packfs_file(f_path, fh, ofs, f_sz));
+
+      ofs += f_sz;
+      j += f_path_len + 5;
     }
-    free(files_header_data);
+    delete[] files_header_data;
   }
   
-  void adjust_slashes(char *path)
-  {
-    int len = strlen(path);
-    for(int i=0; i<len; i++) {
-      if (path[i] == '/' || path[i] == '\\') {
-        path[i] = '-';
-      }
-    }
+  void adjust_slashes(char *path) {
+    for(int i=0,len=strlen(path); i<len; i++)
+      if(path[i] == '\\')
+        path[i] = '/';
   }
 
   int force_open(const char *path) {
@@ -134,34 +144,112 @@ private:
   }
 };
 
+/* STL hash_map is fail design, C/C++ has no GC, so dictionary needs to manage key's memory */
+template <class T> class bucket {
+public:
+  std::vector<uint32_t> hashes;
+  std::vector<char *> keys;
+  std::vector<T *> values;
 
-struct eqstr
-{
-  bool operator()(const char* s1, const char* s2) const
-  {
-    return strcmp(s1, s2) == 0;
+  T* get(uint32_t h, const char *key) {
+    for(uint i=0; i<keys.size(); i++)
+      if(h == hashes[i] && 0 == strcmp(keys[i], key))
+        return values[i];
+    return NULL;
+  };
+  
+  void set(uint32_t h, const char *_key, T *value) {
+    char *key = strdup(_key);
+
+    for(uint i=0; i<keys.size(); i++)
+      if(h == hashes[i] == h && 0 == strcmp(keys[i], key)) {
+        free(keys[i]);
+        keys[i] = key;
+        values[i] = value;
+        return;
+      }
+
+    hashes.push_back(h);
+    keys.push_back(key);
+    values.push_back(value);
   }
 };
 
+template <class T> class dictionary {
+  bucket<T> buckets[256];
 
-class packfs
-{
+  uint32_t hash(const char*key) {
+    uint32_t h = 0x84222325;
+    while(*key) {
+      h *= 0x1B3;
+      h ^= (unsigned char)key[0];
+      key++;
+    }
+    return h;
+  }
 public:
-  pack_file *packs[3];
+  T* operator [](const char *key) {
+    uint32_t h = hash(key);
+    return buckets[h&0xFF].get(h, key);
+  };
+  void set(const char *key, T *value) {
+    uint32_t h = hash(key);
+    buckets[h&0xFF].set(h, key, value);
+  };
+};
 
-  hash_map<const char*, packfs_file*, hash<const char*>, eqstr> files;
+class packfs {
+public:
+  std::vector<pack_archive*> packs;
+  dictionary<packfs_file > files;
+  dictionary<std::vector<char*> > dirs;
   
-  packfs() {
-    packs[0] = new pack_file("packs/main.pack");
-    packs[1] = new pack_file("packs/patch.pack");
-    packs[2] = new pack_file("packs/patch2.pack");
-    
-    for(uint j=0; j<3; j++) {
-      for(uint i=0; i<packs[j]->files_count; i++) {
-        packfs_file *file = &packs[j]->files[i];
-        files[file->path] = file;
+  void add_pack_archive(pack_archive *pack) {
+    for(uint i=0; i<pack->files_count; i++)
+      add_file(pack->files[i]);
+  }
+  
+  void add_file(packfs_file *file){
+    if(files[file->path]) {
+      files[file->path]->shadowed_by = file;
+      files.set(file->path, file);
+      // printf("Override file %s go!\n", file->path);
+    } else {
+      files.set(file->path, file);
+      // printf("File %s go!\n", file->path);
+      add_path(strdup(file->path));
+    }
+  }
+  
+  void add_path(char *path) {
+    while(char *part = rindex(path, '/')) {
+      part[0] = 0;
+      part = strdup(part+1);
+      if(dirs[path]){
+        dirs[path]->push_back(part);
+        // printf("Dir[%s]@%d << File[%s]\n", path, (uint32_t)dirs[path]->size(), part);
+        break;
+      } else {
+        dirs.set(path, new std::vector<char*>());
+        dirs[path]->push_back(part);
+        // printf("Dir[%s]!! << File[%s]\n", path, part);
       }
     }
+    free(path);
+  }
+  
+  packfs() {
+    packs.push_back(new pack_archive("etw_packs/main.pack"));
+    packs.push_back(new pack_archive("etw_packs/patch.pack"));
+    packs.push_back(new pack_archive("etw_packs/patch2.pack"));
+    std::vector<char*> *root = new std::vector<char*>();
+    dirs.set("", root);
+    dirs.set("/", root);
+
+    for(uint pt=0; pt<=5; pt++)
+      for(uint j=0; j<packs.size(); j++)
+        if(pt == packs[j]->pack_type)
+          add_pack_archive(packs[j]);
   }
 };
 
@@ -169,89 +257,48 @@ public:
 packfs *fs;
 
 int packfs_readdir(__const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
-  if (strcmp(path, "/") != 0) 
-    return -2;
-
-  /* Don't report one file multiple times */
-  for(uint j=0; j<3; j++) {
-    for(uint i=0; i<fs->packs[j]->files_count; i++) {
-      packfs_file *file = &fs->packs[j]->files[i];
-      if(fs->files[file->path] == file) {
-        filler(buf, file->path, NULL, 0);
-      }
-    }
-  }
-
-
+  // printf("Readdir[%s]\n", path);
+  
+  std::vector<char*> *dir = fs->dirs[path];
+  if(!dir) return -2;
   filler(buf, ".", NULL, 0);
   filler(buf, "..", NULL, 0);
-
+  for(uint i=0; i<dir->size(); i++)
+    filler(buf, (*dir)[i], NULL, 0);
   return 0;
 }
 
-int packfs_getattr(const char *path, struct stat *stbuf)
-{
+int packfs_getattr(const char *path, struct stat *stbuf) {
+  // printf("Getattr[%s]\n", path);
   memset((void*)stbuf, 0, sizeof(struct stat));
-
-  if (strcmp(path, "/") == 0) { /* The root directory of our file system. */
+  if(fs->dirs[path]){
     stbuf->st_mode = S_IFDIR | 0555;
     stbuf->st_nlink = 2;
     return 0;
   }
-  
-  packfs_file *file = fs->files[path+1];
-
-  if(file) {
-    stbuf->st_mode  = S_IFREG | 0444;
-    stbuf->st_nlink = 1;
-    stbuf->st_size  = file->size;
-    stbuf->st_ctime = file->ctime;
-    stbuf->st_mtime = file->mtime;
-    stbuf->st_atime = file->atime;
-    return 0;
-  } else {
-    return -ENOENT;
-  }
+  packfs_file *file = fs->files[path];
+  if(!file) return -ENOENT;
+  return file->getattr(stbuf);
 }
 
-int packfs_open(const char *path, struct fuse_file_info *fi)
-{
-  packfs_file *file = fs->files[path+1];
-  if (!file)
-    return -ENOENT;
-
-  if ((fi->flags & O_ACCMODE) != O_RDONLY)
-    return -EACCES;
-
+int packfs_open(const char *path, struct fuse_file_info *fi) {
+  // printf("Open[%s]\n", path);
+  if (!fs->files[path]) return -ENOENT;
+  if ((fi->flags & O_ACCMODE) != O_RDONLY) return -EACCES;
   return 0;
 }
 
-int packfs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
-{
-  packfs_file *file = fs->files[path+1];
-  if (!file)
-    return -ENOENT;
-
-  if (offset >= file->size)
-    return 0;
-
-  if (offset + size > file->size)
-      size = file->size - offset;
-
-  if(-1 == lseek(file->fh, file->ofs + offset, SEEK_SET))
-    return -EIO;
-
-  return read(file->fh, buf, size);
+int packfs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+  // printf("Read[%s]\n", path);
+  packfs_file *file = fs->files[path];
+  if (!file) return -ENOENT;
+  return file->xread(buf, size, offset);
 }
 
-
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   fs = new packfs();
-  
   struct fuse_operations packfs_ops;
   memset((void*)&packfs_ops, 0, sizeof(struct fuse_operations));
-  
   packfs_ops.readdir = packfs_readdir;
   packfs_ops.getattr = packfs_getattr;
   packfs_ops.open    = packfs_open;

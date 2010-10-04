@@ -1,19 +1,12 @@
-TARGETS = packfs
-
-CC = gcc
-CXX = g++
 CFLAGS_MACFUSE = -D__FreeBSD__=10 -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=26 -I/usr/local/include/fuse
 CFLAGS_EXTRA = -Wall -g -Wno-deprecated
-ARCHS = -arch i386 -arch ppc
+ARCHS = -arch i386
 LIBS = -lfuse
 
-all: $(TARGETS)
+# -Wall -g -Wno-deprecated -DFUSE_USE_VERSION=26  `pkg-config fuse --cflags --libs`  -Wno-deprecated
 
-%: %.c
-	$(CC) $(CFLAGS_MACFUSE) $(CFLAGS_EXTRA) $(ARCHS) -o $@ $< $(LIBS)
-
-%: %.cc
-	$(CXX) $(CFLAGS_MACFUSE) $(CFLAGS_EXTRA) $(ARCHS) -o $@ $< $(LIBS)
+packfs: packfs.cc
+	./g++ $(CFLAGS_MACFUSE) $(CFLAGS_EXTRA) $(ARCHS) $(LIBS) -o $@ $<
 
 clean:
-	rm -f $(TARGETS) *.o
+	rm -f packfs *.o
