@@ -162,7 +162,7 @@ public:
     char *key = strdup(_key);
 
     for(uint i=0; i<keys.size(); i++)
-      if(h == hashes[i] == h && 0 == strcmp(keys[i], key)) {
+      if(h == hashes[i] && 0 == strcmp(keys[i], key)) {
         free(keys[i]);
         keys[i] = key;
         values[i] = value;
