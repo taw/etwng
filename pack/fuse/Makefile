@@ -6,7 +6,7 @@ LIBS = -lfuse
 # -Wall -g -Wno-deprecated -DFUSE_USE_VERSION=26  `pkg-config fuse --cflags --libs`  -Wno-deprecated
 
 packfs: packfs.cc
-	./g++ $(CFLAGS_MACFUSE) $(CFLAGS_EXTRA) $(ARCHS) $(LIBS) -o $@ $<
+	g++ $(CFLAGS_MACFUSE) $(CFLAGS_EXTRA) $(ARCHS) $(LIBS) -o $@ $<
 
 clean:
 	rm -f packfs *.o
