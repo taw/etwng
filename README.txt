@@ -1,4 +1,5 @@
-This project is collection of tools for Empire Total War modding, especially:
+This project is collection of tools for modding Empire Total War
+and related games like Napoleon Total War, especially:
 
 * ETW-specific file format information
 * Converters from ETW to mainstream formats and back
@@ -26,7 +27,31 @@ and fully documented to quick nasty hacks and wild guesses.
 This is to be expected given rapid progress of our knowledge of
 ETW formats.
 
+= Layers =
 
+Usually there are multiple layers of data, and figuring out one layer
+isn't success yet.
+
+For example if we find an image and it looks like something directly
+displayed on screen - like an unit card, or an icon - our work is done.
+If it looks like a texture, we probably need to figure out UV coordinates,
+and similar minor points.
+
+But if it doesn't look like anything? Is it map data of some sort?
+A height map with gray levels corresponding to height? A few large
+areas uniformly colored with 5 basic colors? What's the scale?
+Which way axes go? What's the meaning of all that?
+Opening one layer doesn't yet solve it.
+
+This is most important for ESF - ESF is more or less binary
+equivalent of XML, so we're down one layer. But what's the
+meaning of different nodes, and different arguments?
+
+And embedded inside such ESF might be binary data,
+in which case we're have to dig even deeper.
+
+It is similar with DB tables - their low-level schemas are usually known,
+their meaning not always.
 
 = How to recognize encrypted data =
 
@@ -47,64 +72,3 @@ If something compresses - even just 1%, it is definitely not encrypted.
 (it might still contain mix of encrypted and unencrypted parts)
 If something doesn't compress, it is very likely to be encrypted.
 Difference between 99% and 100% might seem small, but it's not.
-
-= Status of file formats =
-
-Not ETW-specific, easily moddable, outside scope of this project:
-* .tga - raster data
-* .jpg - raster data
-* .dds - raster data
-* .bik - video
-* .mp3 - audio
-* .wav - audio
-
-
-More or less ETW-specific, details in individual directories
-when present:
-
-* .pack - file container, fully known, and widely supported
-* db    - relational tables, schema external, mostly known,
-          modding tools lack a few features but are usually adequate
-* .lua  - lua 5.1 code, ETW interface weakly documented
-* .luac - compiled .lua - mostly recoverable with difficulty
-* .esf  - serialized hierarchical data (binary XML),
-         mostly known, modding support weak
-* .farm_fields_tile_texture - list of pairs of JPEG files,
-                              only very recently understood
-* .farm_template_tile - ESF
-
-Status to be investimaged:
-* .rigid_model
-* .anim_sound_event
-* .anim
-* .rigid_model_header
-* .txt
-* .variant_weighted_mesh
-* .rigid_spline
-* .parsed
-* .rigid_model_animation
-* .environment
-* .spt
-* .xml
-* .fx
-* .animatable_rigid_model
-* .desc_model
-* .windows_model
-* .rigid_mesh
-* .cuf
-* .fx_fragment
-* .settings
-* .rigid_naval_model
-* .dat
-* .db
-* .csv
-* .tree_model
-* .battle_script
-* .tai
-* .h
-* .rigging
-* .script
-* .gallant
-* .deployment_areas
-* .loc
-* ...

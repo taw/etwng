@@ -1,0 +1,205 @@
+Here's quick list of known formats and their status.
+
+Code system:
+* [DONE]         - nothing at all to be done, entirely finished.
+* [LAYER DONE]   - successfully down to the next layer.
+* [TOOLS NEEDED] - format of the layer is well understood but tools have been somewhat lacking.
+* [???]          - I haven't successfully researched the question yet. Might be known to others.
+* [UNKNOWN]      - Definitely not known.
+
+
+NOTE: Excuse my formatting, it's copypasta from various sources and detection programs.
+      I'll clean it up more once I filter out encrypted files and add basic text types (xml/csv/other txt).
+			Right now I cannot even run verification scripts as they will find one encrypted file,
+			and use it to tell me I'm wrong.
+
+== In-game movies ==
+
+* .bik - video - [DONE]
+
+Quite common format. Viewers are widely available, creation programs less,
+but they exist as well.
+
+== Audio ==
+
+* .mp3 - audio - [DONE]
+* .wav - audio - [DONE]
+
+Both formats extremely widely supported, nothing to be done.
+
+== Raster data ==
+
+All data seems to be in following formats:
+* .tga - [LAYER DONE]
+* .jpg - [LAYER DONE]
+* .dds - [LAYER DONE]
+
+.tga and .jpg are universally supported.
+.dds (Microsoft DirectDraw Surface format) is not common, but has a lot of converters, including ImageMagic
+
+Also seen. All at least [LAYER DONE], and most likely only used for testing etc.:
+* .tga_old = .tga
+* .psd
+* .png
+* .bmp
+
+== Pixels inside raster data ==
+
+There are multiple data types, both directly inside image files,
+and embedded in other structures.
+
+Some [DONE]
+Some [???] - especially raster data embedded in other objects
+
+== LUA ==
+
+Empire Total War uses lua 5.1 with single precision numbers.
+luadec decompiler doesn't handle lua 5.1 well, but there's been
+a lot of progress fixing it - and format itself is 100% understood
+if you wish to look at lua bytecode
+
+* .lua  [LAYER DONE] 
+* .luac [TOOLS NEEDED]
+
+== PACK ==
+
+* .pack is virtual filesystem
+
+Because of lack of handling of dependency header in patchN.pack files,
+and /-to-\ conversion missing from current tools I'll list it as [TOOLS NEEDED],
+but it's really [99% LAYER DONE].
+
+== DB ==
+
+db/*/* are relational tables.
+Their schema is not embedded. It is known for most, but not for all.
+
+Existing tools are usable, but lack a few important capabilities.
+
+Range is:
+* [TOOLS NEEDED]/[DONE]       - about half of the tables
+* [TOOLS NEEDED]/[LAYER DONE] - for most tables we know number and type of columns, not their meaning
+* [UNKWOWN] - 1
+
+== ESF ==
+
+[TOOLS NEEDED]
+
+ESF is more or less binary serialized XML.
+
+There are multiple .esf files. In addition to those with actual .esf extension
+and save games, these are .esf:
+
+* .prop_list
+* .farm_template_tile
+* .building_list
+* .ai_hints
+* .farm_manager
+* .tree_list
+* .dat
+* .deployment_areas
+* .settings
+* ...
+
+Data within is barely known
+
+== .farm_fields_tile_texture ==
+
+* .farm_fields_tile_texture - list of pairs of JPEG files,
+                              only very recently understood
+
+== Supertexture ==
+
+* .sptd/.spti - highly [UNKNOWN]
+
+== Other file types ==
+
+All [???]
+
+Most files start with either uint32 magic or uint32 record count.
+
+
+* ".atlas",              0x00000001 # Or is it count?
+* ".spt",                0x000003E8
+* ".weighted_mesh",      0x00000B2E
+* ".bmd_definition",     0x0000112E
+
+* ".prop_list",          0x0000ABCE # ESF
+* ".farm_template_tile", 0x0000ABCE 
+* ".building_list",      0x0000ABCE
+* ".ai_hints",           0x0000ABCE
+* ".farm_manager",       0x0000ABCE
+* ".tree_list",          0x0000ABCE
+* ".dat",                0x0000ABCE
+* ".deployment_areas",   0x0000ABCE
+* ".settings",           0x0000ABCE
+
+* ".rigid_model_header", 0x000FEABC # "\274\352\017\000"
+* ".hf",                 0x01004648 # "HF\000\001"
+* ".rigid_mesh",         0x12345678 # "xV4\022"
+* ".dds",                0x20534444 # "DDS "
+* ".cuf",                0x30465543 # "CUF0"
+* ".rigid_trees",        0x3D4D4047 # "G@M="
+* ".tree_model",         0x3D5E4128 # "(A^="
+* ".anim",               0x41A00000 # "\000\000\240A"
+* ".cs2",                0x43533201 # "\0012SC"
+
+* ".variant_part_mesh",  0x46504D56 # "VMPF"
+* ".unit_variant",       0x544E5256 # "VRNT"
+* ".sfk",                0x4B504653 # "SFPK"
+* ".rigid_spline",       0x4E4C5053 # "SPLN"
+
+* ".loc",                0x4F4CFEFF # "\377\376LO"
+* ".psd",                0x53504238 # "8BPS"
+
+* ".rigid_model_bounds", 0xBECC495F # "_I\314\276"
+* ".fogvolume_mesh",     0xFEDC5678 # "xV\334\376"
+
+
+* Layout script (no extension) - "Version" + 0NN
+
+* ".anim_sound_event", :CNT
+* ".rigid_model_animation", :CNT
+* ".desc_model", :CNT
+* ".rigid_model", :CNT
+* ".animatable_rigid_model", :CNT
+* ".farm_fields_tile_texture", :CNT
+* ".rigid_naval_model", :CNT
+* ".windows_model", :CNT
+
+
+== Text formats and everything else ==
+
+*** Format detection might have failed due to file encryption **
+
+
+There are [???]:
+* ".variant_weighted_mesh", :XXX
+* ".rigid_mesh", :XXX
+
+* ".battle_script", :XXX
+* ".tai", :XXX
+* ".parsed", ::BINARY # float, float, float, float ... ?
+* ".fx", :XXX
+* ".fx_fragment", :XXX
+
+# Some xml?
+* ".environment",        0x4543533C # "<SCE"
+
+Text???
+* ".ta",                 0x6C632023 # "# cl"
+* ".placement",          0x746C756D # "mult"
+* ".rigging",            0x73726576 # "vers"
+* ".gallant",            0x73726576 # "vers"
+
+
+These are [LAYER DONE]:
+* ".csv", :CSV
+
+
+* ".xml", :XML
+* ".twin", :XML
+
+* ".txt", :TXT
+* ".h", :TXT
+* ".lua", :TXT
