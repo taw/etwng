@@ -1,0 +1,24 @@
+desc "Test on Ruby 1.8"
+task :test18 do
+  system "ruby ./test.rb"
+end
+
+desc "Test on Ruby 1.9"
+task :test19 do
+  system "ruby1.9 ./test.rb"
+end
+
+desc "Test on JRuby in 1.8 mode"
+task :testj18 do
+  system "jruby --1.8 ./test.rb"
+end
+
+desc "Test on JRuby in 1.9 mode"
+task :testj19 do
+  system "jruby --1.9 ./test.rb"
+end
+
+desc "Test all Ruby versions (1.8, 1.9, JRuby 1.8 mode, JRuby 1.9 mode)"
+task :test => [:test18, :test19, :testj18, :testj19]
+
+task :default => [:test]
