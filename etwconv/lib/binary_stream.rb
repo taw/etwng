@@ -1,9 +1,11 @@
+require "lib/platform"
+
 class BinaryStream
   attr_reader :data, :ofs
   
   def initialize(data)
-    @data = data
-    @ofs  = 0
+    @data     = data
+    @ofs      = 0
   end
 
   def size
@@ -13,39 +15,8 @@ class BinaryStream
   def eof?
     @data.size == @ofs
   end
-  
 
-  # Getting data
-  # These functions should be verified by PlatformTest
-
-  def get_byte
-    get_unpack(1, "C")[0]
-  end
-
-  def get_u2
-    get_unpack(2, "v")[0]
-  end
-  
-  def get_u4
-    get_unpack(4, "V")[0]
-  end
-
-  def get_f
-    get_unpack(4, "f")[0]
-  end
-
-  def get_unpack(bytes, fmt)
-    get_bytes(bytes).unpack(fmt)
-  end
-
-  def get_bytes(bytes)
-    ensure_available!(bytes)
-    rv, @ofs = @data[@ofs, bytes], @ofs+bytes
-    rv
-  end
-  
   # Deal with error in formats
-  
   def ensure_available!(bytes)
     raise BinaryStreamException.new("#{bytes} bytes requested but only #{@data.size-@ofs} available") if @data.size-@ofs < bytes
   end
@@ -61,6 +32,35 @@ class BinaryStream
   def ensure_eof!
     raise BinaryStreamException.new("Expected file offset #{@data.size} (EOF), but actual is #{@ofs}") unless @data.size == @ofs
   end
+  
+  def get_unpack(fmt)
+    get(FmtSizes[fmt]).unpack(fmt)
+  end
+
+  def put_pack(fmt, data)
+    @data << data.pack(fmt)
+  end
+
+  def get(bytes)
+    ensure_available!(bytes)
+    rv, @ofs = @data[@ofs, bytes], @ofs+bytes
+    rv
+  end
+
+  def put(x)
+    @data << x
+  end
+
+  def <<(x)
+    @data << x
+  end
+
+  # Getting and putting data - convenient wrappers for most common functions
+  # These functions should be verified by PlatformTest
+  FmtNames.each{|name,fmt| 
+     eval %Q[def get_#{name}; get(#{FmtSizes[fmt]}).unpack(#{fmt.inspect})[0]; end]
+     eval %Q[def put_#{name}(arg); @data << [arg].pack(#{fmt.inspect}); end]
+  }
 end
 
 class BinaryStreamException < Exception

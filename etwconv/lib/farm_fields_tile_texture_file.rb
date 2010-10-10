@@ -19,13 +19,13 @@ class FarmFieldsTileTextureConverter
   def unpack(data)
     stream = BinaryStream.new(data)
     pair_count   = stream.get_u4
-    pair_offsets = stream.get_unpack(4*pair_count, "V"*pair_count)
+    pair_offsets = stream.get_unpack("V"*pair_count)
     file_size    = stream.get_u4
     stream.ensure_file_size!(file_size)
     results = pair_offsets.map{|ofs|
       stream.ensure_offset! ofs
-      size_a, size_b = stream.get_unpack(8, "VV")
-      [stream.get_bytes(size_a), stream.get_bytes(size_b)]
+      size_a, size_b = stream.get_unpack("VV")
+      [stream.get(size_a), stream.get(size_b)]
     }
     stream.ensure_eof!
     results
