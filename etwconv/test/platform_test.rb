@@ -24,6 +24,17 @@ class TestPlatform < Test::Unit::TestCase
     assert_pack "V", [0xFFFF_FFFF], "\xFF\xFF\xFF\xFF"
   end
 
+  def test_f
+    assert_pack "f", [  0.0],  "\x00\x00\x00\x00"
+    assert_pack "f", [ -0.0],  "\x00\x00\x00\x80"
+    assert_pack "f", [  1.0],  "\x00\x00\x80\x3F"
+    assert_pack "f", [ -1.0],  "\x00\x00\x80\xbF"
+    assert_pack "f", [ 0.25],  "\x00\x00\x80\x3e"
+    assert_pack "f", [-0.25],  "\x00\x00\x80\xbe"
+    assert_pack "f", [ 42.0],  "\x00\x00\x28\x42"
+    assert_pack "f", [-42.0],  "\x00\x00\x28\xc2"
+  end
+
   def test_u2
     assert_pack "v", [0x0000], "\x00\x00"
     assert_pack "v", [0x0001], "\x01\x00"
