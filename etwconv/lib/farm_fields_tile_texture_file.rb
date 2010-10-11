@@ -1,33 +1,49 @@
 require "lib/binary_stream"
+require "lib/converter"
 
-class FarmFieldsTileTextureConverter
-  def pack(filepairs)
-    headers = [filepairs.size]
-    data = []
-    ofs = 8 + 4 * filepairs.size
-    filepairs.each{|data_a,data_b|
-      headers << ofs
+# TODO: Refactor to take advantage of Converter/Stream features
+class FarmFieldsTileTextureConverter < Converter
+  def pack_data(stream, data)
+    vers, data = data
+    
+    ofs = 8 + vers.size + 4 * data.size
+    stream << vers
+    stream.u4_ary(data) do |data_a, data_b|
+      stream.u4 ofs
       ofs += 8 + data_a.size + data_b.size
-      data << [data_a.size, data_b.size].pack("VV")
-      data << data_a
-      data << data_b
-    }
-    headers << ofs
-    return headers.pack("V*") + data.join
+    end
+    stream.u4 ofs
+
+    data.each do |data_a, data_b|
+      stream.u4 data_a.size
+      stream.u4 data_b.size
+      stream << data_a
+      stream << data_b
+    end
   end
-  
-  def unpack(data)
-    stream = BinaryStream.new(data)
-    pair_count   = stream.get_u4
-    pair_offsets = stream.get_unpack("V"*pair_count)
-    file_size    = stream.get_u4
-    stream.ensure_file_size!(file_size)
-    results = pair_offsets.map{|ofs|
+
+  def unpack_data(stream)
+    begin
+      pair_offsets = stream.u4_ary{ stream.u4 }
+      file_size    = stream.u4
+      stream.ensure_file_size!(file_size)
+      vers = ""
+    rescue BinaryStreamException
+      stream.ofs = 0
+      vers = stream.get(1)
+      pair_offsets = stream.u4_ary{ stream.u4 }
+      file_size    = stream.u4
+      stream.ensure_file_size!(file_size)
+    end
+    
+    data = pair_offsets.map{|ofs|
       stream.ensure_offset! ofs
-      size_a, size_b = stream.get_unpack("VV")
-      [stream.get(size_a), stream.get(size_b)]
+      size_a = stream.u4
+      size_b = stream.u4
+      data_a = stream.get(size_a)
+      data_b = stream.get(size_b)
+      [data_a, data_b]
     }
-    stream.ensure_eof!
-    results
+    [vers, data]
   end
 end

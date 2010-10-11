@@ -1,31 +1,33 @@
 require "lib/file_format_detection"
 require "fileutils"
 
-desc "Test on Ruby 1.8"
-task :test18 do
-  system "ruby ./test.rb"
-end
+RUBY_VERSIONS = {
+  "18"  => ["Ruby 1.8",  "ruby"],
+  "19"  => ["Ruby 1.9",  "ruby1.9"],
+  "j18" => ["JRuby 1.8", "jruby --1.8"],
+  "j19" => ["JRuby 1.9", "jruby --1.9"],
+}
 
-desc "Test on Ruby 1.9"
-task :test19 do
-  system "ruby1.9 ./test.rb"
-end
+RUBY_VERSIONS.each{|name,(dsc,cmd)|
+  desc "Run unit tests on #{dsc}"
+  task "test:#{name}" do
+    system "#{cmd} ./test.rb"
+  end
 
-desc "Test on JRuby in 1.8 mode"
-task :testj18 do
-  system "jruby --1.8 ./test.rb"
-end
+  desc "Run samples tests on #{dsc}"
+  task "test:samples:#{name}" do
+    system "#{cmd} ./test_samples.rb"
+  end
+}
 
-desc "Test on JRuby in 1.9 mode"
-task :testj19 do
-  system "jruby --1.9 ./test.rb"
-end
+task "default" => "test"
+task "test" => "test:18"
+task "test:samples" => "test:samples:18"
+task "test:samples:all" => RUBY_VERSIONS.keys.map{|name| "test:samples:#{name}"}
+task "test:all" => RUBY_VERSIONS.keys.map{|name| "test:#{name}"}
 
-desc "Test all Ruby versions (1.8, 1.9, JRuby 1.8 mode, JRuby 1.9 mode)"
-task :test => [:test18, :test19, :testj18, :testj19]
 
-task :default => [:test]
-
+# Feel free to pick different samples
 desc "Verify that samples/ directory has a sample of each format (not distributed for copyright reasons)"
 task :samples do
   FileFormatDetection.new("samples").verify_samples!

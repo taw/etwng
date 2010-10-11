@@ -11,13 +11,13 @@ class TestFarmFieldsTileTextureFile < Test::Unit::TestCase
   
   # Note: Nobody observed empty one in practice, but it sounds sensible
   def test_empty
-    assert_fftt [], [0,8].pack("VV")
+    assert_fftt ["", []], [0,8].pack("VV")
   end
 
   def test_one_pair
     xs = "x"*217
     ys = "y"*109
-    assert_fftt [[xs,ys]],
+    assert_fftt ["", [[xs,ys]]],
       [1, 12, 12+8+217+109].pack("VVV") +
       [217, 109].pack("VV") + xs + ys
   end
@@ -31,7 +31,7 @@ class TestFarmFieldsTileTextureFile < Test::Unit::TestCase
     sz1 = 8+217+109
     sz2 = 8+1029+220
     
-    assert_fftt [[xs,ys],[as,bs]],
+    assert_fftt ["", [[xs,ys],[as,bs]]],
        [2, 16, 16+sz1, 16+sz1+sz2].pack("VVVV") +
        [217, 109].pack("VV") + xs + ys +
        [1029, 220].pack("VV") + as + bs
@@ -43,7 +43,7 @@ class TestFarmFieldsTileTextureFile < Test::Unit::TestCase
             ["c"*14, "d"*0],
             ["e"*199, "f"*8504]]
     sz = [8+217+109, 8, 8+14, 8+199+8504]
-    assert_fftt data,
+    assert_fftt ["", data],
        [4, 24, 24+sz[0], 24+sz[0]+sz[1], 24+sz[0]+sz[1]+sz[2], 24+sz[0]+sz[1]+sz[2]+sz[3]].pack("VVVVVV") +
        [217, 109].pack("VV") + data[0].join +
        [0, 0].pack("VV") + data[1].join +
