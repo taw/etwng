@@ -22,7 +22,7 @@ class BinaryStream
   ## Deal with error in formats
   ## ensure_x! do not move offset, they just raise exception or not
   def error!(msg)
-    raise BinaryStreamException.new(msg)
+    raise BinaryStreamException.new(msg + " [ofs=#{@ofs}; next=#{@data[@ofs,16].unpack("H2"*16)}]")
   end
   
   def ensure_available!(bytes)
@@ -93,6 +93,17 @@ class BinaryStreamWriter < BinaryStream
     u2(s.size/2)
     put(s)
   end
+  def bool(v)
+    @data << (v ? "\x01" : "\x00")
+  end
+  def opt(v)
+    if v.nil?
+      @data << "\x00"
+    else
+      @data << "\x01"
+      yield
+    end
+  end
   def self.open
     s = new
     yield(s)
@@ -107,6 +118,14 @@ class BinaryStreamReader < BinaryStream
   end
   def u2_ary(&blk)
     (0...u2).map(&blk)
+  end
+  def bool
+    b = byte
+    error!("Boolean not 0 or 1") if b > 1
+    b == 1
+  end
+  def opt
+    yield if bool
   end
   def esf_nodenames
     u2_ary{ ascii }

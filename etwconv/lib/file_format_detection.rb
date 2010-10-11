@@ -9,6 +9,10 @@ require "lib/farm_fields_tile_texture_file"
 require "lib/desc_model_file"
 require "lib/anim_sound_event"
 require "lib/spln"
+require "lib/rigid_model_bounds"
+require "lib/rigid_model_header"
+require "lib/loc"
+require "lib/atlas_converter"
 
 SupportedFormats = {
 # Esf extensions
@@ -18,10 +22,12 @@ SupportedFormats = {
   ".ai_hints"                => EsfFile,
   ".farm_manager"            => EsfFile,
   ".tree_list"               => EsfFile,
-  # There are different kinds of .dat
-  # ".dat"                     => EsfFile,
   ".deployment_areas"        => EsfFile,
   ".settings"                => EsfFile,
+  ".bmd_definition"          => EsfFile,
+
+  # There are different kinds of .dat, some are .esf but not all
+  # ".dat"                     => EsfFile,
 
 # Esf special files
   "pathfinding.esf"          => EsfFile,
@@ -37,14 +43,28 @@ SupportedFormats = {
   ".desc_model"               => DescModelConverter,
   ".rigid_model"              => nil,
   ".animatable_rigid_model"   => nil,
-  ".rigid_naval_model"        => nil,
-  ".windows_model"            => nil,
 
 # FFTT (not all subtypes supported)
   ".farm_fields_tile_texture" => FarmFieldsTileTextureConverter,
 
 # Spline formats
   ".rigid_spline"             => SplnConverter,
+
+# What are these ?
+  ".rigid_model_header"      => RigidModelHeaderConverter,
+  ".rigid_model_bounds"      => RigidModelBoundsConverter,
+  ".loc"                     => LocConverter,
+  ".atlas"                   => AtlasConverter,
+  ".rigid_naval_model"        => nil,
+  ".windows_model"            => nil,
+  ".variant_weighted_mesh"   => nil,
+  ".spt"                     => nil,
+  ".weighted_mesh"           => nil,
+  ".hf"                      => nil,
+  ".cuf"                     => nil,
+  ".rigid_trees"             => nil,
+  ".tree_model"              => nil,
+  ".fogvolume_mesh"          => nil,
 
 # Similar tags, but definitely not splines
   ".variant_part_mesh"        => nil, # VmpfConverter,
@@ -82,7 +102,7 @@ class FileFormatDetection
 
     if conv.nil? and false
       puts "What is #{fn} [#{File.size(fn)} bytes]?"
-      system "hexdump -C #{fn} | head -n 32"
+      system "hexdump -C #{fn}| head -n 64"
     end
 
     return conv
