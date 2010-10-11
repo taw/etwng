@@ -12,7 +12,9 @@ require "lib/spln"
 require "lib/rigid_model_bounds"
 require "lib/rigid_model_header"
 require "lib/loc"
+require "lib/rigid_mesh"
 require "lib/atlas_converter"
+require "lib/anim"
 
 SupportedFormats = {
 # Esf extensions
@@ -54,7 +56,11 @@ SupportedFormats = {
   ".rigid_model_header"      => RigidModelHeaderConverter,
   ".rigid_model_bounds"      => RigidModelBoundsConverter,
   ".loc"                     => LocConverter,
+  ".rigid_mesh"              => RigidMeshConverter,
   ".atlas"                   => AtlasConverter,
+  ".anim"                    => AnimConverter,
+
+  
   ".rigid_naval_model"        => nil,
   ".windows_model"            => nil,
   ".variant_weighted_mesh"   => nil,

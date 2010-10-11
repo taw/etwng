@@ -23,7 +23,7 @@ class TestSamples < Test::Unit::TestCase
   def assert_converts(fn)
     conv = ffd.converter_for(fn)
     return unless conv
-
+    
     orig = File.read(fn)
     data = conv.unpack(File.read(fn))
     back = conv.pack(data)
@@ -35,7 +35,7 @@ class TestSamples < Test::Unit::TestCase
   end
 
   Dir["samples/*"].sort.each{|fn|
-    name = File.basename(fn).gsub(".","_")
+    name = File.basename(fn).tr(".-","__")
     eval "def test_#{name}; assert_converts(#{fn.inspect}); end"
   }
 end

@@ -1,9 +1,13 @@
 require "lib/file_format_detection"
 require "fileutils"
 
+# i386-darwin9.8.0/1.9.3
+# Seems to have some bug with unpacking long series of floats
+# ???
+
 RUBY_VERSIONS = {
   "18"  => ["Ruby 1.8",  "ruby"],
-  "19"  => ["Ruby 1.9",  "ruby1.9"],
+#  "19"  => ["Ruby 1.9",  "ruby1.9"],
   "j18" => ["JRuby 1.8", "jruby --1.8"],
   "j19" => ["JRuby 1.9", "jruby --1.9"],
 }
@@ -39,3 +43,4 @@ namespace :samples do
     FileFormatDetection.new("samples").get_missing_samples!
   end
 end
+

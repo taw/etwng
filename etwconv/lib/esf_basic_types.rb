@@ -95,8 +95,12 @@ class EsfConv0e < EsfConv
     @stream.str
   end
   def to_xml
-    "<s>#{to_ruby}</s>"
-    warn "xml escape"
+    v = to_ruby.xml_escape
+    if v.empty?
+      "<s/>"
+    else
+      "<s>#{v}</s>"
+    end
   end
 end
 
@@ -105,8 +109,12 @@ class EsfConv0f < EsfConv
     @stream.ascii
   end
   def to_xml
-    "<asc>#{to_ruby}</asc>"
-    warn "xml escape"
+    v = to_ruby.xml_escape
+    if v.empty?
+      "<asc/>"
+    else
+      "<asc>#{v}</asc>"
+    end
   end
 end
 

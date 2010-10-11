@@ -8,8 +8,6 @@ class TestEsf < Test::Unit::TestCase
     e = EsfFile.new(s)
     v = e.get_value_as_xml
     assert_equal xml, v
-    
-    
   end
   
   def test_esf_xml_bidi
@@ -44,13 +42,13 @@ class TestEsf < Test::Unit::TestCase
   end
 
   def test_esf_v2
-    # assert_esf_xml "<v2 x='6.28' y='-4.2'/>", "\x0c\xc3\xf5\xc8\x40\x66\x66\x86\xc0"
-    assert_esf_xml "<v2 x='6.28000020980835' y='-4.19999980926514'/>", "\x0c\xc3\xf5\xc8\x40\x66\x66\x86\xc0"
+    # assert_esf_xml "<v2 x='6.28' y='-4.9'/>", "\x0c\xc3\xf5\xc8\x40\x66\x66\x86\xc0"
+    assert_esf_xml "<v2 x='6.28000020980835' y='-4.90000009536743'/>", "\x0c\xc3\xf5\xc8\x40\xcd\xcc\x9c\xc0"
   end
 
   def test_esf_v3
     #assert_esf_xml "<v3 x='6.28' y='-4.2' z='16.25'/>", "\x0d\xc3\xf5\xc8\x40\x66\x66\x86\xc0\x00\x00\x82\x41"
-    assert_esf_xml "<v3 x='6.28000020980835' y='-4.19999980926514' z='16.25'/>", "\x0d\xc3\xf5\xc8\x40\x66\x66\x86\xc0\x00\x00\x82\x41"
+    assert_esf_xml "<v3 x='6.28000020980835' y='-4.90000009536743' z='16.25'/>", "\x0d\xc3\xf5\xc8\x40\xcd\xcc\x9c\xc0\x00\x00\x82\x41"
   end
 
   # Does anybody know with any kind of certainty which are signed and which are not?
@@ -87,12 +85,23 @@ class TestEsf < Test::Unit::TestCase
     assert_esf_xml "<u>2147483648</u>",  "\x08\x00\x00\00\x80"
     assert_esf_xml "<u>4294967295</u>",  "\x08\xFF\xFF\xFF\xFF"
   end
+  
+  def test_esf_str
+    assert_esf_xml "<asc/>",            "\x0f\x00\x00"
+    assert_esf_xml "<s/>",              "\x0e\x00\x00"
+    assert_esf_xml "<asc>A</asc>",      "\x0f\x01\x00A"
+    assert_esf_xml "<s>A</s>",          "\x0e\x01\x00A\x00"
+    assert_esf_xml "<asc>&lt;</asc>",   "\x0f\x01\x00<"
+    assert_esf_xml "<s>&lt;</s>",       "\x0e\x01\x00<\x00"
+    assert_esf_xml "<asc>&gt;</asc>",   "\x0f\x01\x00>"
+    assert_esf_xml "<s>&gt;</s>",       "\x0e\x01\x00>\x00"
+    assert_esf_xml "<asc>&amp;</asc>",  "\x0f\x01\x00&"
+    assert_esf_xml "<s>&amp;</s>",      "\x0e\x01\x00&\x00"
+  end
 end
 
 
 __END__
-      0x0e => EsfType_Str.new(self),
-      0x0f => EsfType_Ascii.new(self),
 
       0x40 => EsfType_Array.new(self, :i2a, 2, "s*"),
 #      0x41 => EsfType_BoolArray.new(self),
