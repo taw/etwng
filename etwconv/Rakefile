@@ -1,3 +1,6 @@
+require "lib/file_format_detection"
+require "fileutils"
+
 desc "Test on Ruby 1.8"
 task :test18 do
   system "ruby ./test.rb"
@@ -22,3 +25,15 @@ desc "Test all Ruby versions (1.8, 1.9, JRuby 1.8 mode, JRuby 1.9 mode)"
 task :test => [:test18, :test19, :testj18, :testj19]
 
 task :default => [:test]
+
+desc "Verify that samples/ directory has a sample of each format (not distributed for copyright reasons)"
+task :samples do
+  FileFormatDetection.new("samples").verify_samples!
+end
+
+desc "Copy samples of each format from your ETW installation"
+namespace :samples do
+  task :get do
+    FileFormatDetection.new("samples").get_missing_samples!
+  end
+end
