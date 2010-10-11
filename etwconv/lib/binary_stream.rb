@@ -1,12 +1,10 @@
 require "lib/platform"
-require "iconv"
 
 class BinaryStreamException < Exception
 end
 
 class BinaryStream
   attr_reader :data
-  attr_writer :ofs
   
   def initialize(data="")
     @data     = data
@@ -91,7 +89,7 @@ class BinaryStreamWriter < BinaryStream
     put(s)
   end
   def str(s)
-    s = Iconv.conv("UTF-16LE", "UTF-8", s)
+    s = s.to_utf16
     u2(s.size/2)
     put(s)
   end
@@ -103,6 +101,7 @@ class BinaryStreamWriter < BinaryStream
 end
 
 class BinaryStreamReader < BinaryStream
+  attr_accessor :ofs
   def u4_ary(&blk)
     (0...u4).map(&blk)
   end
@@ -126,7 +125,7 @@ class BinaryStreamReader < BinaryStream
     nil
   end
   def str
-    Iconv.conv("UTF-8", "UTF-16LE", get(u2*2))
+    get(u2*2).from_utf16
   end
   FmtNames.each{|name,fmt| 
      eval %Q[def #{name}; get(#{FmtSizes[fmt]}).unpack(#{fmt.inspect})[0]; end]

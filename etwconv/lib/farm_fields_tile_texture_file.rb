@@ -3,7 +3,7 @@ require "lib/converter"
 
 # TODO: Refactor to take advantage of Converter/Stream features
 class FarmFieldsTileTextureConverter < Converter
-  def pack_data(stream, data)
+  def pack_data(data)
     vers, data = data
     
     ofs = 8 + vers.size + 4 * data.size
@@ -22,7 +22,7 @@ class FarmFieldsTileTextureConverter < Converter
     end
   end
 
-  def unpack_data(stream)
+  def unpack_data
     begin
       pair_offsets = stream.u4_ary{ stream.u4 }
       file_size    = stream.u4

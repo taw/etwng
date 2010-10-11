@@ -4,7 +4,7 @@ require "lib/farm_fields_tile_texture_file"
 
 class TestFarmFieldsTileTextureFile < Test::Unit::TestCase
   def assert_fftt(data_ruby, data_bin)
-    ffttc = FarmFieldsTileTextureConverter.new
+    ffttc = FarmFieldsTileTextureConverter
     assert_equal data_ruby, ffttc.unpack(data_bin)
     assert_equal data_bin, ffttc.pack(data_ruby)
   end

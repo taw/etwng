@@ -1,9 +1,8 @@
 puts "Testing #{RUBY_PLATFORM}/#{RUBY_VERSION}"
 $: << "."
 
+require "lib/core_ext"
 require "lib/file_format_detection"
-
-
 require "test/unit"
 
 class TestSamples < Test::Unit::TestCase
@@ -16,7 +15,7 @@ class TestSamples < Test::Unit::TestCase
     16.times{|i|
       bytes = data[16*i,16].unpack("C*")
       break if bytes.nil?
-      rows << bytes.map{|x| "%X02" % x}.join(" ") + "\n"
+      rows << bytes.map{|x| "%02X" % x}.join(" ") + "\n"
     }
     rows.join
   end
@@ -24,8 +23,6 @@ class TestSamples < Test::Unit::TestCase
   def assert_converts(fn)
     conv = ffd.converter_for(fn)
     return unless conv
-
-    conv = conv.new
 
     orig = File.read(fn)
     data = conv.unpack(File.read(fn))
