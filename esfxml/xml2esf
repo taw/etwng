@@ -1,0 +1,260 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'libxml'
+require "esf_types"
+
+include LibXML
+
+class EsfBuilder
+  include XML::SaxParser::Callbacks
+  
+  attr_reader :data, :stack
+
+  def initialize
+    @data = ""
+    @node_names = nil
+    @lookup = Hash.new{|ht,k| raise "Unknown node name #{k}"}
+    @stack = []
+  end
+
+  def put(bytes)
+    @data << bytes
+  end
+
+  def chara_ok?
+    (@stack[-1] || {:chara => false})[:chara]
+  end
+  
+  def nest_ok?
+    (@stack[-1] || {:nest => true})[:nest]
+  end
+
+  def on_start_element(element, attributes)
+    raise "Illegal place for nested element" unless nest_ok?
+    
+    ofs = @data.size
+    finalization = {}
+    chara_ok = false
+    nest_ok = false
+    
+    case el = element.to_sym
+    when :"esf"
+      @magic = attributes["magic"].split(/\s+/).map{|x| x.to_i}
+      put(@magic.pack("V*"))
+      finalization[:end_of_headers] = @data.size
+      put([0].pack("V"))
+      nest_ok = true
+
+    when :"node_names"
+      @node_names = []
+      nest_ok = true
+
+    when :"node_name"
+      name = attributes["name"]
+      raise "Name already set: #{name}" if @lookup.has_key?(name)
+      @lookup[name] = @node_names.size
+      @node_names << name
+
+    when :"true"
+      put([0x01, 1].pack("CC"))
+    when :"false"
+      put([0x01, 0].pack("CC"))
+
+    when :"vec2"
+      put([0x0c, attributes["x"].to_f, attributes["y"].to_f].pack("Cff"))
+    when :"vec3"
+      put([0x0d, attributes["x"].to_f, attributes["y"].to_f, attributes["z"].to_f].pack("Cfff"))
+
+
+    when :"i2"
+      put([0x00].pack("C"))
+      chara_ok = true
+    when :"u2"
+      if attributes["type"]
+        put([attributes["type"].to_i].pack("C"))
+      else
+        put([0x07].pack("C"))
+      end
+      chara_ok = true
+    when :"i4"
+      put([0x04].pack("C"))
+      chara_ok = true
+    when :"u4"
+      put([0x08].pack("C"))
+      chara_ok = true
+    when :"byte"
+      put([0x06].pack("C"))
+      chara_ok = true
+    when :"bool"
+      put([0x01].pack("C"))
+      chara_ok = true
+    when :"str"
+      put([0x0e].pack("C"))
+      chara_ok = true
+    when :"ascii"
+      put([0x0f].pack("C"))
+      chara_ok = true
+    when :"flt"
+      put([0x0a].pack("C"))
+      chara_ok = true
+
+    when :"record"
+      name_code = @lookup[attributes['name']]
+      flags = attributes['flags'].to_i
+      put([0x80, name_code, flags, 0].pack("CvCV"))
+      nest_ok = true
+
+    when :"array"
+      name_code = @lookup[attributes['name']]
+      flags = attributes['flags'].to_i
+      put([0x81, name_code, flags, 0, 0].pack("CvCVV"))
+      finalization = {:children => 0}
+      nest_ok = true
+
+    when :"element"
+      raise "Only valid with array parent" unless @stack[-1][:el] == :"array"
+      @stack[-1][:children] += 1
+      put([0].pack("V"))
+      nest_ok = true
+
+    when :"u2_ary"
+      finalization = {:size => attributes['size'].to_i}
+      put([0x47].pack("C"))
+      chara_ok = true
+    when :"i4_ary"
+      finalization = {:size => attributes['size'].to_i}
+      put([0x48].pack("C"))
+      chara_ok = true
+    when :"flt_ary"
+      finalization = {:size => attributes['size'].to_i}
+      put([0x4c].pack("C"))
+      chara_ok = true
+    when :"bin"
+      finalization = {:size => attributes['size'].to_i}
+      put([0x40 + attributes['type'].to_i].pack("C"))
+      chara_ok = true
+    else
+      if ElementTypes[el]
+        types, keys = ElementTypes[el]
+        on_start_element("element", {'flags' => attributes['flags'], 'name' => element})
+        types.zip(keys).each{|type,key|
+          on_start_element(type, {})
+          on_characters(attributes[key.to_s])
+          on_end_element(type)
+        }
+        on_end_element("element")
+      elsif RecordTypes[el]
+        types, keys = RecordTypes[el]
+        on_start_element("record", {'flags' => attributes['flags'], 'name' => element})
+        types.zip(keys).each{|type,key|
+          on_start_element(type, {})
+          on_characters(attributes[key.to_s])
+          on_end_element(type)
+        }
+        on_end_element("record")
+      else
+        raise "No idea what to do with #{element} open means"
+      end
+    end
+
+    @stack << {:el => el, :ofs => ofs, :chara => chara_ok, :buf => "", :nest => nest_ok}.merge(finalization)
+  end
+  
+  def adjust_ofs(at)
+    @data[at, 4] = [@data.size].pack("V")
+  end
+  
+  def on_end_element(element)
+    ctx = @stack.pop
+    case el = element.to_sym
+    when :"esf"
+      adjust_ofs(ctx[:end_of_headers])
+      put([@node_names.size].pack("v"))
+      @node_names.each{|nn|
+        put([nn.size].pack("v"))
+        put(nn)
+      }
+    when :"ascii"
+      str = ctx[:buf]
+      put([str.size].pack("v"))
+      put(str)
+    when :"str"
+      uchars = ctx[:buf].unpack("U*")
+      put([uchars.size, *uchars].pack("v*"))
+    when :"u4", :"i4"
+      put([ctx[:buf].to_i].pack("V"))
+    when :"u2", :"i2"
+      put([ctx[:buf].to_i].pack("v"))
+    when :"byte"
+      put([ctx[:buf].to_i].pack("C"))
+    when :"bool"
+      case ctx[:buf].strip
+      when "true"
+        put([1].pack("C"))
+      when "false"
+        put([0].pack("C"))
+      else
+        raise "Boolean must be true or false only, got: #{ctx[:buf]}"
+      end
+    when :"flt"
+      put([ctx[:buf].to_f].pack("f"))
+
+    when :"record"
+      adjust_ofs(ctx[:ofs]+4)
+    when :"array"
+      @data[ctx[:ofs]+4, 8] = [@data.size, ctx[:children]].pack("VV")
+    when :"element"
+      adjust_ofs(ctx[:ofs])
+
+    when :"u4_ary", :"i4_ary"
+      expected = ctx[:size]
+      elems = ctx[:buf].split.map(&:to_i)
+      raise "Expected #{expected} elements, got #{elems.size}" unless expected == elems.size
+      put([@data.size+4*elems.size+4].pack("V"))
+      put(elems.pack("V*"))
+
+    when :"u2_ary", :"i2_ary"
+      expected = ctx[:size]
+      elems = ctx[:buf].split.map(&:to_i)
+      raise "Expected #{expected} elements, got #{elems.size}" unless expected == elems.size
+      put([@data.size+2*elems.size+4].pack("V"))
+      put(elems.pack("v*"))
+
+    when :"flt_ary"
+      expected = ctx[:size]
+      elems = ctx[:buf].split.map(&:to_f)
+      raise "Expected #{expected} elements, got #{elems.size}" unless expected == elems.size
+      put([@data.size+4*elems.size+4].pack("V"))
+      put(elems.pack("f*"))
+
+    when :"bin"
+      expected = ctx[:size]
+      elems = ctx[:buf].split.map{|x| x.to_i(16)}
+      raise "Expected #{expected} elements, got #{elems.size}" unless expected == elems.size
+      put([@data.size+elems.size+4].pack("V"))
+      put(elems.pack("C*"))
+
+    when :"node_names", :"node_name", :"true", :"false", :"vec2", :"vec3"
+      # pass
+    else
+      raise "No idea what to do with #{element} close" unless RecordTypes[el] or ElementTypes[el]
+    end
+  end
+  
+  def on_characters(chars)
+    if chara_ok?
+      @stack[-1][:buf] << chars
+    else
+      raise "Illegal place for non-whitespace characters: #{@stack[-1].inspect}" if chars =~ /\S/
+    end
+  end
+end
+
+esf = EsfBuilder.new
+parser = XML::SaxParser.io(STDIN) # :encoding => XML::Encoding::UTF_8
+parser.callbacks = esf
+parser.parse
+print esf.data
+
+#File.open("out.esf", "w"){|fh| fh.print esf.data}

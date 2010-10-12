@@ -1,0 +1,319 @@
+#!/usr/bin/env ruby
+
+require "pp"
+require "esf_types"
+
+class String
+  # Escape string for output as XML text (< > &)
+  def xml_escape
+    replacements = {"<" => "&lt;", ">" => "&gt;", "&" => "&amp;" }
+    gsub(/([<>&])/) { replacements[$1] }
+  end
+  # Escape characters for output as XML attribute values (< > & ' ")
+  def xml_attr_escape
+    replacements = {"<" => "&lt;", ">" => "&gt;", "&" => "&amp;", "\"" => "&quot;", "'" => "&apos;"}
+    gsub(/([<>&\'\"])/) { replacements[$1] }
+  end
+end
+
+module EsfBasicBinaryOps
+  def get_u4
+    rv = @data[@ofs,4].unpack("V")[0]
+    @ofs += 4
+    rv
+  end
+  def get_i4
+    rv = @data[@ofs,4].unpack("l")[0]
+    @ofs += 4
+    rv
+  end
+  def get_i2
+    rv = @data[@ofs,2].unpack("s")[0]
+    @ofs += 2
+    rv
+  end
+  def get_float
+    rv = @data[@ofs,4].unpack("f")[0]
+    @ofs += 4
+    rv
+  end
+  def get_u2
+    rv = @data[@ofs,2].unpack("v")[0]
+    @ofs += 2
+    rv
+  end
+  def get_bytes(sz)
+    rv = @data[@ofs, sz]
+    @ofs += sz
+    rv
+  end
+  def get_ascii
+    get_bytes(get_u2)
+  end
+  def get_str
+    get_bytes(get_u2*2).unpack("v*").pack("U*")
+  end
+  def get_byte
+    rv = @data[@ofs]
+    @ofs += 1
+    rv
+  end
+  def get_bool
+    case b = get_byte
+    when 1
+      true
+    when 0
+      false
+    else
+      warn "Weird boolean value: #{b}"
+      true
+    end
+  end    
+  def with_temp_ofs(tmp)
+    orig = @ofs
+    begin
+      @ofs = tmp
+      yield
+    ensure
+      @ofs = orig
+    end
+  end
+  def size
+    @data.size
+  end
+end
+
+class EsfParser
+  include EsfBasicBinaryOps
+  
+  attr_accessor :ofs
+  attr_reader :data, :out
+  attr_reader :magic, :node_names
+
+  def initialize(in_fh, out_fh)
+    @data = in_fh.read
+    @out = XMLPrinter.new(out_fh)
+    @ofs = 0
+    get_header
+  end
+  def get_header
+    case magic = get_u4
+    when 0xABCD
+      @magic = [0xABCD]
+    when 0xABCE
+      a = get_u4
+      b = get_u4
+      raise "Incorrect ESF magic followup" unless a == 0
+      @magic = [0xABCE, a, b]
+    else
+      raise "Incorrect ESF magic: %X" % magic
+    end
+    with_temp_ofs(get_u4) {
+      @node_names = get_node_names
+    }
+  end
+  def get_node_names
+    (0...get_u2()).map{ get_ascii.to_sym }
+  end
+  def inspect
+    "EsfParser(#{@ofs})"
+  end
+  def get_node_name
+    @node_names[get_u2]
+  end
+  def convert_until_ofs!(ofs_end)
+    convert_value! while @ofs < ofs_end
+  end
+  def capturing_output
+    accu = XMLAccumulator.new
+    orig_out, @out = @out, accu
+    yield
+    @out = orig_out
+    accu.captured
+  end
+  def capturing_simple(node_name)
+    rv = capturing_output{ yield }
+    types, data = [], []
+    rv.each{|x|
+      x[1,0] = ["bool"] if x.size == 2 and x[1] == "false" or x[1] == "true"
+      raise "Unexpected nesting #{node_name}: #{rv.inspect}" unless x.size == 3 and x[0] == :tag!
+    }
+    [rv.map{|x| x[1]}, rv.map{|x| x[2]}]
+  end
+
+  def convert_value!
+    case node_type = get_byte
+    when 0x08
+      @out.tag!("u4", get_u4)
+    when 0x04
+      @out.tag!("i4", get_i4)
+    when 0x0c
+      @out.tag!("vec2", :x=>get_float, :y=>get_float)
+    when 0x07
+      @out.tag!("u2", get_u2)
+    when 0x0a
+      @out.tag!("flt", get_float)
+    when 0x48
+      bindata = get_ofs_bytes
+      raise "Size of 0x48 type binary data must be in multiples of 4" if bindata.size & 3 != 0
+      enc_bindata = bindata.unpack("l*").join(" ")
+      @out.tag!("i4_ary", {:size => bindata.size/4}, enc_bindata)
+    when 0x80
+      node_name   = get_node_name
+      flags       = get_byte
+      ofs_end     = get_u4
+      if RecordTypes[node_name]
+        types, keys = RecordTypes[node_name]
+        xtypes, data = capturing_simple(node_name){ convert_until_ofs!(ofs_end) }
+        raise "Unexpected data inside #{node_name}: #{[xtypes, data].inspect}"  unless xtypes == types
+        attrs = {:flags => flags}
+        keys.size.times{|i| attrs[keys[i]] = data[i] }
+        @out.tag!(node_name, attrs)
+      else
+        @out.tag!("record", :name=>node_name, :flags=>flags) do
+          convert_until_ofs!(ofs_end)
+        end
+      end
+    when 0x81
+      node_name = get_node_name
+      flags     = get_byte
+      ofs_end   = get_u4
+      count     = get_u4
+      if count == 0
+        @out.tag!("array", :name=>node_name, :flags=>flags)
+      else
+        @out.tag!("array", :name=>node_name, :flags=>flags) do
+          count.times do
+            if ElementTypes[node_name]
+              types, keys = ElementTypes[node_name]
+              xtypes, data = capturing_simple(node_name){ convert_until_ofs!(get_u4) }
+              raise "Unexpected data inside #{node_name}: #{[xtypes, data].inspect}"  unless xtypes == types
+              @out.tag! node_name, Hash[*keys.zip(data).inject(&:+)]
+            else
+              @out.tag!("element", :name=>node_name) do
+                convert_until_ofs!(get_u4)
+              end
+            end
+          end
+        end
+      end
+    when 0x01
+      @out.tag!(get_bool ? "true" : "false")
+    when 0x0e
+      @out.tag!("str", get_str.xml_escape)
+    when 0x0f
+      @out.tag!("ascii", get_ascii.xml_escape)
+    when 0x06
+      @out.tag!("byte", get_byte)
+    when 0x10
+      @out.tag!("u2", {:type=>0x10}, get_u2)
+    when 0x00
+      @out.tag!("i2", get_i2)
+    when 0x0d
+      @out.tag!("vec3", :x=>get_float, :y=>get_float, :z=>get_float)
+    when 0x47
+      bindata = get_ofs_bytes
+      raise "Size of 0x47 type binary data must be in multiples of 2" if bindata.size & 1 != 0
+      enc_bindata = bindata.unpack("v*").join(" ")
+      @out.tag!("u2_ary", {:size => bindata.size/2}, enc_bindata)
+    when 0x4c
+      bindata = get_ofs_bytes
+      raise "Size of 0x4c type binary data must be in multiples of 4" if bindata.size & 3 != 0
+      enc_bindata = bindata.unpack("f*").join(" ")
+      @out.tag!("flt_ary", {:size => bindata.size/4}, enc_bindata)
+    when 0x40..0x4F
+      bindata = get_ofs_bytes
+      enc_bindata = bindata.unpack("H2" * bindata.size).join(" ")
+      @out.tag!("bin", {:type=>node_type-0x40, :size=>bindata.size}, enc_bindata)
+    else
+      raise "Unknown type 0x%x? at #{context}" % node_type
+    end
+  end
+  def get_ofs_bytes
+    ofs_end = get_u4
+    sz = ofs_end-@ofs
+    get_bytes(sz)
+  end
+  def context
+    "#{@ofs} [ #{@data[@ofs, 32].unpack("C*").join(" ")}]"
+  end
+  def convert!
+    @out.tag!("esf", :magic => @magic.join(" ")) do
+      @out.tag!("node_names") do
+        node_names.each do |n|
+          @out.tag!("node_name", :name => n)
+        end
+      end
+      convert_value!
+    end
+  end
+end
+
+class XMLPrinterDevNull
+  def tag!(*args)
+    yield if block_given?
+  end
+end
+
+class XMLAccumulator
+  attr_reader :captured
+  def initialize
+    @captured = []
+  end
+  def tag!(*args)
+    @captured << [:tag!, *args]
+    yield if block_given?
+  end
+end
+
+class XMLPrinter
+  attr_reader :stats
+  def initialize(out)
+    @out = out
+    @stack = []
+    @indent = Hash.new{|ht,k| ht[k]=" "*k}
+  end
+  def tag!(name, *args)
+    raise ArgumentError.new("Too many arguments") if args.size > 2
+    
+    attrs_s = ""
+    cnt = nil
+
+    if args.size == 2
+      attrs_s = attrs_to_s(args[0])
+      cnt = args[1]
+    elsif args.size == 1
+      if args[0].is_a?(Hash)
+        attrs_s = attrs_to_s(args[0])
+      else
+        cnt = args[0]
+      end
+    end
+    
+    cnt = nil if cnt == ""
+
+    if block_given?
+      raise ArgumentError.new("Cannot use content argument and bolck at the same time") if cnt
+      output "<#{name}#{attrs_s}>\n"
+      @stack << name
+      yield
+      @stack.pop
+      output "</#{name}>\n"
+    elsif cnt.nil?
+      output "<#{name}#{attrs_s} />\n"
+    else
+      output "<#{name}#{attrs_s}>#{cnt}</#{name}>\n"
+    end
+  end
+private
+  def output(str)
+    @out.print(@indent[@stack.size], str)
+  end
+  def attrs_to_s(attrs={})
+    #attrs.to_a.map{|k,v| k=k.to_s; [k, " #{k}='#{v.to_s.xml_attr_escape}'"]}.sort.map{|k,a| a}.join
+    attrs.to_a.map{|k,v| " #{k}='#{v.to_s.xml_attr_escape}'"}.join
+  end
+end
+
+esf = EsfParser.new(STDIN, STDOUT)
+esf.convert!
