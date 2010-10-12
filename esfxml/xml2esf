@@ -2,7 +2,6 @@
 
 require 'rubygems'
 require 'libxml'
-require "esf_types"
 
 include LibXML
 
@@ -13,25 +12,19 @@ class EsfBuilder
 
   def initialize
     @data = ""
-    @node_names = nil
+    @node_types = nil
     @lookup = Hash.new{|ht,k| raise "Unknown node name #{k}"}
-    @stack = []
+    @stack = [{:chara => false, :nest => true}]
   end
 
   def put(bytes)
     @data << bytes
   end
 
-  def chara_ok?
-    (@stack[-1] || {:chara => false})[:chara]
-  end
-  
-  def nest_ok?
-    (@stack[-1] || {:nest => true})[:nest]
-  end
-
   def on_start_element(element, attributes)
-    raise "Illegal place for nested element" unless nest_ok?
+    # STDERR.puts [:start, element, attributes].inspect
+    
+    raise "Illegal place for nested element: #{@stack[-1].inspect}" unless @stack[-1][:nest]
     
     ofs = @data.size
     finalization = {}
@@ -39,6 +32,76 @@ class EsfBuilder
     nest_ok = false
     
     case el = element.to_sym
+    when :yes
+      put("\x01\x01")
+    when :no
+      put("\x01\x00")
+
+    when :"v2"
+      put([0x0c, attributes["x"].to_f, attributes["y"].to_f].pack("Cff"))
+    when :"v3"
+      put([0x0d, attributes["x"].to_f, attributes["y"].to_f, attributes["z"].to_f].pack("Cfff"))
+
+    when :"i2"
+      put("\x00")
+      chara_ok = true
+    when :"u2"
+      put("\x07")
+      chara_ok = true
+    when :"u2x"
+      put("\x10")
+      chara_ok = true
+    when :"i"
+      put("\x04")
+      chara_ok = true
+    when :"u"
+      put("\x08")
+      chara_ok = true
+    when :"byte"
+      put("\x06")
+      chara_ok = true
+    when :"s"
+      put("\x0e")
+      chara_ok = true
+    when :"asc"
+      put("\x0f")
+      chara_ok = true
+    when :"flt"
+      put("\x0a")
+      chara_ok = true
+
+    when :"rec"
+      if @stack[-1][:el] == :ary
+        @stack[-1][:children] += 1
+        put("\x00\x00\x00\x00")
+      else
+        finalization = {:ofs => ofs + 4}
+        name_code = @lookup[attributes['type']]
+        version = attributes['version'].to_i
+        put([0x80, name_code, version, 0].pack("CvCV"))
+      end
+
+      nest_ok = true
+
+    when :"ary"
+      name_code = @lookup[attributes['type']]
+      version = attributes['version'].to_i
+      put([0x81, name_code, version, 0, 0].pack("CvCVV"))
+      finalization = {:children => 0}
+      nest_ok = true
+
+    when :"u2_ary"
+      put("\x47")
+      chara_ok = true
+    when :"i4_ary"
+      put("\x48")
+      chara_ok = true
+    when :"flt_ary"
+      put("\x4c")
+      chara_ok = true
+    when :"bin"
+      put([0x40 + attributes['type'].to_i].pack("C"))
+      chara_ok = true
     when :"esf"
       @magic = attributes["magic"].split(/\s+/).map{|x| x.to_i}
       put(@magic.pack("V*"))
@@ -46,116 +109,18 @@ class EsfBuilder
       put([0].pack("V"))
       nest_ok = true
 
-    when :"node_names"
-      @node_names = []
+    when :"node_types"
+      @node_types = []
       nest_ok = true
 
-    when :"node_name"
+    when :"node_type"
       name = attributes["name"]
       raise "Name already set: #{name}" if @lookup.has_key?(name)
-      @lookup[name] = @node_names.size
-      @node_names << name
+      @lookup[name] = @node_types.size
+      @node_types << name
 
-    when :"true"
-      put([0x01, 1].pack("CC"))
-    when :"false"
-      put([0x01, 0].pack("CC"))
-
-    when :"vec2"
-      put([0x0c, attributes["x"].to_f, attributes["y"].to_f].pack("Cff"))
-    when :"vec3"
-      put([0x0d, attributes["x"].to_f, attributes["y"].to_f, attributes["z"].to_f].pack("Cfff"))
-
-
-    when :"i2"
-      put([0x00].pack("C"))
-      chara_ok = true
-    when :"u2"
-      if attributes["type"]
-        put([attributes["type"].to_i].pack("C"))
-      else
-        put([0x07].pack("C"))
-      end
-      chara_ok = true
-    when :"i4"
-      put([0x04].pack("C"))
-      chara_ok = true
-    when :"u4"
-      put([0x08].pack("C"))
-      chara_ok = true
-    when :"byte"
-      put([0x06].pack("C"))
-      chara_ok = true
-    when :"bool"
-      put([0x01].pack("C"))
-      chara_ok = true
-    when :"str"
-      put([0x0e].pack("C"))
-      chara_ok = true
-    when :"ascii"
-      put([0x0f].pack("C"))
-      chara_ok = true
-    when :"flt"
-      put([0x0a].pack("C"))
-      chara_ok = true
-
-    when :"record"
-      name_code = @lookup[attributes['name']]
-      flags = attributes['flags'].to_i
-      put([0x80, name_code, flags, 0].pack("CvCV"))
-      nest_ok = true
-
-    when :"array"
-      name_code = @lookup[attributes['name']]
-      flags = attributes['flags'].to_i
-      put([0x81, name_code, flags, 0, 0].pack("CvCVV"))
-      finalization = {:children => 0}
-      nest_ok = true
-
-    when :"element"
-      raise "Only valid with array parent" unless @stack[-1][:el] == :"array"
-      @stack[-1][:children] += 1
-      put([0].pack("V"))
-      nest_ok = true
-
-    when :"u2_ary"
-      finalization = {:size => attributes['size'].to_i}
-      put([0x47].pack("C"))
-      chara_ok = true
-    when :"i4_ary"
-      finalization = {:size => attributes['size'].to_i}
-      put([0x48].pack("C"))
-      chara_ok = true
-    when :"flt_ary"
-      finalization = {:size => attributes['size'].to_i}
-      put([0x4c].pack("C"))
-      chara_ok = true
-    when :"bin"
-      finalization = {:size => attributes['size'].to_i}
-      put([0x40 + attributes['type'].to_i].pack("C"))
-      chara_ok = true
     else
-      if ElementTypes[el]
-        types, keys = ElementTypes[el]
-        on_start_element("element", {'flags' => attributes['flags'], 'name' => element})
-        types.zip(keys).each{|type,key|
-          on_start_element(type, {})
-          on_characters(attributes[key.to_s])
-          on_end_element(type)
-        }
-        on_end_element("element")
-      elsif RecordTypes[el]
-        types, keys = RecordTypes[el]
-        on_start_element("record", {'flags' => attributes['flags'], 'name' => element})
-        types.zip(keys).each{|type,key|
-          on_start_element(type, {})
-          on_characters(attributes[key.to_s])
-          on_end_element(type)
-        }
-        on_end_element("record")
-      else
-        raise "No idea what to do with #{element} open means"
-      end
+      raise "No idea what to do with #{element} open means"
     end
 
     @stack << {:el => el, :ofs => ofs, :chara => chara_ok, :buf => "", :nest => nest_ok}.merge(finalization)
@@ -166,84 +131,69 @@ class EsfBuilder
   end
   
   def on_end_element(element)
+    # STDERR.puts [:end, element].inspect
     ctx = @stack.pop
-    case el = element.to_sym
-    when :"esf"
-      adjust_ofs(ctx[:end_of_headers])
-      put([@node_names.size].pack("v"))
-      @node_names.each{|nn|
-        put([nn.size].pack("v"))
-        put(nn)
-      }
-    when :"ascii"
+    el = element.to_sym
+    no_finalization = [:node_types, :node_type, :yes, :no, :v2, :v3]
+    return if no_finalization.include?(el)
+    
+    case el
+    when :asc
       str = ctx[:buf]
       put([str.size].pack("v"))
       put(str)
-    when :"str"
+    when :s
       uchars = ctx[:buf].unpack("U*")
       put([uchars.size, *uchars].pack("v*"))
-    when :"u4", :"i4"
+    when :u, :i
       put([ctx[:buf].to_i].pack("V"))
-    when :"u2", :"i2"
+    when :u2, :i2, :u2x
       put([ctx[:buf].to_i].pack("v"))
-    when :"byte"
+    when :byte
       put([ctx[:buf].to_i].pack("C"))
-    when :"bool"
-      case ctx[:buf].strip
-      when "true"
-        put([1].pack("C"))
-      when "false"
-        put([0].pack("C"))
-      else
-        raise "Boolean must be true or false only, got: #{ctx[:buf]}"
-      end
-    when :"flt"
+    when :flt
       put([ctx[:buf].to_f].pack("f"))
 
-    when :"record"
-      adjust_ofs(ctx[:ofs]+4)
-    when :"array"
-      @data[ctx[:ofs]+4, 8] = [@data.size, ctx[:children]].pack("VV")
-    when :"element"
+    when :rec
       adjust_ofs(ctx[:ofs])
+    when :ary
+      @data[ctx[:ofs]+4, 8] = [@data.size, ctx[:children]].pack("VV")
+
 
     when :"u4_ary", :"i4_ary"
-      expected = ctx[:size]
       elems = ctx[:buf].split.map(&:to_i)
-      raise "Expected #{expected} elements, got #{elems.size}" unless expected == elems.size
       put([@data.size+4*elems.size+4].pack("V"))
       put(elems.pack("V*"))
 
     when :"u2_ary", :"i2_ary"
-      expected = ctx[:size]
       elems = ctx[:buf].split.map(&:to_i)
-      raise "Expected #{expected} elements, got #{elems.size}" unless expected == elems.size
       put([@data.size+2*elems.size+4].pack("V"))
       put(elems.pack("v*"))
 
     when :"flt_ary"
-      expected = ctx[:size]
       elems = ctx[:buf].split.map(&:to_f)
-      raise "Expected #{expected} elements, got #{elems.size}" unless expected == elems.size
       put([@data.size+4*elems.size+4].pack("V"))
       put(elems.pack("f*"))
 
     when :"bin"
-      expected = ctx[:size]
       elems = ctx[:buf].split.map{|x| x.to_i(16)}
-      raise "Expected #{expected} elements, got #{elems.size}" unless expected == elems.size
       put([@data.size+elems.size+4].pack("V"))
       put(elems.pack("C*"))
 
-    when :"node_names", :"node_name", :"true", :"false", :"vec2", :"vec3"
-      # pass
+    when :"esf"
+      adjust_ofs(ctx[:end_of_headers])
+      put([@node_types.size].pack("v"))
+      @node_types.each{|nn|
+        put([nn.size].pack("v"))
+        put(nn)
+      }
     else
-      raise "No idea what to do with #{element} close" unless RecordTypes[el] or ElementTypes[el]
+      raise "No idea what to do with #{element} close"
     end
   end
   
   def on_characters(chars)
-    if chara_ok?
+    if @stack[-1][:chara]
       @stack[-1][:buf] << chars
     else
       raise "Illegal place for non-whitespace characters: #{@stack[-1].inspect}" if chars =~ /\S/
@@ -251,10 +201,12 @@ class EsfBuilder
   end
 end
 
-esf = EsfBuilder.new
-parser = XML::SaxParser.io(STDIN) # :encoding => XML::Encoding::UTF_8
-parser.callbacks = esf
-parser.parse
-print esf.data
-
-#File.open("out.esf", "w"){|fh| fh.print esf.data}
+begin
+  esf = EsfBuilder.new
+  parser = XML::SaxParser.io(STDIN)
+  parser.callbacks = esf
+  parser.parse
+  print esf.data
+ensure
+#  STDERR.puts esf.stack.inspect
+end

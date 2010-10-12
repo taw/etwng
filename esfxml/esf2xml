@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require "pp"
-require "esf_types"
 
 class String
   # Escape string for output as XML text (< > &)
@@ -88,11 +87,12 @@ class EsfParser
   
   attr_accessor :ofs
   attr_reader :data, :out
-  attr_reader :magic, :node_names
+  attr_reader :magic, :node_types
 
   def initialize(in_fh, out_fh)
     @data = in_fh.read
-    @out = XMLPrinter.new(out_fh)
+    @out_fh = out_fh
+    @out = XMLPrinter.new("")
     @ofs = 0
     get_header
   end
@@ -109,122 +109,85 @@ class EsfParser
       raise "Incorrect ESF magic: %X" % magic
     end
     with_temp_ofs(get_u4) {
-      @node_names = get_node_names
+      @node_types = get_node_types
     }
   end
-  def get_node_names
+  def get_node_types
     (0...get_u2()).map{ get_ascii.to_sym }
   end
   def inspect
     "EsfParser(#{@ofs})"
   end
-  def get_node_name
-    @node_names[get_u2]
+  def get_node_type
+    @node_types[get_u2]
   end
   def convert_until_ofs!(ofs_end)
     convert_value! while @ofs < ofs_end
   end
-  def capturing_output
-    accu = XMLAccumulator.new
-    orig_out, @out = @out, accu
-    yield
-    @out = orig_out
-    accu.captured
-  end
-  def capturing_simple(node_name)
-    rv = capturing_output{ yield }
-    types, data = [], []
-    rv.each{|x|
-      x[1,0] = ["bool"] if x.size == 2 and x[1] == "false" or x[1] == "true"
-      raise "Unexpected nesting #{node_name}: #{rv.inspect}" unless x.size == 3 and x[0] == :tag!
-    }
-    [rv.map{|x| x[1]}, rv.map{|x| x[2]}]
-  end
-
   def convert_value!
     case node_type = get_byte
     when 0x08
-      @out.tag!("u4", get_u4)
+      @out.out!("<u>#{get_u4}</u>")
     when 0x04
-      @out.tag!("i4", get_i4)
+      @out.out!("<i>#{get_i4}</i>")
     when 0x0c
-      @out.tag!("vec2", :x=>get_float, :y=>get_float)
+      @out.out!("<v2 x='#{get_float}' y='#{get_float}'/>")
     when 0x07
-      @out.tag!("u2", get_u2)
+      @out.out!("<u2>#{get_u2}</u2>")
     when 0x0a
-      @out.tag!("flt", get_float)
+      @out.out!("<flt>#{get_float}</flt>")
     when 0x48
       bindata = get_ofs_bytes
       raise "Size of 0x48 type binary data must be in multiples of 4" if bindata.size & 3 != 0
       enc_bindata = bindata.unpack("l*").join(" ")
-      @out.tag!("i4_ary", {:size => bindata.size/4}, enc_bindata)
+      @out.out!("<i4_ary>#{enc_bindata}</i4_ary>")
     when 0x80
-      node_name   = get_node_name
-      flags       = get_byte
+      node_type   = get_node_type
+      version     = get_byte
       ofs_end     = get_u4
-      if RecordTypes[node_name]
-        types, keys = RecordTypes[node_name]
-        xtypes, data = capturing_simple(node_name){ convert_until_ofs!(ofs_end) }
-        raise "Unexpected data inside #{node_name}: #{[xtypes, data].inspect}"  unless xtypes == types
-        attrs = {:flags => flags}
-        keys.size.times{|i| attrs[keys[i]] = data[i] }
-        @out.tag!(node_name, attrs)
-      else
-        @out.tag!("record", :name=>node_name, :flags=>flags) do
-          convert_until_ofs!(ofs_end)
-        end
+      @out.tag!("rec", :type=>node_type, :version=>version) do
+        convert_until_ofs!(ofs_end)
       end
     when 0x81
-      node_name = get_node_name
-      flags     = get_byte
+      node_type = get_node_type
+      version   = get_byte
       ofs_end   = get_u4
       count     = get_u4
-      if count == 0
-        @out.tag!("array", :name=>node_name, :flags=>flags)
-      else
-        @out.tag!("array", :name=>node_name, :flags=>flags) do
-          count.times do
-            if ElementTypes[node_name]
-              types, keys = ElementTypes[node_name]
-              xtypes, data = capturing_simple(node_name){ convert_until_ofs!(get_u4) }
-              raise "Unexpected data inside #{node_name}: #{[xtypes, data].inspect}"  unless xtypes == types
-              @out.tag! node_name, Hash[*keys.zip(data).inject(&:+)]
-            else
-              @out.tag!("element", :name=>node_name) do
-                convert_until_ofs!(get_u4)
-              end
-            end
+      @out.tag!("ary", :type=>node_type, :version=>version) do
+        count.times do
+          @out.tag!("rec", :type=>node_type) do
+            convert_until_ofs!(get_u4)
           end
         end
       end
     when 0x01
-      @out.tag!(get_bool ? "true" : "false")
+      @out.out!(get_bool ? "<yes/>" : "<no/>")
     when 0x0e
-      @out.tag!("str", get_str.xml_escape)
+      @out.out!("<s>#{get_str.xml_escape}</s>")
     when 0x0f
-      @out.tag!("ascii", get_ascii.xml_escape)
+      @out.out!("<asc>#{get_ascii.xml_escape}</asc>")
     when 0x06
-      @out.tag!("byte", get_byte)
+      @out.out!("<byte>#{get_byte}</byte>")
     when 0x10
-      @out.tag!("u2", {:type=>0x10}, get_u2)
+      @out.out!("<u2x>#{get_u2}</u2x>")
     when 0x00
-      @out.tag!("i2", get_i2)
+      @out.out!("<i2>#{get_i2}</i2>")
     when 0x0d
-      @out.tag!("vec3", :x=>get_float, :y=>get_float, :z=>get_float)
+      @out.out!("<v3 x='#{get_float}' y='#{get_float}' z='#{get_float}'/>")
     when 0x47
       bindata = get_ofs_bytes
       raise "Size of 0x47 type binary data must be in multiples of 2" if bindata.size & 1 != 0
       enc_bindata = bindata.unpack("v*").join(" ")
-      @out.tag!("u2_ary", {:size => bindata.size/2}, enc_bindata)
+      @out.out!("<u2_ary>#{enc_bindata}</u2_ary>")
     when 0x4c
       bindata = get_ofs_bytes
       raise "Size of 0x4c type binary data must be in multiples of 4" if bindata.size & 3 != 0
       enc_bindata = bindata.unpack("f*").join(" ")
-      @out.tag!("flt_ary", {:size => bindata.size/4}, enc_bindata)
+      @out.out!("<flt_ary>#{enc_bindata}</flt_ary>")
     when 0x40..0x4F
       bindata = get_ofs_bytes
       enc_bindata = bindata.unpack("H2" * bindata.size).join(" ")
-      @out.tag!("bin", {:type=>node_type-0x40, :size=>bindata.size}, enc_bindata)
+      @out.out!("<bin type='#{node_type-0x40}'>#{enc_bindata}</bin>")
     else
       raise "Unknown type 0x%x? at #{context}" % node_type
     end
@@ -239,35 +202,19 @@ class EsfParser
   end
   def convert!
     @out.tag!("esf", :magic => @magic.join(" ")) do
-      @out.tag!("node_names") do
-        node_names.each do |n|
-          @out.tag!("node_name", :name => n)
+      @out.tag!("node_types") do
+        node_types.each do |n|
+          @out.tag!("node_type", :name => n)
         end
       end
       convert_value!
     end
-  end
-end
-
-class XMLPrinterDevNull
-  def tag!(*args)
-    yield if block_given?
-  end
-end
-
-class XMLAccumulator
-  attr_reader :captured
-  def initialize
-    @captured = []
-  end
-  def tag!(*args)
-    @captured << [:tag!, *args]
-    yield if block_given?
+    @out_fh.print @out.out
   end
 end
 
 class XMLPrinter
-  attr_reader :stats
+  attr_reader :out
   def initialize(out)
     @out = out
     @stack = []
@@ -294,21 +241,21 @@ class XMLPrinter
 
     if block_given?
       raise ArgumentError.new("Cannot use content argument and bolck at the same time") if cnt
-      output "<#{name}#{attrs_s}>\n"
+      out! "<#{name}#{attrs_s}>"
       @stack << name
       yield
       @stack.pop
-      output "</#{name}>\n"
+      out! "</#{name}>"
     elsif cnt.nil?
-      output "<#{name}#{attrs_s} />\n"
+      out! "<#{name}#{attrs_s}/>"
     else
-      output "<#{name}#{attrs_s}>#{cnt}</#{name}>\n"
+      out! "<#{name}#{attrs_s}>#{cnt}</#{name}>"
     end
   end
-private
-  def output(str)
-    @out.print(@indent[@stack.size], str)
+  def out!(str)
+    @out << @indent[@stack.size] << str << "\n"
   end
+  private
   def attrs_to_s(attrs={})
     #attrs.to_a.map{|k,v| k=k.to_s; [k, " #{k}='#{v.to_s.xml_attr_escape}'"]}.sort.map{|k,a| a}.join
     attrs.to_a.map{|k,v| " #{k}='#{v.to_s.xml_attr_escape}'"}.join
