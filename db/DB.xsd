@@ -532,11 +532,11 @@
 		<xs:attribute name="Y" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="campaign_map_playable_areas_tables">
-		<xs:attribute name="Unknown1" type="xs:string" use="required" />
+		<xs:attribute name="Random_value_x0020__x0028__x003F__x0029_" type="xs:string" use="required" />
 		<xs:attribute name="Unknown2" type="xs:boolean" use="required" />
 		<xs:attribute name="Unknown3" type="xs:boolean" use="required" />
-		<xs:attribute name="Unknown4" type="xs:string" use="required" />
-		<xs:attribute name="unknown1" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Map__x0022_texture_x0022_.tga" type="xs:string" use="required" />
+		<xs:attribute name="Map_lookup.tga" msprop:Optional="true" type="xs:string" />
 		<xs:attribute name="unknown2" msprop:Optional="true" type="xs:string" />
 		<xs:attribute name="Unknown5" type="xs:string" use="required" />
 		<xs:attribute name="Unknown6" type="xs:int" use="required" />
@@ -561,7 +561,7 @@
 	</xs:complexType>
 	<xs:complexType name="campaign_map_tooltips_tables">
 		<xs:attribute name="Unknown1" type="xs:string" use="required" />
-		<xs:attribute name="Unknown2" type="xs:string" use="required" />
+		<xs:attribute name="tooltip_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="campaign_map_towns_and_ports_tables">
 		<xs:attribute name="Town_ID" type="xs:string" use="required" />
@@ -635,7 +635,7 @@
 	</xs:complexType>
 	<xs:complexType name="effect_bonus_value_building_chain_junctions_tables">
 		<xs:attribute name="Effect_IDRef" type="xs:string" use="required" />
-		<xs:attribute name="String2" type="xs:string" use="required" />
+		<xs:attribute name="effect_bonus" type="xs:string" use="required" />
 		<xs:attribute name="Building_x0020_Chain" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="effect_bonus_value_population_class_junction_tables">
@@ -756,8 +756,8 @@
 	<xs:complexType name="gun_types_tables">
 		<xs:attribute name="Gun_ID" type="xs:string" use="required" />
 		<xs:attribute name="Battle_x0020_Entity" type="xs:string" use="required" />
-		<xs:attribute name="Dcreen_Name" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="GunID" type="xs:string" use="required" />
+		<xs:attribute name="Animation_table" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:string" use="required" />
 		<xs:attribute name="Model_Gun_x0020_Destroyed" type="xs:string" use="required" />
 		<xs:attribute name="Animation_Gun_x0020_Destruction" type="xs:string" use="required" />
@@ -839,30 +839,30 @@
 	</xs:complexType>
 	<xs:complexType name="projectile_impacts_tables">
 		<xs:attribute name="Projectile_IDRef" type="xs:string" use="required" />
-		<xs:attribute name="unknown1" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown2" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown3" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown4" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown5" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Hit_effect_ship" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Hit_effect_water" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Hit_effect_sail" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Impact_building_effect" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Impact_effect_ground_1" msprop:Optional="true" type="xs:string" />
 		<xs:attribute name="unknown6" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown7" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown8" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown9" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown10" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown11" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown12" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Impact_effect_ground_2" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Impact_effect_ground_3" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Impact_effect_ground_4" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Impact_effect_ground_5" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Impact_effect_ground_6" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Impact_effect_human" msprop:Optional="true" type="xs:string" />
 		<xs:attribute name="unknown13" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown14" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown15" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown16" type="xs:string" use="required" />
+		<xs:attribute name="impact_tree_effect_1" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="impact_tree_effect" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="impact_size_x0020__x0028__x003F__x0029_" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="projectile_shot_type_enum_tables">
 		<xs:attribute name="Projectile_Shot" type="xs:string" use="required" />
-		<xs:attribute name="unknown1" type="xs:boolean" use="required" />
+		<xs:attribute name="Researchable_technology" type="xs:boolean" use="required" />
 		<xs:attribute name="unknown2" type="xs:boolean" use="required" />
 		<xs:attribute name="Obsoleted_Projectile_Shot" msprop:Optional="true" type="xs:string" />
 		<xs:attribute name="unknown3" type="xs:boolean" use="required" />
-		<xs:attribute name="unknown4" type="xs:boolean" use="required" />
+		<xs:attribute name="Artillery_projectile_x0020__x0028__x003F__x0029_" type="xs:boolean" use="required" />
 	</xs:complexType>
 	<xs:complexType name="projectile_trails_tables">
 		<xs:attribute name="Projectile_Trail" type="xs:string" use="required" />
@@ -984,9 +984,9 @@
 	</xs:complexType>
 	<xs:complexType name="slots_tables">
 		<xs:attribute name="Slot_ID" type="xs:string" use="required" />
-		<xs:attribute name="unknown1" type="xs:boolean" use="required" />
-		<xs:attribute name="unknown2" type="xs:boolean" use="required" />
-		<xs:attribute name="unknown3" type="xs:boolean" use="required" />
+		<xs:attribute name="Agrar_town_x0020__x0028__x003F__x0029_" type="xs:boolean" use="required" />
+		<xs:attribute name="Industrial_town_x0020__x0028__x003F__x0029_" type="xs:boolean" use="required" />
+		<xs:attribute name="Port_x0020__x0028__x003F__x0029_" type="xs:boolean" use="required" />
 		<xs:attribute name="unknown4" type="xs:boolean" use="required" />
 	</xs:complexType>
 	<xs:complexType name="state_gift_values_tables">
@@ -1097,13 +1097,13 @@
 		<xs:attribute name="unknown5" type="xs:int" use="required" />
 	</xs:complexType>
 	<xs:complexType name="trigger_events_tables">
-		<xs:attribute name="unknown" type="xs:string" use="required" />
+		<xs:attribute name="Trigger_event" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="unit_abilities_tables">
 		<xs:attribute name="Unit_Ability_ID" type="xs:string" use="required" />
-		<xs:attribute name="unknown1" type="xs:boolean" use="required" />
+		<xs:attribute name="Defensive_Ability" type="xs:boolean" use="required" />
 		<xs:attribute name="Obsoletes" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown2" type="xs:boolean" use="required" />
+		<xs:attribute name="Researchable_Technology_x0020__x0028__x003F__x0029_" type="xs:boolean" use="required" />
 	</xs:complexType>
 	<xs:complexType name="unit_category_tables">
 		<xs:attribute name="Unit_Category_ID" type="xs:string" use="required" />
@@ -1190,23 +1190,23 @@
 		<xs:attribute name="Unused7" type="xs:string" use="required" />
 		<xs:attribute name="Training" type="xs:string" use="required" />
 		<xs:attribute name="Morale" type="xs:int" use="required" />
-		<xs:attribute name="Deployed_x0020_Ranks" type="xs:int" use="required" />
-		<xs:attribute name="File_x0020_Spacing" type="xs:float" use="required" />
-		<xs:attribute name="Rank_x0020_Spacing" type="xs:float" use="required" />
 		<xs:attribute name="Unused8" type="xs:float" use="required" />
 		<xs:attribute name="Unused9" type="xs:float" use="required" />
-		<xs:attribute name="File_x0020_Spacing_x0020_Dismounted" type="xs:float" use="required" />
-		<xs:attribute name="Rank_x0020_Spacing_x0020_Dismounted" type="xs:float" use="required" />
 		<xs:attribute name="Unused10" type="xs:float" use="required" />
+		<xs:attribute name="Deployed_Ranks" type="xs:int" use="required" />
+		<xs:attribute name="File_Spacing" type="xs:float" use="required" />
+		<xs:attribute name="Rank_Spacing" type="xs:float" use="required" />
+		<xs:attribute name="File_Spacing_Dismounted" type="xs:float" use="required" />
+		<xs:attribute name="Rank_Spacing_Dismounted" type="xs:float" use="required" />
 		<xs:attribute name="Anti_Cavalry_Bonus" type="xs:int" use="required" />
 		<xs:attribute name="Can_x0020_Throw_x0020_Grenades" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_x0020_Skirmish" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_x0020_Guard" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_x0020_Dismount" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_x0020_Place_x0020_Stakes" type="xs:boolean" use="required" />
-		<xs:attribute name="Is_x0020_Slow_x0020_Moving" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_x0020_Rally_x0020_Comrades_x0020__x0023_Has_x0020_No_x0020_In-Game_x0020_Effect_x0023_" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_x0020_Hide_x0020_In_x0020_Woodland" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_Skirmish" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_Guard" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_Dismount" type="xs:boolean" use="required" />
+		<xs:attribute name="Is_Slow_Moving" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_Hide_in_Light_Scrub" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_Hide_in_Long_Grass" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_Hide_in_Buildings" type="xs:boolean" use="required" />
@@ -1216,21 +1216,21 @@
 		<xs:attribute name="Tree_x0020_Spotting_x0020_Distance" type="xs:float" use="required" />
 		<xs:attribute name="Scrub_x0020_Spotting_x0020_Distance" type="xs:float" use="required" />
 		<xs:attribute name="Long_x0020_Grass_x0020_Spotting_x0020_Distance" type="xs:float" use="required" />
-		<xs:attribute name="Paths_x0020_Seldom_x0020_Trod" type="xs:boolean" use="required" />
-		<xs:attribute name="Garrison_x0020_Police_x0020_Bonus" type="xs:boolean" use="required" />
 		<xs:attribute name="Discipined" type="xs:boolean" use="required" />
 		<xs:attribute name="Impetuous" type="xs:boolean" use="required" />
-		<xs:attribute name="Scares_x0020_Horses" type="xs:boolean" use="required" />
-		<xs:attribute name="Scares_x0020_Enemies" type="xs:boolean" use="required" />
-		<xs:attribute name="Inspires_x0020_Allies" type="xs:boolean" use="required" />
-		<xs:attribute name="Good_x0020_Stamina" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_x0020_Use_x0020_Rope_x0020_Ladders" type="xs:boolean" use="required" />
-		<xs:attribute name="Heat_x0020_Resistant" type="xs:boolean" use="required" />
-		<xs:attribute name="Cold_x0020_Resistant" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_x0020_Do_x0020_Formed_x0020_Attack" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_x0020_Use_x0020_Pike_x0020_Wall" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_x0020_Use_x0020_Pike_x0020_Square" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_x0020_Shoot_x0020_While_x0020_Moving" msprop:VersionStart="2" type="xs:boolean" use="required" />
+		<xs:attribute name="Paths_Seldom_Trod" type="xs:boolean" use="required" />
+		<xs:attribute name="Garrison_Police_Bonus" type="xs:boolean" use="required" />
+		<xs:attribute name="Scares_Horses" type="xs:boolean" use="required" />
+		<xs:attribute name="Scares_Enemies" type="xs:boolean" use="required" />
+		<xs:attribute name="Inspires_Allies" type="xs:boolean" use="required" />
+		<xs:attribute name="Good_Stamina" type="xs:boolean" use="required" />
+		<xs:attribute name="Heat_Resistant" type="xs:boolean" use="required" />
+		<xs:attribute name="Cold_Resistant" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_Use_Pike_Wall" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_Use_Pike_Square" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_Shoot_While_Moving" msprop:VersionStart="2" type="xs:boolean" use="required" />
 	</xs:complexType>
 	<xs:complexType name="unit_stats_land_experience_bonuses_tables">
 		<xs:attribute name="Experience_Level" type="xs:string" use="required" />
@@ -1492,7 +1492,7 @@
 	<xs:complexType name="warscape_rigid_lod_tables">
 		<xs:attribute name="Random_Index" type="xs:string" use="required" />
 		<xs:attribute name="Model_filepath" type="xs:string" use="required" />
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="LodID" type="xs:string" use="required" />
 		<xs:attribute name="Filename_x0020_WA_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="wind_levels_tables">
@@ -1535,8 +1535,8 @@
 		<xs:attribute name="unknown3" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="climate_to_erosion_settings_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Climate_ID" type="xs:string" use="required" />
+		<xs:attribute name="Erosion_type" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:int" use="required" />
 		<xs:attribute name="unknown4" type="xs:float" use="required" />
 		<xs:attribute name="unknown5" type="xs:float" use="required" />
@@ -1548,21 +1548,21 @@
 		<xs:attribute name="unknown11" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="climates_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:int" use="required" />
-		<xs:attribute name="unknown3" type="xs:int" use="required" />
+		<xs:attribute name="Climate_ID" type="xs:string" use="required" />
+		<xs:attribute name="Value" type="xs:int" use="required" />
+		<xs:attribute name="unknown_x0020__x0028_difference_x0020_between_x0020_land_x0020_and_x0020_sea_x0020_climate_x0020__x0028__x003F__x0029_" type="xs:int" use="required" />
 		<xs:attribute name="unknown4" type="xs:int" use="required" />
 		<xs:attribute name="unknown5" type="xs:boolean" use="required" />
 	</xs:complexType>
 	<xs:complexType name="commodities_demand_drivers_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="Commodity_demand_drivers" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="commodity_unit_names_tables">
-		<xs:attribute name="Unit_x0020_Name" type="xs:string" use="required" />
+		<xs:attribute name="measuring_unit" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="cursors_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Cursor_action" type="xs:string" use="required" />
+		<xs:attribute name="Icon" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:int" use="required" />
 		<xs:attribute name="unknown4" type="xs:int" use="required" />
 		<xs:attribute name="unknown5" type="xs:float" use="required" />
@@ -1573,54 +1573,54 @@
 		<xs:attribute name="unknown10" type="xs:boolean" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomacy_attitudes_tables">
-		<xs:attribute name="Cause" type="xs:string" use="required" />
-		<xs:attribute name="Limit" type="xs:int" use="required" />
-		<xs:attribute name="Change_Per_Turn" type="xs:int" use="required" />
-		<xs:attribute name="Change_Once" type="xs:int" use="required" />
+		<xs:attribute name="diplomatic_factor_ID" type="xs:string" use="required" />
+		<xs:attribute name="Value_1" type="xs:int" use="required" />
+		<xs:attribute name="Value_2" type="xs:int" use="required" />
+		<xs:attribute name="Value_3" type="xs:int" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomacy_factor_strings_tables">
-		<xs:attribute name="DiplomacyFactorId" type="xs:string" use="required" />
+		<xs:attribute name="Diplomatic_factor_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomacy_negotiation_faction_override_strings_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="GovernmentType" type="xs:string" use="required" />
-		<xs:attribute name="Faction" type="xs:string" use="required" />
-		<xs:attribute name="unknown5" type="xs:string" use="required" />
+		<xs:attribute name="Diplomatic_string_ID" type="xs:string" use="required" />
+		<xs:attribute name="culture" type="xs:string" use="required" />
+		<xs:attribute name="Government_system" type="xs:string" use="required" />
+		<xs:attribute name="faction" type="xs:string" use="required" />
+		<xs:attribute name="government_system_of_faction" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomacy_negotiation_strings_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
-		<xs:attribute name="unknown4" type="xs:string" use="required" />
+		<xs:attribute name="diplomacy_strings_ID" type="xs:string" use="required" />
+		<xs:attribute name="culture" type="xs:string" use="required" />
+		<xs:attribute name="Government_system" type="xs:string" use="required" />
+		<xs:attribute name="government_system_2" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomacy_strings_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="diplomacy_strings_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomatic_relations_attitudes_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:int" use="required" />
+		<xs:attribute name="Diplomatic_relation" type="xs:string" use="required" />
+		<xs:attribute name="Value" type="xs:int" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomatic_relations_government_type_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="government_category" type="xs:string" use="required" />
+		<xs:attribute name="government_category_2" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:int" use="required" />
 		<xs:attribute name="unknown4" type="xs:int" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomatic_relations_religion_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="DiplomaticBonus" type="xs:int" use="required" />
-		<xs:attribute name="UnrestPenalty" type="xs:float" use="required" />
+		<xs:attribute name="Religion_ID" type="xs:string" use="required" />
+		<xs:attribute name="Religion_ID_x0020__x0028_2_x0029_" type="xs:string" use="required" />
+		<xs:attribute name="unknown3" type="xs:int" use="required" />
+		<xs:attribute name="unknown4" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="disaster_to_ground_types_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
 		<xs:attribute name="unknown2" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="disasters_tables">
-		<xs:attribute name="DisasterId" type="xs:string" use="required" />
+		<xs:attribute name="Disaster_ID" type="xs:string" use="required" />
 		<xs:attribute name="unknown2" type="xs:float" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="Disaster_to_season" type="xs:string" use="required" />
 		<xs:attribute name="unknown4" type="xs:boolean" use="required" />
 		<xs:attribute name="unknown5" type="xs:string" use="required" />
 		<xs:attribute name="unknown6" type="xs:string" use="required" />
@@ -1628,7 +1628,7 @@
 		<xs:attribute name="unknown8" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diseases_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="Disease_ID" type="xs:string" use="required" />
 		<xs:attribute name="unknown2" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:float" use="required" />
 		<xs:attribute name="unknown4" type="xs:float" use="required" />
@@ -1636,57 +1636,57 @@
 	</xs:complexType>
 	<xs:complexType name="effect_bonus_value_commodity_junction_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="affect_this_bonus" type="xs:string" use="required" />
+		<xs:attribute name="Resource_category" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="effect_bonus_value_population_class_and_religion_junction_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
-		<xs:attribute name="unknown4" type="xs:string" use="required" />
+		<xs:attribute name="affect_this_value" type="xs:string" use="required" />
+		<xs:attribute name="Class" type="xs:string" use="required" />
+		<xs:attribute name="Religion_category" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="effect_bonus_value_projectile_junctions_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="Bonus_effect" type="xs:string" use="required" />
+		<xs:attribute name="weapon_category" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="effect_bonus_value_religion_junction_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="Bonus_effect" type="xs:string" use="required" />
+		<xs:attribute name="Religion_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="effect_bonus_value_resource_junction_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="Bonus_effect_ID" type="xs:string" use="required" />
+		<xs:attribute name="Resource_category" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="effect_bonus_value_shot_type_junctions_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="Effect_ID" type="xs:string" use="required" />
+		<xs:attribute name="Unit_ability" type="xs:string" use="required" />
+		<xs:attribute name="projectile_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="effect_bonus_value_unit_category_junction_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="Trait_effect" type="xs:string" use="required" />
+		<xs:attribute name="Bonus_ID" type="xs:string" use="required" />
+		<xs:attribute name="unit_category" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="empires_regions_junct_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
 		<xs:attribute name="unknown2" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="empires_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="Empire_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="entity_training_levels_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:float" use="required" />
+		<xs:attribute name="Training_level_of_Units" type="xs:string" use="required" />
+		<xs:attribute name="degree_of_dissarangment_of_x0020_formations" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="erosion_types_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="Erosion_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="events_view_group_junct_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Historic_event_ID" type="xs:string" use="required" />
+		<xs:attribute name="Corrospondents_to_faction_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="faction_groups_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
@@ -1779,13 +1779,13 @@
 		<xs:attribute name="unknown5" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="fort_underlay_climate_jcts_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Fort_underlay_ID" type="xs:string" use="required" />
+		<xs:attribute name="climate_ID" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:boolean" use="required" />
 		<xs:attribute name="unknown4" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="governorships_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="Continent_ID_x0020__x0028_used_x0020_for_x0020_governorship_x0020_assign_x0020__x0028__x003F__x0029_" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="lighting_setups_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
@@ -1821,40 +1821,40 @@
 		<xs:attribute name="unknown31" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="ministerial_effectiveness_modifiers_tables">
-		<xs:attribute name="unknown1" type="xs:int" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Effectiveness_ID_x0020__x0028_corrospondents_x0020_to_x0020_ministerial_x0020_position_x0020_to_x0020_effect_x0020_table_x0029_" type="xs:int" use="required" />
+		<xs:attribute name="Government_ID" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="ministerial_position_default_names_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Ministerial_position_ID" type="xs:string" use="required" />
+		<xs:attribute name="government_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="ministerial_positions_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
 		<xs:attribute name="unknown2" type="xs:int" use="required" />
 	</xs:complexType>
 	<xs:complexType name="ministerial_positions_to_effects_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:int" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
-		<xs:attribute name="unknown4" type="xs:int" use="required" />
+		<xs:attribute name="Ministerial_position" type="xs:string" use="required" />
+		<xs:attribute name="Efectiveness_ID" type="xs:int" use="required" />
+		<xs:attribute name="ministerial_Effect_ID" type="xs:string" use="required" />
+		<xs:attribute name="Value1" type="xs:int" use="required" />
 		<xs:attribute name="unknown5" type="xs:int" use="required" />
 	</xs:complexType>
 	<xs:complexType name="ministerial_positions_to_governorships_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="governor_cont" type="xs:string" use="required" />
+		<xs:attribute name="continent" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="mission_activities_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Mission" type="xs:string" use="required" />
+		<xs:attribute name="Required_mission_activity" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="mission_effects_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Mission_effect_ID" type="xs:string" use="required" />
+		<xs:attribute name="Mission_effect" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="mission_sources_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Gov_ID" type="xs:string" use="required" />
+		<xs:attribute name="Mission_source" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="models_artilleries_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
@@ -2043,8 +2043,8 @@
 		<xs:attribute name="unknown184" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="models_artillery_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Model_ID" type="xs:string" use="required" />
+		<xs:attribute name="cs2.parsed_x0020_Path" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:float" use="required" />
 		<xs:attribute name="unknown4" type="xs:int" use="required" />
 		<xs:attribute name="unknown5" type="xs:float" use="required" />
@@ -2229,27 +2229,27 @@
 		<xs:attribute name="unknown184" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="mount_variants_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Mount_variant" type="xs:string" use="required" />
+		<xs:attribute name="Mount_ID" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="movie_event_strings_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
-		<xs:attribute name="unknown4" type="xs:string" use="required" />
+		<xs:attribute name="Event_message" type="xs:string" use="required" />
+		<xs:attribute name="culture_ID" type="xs:string" use="required" />
+		<xs:attribute name="Video" type="xs:string" use="required" />
+		<xs:attribute name="Value" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="names_forts_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Names_group_ID" type="xs:string" use="required" />
+		<xs:attribute name="Fort_Name" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="names_groups_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Name_groups_ID" type="xs:string" use="required" />
+		<xs:attribute name="Name_groups" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="particle_effects_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="Effect" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="pdlc_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
@@ -2262,22 +2262,22 @@
 		<xs:attribute name="unknown2" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="population_classes_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:boolean" use="required" />
+		<xs:attribute name="class_ID" type="xs:string" use="required" />
+		<xs:attribute name="unkown1" type="xs:boolean" use="required" />
 		<xs:attribute name="unknown3" type="xs:boolean" use="required" />
 		<xs:attribute name="unknown4" type="xs:boolean" use="required" />
 	</xs:complexType>
 	<xs:complexType name="religions_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="Religion_ID" type="xs:string" use="required" />
 		<xs:attribute name="unknown2" type="xs:int" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="Graphic_path" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="resources_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" msprop:Optional="true" type="xs:string" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
-		<xs:attribute name="unknown4" type="xs:int" use="required" />
-		<xs:attribute name="unknown5" type="xs:string" use="required" />
+		<xs:attribute name="Resource_ID" type="xs:string" use="required" />
+		<xs:attribute name="Dimension_Unit" msprop:Optional="true" type="xs:string" />
+		<xs:attribute name="Slot_ID" type="xs:string" use="required" />
+		<xs:attribute name="Effect_for_non_trade_goods_x0020__x0028__x003F__x0029_" type="xs:int" use="required" />
+		<xs:attribute name="Graphic_path" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="sea_climate_details_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
@@ -2343,66 +2343,66 @@
 		<xs:attribute name="unknown4" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="slots_templates_models_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="Town_ID" type="xs:string" use="required" />
+		<xs:attribute name="Town_slot_ID" type="xs:string" use="required" />
+		<xs:attribute name="Model_path" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="small_vegetation_climates_jct_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Climate_ID" type="xs:string" use="required" />
+		<xs:attribute name="Vegetation_props_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="special_edition_enums_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
 		<xs:attribute name="unknown2" type="xs:int" use="required" />
 	</xs:complexType>
 	<xs:complexType name="stances_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Diplomatic_stance" type="xs:string" use="required" />
+		<xs:attribute name="Diplomatic_stance_behaviour_x0020__x0028__x003F__x0029_" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="taxes_classes_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="taxes_classes" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="taxes_keys_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="Class" type="xs:string" use="required" />
+		<xs:attribute name="Tax_level_ID" type="xs:string" use="required" />
+		<xs:attribute name="Tax_effect_x0020__x0028__x003F__x0029_" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="taxes_levels_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:int" use="required" />
+		<xs:attribute name="Tax_level_ID" type="xs:string" use="required" />
+		<xs:attribute name="Income_multiplier" type="xs:int" use="required" />
 	</xs:complexType>
 	<xs:complexType name="town_wealth_growth_factors_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="Wealth_effect" type="xs:string" use="required" />
+		<xs:attribute name="Icon_happy" type="xs:string" use="required" />
+		<xs:attribute name="Icon_unhappy" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="trade_details_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="ID" type="xs:string" use="required" />
+		<xs:attribute name="Texture_path" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="warscape_categories_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="Categories" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="warscape_naval_lod_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
+		<xs:attribute name="Random_x0020_Number" type="xs:string" use="required" />
+		<xs:attribute name="Modelpath" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:string" use="required" />
 		<xs:attribute name="unknown4" type="xs:string" use="required" />
-		<xs:attribute name="unknown5" type="xs:string" use="required" />
+		<xs:attribute name="Ship_x0020_ID" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="warscape_rigid_lod_range_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="LodID" type="xs:string" use="required" />
 		<xs:attribute name="unknown2" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="warscape_trees_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="TreeID" type="xs:string" use="required" />
+		<xs:attribute name="Season" type="xs:string" use="required" />
+		<xs:attribute name="Model_x0020_Path" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="warscape_underlay_textures_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:string" use="required" />
+		<xs:attribute name="Underlay_texture" type="xs:string" use="required" />
+		<xs:attribute name="Underlay_texture_path" type="xs:string" use="required" />
 		<xs:attribute name="unknown4" type="xs:int" use="required" />
 	</xs:complexType>
 	<xs:element name="DBDataSet">
@@ -3060,7 +3060,7 @@
 		<xs:unique name="effect_bonus_value_building_chain_junctions_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//effect_bonus_value_building_chain_junctions_tables" />
 			<xs:field xpath="@Effect_IDRef" />
-			<xs:field xpath="@String2" />
+			<xs:field xpath="@effect_bonus" />
 			<xs:field xpath="@Building_x0020_Chain" />
 		</xs:unique>
 		<xs:unique name="effect_bonus_value_population_class_junction_tables_Constraint1" msdata:PrimaryKey="true">
@@ -3308,7 +3308,7 @@
 		</xs:unique>
 		<xs:unique name="trigger_events_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//trigger_events_tables" />
-			<xs:field xpath="@unknown" />
+			<xs:field xpath="@Trigger_event" />
 		</xs:unique>
 		<xs:unique name="unit_abilities_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//unit_abilities_tables" />
@@ -3984,9 +3984,9 @@
 			<xs:selector xpath=".//unit_stats_naval_tables" />
 			<xs:field xpath="@Admiral" />
 		</xs:keyref>
-		<xs:keyref name="unit_stats_land_tables.Man_entity_x0020_-_x0020_links_x0020_to_x0020_battle_entities_x0020_table__is-a__battle_entities_tables.Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
+		<xs:keyref name="unit_stats_land_tables.Infantry_x0020_Battle_x0020_Entity__is-a__battle_entities_tables.Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
-			<xs:field xpath="@Man_entity_x0020_-_x0020_links_x0020_to_x0020_battle_entities_x0020_table" />
+			<xs:field xpath="@Infantry_x0020_Battle_x0020_Entity" />
 		</xs:keyref>
 		<xs:keyref name="unit_stats_land_tables.Officer__is-a__battle_personalities_tables.Battle_x0020_Personality_x0020_ID" refer="battle_personalities_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
@@ -4004,9 +4004,9 @@
 			<xs:selector xpath=".//unit_stats_land_tables" />
 			<xs:field xpath="@Standard_x0020_Bearer" />
 		</xs:keyref>
-		<xs:keyref name="unit_stats_land_tables_Mount_x0020_Model__TO__mounts_tables_Mount_ID" refer="mounts_tables_Constraint1">
+		<xs:keyref name="unit_stats_land_tables_Horse_1__TO__mounts_tables_Mount_ID" refer="mounts_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
-			<xs:field xpath="@Mount_x0020_Model" />
+			<xs:field xpath="@Horse_1" />
 		</xs:keyref>
 		<xs:keyref name="unit_stats_land_tables.Cavalry_x0020_Battle_x0020_Entity__is-a__battle_entities_tables.Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
@@ -4060,7 +4060,7 @@
 			<xs:selector xpath=".//trees_climates_jct_tables" />
 			<xs:field xpath="@Tree" />
 		</xs:keyref>
-		<xs:keyref name="trait_triggers_tables_Event_IDRef__TO__trigger_events_tables_unknown" refer="trigger_events_tables_Constraint1">
+		<xs:keyref name="trait_triggers_tables.Event_IDRef__is-a__trigger_events_tables.Trigger_event" refer="trigger_events_tables_Constraint1">
 			<xs:selector xpath=".//trait_triggers_tables" />
 			<xs:field xpath="@Event_IDRef" />
 		</xs:keyref>
