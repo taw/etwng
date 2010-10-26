@@ -1190,23 +1190,23 @@
 		<xs:attribute name="Unused7" type="xs:string" use="required" />
 		<xs:attribute name="Training" type="xs:string" use="required" />
 		<xs:attribute name="Morale" type="xs:int" use="required" />
+		<xs:attribute name="Deployed_x0020_Ranks" type="xs:int" use="required" />
+		<xs:attribute name="File_x0020_Spacing" type="xs:float" use="required" />
+		<xs:attribute name="Rank_x0020_Spacing" type="xs:float" use="required" />
 		<xs:attribute name="Unused8" type="xs:float" use="required" />
 		<xs:attribute name="Unused9" type="xs:float" use="required" />
+		<xs:attribute name="File_x0020_Spacing_x0020_Dismounted" type="xs:float" use="required" />
+		<xs:attribute name="Rank_x0020_Spacing_x0020_Dismounted" type="xs:float" use="required" />
 		<xs:attribute name="Unused10" type="xs:float" use="required" />
-		<xs:attribute name="Deployed_Ranks" type="xs:int" use="required" />
-		<xs:attribute name="File_Spacing" type="xs:float" use="required" />
-		<xs:attribute name="Rank_Spacing" type="xs:float" use="required" />
-		<xs:attribute name="File_Spacing_Dismounted" type="xs:float" use="required" />
-		<xs:attribute name="Rank_Spacing_Dismounted" type="xs:float" use="required" />
 		<xs:attribute name="Anti_Cavalry_Bonus" type="xs:int" use="required" />
 		<xs:attribute name="Can_x0020_Throw_x0020_Grenades" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_x0020_Skirmish" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_x0020_Guard" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_x0020_Dismount" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_x0020_Place_x0020_Stakes" type="xs:boolean" use="required" />
+		<xs:attribute name="Is_x0020_Slow_x0020_Moving" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_x0020_Rally_x0020_Comrades_x0020__x0023_Has_x0020_No_x0020_In-Game_x0020_Effect_x0023_" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_x0020_Hide_x0020_In_x0020_Woodland" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_Skirmish" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_Guard" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_Dismount" type="xs:boolean" use="required" />
-		<xs:attribute name="Is_Slow_Moving" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_Hide_in_Light_Scrub" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_Hide_in_Long_Grass" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_Hide_in_Buildings" type="xs:boolean" use="required" />
@@ -1216,21 +1216,21 @@
 		<xs:attribute name="Tree_x0020_Spotting_x0020_Distance" type="xs:float" use="required" />
 		<xs:attribute name="Scrub_x0020_Spotting_x0020_Distance" type="xs:float" use="required" />
 		<xs:attribute name="Long_x0020_Grass_x0020_Spotting_x0020_Distance" type="xs:float" use="required" />
+		<xs:attribute name="Paths_x0020_Seldom_x0020_Trod" type="xs:boolean" use="required" />
+		<xs:attribute name="Garrison_x0020_Police_x0020_Bonus" type="xs:boolean" use="required" />
 		<xs:attribute name="Discipined" type="xs:boolean" use="required" />
 		<xs:attribute name="Impetuous" type="xs:boolean" use="required" />
+		<xs:attribute name="Scares_x0020_Horses" type="xs:boolean" use="required" />
+		<xs:attribute name="Scares_x0020_Enemies" type="xs:boolean" use="required" />
+		<xs:attribute name="Inspires_x0020_Allies" type="xs:boolean" use="required" />
+		<xs:attribute name="Good_x0020_Stamina" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_x0020_Use_x0020_Rope_x0020_Ladders" type="xs:boolean" use="required" />
+		<xs:attribute name="Heat_x0020_Resistant" type="xs:boolean" use="required" />
+		<xs:attribute name="Cold_x0020_Resistant" type="xs:boolean" use="required" />
 		<xs:attribute name="Can_x0020_Do_x0020_Formed_x0020_Attack" type="xs:boolean" use="required" />
-		<xs:attribute name="Paths_Seldom_Trod" type="xs:boolean" use="required" />
-		<xs:attribute name="Garrison_Police_Bonus" type="xs:boolean" use="required" />
-		<xs:attribute name="Scares_Horses" type="xs:boolean" use="required" />
-		<xs:attribute name="Scares_Enemies" type="xs:boolean" use="required" />
-		<xs:attribute name="Inspires_Allies" type="xs:boolean" use="required" />
-		<xs:attribute name="Good_Stamina" type="xs:boolean" use="required" />
-		<xs:attribute name="Heat_Resistant" type="xs:boolean" use="required" />
-		<xs:attribute name="Cold_Resistant" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_Use_Pike_Wall" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_Use_Pike_Square" type="xs:boolean" use="required" />
-		<xs:attribute name="Can_Shoot_While_Moving" msprop:VersionStart="2" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_x0020_Use_x0020_Pike_x0020_Wall" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_x0020_Use_x0020_Pike_x0020_Square" type="xs:boolean" use="required" />
+		<xs:attribute name="Can_x0020_Shoot_x0020_While_x0020_Moving" msprop:VersionStart="2" type="xs:boolean" use="required" />
 	</xs:complexType>
 	<xs:complexType name="unit_stats_land_experience_bonuses_tables">
 		<xs:attribute name="Experience_Level" type="xs:string" use="required" />
@@ -1573,10 +1573,10 @@
 		<xs:attribute name="unknown10" type="xs:boolean" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomacy_attitudes_tables">
-		<xs:attribute name="diplomatic_factor_ID" type="xs:string" use="required" />
-		<xs:attribute name="Value_1" type="xs:int" use="required" />
-		<xs:attribute name="Value_2" type="xs:int" use="required" />
-		<xs:attribute name="Value_3" type="xs:int" use="required" />
+		<xs:attribute name="Cause" type="xs:string" use="required" />
+		<xs:attribute name="Limit" type="xs:int" use="required" />
+		<xs:attribute name="Change_Per_Turn" type="xs:int" use="required" />
+		<xs:attribute name="Change_Once" type="xs:int" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomacy_factor_strings_tables">
 		<xs:attribute name="Diplomatic_factor_ID" type="xs:string" use="required" />
@@ -1610,8 +1610,8 @@
 	<xs:complexType name="diplomatic_relations_religion_tables">
 		<xs:attribute name="Religion_ID" type="xs:string" use="required" />
 		<xs:attribute name="Religion_ID_x0020__x0028_2_x0029_" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" type="xs:int" use="required" />
-		<xs:attribute name="unknown4" type="xs:float" use="required" />
+		<xs:attribute name="DiplomaticBonus" type="xs:int" use="required" />
+		<xs:attribute name="UnrestPenalty" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="disaster_to_ground_types_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
@@ -2263,9 +2263,9 @@
 	</xs:complexType>
 	<xs:complexType name="population_classes_tables">
 		<xs:attribute name="class_ID" type="xs:string" use="required" />
-		<xs:attribute name="unkown1" type="xs:boolean" use="required" />
+		<xs:attribute name="unknown1" type="xs:boolean" use="required" />
+		<xs:attribute name="unknown2" type="xs:boolean" use="required" />
 		<xs:attribute name="unknown3" type="xs:boolean" use="required" />
-		<xs:attribute name="unknown4" type="xs:boolean" use="required" />
 	</xs:complexType>
 	<xs:complexType name="religions_tables">
 		<xs:attribute name="Religion_ID" type="xs:string" use="required" />
