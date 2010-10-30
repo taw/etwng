@@ -1,16 +1,30 @@
 #!/usr/bin/env ruby
 
+require "rubygems"
 require "pp"
-require "yaml"
+require "json"
+
+class File
+  def self.save_as_new(base, ext, content)
+    extra = 0
+    fn    = "#{base}#{ext}"
+    while true
+      begin
+        File.open(fn, IO::CREAT|IO::EXCL|IO::WRONLY){|fh| fh.write content}
+        return
+      rescue Errno::EEXIST
+        extra += 1
+        fn    = "#{base}-#{extra}#{ext}"
+      end
+    end
+  end
+end
 
 class Float
   def pretty_single
     rv = (((100_000.0 * self).round / 100_000.0) rescue self)
-    if [self].pack("f") == [rv].pack("f")
-      rv
-    else
-      self
-    end
+    return rv if [self].pack("f") == [rv].pack("f")
+    self
   end
 end
 
@@ -21,9 +35,6 @@ class String
   def utf8_to_utf16
     unpack("U*").pack("v*")
   end
-  def hexdump
-    unpack("C*").map{|x| "%02X" % x}.join(" ")
-  end
 end
 
 class GroupFormationsUnpacker
@@ -31,47 +42,39 @@ class GroupFormationsUnpacker
     @data = data
     @ofs = 0
   end
-  
   def get(sz)
     ofs0, @ofs = @ofs, @ofs+sz
     @data[ofs0...@ofs]
   end
-  
-  def get_flt
+    def get_flt
     get(4).unpack("f")[0].pretty_single
   end
-
   def get_u4
     get(4).unpack("V")[0]
   end
-
   def get_u2
     get(2).unpack("v")[0]
   end
-
   def get_i4
     get(4).unpack("i")[0]
   end
-
-  def get_x4
-    v =  get(4)
-    "0x%X/%f" % [v.unpack("V")[0], v.unpack("f")[0].pretty_single]
+  def get_v2
+    {:x => get_flt, :y => get_flt}
   end
-  
+  def get_ary(&blk)
+    (1..get_u4).map(&blk)
+  end
   def get_str
     get(get_u2*2).utf16_to_utf8
   end
-  
   def get_factions
-    (1..get_u4).map{ get_str }
+    get_ary{ get_str }
   end
-
   def get_pairs
-    cnt = get_u4
-    raise "Line cannot contain 0 pairs" if cnt == 0
-    (1..cnt).map{ [get_flt, get_i4] }
+    out = get_ary{ [get_flt, get_i4] }
+    raise "Line cannot contain 0 pairs" if out.empty?
+    out
   end
-  
   def get_line
     line_id   = get_u4
     line_type = get_u4
@@ -79,37 +82,19 @@ class GroupFormationsUnpacker
     when 0
       [
         :type0,
-        [
-          get_flt,
-          get_flt,
-          get_u4,
-
-          get_flt,
-          get_flt,
-          get_flt,
-          get_flt,
-
-          get_u4,
-          get_i4,
-        ],
+        [get_flt, get_flt, get_u4],
+        get_v2,
+        get_v2,
+        [get_u4, get_i4],
         get_pairs,
       ]
     when 1
       [
         :type1,
-        [
-          get_flt,
-          get_u4,
-          get_u4,
-
-          get_flt,
-          get_flt,
-          get_flt,
-          get_flt,
-
-          get_u4,
-          get_i4,
-        ],
+        [get_flt, get_u4, get_u4],
+        get_v2,
+        get_v2,
+        [get_u4, get_i4],
         get_pairs,
       ]
     when 3
@@ -119,7 +104,6 @@ class GroupFormationsUnpacker
     end
     return [line_id, out]
   end
-  
   def get_lines
     out = []
     sz, line = get_line
@@ -131,11 +115,9 @@ class GroupFormationsUnpacker
     }
     out
   end
-  
   def get_header
     [get_flt, get_u4, get_u4, get_u4, get_u4]
   end
-  
   def get_formation
     {
       :name     => get_str,
@@ -144,22 +126,22 @@ class GroupFormationsUnpacker
       :lines    => get_lines,
     }
   end
-  
   def unpack
-    cnt = get_u4
-    out = (1..cnt).map{
-      get_formation
-    }
+    out = get_ary{ get_formation }
     raise "EOF expected at #{@ofs}" unless @ofs == @data.size
+    out
+  end
+  def unpack_to_string
+    out = ""
+    unpack.each{|form|
+      PP.pp(form, out, 150)
+      out << "\n"
+    }
     out
   end
 end
 
-data = File.read("etw/groupformations.bin")
-gfu = GroupFormationsUnpacker.new(data)
-out = gfu.unpack
-
-out.each{|form|
-  PP.pp(form, STDOUT, 150)
-  puts ""
+Dir["groupformations*.bin"].each{|fn|
+  out = GroupFormationsUnpacker.new(File.read(fn)).unpack_to_string
+  File.save_as_new(fn.sub(/\.bin\z/i, ""), ".txt", out)
 }
