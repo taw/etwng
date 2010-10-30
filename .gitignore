@@ -3,3 +3,5 @@
 .DS_Store
 pack/fuse/packfs
 etwconv/samples
+gfconv/groupformations*.bin
+gfconv/groupformations*.txt
