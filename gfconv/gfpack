@@ -1,0 +1,113 @@
+#!/usr/bin/env ruby
+
+require "pp"
+
+class File
+  def self.save_as_new(base, ext, content)
+    extra = 0
+    fn    = "#{base}#{ext}"
+    while true
+      begin
+        File.open(fn, IO::CREAT|IO::EXCL|IO::WRONLY){|fh| fh.write content}
+        return
+      rescue Errno::EEXIST
+        extra += 1
+        fn    = "#{base}-#{extra}#{ext}"
+      end
+    end
+  end
+end
+
+class String
+  def utf16_to_utf8
+    unpack("v*").pack("U*")
+  end
+  def utf8_to_utf16
+    unpack("U*").pack("v*")
+  end
+end
+
+class GroupFormationsPacker
+  def initialize
+  end
+  def pack(formations)
+    @out = ""
+    pack_u4(formations.size)
+    formations.each{|formation|
+      pack_formation(formation)
+    }
+    @out
+  end
+  def pack_u4(val)
+    @out << [val].pack("V")
+  end
+  def pack_flt(val)
+    @out << [val].pack("f")
+  end
+  def pack_str(str)
+    str = str.utf8_to_utf16
+    @out << [str.size/2].pack("v")
+    @out << str
+  end
+  def pack_header(header)
+    @out << header.pack("fVVVV")
+  end
+  def pack_factions(factions)
+    pack_u4(factions.size)
+    factions.each{|faction| pack_str(faction)}
+  end
+  def pack_formation(formation)
+    pack_str(formation[:name])
+    pack_header(formation[:header])
+    pack_factions(formation[:factions])
+    pack_lines(formation[:lines])
+  end
+  def pack_lines(lines)
+    lines.each_with_index{|line, i|
+      pack_u4(i == 0 ? lines.size : i)
+      pack_line(*line)
+    }
+  end
+  def pack_v2(v2)
+    pack_flt v2[:x]
+    pack_flt v2[:y]
+  end
+  def pack_pairs(pairs)
+    pack_u4 pairs.size
+    pairs.each{|pair|
+      @out << pair.pack("fi")
+    }
+  end
+  def pack_line(line_type, *line_data)
+    case line_type
+    when :type0
+      pack_u4 0
+      @out << line_data[0].pack("ffV")
+      pack_v2 line_data[1]
+      pack_v2 line_data[2]
+      @out << line_data[3].pack("Vi")
+      pack_pairs(line_data[4])
+    when :type1
+      pack_u4 1
+      @out << line_data[0].pack("fVV")
+      pack_v2 line_data[1]
+      pack_v2 line_data[2]
+      @out << line_data[3].pack("Vi")
+      pack_pairs(line_data[4])
+    when :type3
+      pack_u4 3
+      pack_u4(line_data.size)
+      line_data.each{|i| pack_u4(i)}
+    else
+      raise "No idea what line type is #{line_type}"
+    end
+  end
+end
+
+
+Dir["groupformations*.txt"].each{|fn|
+  data = eval(File.read(fn))
+  gfp = GroupFormationsPacker.new
+  out = gfp.pack(data)
+  File.save_as_new(fn.sub(/\.txt\z/i, ""), ".bin", out)
+}

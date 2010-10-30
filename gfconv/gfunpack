@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 
-require "rubygems"
 require "pp"
-require "json"
 
 class File
   def self.save_as_new(base, ext, content)
@@ -133,10 +131,7 @@ class GroupFormationsUnpacker
   end
   def unpack_to_string
     out = ""
-    unpack.each{|form|
-      PP.pp(form, out, 150)
-      out << "\n"
-    }
+    PP.pp(unpack, out, 150)
     out
   end
 end
