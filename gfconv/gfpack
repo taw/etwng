@@ -8,7 +8,7 @@ class File
     fn    = "#{base}#{ext}"
     while true
       begin
-        File.open(fn, IO::CREAT|IO::EXCL|IO::WRONLY){|fh| fh.write content}
+        File.open(fn, (IO::BINARY rescue 0)|IO::CREAT|IO::EXCL|IO::WRONLY){|fh| fh.write content}
         return
       rescue Errno::EEXIST
         extra += 1
@@ -106,7 +106,7 @@ end
 
 
 Dir["groupformations*.txt"].each{|fn|
-  data = eval(File.read(fn))
+  data = eval(File.open(fn, "rb").read)
   gfp = GroupFormationsPacker.new
   out = gfp.pack(data)
   File.save_as_new(fn.sub(/\.txt\z/i, ""), ".bin", out)
