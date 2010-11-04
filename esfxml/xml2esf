@@ -145,4 +145,6 @@ class Xml2Esf
   end
 end
 
+STDIN.binmode
+STDOUT.binmode
 STDOUT.write Xml2Esf.parse_io(STDIN)

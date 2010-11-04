@@ -273,5 +273,7 @@ class XMLPrinter
   end
 end
 
+STDIN.binmode
+STDOUT.binmode
 esf = EsfParser.new(STDIN, STDOUT)
 esf.convert!
