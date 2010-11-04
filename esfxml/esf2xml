@@ -176,18 +176,29 @@ class EsfParser
       @out.out!("<v3 x='#{get_float}' y='#{get_float}' z='#{get_float}'/>")
     when 0x47
       bindata = get_ofs_bytes
-      raise "Size of 0x47 type binary data must be in multiples of 2" if bindata.size & 1 != 0
+      raise "Size of 0x47 type binary data must be in multiples of 2" if bindata.size % 2 != 0
       enc_bindata = bindata.unpack("v*").join(" ")
       @out.out!("<u2_ary>#{enc_bindata}</u2_ary>")
-    when 0x4c
+    when 0x4a
       bindata = get_ofs_bytes
-      raise "Size of 0x4c type binary data must be in multiples of 4" if bindata.size & 3 != 0
+      raise "Size of 0x4a type binary data must be in multiples of 4" if bindata.size % 4 != 0
       enc_bindata = bindata.unpack("f*").join(" ")
       @out.out!("<flt_ary>#{enc_bindata}</flt_ary>")
+    when 0x4c
+      bindata = get_ofs_bytes
+      raise "Size of 0x4a type binary data must be in multiples of 8" if bindata.size % 8 != 0
+      enc_bindata = bindata.unpack("f*").join(" ")
+      @out.out!("<v2_ary>#{enc_bindata}</v2_ary>")
+    when 0x4d
+      bindata = get_ofs_bytes
+      raise "Size of 0x4a type binary data must be in multiples of 12" if bindata.size % 12 != 0
+      enc_bindata = bindata.unpack("f*").join(" ")
+      @out.out!("<v3_ary>#{enc_bindata}</v3_ary>")
     when 0x40..0x4F
       bindata = get_ofs_bytes
       enc_bindata = bindata.unpack("H2" * bindata.size).join(" ")
-      @out.out!("<bin type='#{node_type-0x40}'>#{enc_bindata}</bin>")
+      code = "bin%X" % (node_type-0x40)
+      @out.out!("<#{code}>#{enc_bindata}</#{code}>")
     else
       raise "Unknown type 0x%x? at #{context}" % node_type
     end
