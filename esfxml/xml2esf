@@ -2,99 +2,7 @@
 
 require 'rubygems'
 require 'libxml'
-
-class EsfBuilder
-  attr_reader :data
-  def initialize
-    @data = ""
-  end
-  def adjust_ofs(at)
-    @data[at, 4] = [@data.size].pack("V")
-  end
-  def put(bytes)
-    @data << bytes
-  end
-  def put_yes
-    @data << "\x01\x01"
-  end
-  def put_no
-    @data << "\x01\x00"
-  end
-  def put_v2(x,y)
-    @data << [0x0c, x, y].pack("Cff")
-  end
-  def put_v3(x,y,z)
-    @data << [0x0d, x, y, z].pack("Cfff")
-  end
-  def put_byte(val)
-    @data << "\x06"
-    @data << [val].pack("C")
-  end
-  def put_flt(val)
-    @data << "\x0a"
-    @data << [val].pack("f")
-  end
-  def put_i2(val)
-    @data << "\x00"
-    @data << [val].pack("v")
-  end
-  def put_u2(val)
-    @data << "\x07"
-    @data << [val].pack("v")
-  end
-  def put_u2x(val)
-    @data << "\x10"
-    @data << [val].pack("v")
-  end
-  def put_i(val)
-    @data << "\x04"
-    @data << [val].pack("V")
-  end
-  def put_u(val)
-    @data << "\x08"
-    @data << [val].pack("V")
-  end
-  def put_s(str)
-    @data << "\x0e"
-    uchars = str.unpack("U*")
-    @data << [uchars.size, *uchars].pack("v*")
-  end
-  def put_asc(str)
-    @data << "\x0f"
-    @data << [str.size].pack("v")
-    @data << str
-  end
-  def put_4x(code, ary_data)
-    @data << code
-    @data << [@data.size + 4 + ary_data.size].pack("V")
-    @data << ary_data
-  end
-
-  def put_u4_ary(elems)
-    put_4x("\x44", elems.pack("V*"))
-  end
-  def put_i4_ary(elems)
-    put_4x("\x48", elems.pack("V*"))
-  end
-  def put_i2_ary(elems)
-    put_4x("\x40", elems.pack("v*"))
-  end
-  def put_u2_ary(elems)
-    put_4x("\x47", elems.pack("v*"))
-  end
-  def put_flt_ary(elems)
-    put_4x("\x4a", elems.pack("f*"))
-  end
-  def put_v2_ary(elems) # Contrary to name, it contains floats
-    put_4x("\x4c", elems.pack("f*"))
-  end
-  def put_v3_ary(elems) # Contrary to name, it contains floats
-    put_4x("\x4d", elems.pack("f*"))
-  end
-end
-
-# TODO: First, this class must totally forget anything about low-level Esf serialization,
-#       only using @esf for such things
+require "esf_builder"
 
 include LibXML
 
@@ -121,7 +29,6 @@ class Xml2Esf
   def on_start_element(element, attributes)
     raise "Illegal place for nested element: #{@stack[-1].inspect}" unless @stack[-1][:nest]
     
-    ofs = @esf.data.size
     finalization = {}
     chara_ok = false
     nest_ok = false
@@ -144,28 +51,18 @@ class Xml2Esf
 
     when :rec
       if @stack[-1][:el] == :ary
-        @stack[-1][:children] += 1
-        @esf.put "\x00\x00\x00\x00"
+        @esf.start_elem
       else
-        finalization = {:ofs => ofs + 4}
-        name_code = @lookup[attributes['type']]
-        version = attributes['version'].to_i
-        @esf.put([0x80, name_code, version, 0].pack("CvCV"))
+        @esf.start_rec @lookup[attributes['type']], attributes['version'].to_i
       end
       nest_ok = true
 
     when :ary
-      name_code = @lookup[attributes['type']]
-      version = attributes['version'].to_i
-      @esf.put([0x81, name_code, version, 0, 0].pack("CvCVV"))
-      finalization = {:children => 0}
+      @esf.start_ary @lookup[attributes['type']], attributes['version'].to_i
       nest_ok = true
 
     when :esf
-      @magic = attributes["magic"].split(/\s+/).map{|x| x.to_i}
-      @esf.put(@magic.pack("V*"))
-      finalization[:end_of_headers] = @esf.data.size
-      @esf.put([0].pack("V"))
+      @esf.start_esf attributes["magic"].split(/\s+/).map(&:to_i)
       nest_ok = true
 
     when :node_types
@@ -182,7 +79,7 @@ class Xml2Esf
       raise "No idea what to do with #{element} open means"
     end
 
-    @stack << {:el => el, :ofs => ofs, :chara => chara_ok, :buf => "", :nest => nest_ok}.merge(finalization)
+    @stack << {:el => el, :chara => chara_ok, :buf => "", :nest => nest_ok}.merge(finalization)
   end
   
   def on_end_element(element)
@@ -211,9 +108,9 @@ class Xml2Esf
     when :flt
       @esf.put_flt ctx[:buf].to_f
     when :rec
-      @esf.adjust_ofs(ctx[:ofs])
+      @esf.end_rec
     when :ary
-      @esf.data[ctx[:ofs]+4, 8] = [@esf.data.size, ctx[:children]].pack("VV")
+      @esf.end_ary
     when :u4_ary
       @esf.put_u4_ary ctx[:buf].split.map(&:to_i)
     when :i4_ary
@@ -233,12 +130,7 @@ class Xml2Esf
         ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*")
       )
     when :esf
-      @esf.adjust_ofs(ctx[:end_of_headers])
-      @esf.put([@node_types.size].pack("v"))
-      @node_types.each{|nn|
-        @esf.put([nn.size].pack("v"))
-        @esf.put(nn)
-      }
+      @esf.put_node_types_table @node_types
     else
       raise "No idea what to do with #{element} close"
     end
