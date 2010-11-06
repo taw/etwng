@@ -355,5 +355,5 @@ in_file = File.open(ARGV[0], 'rb')
 out_file = File.open(ARGV[1], 'wb')
 
 esf = EsfParser.new(in_file, out_file)
-thr = esf.progressbar_thread # if verbose
+thr = esf.progressbar_thread if verbose
 esf.convert!
