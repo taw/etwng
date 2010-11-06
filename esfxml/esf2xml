@@ -328,6 +328,7 @@ class XMLPrinter
   end
   def out!(str)
     @out_buf << @indent[@stack.size] << str << "\n"
+    flush if @out_buf.size > 1_000_000
   end
   private
   def attrs_to_s(attrs={})
