@@ -13,8 +13,9 @@ class TestSamples < Test::Unit::TestCase
   def hexdump(label, data)
     rows = ["#{label} #{data.size} bytes\n"]
     16.times{|i|
-      bytes = data[16*i,16].unpack("C*")
-      break if bytes.nil?
+      sdata = data[16*i,16]
+      break if sdata.nil?
+      bytes = sdata.unpack("C*")
       rows << bytes.map{|x| "%02X" % x}.join(" ") + "\n"
     }
     rows.join
