@@ -1,13 +1,31 @@
 #!/usr/bin/env ruby
 
 require 'rubygems'
-require 'libxml'
+require "nokogiri"
 require "esf_builder"
+require "pp"
 
-include LibXML
+class XMLParserCallbacks < Nokogiri::XML::SAX::Document
+  def initialize(xml2esf)
+    @xml2esf = xml2esf
+    super()
+  end
+  def start_element(element, attributes)
+    attrs = {}
+    until attributes.empty?
+      attrs[attributes.shift.to_sym] = attributes.shift
+    end
+    @xml2esf.on_start_element(element.to_sym, attrs)
+  end
+  def end_element(element)
+    @xml2esf.on_end_element(element.to_sym)
+  end
+  def characters(chara)
+    @xml2esf.on_characters(chara)
+  end
+end
 
 class Xml2Esf
-  include XML::SaxParser::Callbacks
   attr_reader :esf, :stack, :parser
   
   def self.parse_io(xml_in)
@@ -20,15 +38,16 @@ class Xml2Esf
     @node_types = nil
     @lookup = Hash.new{|ht,k| raise "Unknown node name #{k}"}
     @stack = [{:chara => false, :nest => true}]
-    @parser = XML::SaxParser.io(xml_in)
-    @parser.callbacks = self
-    @parser.parse
+    
+    @callbacks = XMLParserCallbacks.new(self)
+    @parser = Nokogiri::XML::SAX::Parser.new(@callbacks, 'UTF-8')
+    @parser.parse_io(xml_in)
   end
 
   def type_and_version(attributes)
-    type_str     = attributes['type']
+    type_str     = attributes[:type]
     type_code    = @lookup[type_str]
-    version_str  = attributes['version']
+    version_str  = attributes[:version]
     version = version_str ? version_str.to_i : @default_version[type_str]
     [type_code, version]
   end
@@ -45,10 +64,10 @@ class Xml2Esf
       @esf.put_yes
     when :no
       @esf.put_no
-    when :"v2"
-      @esf.put_v2 attributes["x"].to_f, attributes["y"].to_f
+    when :v2
+      @esf.put_v2 attributes[:x].to_f, attributes[:y].to_f
     when :"v3"
-      @esf.put_v3 attributes["x"].to_f, attributes["y"].to_f, attributes["z"].to_f
+      @esf.put_v3 attributes[:x].to_f, attributes[:y].to_f, attributes[:z].to_f
     when :rec
       if @stack[-1][:el] == :ary
         @esf.start_elem
@@ -66,7 +85,8 @@ class Xml2Esf
       chara_ok = true
 
     when :esf
-      @esf.start_esf attributes["magic"].split(/\s+/).map(&:to_i)
+      raise "Magic attribute required" unless attributes[:magic]
+      @esf.start_esf attributes[:magic].split(/\s+/).map(&:to_i)
       nest_ok = true
 
     when :node_types
@@ -74,7 +94,7 @@ class Xml2Esf
       nest_ok = true
 
     when :node_type
-      name = attributes["name"]
+      name = attributes[:name]
       raise "Name already set: #{name}" if @lookup.has_key?(name)
       @lookup[name] = @node_types.size
       @node_types << name
@@ -88,11 +108,10 @@ class Xml2Esf
   
   def on_end_element(element)
     ctx = @stack.pop
-    el = element.to_sym
     no_finalization = [:node_types, :node_type, :yes, :no, :v2, :v3]
-    return if no_finalization.include?(el)
+    return if no_finalization.include?(element)
     
-    case el
+    case element
     when :asc
       @esf.put_asc ctx[:buf]
     when :s
@@ -130,7 +149,7 @@ class Xml2Esf
     when :bin0, :bin1, :bin2, :bin3, :bin4, :bin5, :bin6, :bin7,
          :bin8, :bin9, :binA, :binB, :binC, :binD, :binE, :binF
       @esf.put_4x(
-        [0x40 + element[-1,1].hex].pack("C"),
+        [0x40 + element.to_s[-1,1].hex].pack("C"),
         ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*")
       )
     when :esf

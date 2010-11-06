@@ -4,6 +4,7 @@ $ ./esf2xml --quiet foo.esf foo.xml
 $ ./xml2esf foo.xml foo.esf
 
 esf2xml automatically prints progressbar unless told not to by --quiet option
+(xml2esf might get this too later)
 
 To run with specific Ruby version use like:
 $ ruby ./esf2xml foo.esf foo.xml
@@ -15,31 +16,22 @@ And you'll need -J-Xmx2048m option, default JVM max heap size
 is ridiculously small.
 
 == System Requirements ==
+It should now work on every system (by every I mean OSX, Linux, and Windows) both ways.
+
+For reasonably recent OSX (10.5 or newer) and Linux esf2xml should work out of the box,
+for xml2esf you only need to run this command, or install nokogiri some other way:
+$ sudo gem install nokogiri
 
 The easiest way to get it running under Windows is by installing
 JRuby single installer with Java Runtime Environment bundled.
 Here's the link:
 http://jruby.org.s3.amazonaws.com/downloads/1.5.3/jruby_windowsjre_1_5_3.exe
-
-For reasonably recent OSX (10.5 or newer) and Linux esf2xml should work out of the box,
-for xml2esf you only need to run this command, or install libxml-ruby some other way:
-$ sudo gem install libxml-ruby
-
+You might still need to install nokogiri:
+$ jgem install nokogiri
 
 
 == Rest of the file ==
 NOTE: Past this line, this README file has very little to do with actual code.
-
-Not ready for an average Joe user.
-
-
-esf_types.rb is extra file used for schema compression.
-Everything works just fine without it, except xml file is uglier.
-
-At the moment mistakes in esf_types.rb crash conversion
-instead of automatically falling back to basic style.
-
-Some samples to give general feeling what this XML is like at the end of this file.
 
 == XML structure ==
 
