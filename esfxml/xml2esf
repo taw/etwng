@@ -16,14 +16,21 @@ class Xml2Esf
 
   def initialize(xml_in)
     @esf = EsfBuilder.new
-
+    @default_version = Hash.new(0)
     @node_types = nil
     @lookup = Hash.new{|ht,k| raise "Unknown node name #{k}"}
     @stack = [{:chara => false, :nest => true}]
-
     @parser = XML::SaxParser.io(xml_in)
     @parser.callbacks = self
     @parser.parse
+  end
+
+  def type_and_version(attributes)
+    type_str     = attributes['type']
+    type_code    = @lookup[type_str]
+    version_str  = attributes['version']
+    version = version_str ? version_str.to_i : @default_version[type_str]
+    [type_code, version]
   end
 
   def on_start_element(element, attributes)
@@ -42,24 +49,21 @@ class Xml2Esf
       @esf.put_v2 attributes["x"].to_f, attributes["y"].to_f
     when :"v3"
       @esf.put_v3 attributes["x"].to_f, attributes["y"].to_f, attributes["z"].to_f
-
+    when :rec
+      if @stack[-1][:el] == :ary
+        @esf.start_elem
+      else
+        @esf.start_rec *type_and_version(attributes)
+      end
+      nest_ok = true
+    when :ary
+      @esf.start_ary *type_and_version(attributes)
+      nest_ok = true
     when :flt, :byte, :s, :asc, :u, :i, :i2, :u2, :u2x, :i4_ary,
          :flt_ary, :u2_ary, :v2_ary, :v3_ary,
          :bin0, :bin1, :bin2, :bin3, :bin4, :bin5, :bin6, :bin7,
          :bin8, :bin9, :binA, :binB, :binC, :binD, :binE, :binF
       chara_ok = true
-
-    when :rec
-      if @stack[-1][:el] == :ary
-        @esf.start_elem
-      else
-        @esf.start_rec @lookup[attributes['type']], attributes['version'].to_i
-      end
-      nest_ok = true
-
-    when :ary
-      @esf.start_ary @lookup[attributes['type']], attributes['version'].to_i
-      nest_ok = true
 
     when :esf
       @esf.start_esf attributes["magic"].split(/\s+/).map(&:to_i)
@@ -145,6 +149,12 @@ class Xml2Esf
   end
 end
 
-STDIN.binmode
-STDOUT.binmode
-STDOUT.write Xml2Esf.parse_io(STDIN)
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input.xml output.esf"
+  exit 1
+end
+
+in_file = File.open(ARGV[0], 'rb')
+out_file = File.open(ARGV[1], 'wb')
+
+out_file.write Xml2Esf.parse_io(in_file)

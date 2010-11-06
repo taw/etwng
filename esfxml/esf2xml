@@ -13,6 +13,12 @@ class String
     replacements = {"<" => "&lt;", ">" => "&gt;", "&" => "&amp;", "\"" => "&quot;", "'" => "&apos;"}
     gsub(/([<>&\'\"])/) { replacements[$1] }
   end
+  def to_hex_dump
+    unpack("H2" * size).join(" ")
+  end
+  def to_flt_dump
+    unpack("f*").join(" ")
+  end
 end
 
 module EsfBasicBinaryOps
@@ -86,15 +92,26 @@ class EsfParser
   include EsfBasicBinaryOps
   
   attr_accessor :ofs
-  attr_reader :data, :out
+  attr_reader :data, :out, :done
   attr_reader :magic, :node_types
 
   def initialize(in_fh, out_fh)
     @data = in_fh.read
-    @out_fh = out_fh
-    @out = XMLPrinter.new("")
+    @xmlout = XMLPrinter.new(out_fh)
     @ofs = 0
     get_header
+    @esf_type_handlers = setup_esf_type_handlers
+    @default_version = Hash.new(0)
+  end
+  def setup_esf_type_handlers
+    out = Hash.new{|ht,node_type|
+      raise "Unknown type 0x%02x at %d" % [node_type, ofs]
+    }
+    (0..255).each{|i|
+      name = ("convert_%02x!" % i).to_sym
+      out[i] = name if respond_to?(name)
+    }
+    out
   end
   def get_header
     case magic = get_u4
@@ -124,84 +141,115 @@ class EsfParser
   def convert_until_ofs!(ofs_end)
     convert_value! while @ofs < ofs_end
   end
-  def convert_value!
-    case node_type = get_byte
-    when 0x08
-      @out.out!("<u>#{get_u4}</u>")
-    when 0x04
-      @out.out!("<i>#{get_i4}</i>")
-    when 0x0c
-      @out.out!("<v2 x='#{get_float}' y='#{get_float}'/>")
-    when 0x07
-      @out.out!("<u2>#{get_u2}</u2>")
-    when 0x0a
-      @out.out!("<flt>#{get_float}</flt>")
-    when 0x48
-      bindata = get_ofs_bytes
-      raise "Size of 0x48 type binary data must be in multiples of 4" if bindata.size & 3 != 0
-      enc_bindata = bindata.unpack("l*").join(" ")
-      @out.out!("<i4_ary>#{enc_bindata}</i4_ary>")
-    when 0x80
-      node_type   = get_node_type
-      version     = get_byte
-      ofs_end     = get_u4
-      @out.tag!("rec", :type=>node_type, :version=>version) do
-        convert_until_ofs!(ofs_end)
-      end
-    when 0x81
-      node_type = get_node_type
-      version   = get_byte
-      ofs_end   = get_u4
-      count     = get_u4
-      @out.tag!("ary", :type=>node_type, :version=>version) do
-        count.times do
-          @out.tag!("rec", :type=>node_type) do
-            convert_until_ofs!(get_u4)
-          end
+  def convert_00!
+    @xmlout.out!("<i2>#{get_i2}</i2>")
+  end
+  def convert_01!
+    @xmlout.out!(get_bool ? "<yes/>" : "<no/>")
+  end
+  def convert_04!
+    @xmlout.out!("<i>#{get_i4}</i>")
+  end
+  def convert_06!
+    @xmlout.out!("<byte>#{get_byte}</byte>")
+  end
+  def convert_07!
+    @xmlout.out!("<u2>#{get_u2}</u2>")
+  end
+  def convert_08!
+    @xmlout.out!("<u>#{get_u4}</u>")
+  end
+  def convert_0a!
+    @xmlout.out!("<flt>#{get_float}</flt>")
+  end
+  def convert_0c!
+    @xmlout.out!("<v2 x='#{get_float}' y='#{get_float}'/>")
+  end
+  def convert_0d!
+    @xmlout.out!("<v3 x='#{get_float}' y='#{get_float}' z='#{get_float}'/>")
+  end
+  def convert_0e!
+    @xmlout.out!("<s>#{get_str.xml_escape}</s>")
+  end
+  def convert_0f!
+    @xmlout.out!("<asc>#{get_ascii.xml_escape}</asc>")
+  end
+  def convert_10!
+    @xmlout.out!("<u2x>#{get_u2}</u2x>")
+  end
+  def convert_40!
+    @xmlout.out!("<bin0>#{get_ofs_bytes.to_hex_dump}</bin0>")
+  end
+  def convert_41!
+    @xmlout.out!("<bin1>#{get_ofs_bytes.to_hex_dump}</bin1>")
+  end
+  def convert_42!
+    @xmlout.out!("<bin2>#{get_ofs_bytes.to_hex_dump}</bin2>")
+  end
+  def convert_43!
+    @xmlout.out!("<bin3>#{get_ofs_bytes.to_hex_dump}</bin3>")
+  end
+  def convert_44!
+    @xmlout.out!("<bin4>#{get_ofs_bytes.to_hex_dump}</bin4>")
+  end
+  def convert_45!
+    @xmlout.out!("<bin5>#{get_ofs_bytes.to_hex_dump}</bin5>")
+  end
+  def convert_46!
+    @xmlout.out!("<bin6>#{get_ofs_bytes.to_hex_dump}</bin6>")
+  end
+  def convert_47!
+    @xmlout.out!("<u2_ary>#{get_ofs_bytes.unpack("v*").join(" ")}</u2_ary>")
+  end
+  def convert_48!
+    @xmlout.out!("<i4_ary>#{get_ofs_bytes.unpack("l*").join(" ")}</i4_ary>")
+  end
+  def convert_49!
+    @xmlout.out!("<bin9>#{get_ofs_bytes.to_hex_dump}</bin9>")
+  end
+  def convert_4a!
+    @xmlout.out!("<flt_ary>#{get_ofs_bytes.to_flt_dump}</flt_ary>")
+  end
+  def convert_4b!
+    @xmlout.out!("<binB>#{get_ofs_bytes.to_hex_dump}</binB>")
+  end
+  def convert_4c!
+    @xmlout.out!("<v2_ary>#{get_ofs_bytes.to_flt_dump}</v2_ary>")
+  end
+  def convert_4d!
+    @xmlout.out!("<v3_ary>#{get_ofs_bytes.to_flt_dump}</v3_ary>")
+  end
+  def convert_4e!
+    @xmlout.out!("<binE>#{get_ofs_bytes.to_hex_dump}</binE>")
+  end
+  def convert_4f!
+    @xmlout.out!("<binF>#{get_ofs_bytes.to_hex_dump}</binF>")
+  end
+  def convert_80!
+    node_type   = get_node_type
+    version     = get_byte
+    ofs_end     = get_u4
+    version   = nil if version == @default_version[node_type]
+    @xmlout.tag!("rec", :type=>node_type, :version=>version) do
+      convert_until_ofs!(ofs_end)
+    end
+  end
+  def convert_81!
+    node_type = get_node_type
+    version   = get_byte
+    ofs_end   = get_u4
+    count     = get_u4
+    version   = nil if version == @default_version[node_type]
+    @xmlout.tag!("ary", :type=>node_type, :version=>version) do
+      count.times do
+        @xmlout.tag!("rec", :type=>node_type) do
+          convert_until_ofs!(get_u4)
         end
       end
-    when 0x01
-      @out.out!(get_bool ? "<yes/>" : "<no/>")
-    when 0x0e
-      @out.out!("<s>#{get_str.xml_escape}</s>")
-    when 0x0f
-      @out.out!("<asc>#{get_ascii.xml_escape}</asc>")
-    when 0x06
-      @out.out!("<byte>#{get_byte}</byte>")
-    when 0x10
-      @out.out!("<u2x>#{get_u2}</u2x>")
-    when 0x00
-      @out.out!("<i2>#{get_i2}</i2>")
-    when 0x0d
-      @out.out!("<v3 x='#{get_float}' y='#{get_float}' z='#{get_float}'/>")
-    when 0x47
-      bindata = get_ofs_bytes
-      raise "Size of 0x47 type binary data must be in multiples of 2" if bindata.size % 2 != 0
-      enc_bindata = bindata.unpack("v*").join(" ")
-      @out.out!("<u2_ary>#{enc_bindata}</u2_ary>")
-    when 0x4a
-      bindata = get_ofs_bytes
-      raise "Size of 0x4a type binary data must be in multiples of 4" if bindata.size % 4 != 0
-      enc_bindata = bindata.unpack("f*").join(" ")
-      @out.out!("<flt_ary>#{enc_bindata}</flt_ary>")
-    when 0x4c
-      bindata = get_ofs_bytes
-      raise "Size of 0x4a type binary data must be in multiples of 8" if bindata.size % 8 != 0
-      enc_bindata = bindata.unpack("f*").join(" ")
-      @out.out!("<v2_ary>#{enc_bindata}</v2_ary>")
-    when 0x4d
-      bindata = get_ofs_bytes
-      raise "Size of 0x4a type binary data must be in multiples of 12" if bindata.size % 12 != 0
-      enc_bindata = bindata.unpack("f*").join(" ")
-      @out.out!("<v3_ary>#{enc_bindata}</v3_ary>")
-    when 0x40..0x4F
-      bindata = get_ofs_bytes
-      enc_bindata = bindata.unpack("H2" * bindata.size).join(" ")
-      code = "bin%X" % (node_type-0x40)
-      @out.out!("<#{code}>#{enc_bindata}</#{code}>")
-    else
-      raise "Unknown type 0x%x? at #{context}" % node_type
     end
+  end
+  def convert_value!
+    send(@esf_type_handlers[get_byte])
   end
   def get_ofs_bytes
     ofs_end = get_u4
@@ -212,24 +260,39 @@ class EsfParser
     "#{@ofs} [ #{@data[@ofs, 32].unpack("C*").join(" ")}]"
   end
   def convert!
-    @out.tag!("esf", :magic => @magic.join(" ")) do
-      @out.tag!("node_types") do
+    @done = false
+    @xmlout.tag!("esf", :magic => @magic.join(" ")) do
+      @xmlout.tag!("node_types") do
         node_types.each do |n|
-          @out.tag!("node_type", :name => n)
+          @xmlout.tag!("node_type", :name => n)
         end
       end
       convert_value!
     end
-    @out_fh.print @out.out
+    @xmlout.flush
+    @done = true
+  end
+  def progressbar_thread
+    Thread.new{
+      begin
+        puts "Done: %0.1f%%" % (100.0 * @ofs.to_f / @data.size)
+        sleep 1
+      end until @done
+    }
   end
 end
 
 class XMLPrinter
-  attr_reader :out
-  def initialize(out)
-    @out = out
+  attr_reader :out_buf
+  def initialize(out_fh)
+    @out_fh  = out_fh
+    @out_buf = ""
     @stack = []
     @indent = Hash.new{|ht,k| ht[k]=" "*k}
+  end
+  def flush
+    @out_fh.write @out_buf
+    @out_buf = ""
   end
   def tag!(name, *args)
     raise ArgumentError.new("Too many arguments") if args.size > 2
@@ -264,16 +327,33 @@ class XMLPrinter
     end
   end
   def out!(str)
-    @out << @indent[@stack.size] << str << "\n"
+    @out_buf << @indent[@stack.size] << str << "\n"
   end
   private
   def attrs_to_s(attrs={})
-    #attrs.to_a.map{|k,v| k=k.to_s; [k, " #{k}='#{v.to_s.xml_attr_escape}'"]}.sort.map{|k,a| a}.join
-    attrs.to_a.map{|k,v| " #{k}='#{v.to_s.xml_attr_escape}'"}.join
+    attrs.to_a.map{|k,v| v.nil? ? "" : " #{k}='#{v.to_s.xml_attr_escape}'"}.join
   end
 end
 
-STDIN.binmode
-STDOUT.binmode
-esf = EsfParser.new(STDIN, STDOUT)
+verbose = true
+if ARGV[0] == "--quiet"
+  ARGV.shift
+  verbose = false
+end
+
+unless ARGV.size == 2
+  STDERR.puts <<EOF
+Usage:
+  #{$0} input.esf output.xml
+To hide progress bar:
+  #{$0} --quiet input.esf output.xml
+EOF
+  exit 1
+end
+
+in_file = File.open(ARGV[0], 'rb')
+out_file = File.open(ARGV[1], 'wb')
+
+esf = EsfParser.new(in_file, out_file)
+thr = esf.progressbar_thread # if verbose
 esf.convert!
