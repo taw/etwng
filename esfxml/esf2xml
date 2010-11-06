@@ -276,7 +276,10 @@ class EsfParser
     Thread.new{
       begin
         puts "Done: %0.1f%%" % (100.0 * @ofs.to_f / @data.size)
-        sleep 1
+        5.times {
+          sleep 1
+          break if @done
+        }
       end until @done
     }
   end
