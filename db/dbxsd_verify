@@ -104,7 +104,7 @@ class DbxsdVerify
       ct = @complex_types[sel]
       ft = ct[field]
       if ft.nil?
-        warn "Constraint `#{name}' refers to `#{sel}.#{field}' column but it doesn't exist"
+        warn "Constraint `#{name}' refers to `#{sel}.#{field}' column but it doesn't exist, available columns: #{ct.keys.join(" ")}"
       elsif ft != "xs:string"
         warn "Constraint `#{name}' refers to `#{sel}.#{field}' column but it's of type `#{ft}', not expected xs:string"
       elsif uht[refer].nil?
