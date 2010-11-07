@@ -8,10 +8,13 @@ esf2xml automatically prints progressbar unless told not to by --quiet option
 
 To run with specific Ruby version use like:
 $ ruby ./esf2xml foo.esf foo_dir
-$ jruby -J-Xmx2048m ./esf2xml foo.esf foo_dir
+$ jruby --server -J-Xmx2048m ./esf2xml foo.esf foo_dir
 
-And you'll need -J-Xmx2048m option, default JVM max heap size
-is ridiculously small.
+You might want to specify higher memory limit like -J-Xmx2048m option,
+default JVM max heap size is ridiculously small 500MB, half of it
+going to JVM overhead.
+
+Passing --server to jruby speeds it up by about 10%, so do it.
 
 == Unpacked Directory ==
 Main file in unpacked directory is always esf.xml

@@ -8,26 +8,270 @@ require "pp"
 class XMLParserCallbacks < Nokogiri::XML::SAX::Document
   def initialize(xml2esf)
     @xml2esf = xml2esf
+    @stack = @xml2esf.stack
+    @start_context = Hash.new{|ht,k| raise "Unknown tag open #{k}"}.merge({
+      :flt         => :on_start_chara_only,
+      :byte        => :on_start_chara_only,
+      :s           => :on_start_chara_only,
+      :asc         => :on_start_chara_only,
+      :u           => :on_start_chara_only,
+      :i           => :on_start_chara_only,
+      :i2          => :on_start_chara_only,
+      :u2          => :on_start_chara_only,
+      :u2x         => :on_start_chara_only,
+      :i4_ary      => :on_start_chara_only,
+      :flt_ary     => :on_start_chara_only,
+      :u2_ary      => :on_start_chara_only,
+      :v2_ary      => :on_start_chara_only,
+      :v3_ary      => :on_start_chara_only,
+      :bin0        => :on_start_chara_only,
+      :bin1        => :on_start_chara_only,
+      :bin2        => :on_start_chara_only,
+      :bin3        => :on_start_chara_only,
+      :bin4        => :on_start_chara_only,
+      :bin5        => :on_start_chara_only,
+      :bin6        => :on_start_chara_only,
+      :bin7        => :on_start_chara_only,
+      :bin8        => :on_start_chara_only,
+      :bin9        => :on_start_chara_only,
+      :binA        => :on_start_chara_only,
+      :binB        => :on_start_chara_only,
+      :binC        => :on_start_chara_only,
+      :binD        => :on_start_chara_only,
+      :binE        => :on_start_chara_only,
+      :binF        => :on_start_chara_only,
+      :yes         => :on_start_yes,
+      :no          => :on_start_no,
+      :esf         => :on_start_esf,
+      :ary         => :on_start_ary,
+      :rec         => :on_start_rec,
+      :node_type   => :on_start_node_type,
+      :node_types  => :on_start_node_types,
+      :xml_include => :on_start_xml_include,
+      :v2          => :on_start_v2,
+      :v3          => :on_start_v3,
+    })
+    @end_context = Hash.new{|ht,k| raise "Unknown tag close #{k}"}.merge({
+      :flt         => :on_end_flt,
+      :byte        => :on_end_byte,
+      :s           => :on_end_s,
+      :asc         => :on_end_asc,
+      :u           => :on_end_u,
+      :i           => :on_end_i,
+      :i2          => :on_end_i2,
+      :u2          => :on_end_u2,
+      :u2x         => :on_end_u2x,
+      :i4_ary      => :on_end_i4_ary,
+      :flt_ary     => :on_end_flt_ary,
+      :u2_ary      => :on_end_u2_ary,
+      :v2_ary      => :on_end_v2_ary,
+      :v3_ary      => :on_end_v3_ary,
+      :bin0        => :on_end_bin0,
+      :bin1        => :on_end_bin1,
+      :bin2        => :on_end_bin2,
+      :bin3        => :on_end_bin3,
+      :bin4        => :on_end_bin4,
+      :bin5        => :on_end_bin5,
+      :bin6        => :on_end_bin6,
+      :bin7        => :on_end_bin7,
+      :bin8        => :on_end_bin8,
+      :bin9        => :on_end_bin9,
+      :binA        => :on_end_binA,
+      :binB        => :on_end_binB,
+      :binC        => :on_end_binC,
+      :binD        => :on_end_binD,
+      :binE        => :on_end_binE,
+      :binF        => :on_end_binF,
+      :yes         => :on_end_ignore,
+      :no          => :on_end_ignore,
+      :esf         => :on_end_esf,
+      :ary         => :on_end_ary,
+      :rec         => :on_end_rec,
+      :node_type   => :on_end_ignore,
+      :node_types  => :on_end_ignore,
+      :xml_include => :on_end_ignore,
+      :v2          => :on_end_ignore,
+      :v3          => :on_end_ignore,
+    })
     super()
   end
   def start_element(element, attributes)
+    raise "Cannot nest tags in this context" unless @xml2esf.stack[-1][:nest]
     attrs = {}
-    until attributes.empty?
-      attrs[attributes.shift.to_sym] = attributes.shift
-    end
-    @xml2esf.on_start_element(element.to_sym, attrs)
+    attrs[attributes.shift.to_sym] = attributes.shift until attributes.empty?
+    @stack << @xml2esf.send(@start_context[element.to_sym], attrs)
   end
   def end_element(element)
-    @xml2esf.on_end_element(element.to_sym)
+    @xml2esf.send(@end_context[element.to_sym], @stack.pop)
   end
-  def characters(chara)
-    @xml2esf.on_characters(chara)
+  def characters(chars)
+    if @stack[-1][:buf]
+      @stack[-1][:buf] << chars
+    elsif chars =~ /\S/
+      raise "Illegal place for non-whitespace characters" 
+    end
+  end
+end
+
+
+module XmlCallbacks
+  def on_end_ignore(ctx)
+  end
+  def on_end_asc(ctx)
+    @esf.put_asc ctx[:buf]
+  end
+  def on_end_s(ctx)
+    @esf.put_s ctx[:buf]
+  end
+  def on_end_u(ctx)
+    @esf.put_u ctx[:buf].to_i
+  end
+  def on_end_i(ctx)
+    @esf.put_i ctx[:buf].to_i
+  end
+  def on_end_u2(ctx)
+    @esf.put_u2 ctx[:buf].to_i
+  end
+  def on_end_i2(ctx)
+    @esf.put_i2 ctx[:buf].to_i
+  end
+  def on_end_u2x(ctx)
+    @esf.put_u2x ctx[:buf].to_i
+  end
+  def on_end_byte(ctx)
+    @esf.put_byte ctx[:buf].to_i
+  end
+  def on_end_esf(ctx)
+    @esf.end_esf
+  end
+  def on_end_flt(ctx)
+    @esf.put_flt ctx[:buf].to_f
+  end
+  def on_end_rec(ctx)
+    @esf.end_rec
+  end
+  def on_end_ary(ctx)
+    @esf.end_ary
+  end
+  def on_end_u4_ary(ctx)
+    @esf.put_u4_ary ctx[:buf].split.map(&:to_i)
+  end
+  def on_end_i4_ary(ctx)
+    @esf.put_i4_ary ctx[:buf].split.map(&:to_i)
+  end
+  def on_end_u2_ary(ctx)
+    @esf.put_u2_ary ctx[:buf].split.map(&:to_i)
+  end
+  def on_end_flt_ary(ctx)
+    @esf.put_flt_ary ctx[:buf].split.map(&:to_f)
+  end
+  def on_end_v2_ary(ctx)
+    @esf.put_v2_ary ctx[:buf].split(/[, ]/).map(&:to_f)
+  end
+  def on_end_v3_ary(ctx)
+    @esf.put_v3_ary ctx[:buf].split(/[, ]/).map(&:to_f)
+  end
+  def on_end_bin0(ctx)
+    @esf.put_4x(0x40, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_bin1(ctx)
+    @esf.put_4x(0x41, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_bin2(ctx)
+    @esf.put_4x(0x42, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_bin3(ctx)
+    @esf.put_4x(0x43, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_bin4(ctx)
+    @esf.put_4x(0x44, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_bin5(ctx)
+    @esf.put_4x(0x45, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_bin6(ctx)
+    @esf.put_4x(0x46, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_bin7(ctx)
+    @esf.put_4x(0x47, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_bin8(ctx)
+    @esf.put_4x(0x48, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_bin9(ctx)
+    @esf.put_4x(0x49, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_binA(ctx)
+    @esf.put_4x(0x4A, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_binB(ctx)
+    @esf.put_4x(0x4B, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_binC(ctx)
+    @esf.put_4x(0x4C, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_binD(ctx)
+    @esf.put_4x(0x4D, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_binE(ctx)
+    @esf.put_4x(0x4E, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_end_binF(ctx)
+    @esf.put_4x(0x4F, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+  end
+  def on_start_chara_only(attrs)
+    {:buf => ""}
+  end
+  def on_start_yes(attrs)
+    @esf.put_yes
+    {}
+  end
+  def on_start_no(attributes)
+    @esf.put_no
+    {}
+  end
+  def on_start_v2(attributes)
+    @esf.put_v2 attributes[:x].to_f, attributes[:y].to_f
+    {}
+  end
+  def on_start_v3(attributes)
+    @esf.put_v3 attributes[:x].to_f, attributes[:y].to_f, attributes[:z].to_f
+    {}
+  end
+  def on_start_xml_include(attributes)
+    parse_file(attributes[:path])
+    {}
+  end
+  def on_start_node_type(attributes)
+    @esf.add_type_code attributes[:name]
+    {}
+  end
+  def on_start_node_types(attributes)
+    {:nest => true}
+  end
+  def on_start_esf(attributes)
+    raise "Magic attribute required" unless attributes[:magic]
+    @esf.start_esf attributes[:magic].split(/\s+/).map(&:to_i)
+    {:nest => true}
+  end
+  def on_start_rec(attributes)
+    if @stack[-1][:ary]
+      @esf.start_elem
+    else
+      @esf.start_rec attributes[:type], attributes[:version]
+    end
+    {:nest => true}
+  end
+  def on_start_ary(attributes)
+    @esf.start_ary attributes[:type], attributes[:version]
+    {:nest => true, :ary => true}
   end
 end
 
 class Xml2Esf
-  attr_reader :esf
-    
+  include XmlCallbacks
+  attr_reader :esf, :stack
+  
   def self.parse(in_dir)
     new(in_dir).esf.data
   end
@@ -40,157 +284,9 @@ class Xml2Esf
   def initialize(in_dir)
     @in_dir = in_dir
     @esf    = EsfBuilder.new
-    @stack  = [{:chara => false, :nest => true}]
+    @stack  = [{:nest => true}]
     @callbacks = XMLParserCallbacks.new(self)
     parse_file('esf.xml')
-  end
-
-  EndOnly = {
-    :flt     => true,
-    :byte    => true,
-    :s       => true,
-    :asc     => true,
-    :u       => true,
-    :i       => true,
-    :i2      => true,
-    :u2      => true,
-    :u2x     => true,
-    :i4_ary  => true,
-    :flt_ary => true,
-    :u2_ary  => true,
-    :v2_ary  => true,
-    :v3_ary  => true,
-    :bin0    => true,
-    :bin1    => true,
-    :bin2    => true,
-    :bin3    => true,
-    :bin4    => true,
-    :bin5    => true,
-    :bin6    => true,
-    :bin7    => true,
-    :bin8    => true,
-    :bin9    => true,
-    :binA    => true,
-    :binB    => true,
-    :binC    => true,
-    :binD    => true,
-    :binE    => true,
-    :binF    => true,
-  }
-
-  def on_start_element(element, attributes)
-    raise "Illegal place for nested element: #{@stack[-1].inspect}" unless @stack[-1][:nest]
-    
-    finalization = {}
-    chara_ok = false
-    nest_ok = false
-    el = element.to_sym
-     
-    if EndOnly[el]
-      chara_ok = true
-    else
-      case el
-      when :yes
-        @esf.put_yes
-      when :no
-        @esf.put_no
-      when :v2
-        @esf.put_v2 attributes[:x].to_f, attributes[:y].to_f
-      when :v3
-        @esf.put_v3 attributes[:x].to_f, attributes[:y].to_f, attributes[:z].to_f
-      when :rec
-        if @stack[-1][:el] == :ary
-          @esf.start_elem
-        else
-          @esf.start_rec attributes[:type], attributes[:version]
-        end
-        nest_ok = true
-      when :ary
-        @esf.start_ary attributes[:type], attributes[:version]
-        nest_ok = true
-
-      when :"xml-include"
-        parse_file(attributes[:path])
-
-      when :node_type
-        name = attributes[:name]
-        @esf.add_type_code attributes[:name]
-
-      when :node_types
-        nest_ok = true
-
-      when :esf
-        raise "Magic attribute required" unless attributes[:magic]
-        @esf.start_esf attributes[:magic].split(/\s+/).map(&:to_i)
-        nest_ok = true
-
-      else
-        raise "No idea what to do with #{element} open means"
-      end
-    end
-
-    @stack << {:el => el, :chara => chara_ok, :buf => "", :nest => nest_ok}.merge(finalization)
-  end
-  
-  def on_end_element(element)
-    ctx = @stack.pop
-    no_finalization = [:node_types, :node_type, :yes, :no, :v2, :v3, :"xml-include"]
-    return if no_finalization.include?(element)
-    
-    case element
-    when :asc
-      @esf.put_asc ctx[:buf]
-    when :s
-      @esf.put_s ctx[:buf]
-    when :u
-      @esf.put_u ctx[:buf].to_i
-    when :i
-      @esf.put_i ctx[:buf].to_i
-    when :u2
-      @esf.put_u2 ctx[:buf].to_i
-    when :i2
-      @esf.put_i2 ctx[:buf].to_i
-    when :u2x
-      @esf.put_u2x ctx[:buf].to_i
-    when :byte
-      @esf.put_byte ctx[:buf].to_i
-    when :flt
-      @esf.put_flt ctx[:buf].to_f
-    when :rec
-      @esf.end_rec
-    when :ary
-      @esf.end_ary
-    when :u4_ary
-      @esf.put_u4_ary ctx[:buf].split.map(&:to_i)
-    when :i4_ary
-      @esf.put_i4_ary ctx[:buf].split.map(&:to_i)
-    when :u2_ary
-      @esf.put_u2_ary ctx[:buf].split.map(&:to_i)
-    when :flt_ary
-      @esf.put_flt_ary ctx[:buf].split.map(&:to_f)
-    when :v2_ary
-      @esf.put_v2_ary ctx[:buf].split.map(&:to_f)
-    when :v3_ary
-      @esf.put_v3_ary ctx[:buf].split.map(&:to_f)
-    when :bin0, :bin1, :bin2, :bin3, :bin4, :bin5, :bin6, :bin7,
-         :bin8, :bin9, :binA, :binB, :binC, :binD, :binE, :binF
-      @esf.put_4x(
-        [0x40 + element.to_s[-1,1].hex].pack("C"),
-        ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*")
-      )
-    when :esf
-      @esf.end_esf
-    else
-      raise "No idea what to do with #{element} close"
-    end
-  end
-  
-  def on_characters(chars)
-    if @stack[-1][:chara]
-      @stack[-1][:buf] << chars
-    else
-      raise "Illegal place for non-whitespace characters: #{@stack[-1].inspect}" if chars =~ /\S/
-    end
   end
 end
 

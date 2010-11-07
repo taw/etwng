@@ -21,6 +21,18 @@ class String
   def to_flt_dump
     unpack("f*").join(" ")
   end
+  def to_v2_dump
+    out = []
+    data = unpack("f*")
+    out << "#{data.shift},#{data.shift}" until data.empty?
+    out.join(" ")
+  end
+  def to_v3_dump
+    out = []
+    data = unpack("f*")
+    out << "#{data.shift},#{data.shift},#{data.shift}" until data.empty?
+    out.join(" ")
+  end
 end
 
 module EsfBasicBinaryOps
@@ -140,7 +152,7 @@ module EsfDefaultConvert
     @xmlout.out!("<bin3>#{get_ofs_bytes.to_hex_dump}</bin3>")
   end
   def convert_44!
-    @xmlout.out!("<bin4>#{get_ofs_bytes.to_hex_dump}</bin4>")
+    @xmlout.out!("<i4_ary>#{get_ofs_bytes.unpack("l*").join(" ")}</i4_ary>")
   end
   def convert_45!
     @xmlout.out!("<bin5>#{get_ofs_bytes.to_hex_dump}</bin5>")
@@ -152,7 +164,7 @@ module EsfDefaultConvert
     @xmlout.out!("<u2_ary>#{get_ofs_bytes.unpack("v*").join(" ")}</u2_ary>")
   end
   def convert_48!
-    @xmlout.out!("<i4_ary>#{get_ofs_bytes.unpack("l*").join(" ")}</i4_ary>")
+    @xmlout.out!("<u4_ary>#{get_ofs_bytes.unpack("V*").join(" ")}</u4_ary>")
   end
   def convert_49!
     @xmlout.out!("<bin9>#{get_ofs_bytes.to_hex_dump}</bin9>")
@@ -164,10 +176,10 @@ module EsfDefaultConvert
     @xmlout.out!("<binB>#{get_ofs_bytes.to_hex_dump}</binB>")
   end
   def convert_4c!
-    @xmlout.out!("<v2_ary>#{get_ofs_bytes.to_flt_dump}</v2_ary>")
+    @xmlout.out!("<v2_ary>#{get_ofs_bytes.to_v2_dump}</v2_ary>")
   end
   def convert_4d!
-    @xmlout.out!("<v3_ary>#{get_ofs_bytes.to_flt_dump}</v3_ary>")
+    @xmlout.out!("<v3_ary>#{get_ofs_bytes.to_v3_dump}</v3_ary>")
   end
   def convert_4e!
     @xmlout.out!("<binE>#{get_ofs_bytes.to_hex_dump}</binE>")
@@ -203,8 +215,13 @@ class EsfParser
   def open_xml(name)
     file_num = 1
     while true
-      rel_path = "%s-%04d.xml" % [name, file_num]
+      if name =~ /\/\z/
+        rel_path = "%s%04d.xml" % [name, file_num]
+      else
+        rel_path = "%s-%04d.xml" % [name, file_num]
+      end
       path     = File.join(out_dir, rel_path)
+      FileUtils.mkdir_p File.dirname(path)
       return XMLPrinter.new(path, rel_path) unless File.exist?(path)
       file_num += 1
     end
@@ -267,33 +284,33 @@ class EsfParser
         @xmlout = orig
         nested.flush
       end
-      @xmlout.tag!("xml-include", :path => nested.rel_path)
+      @xmlout.tag!("xml_include", :path => nested.rel_path)
     else
       yield
     end
   end
+  XmlSplit = {
+    :CAI_BDI_POOL              => "bdi_pool/",
+    :CAI_INTERFACE             => "cai",
+    :CAI_WORLD                 => "cai_world",
+    :CAMPAIGN_PATHFINDER       => "pathfinder",
+    :FACTION                   => "faction/",
+    :QUAD_TREE_BIT_ARRAY       => "quadtree/",
+    :black_shroud_outlines     => "black_shroud",
+    :grid_data                 => "grid_data",
+    :pathfinding_areas         => "pathfinding_areas",
+    :query_info                => "query_info",
+    :region_data               => "region_data",
+    :regions                   => "region/",
+    :theatre                   => "theatre",
+    :MAPS                      => "maps",
+    :UNIT_CLASS_NAME_ALLOCATOR => 'unit_name_alloc/',
+    :SAVE_GAME_HEADER          => 'save_game_header',
+    :CAMPAIGN_PREOPEN_MAP_INFO => 'preopen_map_info',
+    :REGION                    => 'region/',
+  }
   def convert_rec!(node_type, version)
-    xmlsplit = {
-      :CAI_BDI_POOL              => "bdi_pool",
-      :CAI_INTERFACE             => "cai",
-      :CAI_WORLD                 => "cai_world",
-      :CAMPAIGN_PATHFINDER       => "pathfinder",
-      :FACTION                   => "faction",
-      :QUAD_TREE_BIT_ARRAY       => "quadtree",
-      :black_shroud_outlines     => "black_shroud",
-      :grid_data                 => "grid_data",
-      :pathfinding_areas         => "pathfinding_areas",
-      :query_info                => "query_info",
-      :region_data               => "region_data",
-      :regions                   => "region",
-      :theatre                   => "theatre",
-      :MAPS                      => "maps",
-      :UNIT_CLASS_NAME_ALLOCATOR => 'unit_name_alloc',
-      :SAVE_GAME_HEADER          => 'save_game_header',
-      :CAMPAIGN_PREOPEN_MAP_INFO => 'preopen_map_info',
-      :REGION                    => 'region',
-    }
-    xml_nested(xmlsplit[node_type]) do
+    xml_nested(XmlSplit[node_type]) do
       @xmlout.tag!("rec", :type=>node_type, :version=>version) do
         convert_until_ofs!(get_u4)
       end
@@ -321,9 +338,7 @@ class EsfParser
     send(@esf_type_handlers[get_byte])
   end
   def get_ofs_bytes
-    ofs_end = get_u4
-    sz = ofs_end-@ofs
-    get_bytes(sz)
+    get_bytes(get_u4 - @ofs)
   end
   def convert!
     @done = false
