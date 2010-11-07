@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 
-require "pp"
 require "default_versions"
+require "fileutils"
+require "pp"
 
 class String
   # Escape string for output as XML text (< > &)
@@ -89,58 +90,7 @@ module EsfBasicBinaryOps
   end
 end
 
-class EsfParser
-  include EsfBasicBinaryOps
-  
-  attr_accessor :ofs
-  attr_reader :data, :out, :done
-  attr_reader :magic, :node_types
-
-  def initialize(in_fh, out_fh)
-    @data = in_fh.read
-    @xmlout = XMLPrinter.new(out_fh)
-    @ofs = 0
-    get_header
-    @esf_type_handlers = setup_esf_type_handlers
-  end
-  def setup_esf_type_handlers
-    out = Hash.new{|ht,node_type|
-      raise "Unknown type 0x%02x at %d" % [node_type, ofs]
-    }
-    (0..255).each{|i|
-      name = ("convert_%02x!" % i).to_sym
-      out[i] = name if respond_to?(name)
-    }
-    out
-  end
-  def get_header
-    case magic = get_u4
-    when 0xABCD
-      @magic = [0xABCD]
-    when 0xABCE
-      a = get_u4
-      b = get_u4
-      raise "Incorrect ESF magic followup" unless a == 0
-      @magic = [0xABCE, a, b]
-    else
-      raise "Incorrect ESF magic: %X" % magic
-    end
-    with_temp_ofs(get_u4) {
-      @node_types = get_node_types
-    }
-  end
-  def get_node_types
-    (0...get_u2()).map{ get_ascii.to_sym }
-  end
-  def inspect
-    "EsfParser(#{@ofs})"
-  end
-  def get_node_type
-    @node_types[get_u2]
-  end
-  def convert_until_ofs!(ofs_end)
-    convert_value! while @ofs < ofs_end
-  end
+module EsfDefaultConvert
   def convert_00!
     @xmlout.out!("<i2>#{get_i2}</i2>")
   end
@@ -225,14 +175,135 @@ class EsfParser
   def convert_4f!
     @xmlout.out!("<binF>#{get_ofs_bytes.to_hex_dump}</binF>")
   end
+end
+
+module EsfParserDebug
+  def progressbar_thread
+    Thread.new{
+      begin
+        puts "Done: %0.1f%%" % (100.0 * @ofs.to_f / @data.size)
+        5.times {
+          sleep 1
+          break if @done
+        }
+      end until @done
+    }
+  end
+end
+
+class EsfParser
+  include EsfBasicBinaryOps
+  include EsfDefaultConvert
+  include EsfParserDebug
+  
+  attr_accessor :ofs
+  attr_reader :data, :out_dir, :done
+  attr_reader :magic, :node_types
+
+  def open_xml(name)
+    file_num = 1
+    while true
+      rel_path = "%s-%04d.xml" % [name, file_num]
+      path     = File.join(out_dir, rel_path)
+      return XMLPrinter.new(path, rel_path) unless File.exist?(path)
+      file_num += 1
+    end
+  end
+
+  def initialize(in_fh, out_dir)
+    @data    = in_fh.read
+    @out_dir = out_dir
+    @xmlout  = XMLPrinter.new(File.join(out_dir, 'esf.xml'), 'esf.xml')
+    @ofs     = 0
+    get_header
+    @esf_type_handlers = setup_esf_type_handlers
+  end
+
+  def setup_esf_type_handlers
+    out = Hash.new{|ht,node_type|
+      raise "Unknown type 0x%02x at %d" % [node_type, ofs]
+    }
+    (0..255).each{|i|
+      name = ("convert_%02x!" % i).to_sym
+      out[i] = name if respond_to?(name)
+    }
+    out
+  end
+  def get_header
+    case magic = get_u4
+    when 0xABCD
+      @magic = [0xABCD]
+    when 0xABCE
+      a = get_u4
+      b = get_u4
+      raise "Incorrect ESF magic followup" unless a == 0
+      @magic = [0xABCE, a, b]
+    else
+      raise "Incorrect ESF magic: %X" % magic
+    end
+    with_temp_ofs(get_u4) {
+      @node_types = get_node_types
+    }
+  end
+  def get_node_types
+    (0...get_u2()).map{ get_ascii.to_sym }
+  end
+  def inspect
+    "EsfParser(#{@ofs})"
+  end
+  def get_node_type
+    @node_types[get_u2]
+  end
+  def convert_until_ofs!(ofs_end)
+    convert_value! while @ofs < ofs_end
+  end
+  def xml_nested(name)
+    if name
+      orig, nested = @xmlout, open_xml(name)
+      begin
+        @xmlout = nested
+        yield
+      ensure
+        @xmlout = orig
+        nested.flush
+      end
+      @xmlout.tag!("xml-include", :path => nested.rel_path)
+    else
+      yield
+    end
+  end
+  def convert_rec!(node_type, version)
+    xmlsplit = {
+      :CAI_BDI_POOL              => "bdi_pool",
+      :CAI_INTERFACE             => "cai",
+      :CAI_WORLD                 => "cai_world",
+      :CAMPAIGN_PATHFINDER       => "pathfinder",
+      :FACTION                   => "faction",
+      :QUAD_TREE_BIT_ARRAY       => "quadtree",
+      :black_shroud_outlines     => "black_shroud",
+      :grid_data                 => "grid_data",
+      :pathfinding_areas         => "pathfinding_areas",
+      :query_info                => "query_info",
+      :region_data               => "region_data",
+      :regions                   => "region",
+      :theatre                   => "theatre",
+      :MAPS                      => "maps",
+      :UNIT_CLASS_NAME_ALLOCATOR => 'unit_name_alloc',
+      :SAVE_GAME_HEADER          => 'save_game_header',
+      :CAMPAIGN_PREOPEN_MAP_INFO => 'preopen_map_info',
+      :REGION                    => 'region',
+    }
+    xml_nested(xmlsplit[node_type]) do
+      @xmlout.tag!("rec", :type=>node_type, :version=>version) do
+        convert_until_ofs!(get_u4)
+      end
+    end
+  end
   def convert_80!
     node_type   = get_node_type
     version     = get_byte
-    ofs_end     = get_u4
-    version   = nil if version == DefaultVersions[node_type]
-    @xmlout.tag!("rec", :type=>node_type, :version=>version) do
-      convert_until_ofs!(ofs_end)
-    end
+    version     = nil if version == DefaultVersions[node_type]
+    convert_rec!(node_type, version)
   end
   def convert_81!
     node_type = get_node_type
@@ -242,9 +313,7 @@ class EsfParser
     version   = nil if version == DefaultVersions[node_type]
     @xmlout.tag!("ary", :type=>node_type, :version=>version) do
       count.times do
-        @xmlout.tag!("rec", :type=>node_type) do
-          convert_until_ofs!(get_u4)
-        end
+        convert_rec!(node_type, nil)
       end
     end
   end
@@ -255,9 +324,6 @@ class EsfParser
     ofs_end = get_u4
     sz = ofs_end-@ofs
     get_bytes(sz)
-  end
-  def context
-    "#{@ofs} [ #{@data[@ofs, 32].unpack("C*").join(" ")}]"
   end
   def convert!
     @done = false
@@ -272,26 +338,17 @@ class EsfParser
     @xmlout.flush
     @done = true
   end
-  def progressbar_thread
-    Thread.new{
-      begin
-        puts "Done: %0.1f%%" % (100.0 * @ofs.to_f / @data.size)
-        5.times {
-          sleep 1
-          break if @done
-        }
-      end until @done
-    }
-  end
 end
 
 class XMLPrinter
-  attr_reader :out_buf
-  def initialize(out_fh)
-    @out_fh  = out_fh
-    @out_buf = ""
-    @stack = []
-    @indent = Hash.new{|ht,k| ht[k]=" "*k}
+  attr_reader :out_buf, :out_path, :rel_path
+  def initialize(out_path, rel_path)
+    @out_path = out_path
+    @rel_path = rel_path
+    @out_fh   = File.open(out_path, 'wb')
+    @out_buf  = ""
+    @stack    = []
+    @indent   = Hash.new{|ht,k| ht[k]=" "*k}
   end
   def flush
     @out_fh.write @out_buf
@@ -348,16 +405,21 @@ end
 unless ARGV.size == 2
   STDERR.puts <<EOF
 Usage:
-  #{$0} input.esf output.xml
+  #{$0} input.esf output_dir
 To hide progress bar:
-  #{$0} --quiet input.esf output.xml
+  #{$0} --quiet input.esf output_dir
 EOF
   exit 1
 end
 
 in_file = File.open(ARGV[0], 'rb')
-out_file = File.open(ARGV[1], 'wb')
+out_dir = ARGV[1]
+if File.exist?(out_dir)
+  STDERR.puts "#{out_dir} already exists"
+  exit 1
+end
+FileUtils.mkdir_p out_dir
 
-esf = EsfParser.new(in_file, out_file)
+esf = EsfParser.new(in_file, out_dir)
 thr = esf.progressbar_thread if verbose
 esf.convert!

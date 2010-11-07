@@ -1,19 +1,21 @@
 == Usage ==
-$ ./esf2xml foo.esf foo.xml
-$ ./esf2xml --quiet foo.esf foo.xml
-$ ./xml2esf foo.xml foo.esf
+$ ./esf2xml foo.esf foo_dir
+$ ./esf2xml --quiet foo.esf foo_dir
+$ ./xml2esf foo_dir foo.esf
 
 esf2xml automatically prints progressbar unless told not to by --quiet option
 (xml2esf might get this too later)
 
 To run with specific Ruby version use like:
-$ ruby ./esf2xml foo.esf foo.xml
-$ jruby -J-Xmx2048m ./esf2xml foo.esf foo.xml
-
-Note: This will change to support multiple output XML splitting.
+$ ruby ./esf2xml foo.esf foo_dir
+$ jruby -J-Xmx2048m ./esf2xml foo.esf foo_dir
 
 And you'll need -J-Xmx2048m option, default JVM max heap size
 is ridiculously small.
+
+== Unpacked Directory ==
+Main file in unpacked directory is always esf.xml
+There might be other files as well, xml, bitmap, or anything else.
 
 == System Requirements ==
 It should now work on every system (by every I mean OSX, Linux, and Windows) both ways.

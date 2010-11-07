@@ -26,19 +26,57 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
 end
 
 class Xml2Esf
-  attr_reader :esf, :stack, :parser
-  
-  def self.parse_io(xml_in)
-    new(xml_in).esf.data
+  attr_reader :esf
+    
+  def self.parse(in_dir)
+    new(in_dir).esf.data
   end
 
-  def initialize(xml_in)
-    @esf = EsfBuilder.new
-    @stack = [{:chara => false, :nest => true}]
-    @callbacks = XMLParserCallbacks.new(self)
-    @parser = Nokogiri::XML::SAX::Parser.new(@callbacks, 'UTF-8')
-    @parser.parse_io(xml_in)
+  def parse_file(rel_path)
+    parser = Nokogiri::XML::SAX::Parser.new(@callbacks, 'UTF-8')
+    parser.parse_file(File.join(@in_dir, rel_path))
   end
+
+  def initialize(in_dir)
+    @in_dir = in_dir
+    @esf    = EsfBuilder.new
+    @stack  = [{:chara => false, :nest => true}]
+    @callbacks = XMLParserCallbacks.new(self)
+    parse_file('esf.xml')
+  end
+
+  EndOnly = {
+    :flt     => true,
+    :byte    => true,
+    :s       => true,
+    :asc     => true,
+    :u       => true,
+    :i       => true,
+    :i2      => true,
+    :u2      => true,
+    :u2x     => true,
+    :i4_ary  => true,
+    :flt_ary => true,
+    :u2_ary  => true,
+    :v2_ary  => true,
+    :v3_ary  => true,
+    :bin0    => true,
+    :bin1    => true,
+    :bin2    => true,
+    :bin3    => true,
+    :bin4    => true,
+    :bin5    => true,
+    :bin6    => true,
+    :bin7    => true,
+    :bin8    => true,
+    :bin9    => true,
+    :binA    => true,
+    :binB    => true,
+    :binC    => true,
+    :binD    => true,
+    :binE    => true,
+    :binF    => true,
+  }
 
   def on_start_element(element, attributes)
     raise "Illegal place for nested element: #{@stack[-1].inspect}" unless @stack[-1][:nest]
@@ -46,46 +84,49 @@ class Xml2Esf
     finalization = {}
     chara_ok = false
     nest_ok = false
-    
-    case el = element.to_sym
-    when :yes
-      @esf.put_yes
-    when :no
-      @esf.put_no
-    when :v2
-      @esf.put_v2 attributes[:x].to_f, attributes[:y].to_f
-    when :v3
-      @esf.put_v3 attributes[:x].to_f, attributes[:y].to_f, attributes[:z].to_f
-    when :rec
-      if @stack[-1][:el] == :ary
-        @esf.start_elem
-      else
-        @esf.start_rec attributes[:type], attributes[:version]
-      end
-      nest_ok = true
-    when :ary
-      @esf.start_ary attributes[:type], attributes[:version]
-      nest_ok = true
-    when :flt, :byte, :s, :asc, :u, :i, :i2, :u2, :u2x, :i4_ary,
-         :flt_ary, :u2_ary, :v2_ary, :v3_ary,
-         :bin0, :bin1, :bin2, :bin3, :bin4, :bin5, :bin6, :bin7,
-         :bin8, :bin9, :binA, :binB, :binC, :binD, :binE, :binF
+    el = element.to_sym
+     
+    if EndOnly[el]
       chara_ok = true
-
-    when :esf
-      raise "Magic attribute required" unless attributes[:magic]
-      @esf.start_esf attributes[:magic].split(/\s+/).map(&:to_i)
-      nest_ok = true
-
-    when :node_types
-      nest_ok = true
-
-    when :node_type
-      name = attributes[:name]
-      @esf.add_type_code attributes[:name]
-
     else
-      raise "No idea what to do with #{element} open means"
+      case el
+      when :yes
+        @esf.put_yes
+      when :no
+        @esf.put_no
+      when :v2
+        @esf.put_v2 attributes[:x].to_f, attributes[:y].to_f
+      when :v3
+        @esf.put_v3 attributes[:x].to_f, attributes[:y].to_f, attributes[:z].to_f
+      when :rec
+        if @stack[-1][:el] == :ary
+          @esf.start_elem
+        else
+          @esf.start_rec attributes[:type], attributes[:version]
+        end
+        nest_ok = true
+      when :ary
+        @esf.start_ary attributes[:type], attributes[:version]
+        nest_ok = true
+
+      when :"xml-include"
+        parse_file(attributes[:path])
+
+      when :node_type
+        name = attributes[:name]
+        @esf.add_type_code attributes[:name]
+
+      when :node_types
+        nest_ok = true
+
+      when :esf
+        raise "Magic attribute required" unless attributes[:magic]
+        @esf.start_esf attributes[:magic].split(/\s+/).map(&:to_i)
+        nest_ok = true
+
+      else
+        raise "No idea what to do with #{element} open means"
+      end
     end
 
     @stack << {:el => el, :chara => chara_ok, :buf => "", :nest => nest_ok}.merge(finalization)
@@ -93,7 +134,7 @@ class Xml2Esf
   
   def on_end_element(element)
     ctx = @stack.pop
-    no_finalization = [:node_types, :node_type, :yes, :no, :v2, :v3]
+    no_finalization = [:node_types, :node_type, :yes, :no, :v2, :v3, :"xml-include"]
     return if no_finalization.include?(element)
     
     case element
@@ -154,11 +195,11 @@ class Xml2Esf
 end
 
 unless ARGV.size == 2
-  STDERR.puts "Usage: #{$0} input.xml output.esf"
+  STDERR.puts "Usage: #{$0} input_dir output.esf"
   exit 1
 end
 
-in_file = File.open(ARGV[0], 'rb')
+in_dir = ARGV[0]
 out_file = File.open(ARGV[1], 'wb')
 
-out_file.write Xml2Esf.parse_io(in_file)
+out_file.write Xml2Esf.parse(in_dir)
