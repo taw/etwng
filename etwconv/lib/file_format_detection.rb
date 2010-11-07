@@ -41,10 +41,12 @@ SupportedFormats = {
 
 # Cnt-prefix simple formats
   ".anim_sound_event"         => AnimSoundEventConverter,
-  ".rigid_model_animation"    => nil,
   ".desc_model"               => DescModelConverter,
-  ".rigid_model"              => nil,
-  ".animatable_rigid_model"   => nil,
+
+# Rigid model
+  # ".rigid_model_animation"    => RigidModelConverter, # SAME as .rigid_model ???
+  # ".rigid_model"              => RigidModelConverter,
+  # ".animatable_rigid_model"   => RigidModelConverter,
 
 # FFTT (not all subtypes supported)
   ".farm_fields_tile_texture" => FarmFieldsTileTextureConverter,
