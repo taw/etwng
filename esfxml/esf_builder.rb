@@ -1,10 +1,20 @@
+require "default_versions"
+
 class EsfBuilder
   attr_reader :data
+  attr_reader :type_codes
   def initialize
-    @data = ""
-    @adjust_ofs      = []
-    @adjust_children = []
-    @children        = []
+    @data             = ""
+    @adjust_ofs       = []
+    @adjust_children  = []
+    @children         = []
+    @type_codes       =  Hash.new{|ht,k| raise "Unknown node name #{k}"}
+    @node_types       = []
+  end
+  def add_type_code(name)
+    raise "Name already set: #{name}" if @type_codes.has_key?(name)
+    @type_codes[name] = @type_codes.size
+    @node_types << name
   end
   def put_yes
     @data << "\x01\x01"
@@ -82,29 +92,25 @@ class EsfBuilder
   def put_v3_ary(elems) # Contrary to name, it contains floats
     put_4x("\x4d", elems.pack("f*"))
   end
-  def put_node_types_table(node_types)
-    pop_marker_ofs
-    @data << [node_types.size].pack("v")
-    node_types.each{|nn|
-      @data << [nn.size].pack("v")
-      @data << nn
-    }
-  end
-  def start_rec(name_code, version)
-    @data << [0x80, name_code, version].pack("CvC")
+  def start_rec(type_str, version_str)
+    type_code = @type_codes[type_str]
+    version = version_str ? version_str.to_i : DefaultVersions[type_str.to_sym]
+    @data << [0x80, type_code, version].pack("CvC")
     push_marker_ofs
+  end
+  def end_rec
+    pop_marker_ofs
   end
   def start_elem
     inc_children
     push_marker_ofs
   end
-  def start_ary(name_code, version)
-    @data << [0x81, name_code, version].pack("CvC")
+  def start_ary(type_str, version_str)
+    type_code = @type_codes[type_str]
+    version = version_str ? version_str.to_i : DefaultVersions[type_str.to_sym]
+    @data << [0x81, type_code, version].pack("CvC")
     push_marker_ofs
     push_marker_children
-  end
-  def end_rec
-    pop_marker_ofs
   end
   def end_ary
     pop_marker_children
@@ -113,6 +119,14 @@ class EsfBuilder
   def start_esf(magic)
     @data << magic.pack("V*")
     push_marker_ofs
+  end
+  def end_esf
+    pop_marker_ofs
+    @data << [@node_types.size].pack("v")
+    @node_types.each{|nn|
+      @data << [nn.size].pack("v")
+      @data << nn
+    }
   end
 
 private

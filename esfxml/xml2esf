@@ -34,22 +34,10 @@ class Xml2Esf
 
   def initialize(xml_in)
     @esf = EsfBuilder.new
-    @default_version = Hash.new(0)
-    @node_types = nil
-    @lookup = Hash.new{|ht,k| raise "Unknown node name #{k}"}
     @stack = [{:chara => false, :nest => true}]
-    
     @callbacks = XMLParserCallbacks.new(self)
     @parser = Nokogiri::XML::SAX::Parser.new(@callbacks, 'UTF-8')
     @parser.parse_io(xml_in)
-  end
-
-  def type_and_version(attributes)
-    type_str     = attributes[:type]
-    type_code    = @lookup[type_str]
-    version_str  = attributes[:version]
-    version = version_str ? version_str.to_i : @default_version[type_str]
-    [type_code, version]
   end
 
   def on_start_element(element, attributes)
@@ -66,17 +54,17 @@ class Xml2Esf
       @esf.put_no
     when :v2
       @esf.put_v2 attributes[:x].to_f, attributes[:y].to_f
-    when :"v3"
+    when :v3
       @esf.put_v3 attributes[:x].to_f, attributes[:y].to_f, attributes[:z].to_f
     when :rec
       if @stack[-1][:el] == :ary
         @esf.start_elem
       else
-        @esf.start_rec *type_and_version(attributes)
+        @esf.start_rec attributes[:type], attributes[:version]
       end
       nest_ok = true
     when :ary
-      @esf.start_ary *type_and_version(attributes)
+      @esf.start_ary attributes[:type], attributes[:version]
       nest_ok = true
     when :flt, :byte, :s, :asc, :u, :i, :i2, :u2, :u2x, :i4_ary,
          :flt_ary, :u2_ary, :v2_ary, :v3_ary,
@@ -90,14 +78,11 @@ class Xml2Esf
       nest_ok = true
 
     when :node_types
-      @node_types = []
       nest_ok = true
 
     when :node_type
       name = attributes[:name]
-      raise "Name already set: #{name}" if @lookup.has_key?(name)
-      @lookup[name] = @node_types.size
-      @node_types << name
+      @esf.add_type_code attributes[:name]
 
     else
       raise "No idea what to do with #{element} open means"
@@ -153,7 +138,7 @@ class Xml2Esf
         ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*")
       )
     when :esf
-      @esf.put_node_types_table @node_types
+      @esf.end_esf
     else
       raise "No idea what to do with #{element} close"
     end

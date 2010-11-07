@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require "pp"
+require "default_versions"
 
 class String
   # Escape string for output as XML text (< > &)
@@ -101,7 +102,6 @@ class EsfParser
     @ofs = 0
     get_header
     @esf_type_handlers = setup_esf_type_handlers
-    @default_version = Hash.new(0)
   end
   def setup_esf_type_handlers
     out = Hash.new{|ht,node_type|
@@ -229,7 +229,7 @@ class EsfParser
     node_type   = get_node_type
     version     = get_byte
     ofs_end     = get_u4
-    version   = nil if version == @default_version[node_type]
+    version   = nil if version == DefaultVersions[node_type]
     @xmlout.tag!("rec", :type=>node_type, :version=>version) do
       convert_until_ofs!(ofs_end)
     end
@@ -239,7 +239,7 @@ class EsfParser
     version   = get_byte
     ofs_end   = get_u4
     count     = get_u4
-    version   = nil if version == @default_version[node_type]
+    version   = nil if version == DefaultVersions[node_type]
     @xmlout.tag!("ary", :type=>node_type, :version=>version) do
       count.times do
         @xmlout.tag!("rec", :type=>node_type) do
