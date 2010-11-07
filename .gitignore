@@ -6,3 +6,5 @@ etwconv/samples
 gfconv/groupformations*.bin
 gfconv/groupformations*.txt
 esfxml/esf
+esfxml/samples
+tmp
