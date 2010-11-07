@@ -1,0 +1,110 @@
+#!/usr/bin/env ruby1.9
+# This utility validates DB.xsd for semantic errors (broken links etc.)
+# It's only useful for automatically generated DB.xsd files
+
+require "rubygems"
+require "nokogiri"
+require "pp"
+
+class DbxsdVerify
+  def initialize(doc)
+    @doc = doc
+  end
+
+  def parse_tablename_xpath(xp)
+    if xp =~ /\A\.\/\/(.*)\z/
+      $1
+    else
+      raise "xpath not a table reference: #{selxp}"
+    end
+  end
+
+  def parse_field_xpath(xp)
+    if xp =~ /\A@(.*)/
+      $1
+    else
+      raise "xpath not a field reference: #{xp}"
+    end
+  end
+  
+  def complex_types
+    unless @complex_types
+      @complex_types = {}
+      @doc.xpath("/schema/complexType").each{|ct|
+        name = ct["name"]
+        warn "Complex type #{name} already exists" if @complex_types[name]
+        @complex_types[name] = {}
+        ct.css("attribute").each{|at|
+          an, at = at["name"], at["type"]
+          raise "Table #{name} already has attribute #{an}" if @complex_types[name][an]
+          @complex_types[name][an] = at
+        }
+      }
+    end
+    @complex_types
+  end
+
+  def uniques
+    @uniques ||= @doc.xpath("/schema/element[@name='DBDataSet']/unique").map{|uk|
+      name = uk["name"]
+      warn "Non-PrimaryKey unique constraint, no idea what to do with it" unless uk["PrimaryKey"] == "true"
+      sel    = parse_tablename_xpath(uk.css("selector")[0]["xpath"])
+      fields = (uk/"field").map{|f| parse_field_xpath(f["xpath"])}
+      [name, sel, fields]
+    }
+  end
+
+  def keyrefs
+    @keyrefs ||= @doc.xpath("/schema/element[@name='DBDataSet']/keyref").map{|kr|
+      name   = kr["name"]
+      refer  = kr["refer"]
+      sel    = parse_tablename_xpath(kr.css("selector")[0]["xpath"])
+      fields = (kr/"field").map{|f| parse_field_xpath(f["xpath"])}
+      [name, refer, sel, fields]
+    }
+  end
+  
+  def dbdataset
+    @dbdataset ||= @doc.xpath("/schema/element[@name='DBDataSet']/complexType/choice/element").map{|el|
+      warn "Form other than 'unqualified', no idea what to do with it" unless el["form"] == "unqualified"
+      warn "Type not in mstns: namespace" unless el["type"] =~ /\Amstns:(.*)\z/
+      type = $1
+      warn "Element name not equal its type name" unless el["name"] == type
+      type
+    }.sort
+  end
+  
+  def verify
+    only_ct  = complex_types.keys.sort - dbdataset.sort
+    warn "complexTypes defined without correspending DBDataSet entry: #{only_ct.inspect}" unless only_ct.empty?
+    only_dds = dbdataset.sort - complex_types.keys.sort
+    warn "DBDataSet entries defined without correspending complexType: #{only_dds.inspect}" unless only_dds.empty?
+
+    uniques.each{|name, sel, fields|
+      x = false
+      fields.each{|fn|
+        ft = complex_types[sel][fn]
+        next if ft == "xs:string"
+        if ft.nil?
+          warn "Unique key `#{name}' refers to column `#{fn}' of table `#{sel}' but no such column exists"
+        else
+          warn "Unique key `#{name}' refers to column `#{fn}' of table `#{sel}' but this column is not of string type"
+        end
+        warn "Available columns: #{complex_types[sel].keys.join(" ")}"
+        x = true
+      }
+      STDERR.puts "" if x
+    }
+    
+    # pp :kr
+    # pp keyrefs
+  end
+end
+
+
+
+
+doc = Nokogiri::XML.parse(STDIN.read)
+doc.remove_namespaces!
+dv = DbxsdVerify.new(doc)
+dv.verify

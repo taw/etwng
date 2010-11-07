@@ -1589,10 +1589,10 @@
 		<xs:attribute name="government_system_of_faction" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomacy_negotiation_strings_tables">
-		<xs:attribute name="diplomacy_strings_ID" type="xs:string" use="required" />
+		<xs:attribute name="diplomacy_action" type="xs:string" use="required" />
 		<xs:attribute name="culture" type="xs:string" use="required" />
 		<xs:attribute name="Government_system" type="xs:string" use="required" />
-		<xs:attribute name="government_system_2" type="xs:string" use="required" />
+		<xs:attribute name="diplomacy_strings" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="diplomacy_strings_tables">
 		<xs:attribute name="diplomacy_strings_ID" type="xs:string" use="required" />
@@ -1671,7 +1671,7 @@
 		<xs:attribute name="unit_category" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="empires_regions_junct_tables">
-		<xs:attribute name="unknown1" type="xs:string" use="required" />
+		<xs:attribute name="Empire_ID" type="xs:string" use="required" />
 		<xs:attribute name="unknown2" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="empires_tables">
@@ -2738,7 +2738,6 @@
 		<xs:unique name="agent_spawnings_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//agent_spawnings_tables" />
 			<xs:field xpath="@Agent_IDRef" />
-			<xs:field xpath="@Chance" />
 		</xs:unique>
 		<xs:unique name="agent_to_agent_abilities_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//agent_to_agent_abilities_tables" />
@@ -3421,23 +3420,23 @@
 		</xs:unique>
 		<xs:unique name="climate_to_erosion_settings_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//climate_to_erosion_settings_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Climate_ID" />
 		</xs:unique>
 		<xs:unique name="climates_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//climates_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Climate_ID" />
 		</xs:unique>
 		<xs:unique name="commodities_demand_drivers_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//commodities_demand_drivers_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Commodity_demand_drivers" />
 		</xs:unique>
 		<xs:unique name="commodity_unit_names_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//commodity_unit_names_tables" />
-			<xs:field xpath="@Unit_x0020_Name" />
+			<xs:field xpath="@measuring_unit" />
 		</xs:unique>
 		<xs:unique name="cursors_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//cursors_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Cursor_action" />
 		</xs:unique>
 		<xs:unique name="diplomacy_attitudes_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//diplomacy_attitudes_tables" />
@@ -3445,31 +3444,31 @@
 		</xs:unique>
 		<xs:unique name="diplomacy_factor_strings_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//diplomacy_factor_strings_tables" />
-			<xs:field xpath="@DiplomacyFactorId" />
+			<xs:field xpath="@Diplomatic_factor_ID" />
 		</xs:unique>
 		<xs:unique name="diplomacy_negotiation_strings_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//diplomacy_negotiation_strings_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@diplomacy_action" />
+			<xs:field xpath="@culture" />
+			<xs:field xpath="@Government_system" />
 		</xs:unique>
 		<xs:unique name="diplomacy_strings_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//diplomacy_strings_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@diplomacy_strings_ID" />
 		</xs:unique>
 		<xs:unique name="diplomatic_relations_attitudes_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//diplomatic_relations_attitudes_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Diplomatic_relation" />
 		</xs:unique>
 		<xs:unique name="diplomatic_relations_government_type_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//diplomatic_relations_government_type_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@government_category" />
+			<xs:field xpath="@government_category_2" />
 		</xs:unique>
 		<xs:unique name="diplomatic_relations_religion_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//diplomatic_relations_religion_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Religion_ID" />
+			<xs:field xpath="@Religion_ID_x0020__x0028_2_x0029_" />
 		</xs:unique>
 		<xs:unique name="disaster_to_ground_types_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//disaster_to_ground_types_tables" />
@@ -3477,11 +3476,11 @@
 		</xs:unique>
 		<xs:unique name="disasters_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//disasters_tables" />
-			<xs:field xpath="@DisasterId" />
+			<xs:field xpath="@Disaster_ID" />
 		</xs:unique>
 		<xs:unique name="diseases_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//diseases_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Disease_ID" />
 		</xs:unique>
 		<xs:unique name="effect_bonus_value_commodity_junction_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//effect_bonus_value_commodity_junction_tables" />
@@ -3490,8 +3489,8 @@
 		<xs:unique name="effect_bonus_value_population_class_and_religion_junction_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//effect_bonus_value_population_class_and_religion_junction_tables" />
 			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@affect_this_value" />
+			<xs:field xpath="@Class" />
 		</xs:unique>
 		<xs:unique name="effect_bonus_value_projectile_junctions_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//effect_bonus_value_projectile_junctions_tables" />
@@ -3507,34 +3506,34 @@
 		</xs:unique>
 		<xs:unique name="effect_bonus_value_shot_type_junctions_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//effect_bonus_value_shot_type_junctions_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Effect_ID" />
 		</xs:unique>
 		<xs:unique name="effect_bonus_value_unit_category_junction_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//effect_bonus_value_unit_category_junction_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@Trait_effect" />
+			<xs:field xpath="@Bonus_ID" />
+			<xs:field xpath="@unit_category" />
 		</xs:unique>
 		<xs:unique name="empires_regions_junct_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//empires_regions_junct_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Empire_ID" />
 		</xs:unique>
 		<xs:unique name="empires_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//empires_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Empire_ID" />
 		</xs:unique>
 		<xs:unique name="entity_training_levels_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//entity_training_levels_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Training_level_of_Units" />
 		</xs:unique>
 		<xs:unique name="erosion_types_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//erosion_types_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Erosion_ID" />
 		</xs:unique>
 		<xs:unique name="events_view_group_junct_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//events_view_group_junct_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Historic_event_ID" />
+			<xs:field xpath="@Corrospondents_to_faction_ID" />
 		</xs:unique>
 		<xs:unique name="faction_groups_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//faction_groups_tables" />
@@ -3550,7 +3549,7 @@
 		</xs:unique>
 		<xs:unique name="governorships_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//governorships_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Continent_ID_x0020__x0028_used_x0020_for_x0020_governorship_x0020_assign_x0020__x0028__x003F__x0029_" />
 		</xs:unique>
 		<xs:unique name="lighting_setups_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//lighting_setups_tables" />
@@ -3558,8 +3557,8 @@
 		</xs:unique>
 		<xs:unique name="ministerial_position_default_names_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//ministerial_position_default_names_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Ministerial_position_ID" />
+			<xs:field xpath="@government_ID" />
 		</xs:unique>
 		<xs:unique name="ministerial_positions_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//ministerial_positions_tables" />
@@ -3567,19 +3566,19 @@
 		</xs:unique>
 		<xs:unique name="ministerial_positions_to_governorships_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//ministerial_positions_to_governorships_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@governor_cont" />
 		</xs:unique>
 		<xs:unique name="mission_activities_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//mission_activities_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Mission" />
 		</xs:unique>
 		<xs:unique name="mission_effects_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//mission_effects_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Mission_effect_ID" />
 		</xs:unique>
 		<xs:unique name="mission_sources_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//mission_sources_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Gov_ID" />
 		</xs:unique>
 		<xs:unique name="models_artilleries_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//models_artilleries_tables" />
@@ -3587,30 +3586,30 @@
 		</xs:unique>
 		<xs:unique name="models_artillery_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//models_artillery_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Model_ID" />
 		</xs:unique>
 		<xs:unique name="mount_variants_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//mount_variants_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Mount_variant" />
+			<xs:field xpath="@Mount_ID" />
 		</xs:unique>
 		<xs:unique name="movie_event_strings_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//movie_event_strings_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Event_message" />
+			<xs:field xpath="@culture_ID" />
 		</xs:unique>
 		<xs:unique name="names_forts_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//names_forts_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Names_group_ID" />
+			<xs:field xpath="@Fort_Name" />
 		</xs:unique>
 		<xs:unique name="names_groups_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//names_groups_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Name_groups_ID" />
 		</xs:unique>
 		<xs:unique name="particle_effects_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//particle_effects_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Effect" />
 		</xs:unique>
 		<xs:unique name="pdlc_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//pdlc_tables" />
@@ -3622,15 +3621,15 @@
 		</xs:unique>
 		<xs:unique name="population_classes_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//population_classes_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@class_ID" />
 		</xs:unique>
 		<xs:unique name="religions_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//religions_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Religion_ID" />
 		</xs:unique>
 		<xs:unique name="resources_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//resources_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Resource_ID" />
 		</xs:unique>
 		<xs:unique name="sea_climate_details_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//sea_climate_details_tables" />
@@ -3647,12 +3646,12 @@
 		</xs:unique>
 		<xs:unique name="slots_templates_models_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//slots_templates_models_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Town_ID" />
 		</xs:unique>
 		<xs:unique name="small_vegetation_climates_jct_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//small_vegetation_climates_jct_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Climate_ID" />
+			<xs:field xpath="@Vegetation_props_ID" />
 		</xs:unique>
 		<xs:unique name="special_edition_enums_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//special_edition_enums_tables" />
@@ -3660,45 +3659,45 @@
 		</xs:unique>
 		<xs:unique name="stances_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//stances_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Diplomatic_stance" />
 		</xs:unique>
 		<xs:unique name="taxes_classes_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//taxes_classes_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@taxes_classes" />
 		</xs:unique>
 		<xs:unique name="taxes_keys_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//taxes_keys_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Class" />
+			<xs:field xpath="@Tax_level_ID" />
 		</xs:unique>
 		<xs:unique name="taxes_levels_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//taxes_levels_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Tax_level_ID" />
 		</xs:unique>
 		<xs:unique name="town_wealth_growth_factors_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//town_wealth_growth_factors_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Wealth_effect" />
 		</xs:unique>
 		<xs:unique name="trade_details_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//trade_details_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@ID" />
 		</xs:unique>
 		<xs:unique name="warscape_categories_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//warscape_categories_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Categories" />
 		</xs:unique>
 		<xs:unique name="warscape_naval_lod_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//warscape_naval_lod_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Random_x0020_Number" />
 		</xs:unique>
 		<xs:unique name="warscape_rigid_lod_range_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//warscape_rigid_lod_range_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@LodID" />
 		</xs:unique>
 		<xs:unique name="warscape_trees_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//warscape_trees_tables" />
-			<xs:field xpath="@unknown1" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@TreeID" />
+			<xs:field xpath="@Season" />
 		</xs:unique>
 		<xs:unique name="warscape_underlay_textures_tables_Constraint1" msdata:PrimaryKey="true">
 			<xs:selector xpath=".//warscape_underlay_textures_tables" />
