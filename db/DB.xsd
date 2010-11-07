@@ -2406,6 +2406,136 @@
 		<xs:attribute name="Underlay_texture_path" type="xs:string" use="required" />
 		<xs:attribute name="unknown4" type="xs:int" use="required" />
 	</xs:complexType>
+
+	<xs:complexType name='_kv_morale_ext_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown4' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown5' type='xs:int' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='_kv_rules_ext_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='advisors_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='battle_sequences_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='battles_to_battle_sky_types_junctions_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='campaigns_campaign_variables_junctions_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:float' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='cdir_campaign_junctions_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute msprop:Optional='true' name='unknown2' type='xs:string'/>
+	</xs:complexType>
+	<xs:complexType name='cdir_desire_priorities_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='cdir_faction_junctions_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute msprop:Optional='true' name='unknown2' type='xs:string'/>
+	</xs:complexType>
+	<xs:complexType name='cdir_unit_balance_group_qualities_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown4' type='xs:int' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='cdir_unit_balance_groups_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:boolean' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='cdir_unit_qualities_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown4' type='xs:int' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='climate_to_tilesets_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='effect_bonus_value_unit_class_junction_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='faction_rebellion_units_junctions_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='faction_uniform_colours_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown4' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown5' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown6' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown7' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown8' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown9' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown10' type='xs:int' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='mp_general_command_ratings_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='subtitles_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='terrain_tilesets_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='trade_node_groups_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='uniform_to_faction_colours_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown4' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown5' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown6' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown7' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown8' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown9' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown10' type='xs:int' use='required'/>
+	  <xs:attribute name='unknown11' type='xs:int' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='uniforms_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='unit_special_abilities_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:float' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:float' use='required'/>
+	  <xs:attribute name='unknown4' type='xs:int' use='required'/>
+	</xs:complexType>
+	<xs:complexType name='videos_tables'>
+	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+	  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+	</xs:complexType>
+
+
 	<xs:element name="DBDataSet">
 		<xs:complexType>
 			<xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2683,6 +2813,33 @@
 				<xs:element name="warscape_rigid_lod_range_tables" form="unqualified" type="mstns:warscape_rigid_lod_range_tables" />
 				<xs:element name="warscape_trees_tables" form="unqualified" type="mstns:warscape_trees_tables" />
 				<xs:element name="warscape_underlay_textures_tables" form="unqualified" type="mstns:warscape_underlay_textures_tables" />
+				
+				
+				<xs:element form='unqualified' name='_kv_morale_ext_tables' type='mstns:_kv_morale_ext_tables'/>
+				<xs:element form='unqualified' name='_kv_rules_ext_tables' type='mstns:_kv_rules_ext_tables'/>
+				<xs:element form='unqualified' name='advisors_tables' type='mstns:advisors_tables'/>
+				<xs:element form='unqualified' name='battle_sequences_tables' type='mstns:battle_sequences_tables'/>
+				<xs:element form='unqualified' name='battles_to_battle_sky_types_junctions_tables' type='mstns:battles_to_battle_sky_types_junctions_tables'/>
+				<xs:element form='unqualified' name='campaigns_campaign_variables_junctions_tables' type='mstns:campaigns_campaign_variables_junctions_tables'/>
+				<xs:element form='unqualified' name='cdir_campaign_junctions_tables' type='mstns:cdir_campaign_junctions_tables'/>
+				<xs:element form='unqualified' name='cdir_desire_priorities_tables' type='mstns:cdir_desire_priorities_tables'/>
+				<xs:element form='unqualified' name='cdir_faction_junctions_tables' type='mstns:cdir_faction_junctions_tables'/>
+				<xs:element form='unqualified' name='cdir_unit_balance_group_qualities_tables' type='mstns:cdir_unit_balance_group_qualities_tables'/>
+				<xs:element form='unqualified' name='cdir_unit_balance_groups_tables' type='mstns:cdir_unit_balance_groups_tables'/>
+				<xs:element form='unqualified' name='cdir_unit_qualities_tables' type='mstns:cdir_unit_qualities_tables'/>
+				<xs:element form='unqualified' name='climate_to_tilesets_tables' type='mstns:climate_to_tilesets_tables'/>
+				<xs:element form='unqualified' name='effect_bonus_value_unit_class_junction_tables' type='mstns:effect_bonus_value_unit_class_junction_tables'/>
+				<xs:element form='unqualified' name='faction_rebellion_units_junctions_tables' type='mstns:faction_rebellion_units_junctions_tables'/>
+				<xs:element form='unqualified' name='faction_uniform_colours_tables' type='mstns:faction_uniform_colours_tables'/>
+				<xs:element form='unqualified' name='mp_general_command_ratings_tables' type='mstns:mp_general_command_ratings_tables'/>
+				<xs:element form='unqualified' name='subtitles_tables' type='mstns:subtitles_tables'/>
+				<xs:element form='unqualified' name='terrain_tilesets_tables' type='mstns:terrain_tilesets_tables'/>
+				<xs:element form='unqualified' name='trade_node_groups_tables' type='mstns:trade_node_groups_tables'/>
+				<xs:element form='unqualified' name='uniform_to_faction_colours_tables' type='mstns:uniform_to_faction_colours_tables'/>
+				<xs:element form='unqualified' name='uniforms_tables' type='mstns:uniforms_tables'/>
+				<xs:element form='unqualified' name='unit_special_abilities_tables' type='mstns:unit_special_abilities_tables'/>
+				<xs:element form='unqualified' name='videos_tables' type='mstns:videos_tables'/>
+				
 			</xs:choice>
 		</xs:complexType>
 		<xs:unique name="Constraint1" msdata:PrimaryKey="true">
@@ -3704,6 +3861,112 @@
 			<xs:selector xpath=".//warscape_underlay_textures_tables" />
 			<xs:field xpath="@unknown1" />
 		</xs:unique>
+
+		<xs:unique msdata:PrimaryKey='true' name='_kv_morale_ext_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//_kv_morale_ext_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='_kv_rules_ext_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//_kv_rules_ext_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='advisors_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//advisors_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='battle_sequences_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//battle_sequences_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='battles_to_battle_sky_types_junctions_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//battles_to_battle_sky_types_junctions_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		  <xs:field xpath='@unknown2'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='campaigns_campaign_variables_junctions_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//campaigns_campaign_variables_junctions_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		  <xs:field xpath='@unknown2'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='cdir_campaign_junctions_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//cdir_campaign_junctions_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='cdir_desire_priorities_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//cdir_desire_priorities_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='cdir_faction_junctions_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//cdir_faction_junctions_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='cdir_unit_balance_group_qualities_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//cdir_unit_balance_group_qualities_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		  <xs:field xpath='@unknown2'/>
+		  <xs:field xpath='@unknown3'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='cdir_unit_balance_groups_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//cdir_unit_balance_groups_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='cdir_unit_qualities_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//cdir_unit_qualities_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		  <xs:field xpath='@unknown2'/>
+		  <xs:field xpath='@unknown3'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='climate_to_tilesets_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//climate_to_tilesets_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='effect_bonus_value_unit_class_junction_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//effect_bonus_value_unit_class_junction_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='faction_rebellion_units_junctions_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//faction_rebellion_units_junctions_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		  <xs:field xpath='@unknown2'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='faction_uniform_colours_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//faction_uniform_colours_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='mp_general_command_ratings_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//mp_general_command_ratings_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='subtitles_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//subtitles_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='terrain_tilesets_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//terrain_tilesets_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='trade_node_groups_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//trade_node_groups_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='uniform_to_faction_colours_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//uniform_to_faction_colours_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='uniforms_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//uniforms_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='unit_special_abilities_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//unit_special_abilities_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+		<xs:unique msdata:PrimaryKey='true' name='videos_tables_tables_Constraint1'>
+		  <xs:selector xpath='.//videos_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:unique>
+
+
 		<xs:keyref name="warscape_trees_tables_unknown1__TO__trees_PrimaryKey" refer="trees_tables_Constraint1">
 			<xs:selector xpath=".//warscape_trees_tables" />
 			<xs:field xpath="@TreeID" />
@@ -4575,6 +4838,23 @@
 		<xs:keyref name="advice_levels_tables_Thread_Name__TO__advice_threads_tables_Key" refer="advice_threads_tables_Constraint1">
 			<xs:selector xpath=".//advice_levels_tables" />
 			<xs:field xpath="@Thread_Name" />
+		</xs:keyref>
+
+		<xs:keyref name='cdir_unit_balance_group_qualities_tables_unknown1__TO__campaign_ai_personalities_PrimaryKey' refer='campaign_ai_personalities_tables_Constraint1'>
+		  <xs:selector xpath='.//cdir_unit_balance_group_qualities_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:keyref>
+		<xs:keyref name='cdir_unit_qualities_tables_unknown1__TO__campaign_ai_personalities_PrimaryKey' refer='campaign_ai_personalities_tables_Constraint1'>
+		  <xs:selector xpath='.//cdir_unit_qualities_tables'/>
+		  <xs:field xpath='@unknown1'/>
+		</xs:keyref>
+		<xs:keyref name='climate_to_tilesets_tables_unknown2__TO__campaign_ground_types_PrimaryKey' refer='campaign_ground_types_tables_Constraint1'>
+		  <xs:selector xpath='.//climate_to_tilesets_tables'/>
+		  <xs:field xpath='@unknown2'/>
+		</xs:keyref>
+		<xs:keyref name='effect_bonus_value_unit_class_junction_tables_unknown3__TO__unit_class_PrimaryKey' refer='unit_class_tables_Constraint1'>
+		  <xs:selector xpath='.//effect_bonus_value_unit_class_junction_tables'/>
+		  <xs:field xpath='@unknown3'/>
 		</xs:keyref>
 	</xs:element>
 </xs:schema>
