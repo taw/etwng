@@ -3705,19 +3705,19 @@
 		</xs:unique>
 		<xs:keyref name="warscape_trees_tables_unknown2__TO__seasons_PrimaryKey" refer="seasons_tables_Constraint1">
 			<xs:selector xpath=".//warscape_trees_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Season" />
 		</xs:keyref>
 		<xs:keyref name="warscape_trees_tables_unknown1__TO__trees_PrimaryKey" refer="trees_tables_Constraint1">
 			<xs:selector xpath=".//warscape_trees_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@TreeID" />
 		</xs:keyref>
 		<xs:keyref name="small_vegetation_climates_jct_tables_unknown2__TO__warscape_rigid_PrimaryKey" refer="warscape_rigid_tables_Constraint1">
 			<xs:selector xpath=".//small_vegetation_climates_jct_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Vegetation_props_ID" />
 		</xs:keyref>
 		<xs:keyref name="small_vegetation_climates_jct_tables_unknown1__TO__climates_PrimaryKey" refer="climates_tables_Constraint1">
 			<xs:selector xpath=".//small_vegetation_climates_jct_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Climate_ID" />
 		</xs:keyref>
 		<xs:keyref name="slots_gdp_values_tables_unknown1__TO__slots_PrimaryKey" refer="slots_tables_Constraint1">
 			<xs:selector xpath=".//slots_gdp_values_tables" />
@@ -3733,47 +3733,47 @@
 		</xs:keyref>
 		<xs:keyref name="resources_tables_unknown3__TO__slots_PrimaryKey" refer="slots_tables_Constraint1">
 			<xs:selector xpath=".//resources_tables" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@Slot_ID" />
 		</xs:keyref>
 		<xs:keyref name="names_forts_tables_unknown1__TO__names_groups_PrimaryKey" refer="names_groups_tables_Constraint1">
 			<xs:selector xpath=".//names_forts_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Names_group_ID" />
 		</xs:keyref>
 		<xs:keyref name="movie_event_strings_tables_unknown2__TO__cultures_PrimaryKey" refer="cultures_tables_Constraint1">
 			<xs:selector xpath=".//movie_event_strings_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@culture_ID" />
 		</xs:keyref>
 		<xs:keyref name="mount_variants_tables_unknown2__TO__warscape_animated_PrimaryKey" refer="warscape_animated_tables_Constraint1">
 			<xs:selector xpath=".//mount_variants_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Mount_ID" />
 		</xs:keyref>
 		<xs:keyref name="ministerial_positions_to_effects_tables_unknown3__TO__effects_PrimaryKey" refer="effects_tables_Constraint1">
 			<xs:selector xpath=".//ministerial_positions_to_effects_tables" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@ministerial_Effect_ID" />
 		</xs:keyref>
 		<xs:keyref name="ministerial_positions_to_effects_tables_unknown1__TO__ministerial_positions_PrimaryKey" refer="ministerial_positions_tables_Constraint1">
 			<xs:selector xpath=".//ministerial_positions_to_effects_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Ministerial_position" />
 		</xs:keyref>
 		<xs:keyref name="ministerial_position_default_names_tables_unknown2__TO__government_types_PrimaryKey" refer="government_types_tables_Constraint1">
 			<xs:selector xpath=".//ministerial_position_default_names_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@government_ID" />
 		</xs:keyref>
 		<xs:keyref name="ministerial_position_default_names_tables_unknown1__TO__ministerial_positions_PrimaryKey" refer="ministerial_positions_tables_Constraint1">
 			<xs:selector xpath=".//ministerial_position_default_names_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Ministerial_position_ID" />
 		</xs:keyref>
 		<xs:keyref name="ministerial_effectiveness_modifiers_tables_unknown2__TO__government_types_PrimaryKey" refer="government_types_tables_Constraint1">
 			<xs:selector xpath=".//ministerial_effectiveness_modifiers_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Government_ID" />
 		</xs:keyref>
 		<xs:keyref name="fort_underlay_climate_jcts_tables_unknown2__TO__climates_PrimaryKey" refer="climates_tables_Constraint1">
 			<xs:selector xpath=".//fort_underlay_climate_jcts_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@climate_ID" />
 		</xs:keyref>
 		<xs:keyref name="fort_underlay_climate_jcts_tables_unknown1__TO__battlefield_buildings_PrimaryKey" refer="battlefield_buildings_tables_Constraint1">
 			<xs:selector xpath=".//fort_underlay_climate_jcts_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Fort_underlay_ID" />
 		</xs:keyref>
 		<xs:keyref name="family_trees_tables_unknown4__TO__factions_PrimaryKey" refer="factions_tables_Constraint1">
 			<xs:selector xpath=".//family_trees_tables" />
@@ -3781,11 +3781,11 @@
 		</xs:keyref>
 		<xs:keyref name="events_view_group_junct_tables_unknown2__TO__groupings_PrimaryKey" refer="groupings_tables_Constraint1">
 			<xs:selector xpath=".//events_view_group_junct_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Corrospondents_to_faction_ID" />
 		</xs:keyref>
 		<xs:keyref name="events_view_group_junct_tables_unknown1__TO__events_PrimaryKey" refer="events_tables_Constraint1">
 			<xs:selector xpath=".//events_view_group_junct_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Historic_event_ID" />
 		</xs:keyref>
 		<xs:keyref name="empires_regions_junct_tables_unknown2__TO__empires_PrimaryKey" refer="empires_tables_Constraint1">
 			<xs:selector xpath=".//empires_regions_junct_tables" />
@@ -3793,31 +3793,31 @@
 		</xs:keyref>
 		<xs:keyref name="effect_bonus_value_unit_category_junction_tables_unknown3__TO__unit_category_PrimaryKey" refer="unit_category_tables_Constraint1">
 			<xs:selector xpath=".//effect_bonus_value_unit_category_junction_tables" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@unit_category" />
 		</xs:keyref>
 		<xs:keyref name="effect_bonus_value_shot_type_junctions_tables_unknown3__TO__projectile_shot_type_enum_PrimaryKey" refer="projectile_shot_type_enum_tables_Constraint1">
 			<xs:selector xpath=".//effect_bonus_value_shot_type_junctions_tables" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@projectile_ID" />
 		</xs:keyref>
 		<xs:keyref name="effect_bonus_value_resource_junction_tables_unknown3__TO__resources_PrimaryKey" refer="resources_tables_Constraint1">
 			<xs:selector xpath=".//effect_bonus_value_resource_junction_tables" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@Resource_category" />
 		</xs:keyref>
 		<xs:keyref name="effect_bonus_value_religion_junction_tables_unknown3__TO__religions_PrimaryKey" refer="religions_tables_Constraint1">
 			<xs:selector xpath=".//effect_bonus_value_religion_junction_tables" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@Religion_ID" />
 		</xs:keyref>
 		<xs:keyref name="effect_bonus_value_projectile_junctions_tables_unknown3__TO__projectiles_PrimaryKey" refer="projectiles_tables_Constraint1">
 			<xs:selector xpath=".//effect_bonus_value_projectile_junctions_tables" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@weapon_category" />
 		</xs:keyref>
 		<xs:keyref name="effect_bonus_value_population_class_and_religion_junction_tables_unknown4__TO__religions_PrimaryKey" refer="religions_tables_Constraint1">
 			<xs:selector xpath=".//effect_bonus_value_population_class_and_religion_junction_tables" />
-			<xs:field xpath="@unknown4" />
+			<xs:field xpath="@Religion_category" />
 		</xs:keyref>
 		<xs:keyref name="effect_bonus_value_population_class_and_religion_junction_tables_unknown2__TO__building_chains_PrimaryKey" refer="building_chains_tables_Constraint1">
 			<xs:selector xpath=".//effect_bonus_value_population_class_and_religion_junction_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@affect_this_value" />
 		</xs:keyref>
 		<xs:keyref name="effect_bonus_value_population_class_and_religion_junction_tables_unknown1__TO__effects_PrimaryKey" refer="effects_tables_Constraint1">
 			<xs:selector xpath=".//effect_bonus_value_population_class_and_religion_junction_tables" />
@@ -3825,7 +3825,7 @@
 		</xs:keyref>
 		<xs:keyref name="effect_bonus_value_commodity_junction_tables_unknown3__TO__resources_PrimaryKey" refer="resources_tables_Constraint1">
 			<xs:selector xpath=".//effect_bonus_value_commodity_junction_tables" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@Resource_category" />
 		</xs:keyref>
 		<xs:keyref name="disaster_to_ground_types_tables_unknown2__TO__campaign_ground_types_PrimaryKey" refer="campaign_ground_types_tables_Constraint1">
 			<xs:selector xpath=".//disaster_to_ground_types_tables" />
@@ -3833,39 +3833,39 @@
 		</xs:keyref>
 		<xs:keyref name="diplomatic_relations_religion_tables_unknown2__TO__religions_PrimaryKey" refer="religions_tables_Constraint1">
 			<xs:selector xpath=".//diplomatic_relations_religion_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@Religion_ID_x0020__x0028_2_x0029_" />
 		</xs:keyref>
 		<xs:keyref name="diplomatic_relations_religion_tables_unknown1__TO__religions_PrimaryKey" refer="religions_tables_Constraint1">
 			<xs:selector xpath=".//diplomatic_relations_religion_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@Religion_ID" />
 		</xs:keyref>
 		<xs:keyref name="diplomatic_relations_government_type_tables_unknown2__TO__government_types_PrimaryKey" refer="government_types_tables_Constraint1">
 			<xs:selector xpath=".//diplomatic_relations_government_type_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@government_category_2" />
 		</xs:keyref>
 		<xs:keyref name="diplomatic_relations_government_type_tables_unknown1__TO__government_types_PrimaryKey" refer="government_types_tables_Constraint1">
 			<xs:selector xpath=".//diplomatic_relations_government_type_tables" />
-			<xs:field xpath="@unknown1" />
+			<xs:field xpath="@government_category" />
 		</xs:keyref>
 		<xs:keyref name="diplomacy_negotiation_strings_tables_unknown3__TO__government_types_PrimaryKey" refer="government_types_tables_Constraint1">
 			<xs:selector xpath=".//diplomacy_negotiation_strings_tables" />
-			<xs:field xpath="@unknown3" />
+			<xs:field xpath="@Government_system" />
 		</xs:keyref>
 		<xs:keyref name="diplomacy_negotiation_strings_tables_unknown2__TO__cultures_PrimaryKey" refer="cultures_tables_Constraint1">
 			<xs:selector xpath=".//diplomacy_negotiation_strings_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@culture" />
 		</xs:keyref>
 		<xs:keyref name="diplomacy_negotiation_faction_override_strings_tables.Faction__is-a__factions_tables.Faction_ID" refer="factions_tables_Constraint1">
 			<xs:selector xpath=".//diplomacy_negotiation_faction_override_strings_tables" />
-			<xs:field xpath="@Faction" />
+			<xs:field xpath="@faction" />
 		</xs:keyref>
 		<xs:keyref name="diplomacy_negotiation_faction_override_strings_tables.GovernmentType__is-a__government_types_tables.Government_ID" refer="government_types_tables_Constraint1">
 			<xs:selector xpath=".//diplomacy_negotiation_faction_override_strings_tables" />
-			<xs:field xpath="@GovernmentType" />
+			<xs:field xpath="@Government_system" />
 		</xs:keyref>
 		<xs:keyref name="diplomacy_negotiation_faction_override_strings_tables_unknown2__TO__cultures_PrimaryKey" refer="cultures_tables_Constraint1">
 			<xs:selector xpath=".//diplomacy_negotiation_faction_override_strings_tables" />
-			<xs:field xpath="@unknown2" />
+			<xs:field xpath="@culture" />
 		</xs:keyref>
 		<xs:keyref name="battlefield_building_categories_tables_unknown3__TO__particle_effects_PrimaryKey" refer="particle_effects_tables_Constraint1">
 			<xs:selector xpath=".//battlefield_building_categories_tables" />
@@ -3985,7 +3985,7 @@
 		</xs:keyref>
 		<xs:keyref name="unit_stats_land_tables.Infantry_x0020_Battle_x0020_Entity__is-a__battle_entities_tables.Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
-			<xs:field xpath="@Infantry_x0020_Battle_x0020_Entity" />
+			<xs:field xpath="@Soldier_x0020_Model" />
 		</xs:keyref>
 		<xs:keyref name="unit_stats_land_tables.Officer__is-a__battle_personalities_tables.Battle_x0020_Personality_x0020_ID" refer="battle_personalities_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
@@ -4003,9 +4003,9 @@
 			<xs:selector xpath=".//unit_stats_land_tables" />
 			<xs:field xpath="@Standard_x0020_Bearer" />
 		</xs:keyref>
-		<xs:keyref name="unit_stats_land_tables_Horse_1__TO__mounts_tables_Mount_ID" refer="mounts_tables_Constraint1">
+		<xs:keyref name="unit_stats_land_tables_Mount_x0020_Model__TO__mounts_tables_Mount_ID" refer="mounts_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
-			<xs:field xpath="@Horse_1" />
+			<xs:field xpath="@Mount_x0020_Model" />
 		</xs:keyref>
 		<xs:keyref name="unit_stats_land_tables.Cavalry_x0020_Battle_x0020_Entity__is-a__battle_entities_tables.Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
