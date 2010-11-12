@@ -7,4 +7,5 @@ gfconv/groupformations*.bin
 gfconv/groupformations*.txt
 esfxml/esf
 esfxml/samples
+farm_fields_tile_texture/samples
 tmp
