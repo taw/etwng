@@ -15,6 +15,7 @@ require "lib/loc"
 require "lib/rigid_mesh"
 require "lib/atlas_converter"
 require "lib/anim"
+require "lib/sound_events"
 
 SupportedFormats = {
 # Esf extensions
@@ -42,6 +43,9 @@ SupportedFormats = {
 # Cnt-prefix simple formats
   ".anim_sound_event"         => AnimSoundEventConverter,
   ".desc_model"               => DescModelConverter,
+
+  # Totally broken
+  # "sound_events"             => SoundEventsConverter, 
 
 # Rigid model
   # ".rigid_model_animation"    => RigidModelConverter, # SAME as .rigid_model ???
