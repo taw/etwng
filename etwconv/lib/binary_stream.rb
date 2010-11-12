@@ -88,6 +88,12 @@ class BinaryStreamWriter < BinaryStream
     u2(s.size)
     put(s)
   end
+  def u4(v)
+    @data << [v].pack("V")
+  end
+  def flt(v)
+    @data << [v].pack("f")
+  end
   def str(s)
     s = s.to_utf16
     u2(s.size/2)
@@ -118,6 +124,12 @@ class BinaryStreamReader < BinaryStream
   end
   def u2_ary(&blk)
     (0...u2).map(&blk)
+  end
+  def u4
+    get(4).unpack("V")[0]
+  end
+  def flt
+    get(4).unpack("f")[0].pretty_single
   end
   def bool
     b = byte
