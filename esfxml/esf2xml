@@ -4,6 +4,14 @@ require "default_versions"
 require "fileutils"
 require "pp"
 
+class Float
+  def pretty_single
+    rv = (((100_000.0 * self).round / 100_000.0) rescue self)
+    return rv if [self].pack("f") == [rv].pack("f")
+    self
+  end
+end
+
 class String
   # Escape string for output as XML text (< > &)
   def xml_escape
@@ -54,7 +62,7 @@ module EsfBasicBinaryOps
   def get_float
     rv = @data[@ofs,4].unpack("f")[0]
     @ofs += 4
-    rv
+    rv.pretty_single
   end
   def get_u2
     rv = @data[@ofs,2].unpack("v")[0]
