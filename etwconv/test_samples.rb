@@ -1,9 +1,14 @@
+#!/usr/bin/env ruby
 puts "Testing #{RUBY_PLATFORM}/#{RUBY_VERSION}"
 $: << "."
 
 require "lib/core_ext"
 require "lib/file_format_detection"
 require "test/unit"
+
+$todo = ARGV.dup
+ARGV.clear
+$todo = Dir["samples/*"] if $todo.empty?
 
 class TestSamples < Test::Unit::TestCase
   def ffd
@@ -35,7 +40,8 @@ class TestSamples < Test::Unit::TestCase
     end
   end
 
-  Dir["samples/*"].sort.each{|fn|
+  
+  $todo.sort.each{|fn|
     name = File.basename(fn).tr(".-","__")
     eval "def test_#{name}; assert_converts(#{fn.inspect}); end"
   }
