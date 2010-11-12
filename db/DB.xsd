@@ -4243,27 +4243,28 @@
 			<xs:selector xpath=".//unit_stats_naval_tables" />
 			<xs:field xpath="@Bosun" />
 		</xs:keyref>
+
 		<xs:keyref name="unit_stats_naval_tables.Cpt__is-a__battle_personalities_tables.Battle_x0020_Personality_x0020_ID" refer="battle_personalities_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_naval_tables" />
 			<xs:field xpath="@Cpt" />
 		</xs:keyref>
-		<xs:keyref name="unit_stats_land_tables.Projectile__is-a__projectiles_tables.Projectile_ID" refer="projectiles_tables_Constraint1">
+		<xs:keyref name="unit_stats_land_tables_Projectile__is-a__projectiles_tables_Projectile_ID" refer="projectiles_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
 			<xs:field xpath="@Projectile" />
 		</xs:keyref>
-		<xs:keyref name="unit_stats_land_tables.Gun__is-a__gun_types_tables.Gun_ID" refer="gun_types_tables_Constraint1">
+		<xs:keyref name="unit_stats_land_tables_Gun__is-a__gun_types_tables.Gun_ID" refer="gun_types_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
 			<xs:field xpath="@Gun" />
 		</xs:keyref>
-		<xs:keyref name="unit_stats_land_tables.Ammo_x0020_Train_x0020_Battle_x0020_Entity__is-a__battle_entities_tables.Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
+		<xs:keyref name="unit_stats_land_tables_Ammo_x0020_Train_x0020_Battle_x0020_Entity__is-a__battle_entities_tables_Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
 			<xs:field xpath="@Ammo_x0020_Train_x0020_Battle_x0020_Entity" />
 		</xs:keyref>
-		<xs:keyref name="unit_stats_land_tables.Carriage_x0020_Battle_x0020_Entity__is-a__battle_entities_tables.Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
+		<xs:keyref name="unit_stats_land_tables_Carriage_x0020_Battle_x0020_Entity__is-a__battle_entities_tables_Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
 			<xs:field xpath="@Carriage_x0020_Battle_x0020_Entity" />
 		</xs:keyref>
-		<xs:keyref name="unit_stats_land_tables.Cavalry_x0020_Battle_x0020_Entity__is-a__battle_entities_tables.Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
+		<xs:keyref name="unit_stats_land_tables_Cavalry_x0020_Battle_x0020_Entity__is-a__battle_entities_tables_Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
 			<xs:field xpath="@Cavalry_x0020_Battle_x0020_Entity" />
 		</xs:keyref>
@@ -4283,14 +4284,12 @@
 			<xs:selector xpath=".//unit_stats_land_tables" />
 			<xs:field xpath="@Unit" />
 		</xs:keyref>
-		<xs:keyref name="unit_stats_land_tables.Officer__is-a__battle_personalities_tables.Battle_x0020_Personality_x0020_ID" refer="battle_personalities_tables_Constraint1">
+
+		<xs:keyref name="unit_stats_land_tables_Officer__is-a__battle_personalities_tables_Battle_x0020_Personality_x0020_ID" refer="battle_personalities_tables_Constraint1">
 			<xs:selector xpath=".//unit_stats_land_tables" />
 			<xs:field xpath="@Officer" />
 		</xs:keyref>
-		<xs:keyref name="unit_stats_land_tables.Infantry_x0020_Battle_x0020_Entity__is-a__battle_entities_tables.Battle_x0020_Entity_x0020_ID" refer="battle_entities_tables_Constraint1">
-			<xs:selector xpath=".//unit_stats_land_tables" />
-			<xs:field xpath="@Soldier_x0020_Model" />
-		</xs:keyref>
+
 		<xs:keyref name="unit_required_technology_junctions_tables_Tech_IDRef__TO__technologies_tables_Tech_ID" refer="technologies_tables_Constraint1">
 			<xs:selector xpath=".//unit_required_technology_junctions_tables" />
 			<xs:field xpath="@Tech_IDRef" />
