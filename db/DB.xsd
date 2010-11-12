@@ -223,7 +223,7 @@
 		<xs:attribute name="Height" type="xs:float" use="required" />
 		<xs:attribute name="Firing_arc_x0020_Front_x003F_" type="xs:float" use="required" />
 		<xs:attribute name="Firing_arc_x0020_Rear_x003F_" type="xs:float" use="required" />
-		<xs:attribute name="melee_resistance" type="xs:float" use="required" />
+		<xs:attribute name="Turning_rate" type="xs:float" use="required" />
 		<xs:attribute name="projectiles_resistance" type="xs:int" use="required" />
 	</xs:complexType>
 	<xs:complexType name="battle_personalities_tables">
