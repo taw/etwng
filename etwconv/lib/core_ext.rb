@@ -12,3 +12,11 @@ class String
     gsub(/[&<>'"]/){ escape_codes[$&] }
   end
 end
+
+class Float
+  def pretty_single
+    rv = (((100_000.0 * self).round / 100_000.0) rescue self)
+    return rv if [self].pack("f") == [rv].pack("f")
+    self
+  end
+end
