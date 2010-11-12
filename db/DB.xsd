@@ -1132,10 +1132,10 @@
 	</xs:complexType>
 	<xs:complexType name="unit_movement_modifiers_tables">
 		<xs:attribute name="Movement_Modifier" type="xs:string" use="required" />
-		<xs:attribute name="unknown1" type="xs:float" use="required" />
-		<xs:attribute name="unknown2" type="xs:float" use="required" />
-		<xs:attribute name="unknown3" type="xs:float" use="required" />
-		<xs:attribute name="unknown4" type="xs:float" use="required" />
+		<xs:attribute name="Horse_Artillery" type="xs:float" use="required" />
+		<xs:attribute name="Foot_Artillery" type="xs:float" use="required" />
+		<xs:attribute name="Cavalry" type="xs:float" use="required" />
+		<xs:attribute name="Infantry" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="unit_regiment_names_tables">
 		<xs:attribute name="Regiment_Name" type="xs:string" use="required" />
