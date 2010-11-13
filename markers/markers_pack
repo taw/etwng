@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input.txt output.markers"
+  exit 1
+end
+
+data = File.open(ARGV[0], 'rb').readlines.map{|str| eval(str)}
+out = data.map{|str,*flts|
+  str = str.unpack("U*").pack("v*")
+  [str.size/2].pack("v") + str + flts.pack("f*")
+}.join
+
+File.open(ARGV[1], 'wb'){|fh| fh.write out}

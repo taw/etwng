@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+class Markers
+  def initialize(path)
+    @data = File.open(path, 'rb').read
+    @ofs = 0
+  end
+
+  def get(n)
+    rv, @ofs = @data[@ofs, n], @ofs + n
+    rv
+  end
+  
+  def parse
+    parsed = []
+    while @ofs < @data.size
+      strlen = get(2).unpack("v")[0]
+      str    = get(strlen*2).unpack("v*").pack("U*")
+      flts   = get(16*4).unpack("f*")
+      parsed << [str, *flts]
+    end
+    parsed
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input.markers output.txt"
+  exit 1
+end
+
+data = Markers.new(ARGV[0]).parse
+
+File.open(ARGV[1], 'wb') do |fh|
+  fh.puts data.map(&:inspect)
+end
