@@ -15,6 +15,7 @@ require "lib/loc"
 require "lib/rigid_mesh"
 require "lib/atlas_converter"
 require "lib/anim"
+require "lib/markers"
 require "lib/sound_events"
 
 SupportedFormats = {
@@ -39,6 +40,8 @@ SupportedFormats = {
   "sea_grids.esf"            => EsfFile,
   "trade_routes.esf"         => EsfFile,
 
+
+  ".markers"                 => MarkersConverter,
 
 # Cnt-prefix simple formats
   ".anim_sound_event"         => AnimSoundEventConverter,
