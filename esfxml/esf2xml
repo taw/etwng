@@ -316,6 +316,9 @@ class EsfParser
     :SAVE_GAME_HEADER          => 'save_game_header',
     :CAMPAIGN_PREOPEN_MAP_INFO => 'preopen_map_info',
     :REGION                    => 'region/',
+    :HEIGHT_FIELD              => "height_field",
+    :BMD_TEXTURES              => "bmd_textures",
+    :GROUND_TYPE_FIELD         => "ground_type_field",
   }
   def convert_rec!(node_type, version)
     xml_nested(XmlSplit[node_type]) do

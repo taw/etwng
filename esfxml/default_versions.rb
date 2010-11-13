@@ -163,4 +163,7 @@ DefaultVersions = Hash.new(0).merge({
   :UNIT_CLASS_NAME_ALLOCATOR => 1,
   :UNIT_HISTORY => 1,
   :WORLD => 4,
+  :WALL_INSTANCE => 2,
+  :FARM_INSTANCE => 2,
+  :FARM_DATA_ITEM_OWNER_INSTANCE => 1,
 })
