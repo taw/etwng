@@ -28,6 +28,9 @@ class CS2File
   def size
     @data.size
   end
+  def bytes_left
+    size - ofs
+  end
   def get(n)
     rv, @ofs = @data[@ofs, n], @ofs+n
     rv
@@ -35,7 +38,21 @@ class CS2File
   def get_flt
     get(4).unpack("f")[0].pretty_single
   end
+  def get_v2
+    [get_flt, get_flt]
+  end
+  def get_v3
+    [get_flt, get_flt, get_flt]
+  end
+  def get_z4
+    v = get_u4
+    warn "Expected 0, got #{v}" unless v == 0
+    v
+  end
   def get_u4
+    get(4).unpack("V")[0]
+  end
+  def get_i4
     get(4).unpack("V")[0]
   end
   def get_u2
@@ -44,100 +61,99 @@ class CS2File
   def get_str
     get(2*get_u2).unpack("v*").pack("U*")
   end
+  def get_u4_ary(&blk) # means u4-indexed, not of-u4
+    (0...get_u4).map(&blk)
+  end
+  def get_v3a
+    get_u4_ary{ get_v3 }
+  end
+  def get_primary_data_array
+    get_u4_ary{|i|
+      a, b = get(5).unpack("VC")
+      raise "Expected #{i}, got #{a} as row index" if a != i
+      [b < 2 ? [false, true][b] : b, *get(19*4).unpack("l*")]
+    }
+  end
 end
 
-files_simple = %W[
-  samples/rigidmodels-buildings-prop_field_treestump_large-prop_field_treestump_large_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_treestump_small-prop_field_treestump_small_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_wheelbarrow-prop_field_wheelbarrow_tech.cs2.parsed
-  samples/buildings-prop_field_tent_med-prop_field_tent_med_tech.cs2.parsed
-  samples/buildings-prop_field_tent_small-prop_field_tent_small_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_tent_med-prop_field_tent_med_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_tent_small-prop_field_tent_small_tech.cs2.parsed
-  samples/buildings-prop_field_haybale_bundle02-prop_field_haybale_bundle02_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_haybale_bundle02-prop_field_haybale_bundle02_tech.cs2.parsed
-  samples/buildings-prop_field_cart-prop_field_cart_tech.cs2.parsed
-  samples/buildings-prop_field_tent_large-prop_field_tent_large_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_cart-prop_field_cart_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_tent_large-prop_field_tent_large_tech.cs2.parsed
-  samples/buildings-native_teepee02-native_teepee02_tech.cs2.parsed
-  samples/rigidmodels-buildings-native_teepee02-native_teepee02_tech.cs2.parsed
-  samples/buildings-fmv_cross2-fmv_cross2_tech.cs2.parsed
-  samples/buildings-fmv_cross3-fmv_cross3_tech.cs2.parsed
-  samples/buildings-fmv_cross4-fmv_cross4_tech.cs2.parsed
-  samples/buildings-fmv_mayflower-fmv_mayflower_tech.cs2.parsed
-  samples/buildings-fmv_rowboat-fmv_rowboat_tech.cs2.parsed
-  samples/buildings-fmv_thirdrate-fmv_thirdrate_tech.cs2.parsed
-  samples/rigidmodels-buildings-fmv_cross2-fmv_cross2_tech.cs2.parsed
-  samples/rigidmodels-buildings-fmv_cross3-fmv_cross3_tech.cs2.parsed
-  samples/rigidmodels-buildings-fmv_cross4-fmv_cross4_tech.cs2.parsed
-  samples/rigidmodels-buildings-fmv_mayflower-fmv_mayflower_tech.cs2.parsed
-  samples/rigidmodels-buildings-fmv_rowboat-fmv_rowboat_tech.cs2.parsed
-  samples/rigidmodels-buildings-fmv_thirdrate-fmv_thirdrate_tech.cs2.parsed
-  samples/buildings-american_fence-american_fence_tech.cs2.parsed
-  samples/buildings-american_fenceend-american_fenceend_tech.cs2.parsed
-  samples/buildings-american_gaet-american_gaet_tech.cs2.parsed
-  samples/buildings-american_stile-american_stile_tech.cs2.parsed
-  samples/buildings-prop_field_trough-prop_field_trough_tech.cs2.parsed
-  samples/rigidmodels-buildings-american_fence-american_fence_tech.cs2.parsed
-  samples/rigidmodels-buildings-american_fenceend-american_fenceend_tech.cs2.parsed
-  samples/rigidmodels-buildings-american_gaet-american_gaet_tech.cs2.parsed
-  samples/rigidmodels-buildings-american_stile-american_stile_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_trough-prop_field_trough_tech.cs2.parsed
-  samples/buildings-native_teepee01-native_teepee01_tech.cs2.parsed
-  samples/rigidmodels-buildings-native_teepee01-native_teepee01_tech.cs2.parsed
+files_sample = %W[
   samples/buildings-prop_field_applebarrels-prop_field_applebarrels_tech.cs2.parsed
-  samples/buildings-prop_field_haybale-prop_field_haybale_tech.cs2.parsed
-  samples/buildings-prop_field_stepladder-prop_field_stepladder_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_applebarrels-prop_field_applebarrels_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_haybale-prop_field_haybale_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_stepladder-prop_field_stepladder_tech.cs2.parsed
+  samples/rigidmodels-buildings-american_gaet-american_gaet_tech.cs2.parsed
+  samples/buildings-fmv_rowboat-fmv_rowboat_tech.cs2.parsed
+  samples/rigidmodels-buildings-native_teepee02-native_teepee02_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_field_cart-prop_field_cart_tech.cs2.parsed
+  samples/buildings-prop_field_haybale_bundle02-prop_field_haybale_bundle02_tech.cs2.parsed
+  samples/buildings-prop_field_tent_small-prop_field_tent_small_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_field_treestump_large-prop_field_treestump_large_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_field_haysheaf-prop_field_haysheaf_tech.cs2.parsed
+  samples/buildings-north_euro_house07a-north_euro_house07a_tech.cs2.parsed
+  samples/buildings-east_euro_house08b-east_euro_house08b_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_town_ottoman_stall01-prop_town_ottoman_stall01_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_town_plant_pot02-prop_town_plant_pot02_tech.cs2.parsed
 ]
-files_all = Dir["samples/*"]
 
-files_simple.sort.each{|fn|
-  next if File.basename(fn) =~ /\Atestdata/
+files_sample_small = %W[
+  samples/buildings-prop_field_applebarrels-prop_field_applebarrels_tech.cs2.parsed
+  samples/rigidmodels-buildings-american_gaet-american_gaet_tech.cs2.parsed
+  samples/buildings-east_euro_house08b-east_euro_house08b_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_town_plant_pot02-prop_town_plant_pot02_tech.cs2.parsed
+
+  samples/buildings-ottoman_warehouse04-ottoman_warehouse04_tech.cs2.parsed
+]
+
+files_all = Dir["samples/*"].sort_by{|fn| [File.size(fn), fn]}
+
+files_all.each{|fn|
   begin
-    data = []
-
     cs2 = CS2File.new(fn)
     puts fn
     p (0..5).map{ cs2.get_flt }
     p cs2.get_str
     p (0..7).map{ cs2.get_flt }
     p (0..7).map{ cs2.get_flt }
-    p cs2.get_u4
-    p cs2.get_str
-    p cs2.get_str
-    p (0..7).map{ cs2.get_flt }
-    p (0..7).map{ cs2.get_flt }
-    p cs2.get_u4
-    p cs2.get_str
-    p cs2.get_u4
-    p cs2.get_str
-    pp (0...cs2.get_u4).map{ [cs2.get_flt, cs2.get_flt, cs2.get_flt] }
 
-    p cs2.get(4).unpack("V")
-    12.times {
-      a, b = cs2.get(5).unpack("VC")
-      p [a, b < 2 ? [false, true][b] : b, *cs2.get(19*4).unpack("V*")]
+    p [cs2.get_u4, cs2.get_str, cs2.get_str]
+    p (0..7).map{ cs2.get_flt }
+    p (0..7).map{ cs2.get_flt }
+    p [cs2.get_u4, cs2.get_str]
+
+    p [cs2.get_z4, cs2.get_str]
+
+    puts "V3s: #{cs2.get_v3a.size} elems"
+    puts "Primary data: #{cs2.get_primary_data_array.size} elems"
+
+    cs2.get_u4.times{
+      p [:ely, cs2.get_str]
+      puts "V3s: #{cs2.get_v3a.size} elems"
+      puts "Primary data: #{cs2.get_primary_data_array.size} elems"
     }
-    
-    p (0..3).map{ cs2.get_u4 }
-    p cs2.get_str
-    p (0...cs2.get_u4).map{ [cs2.get_flt, cs2.get_flt, cs2.get_flt] }
-    p (0..3).map{ cs2.get_u4 }
-    p cs2.get(4*25).unpack("f*")
 
-    p cs2.get(8).unpack("V*")
-    p cs2.get(36).unpack("f*")
-    
-    puts "#{cs2.size - cs2.ofs} bytes to go" 
-    puts ""
+    # p (0..2).map{ cs2.get_u4 }
+    # p cs2.get_str
     
     
+    
+    # cs2.get_u4_ary{ cs2.get_v3 }
+    # (0..2).map{ cs2.get_u4 }
+    # cs2.get_u4_ary{ cs2.get(12).unpack("ffV") }
+    # 
+    # 
+    # pp [cs2.get_z4, cs2.get_z4]
+    # pp cs2.get(3*4).unpack("f*")
+    # pp cs2.get(3*4).unpack("f*")
+    # pp [cs2.get_z4, cs2.get_z4, cs2.get_z4, cs2.get_z4, cs2.get_z4]
 
-    break
+    # cs2.get(13*4).unpack("f*")
+    # cs2.get_str
+    # pp cs2.get(8).unpack("v*")
+    # pp cs2.get_v3
+    # pp cs2.get_v3
+    # pp cs2.get(4*7).unpack("V*")
+    
+    # p cs2.get(cs2.bytes_left).unpack("V*")
+    
+    puts "#{cs2.bytes_left}/#{cs2.size} bytes to go" 
+    puts "", "", ""
     
   rescue
     puts "FAIL #{fn}: #{$!}"
