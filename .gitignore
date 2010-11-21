@@ -6,7 +6,9 @@ etwconv/samples
 gfconv/groupformations*.bin
 gfconv/groupformations*.txt
 esfxml/esf
-esfxml/samples
+esfxml/samples*
+esfxml/out
 farm_fields_tile_texture/samples
 tmp
 markers/samples
+cs2parsed/samples*
