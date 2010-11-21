@@ -31,8 +31,13 @@ The easiest way to get it running under Windows is by installing
 JRuby single installer with Java Runtime Environment bundled.
 Here's the link:
 http://jruby.org.s3.amazonaws.com/downloads/1.5.3/jruby_windowsjre_1_5_3.exe
+
 You might still need to install nokogiri:
-$ jgem install nokogiri
+$ jgem install nokogiri --pre
+
+For Windows JRuby you need prerelease version of Nokogiri (--pre flag).
+If you have installed other version before, please uninstall it first:
+$ jgem uninstall nokogiri
 
 
 == Rest of the file ==
