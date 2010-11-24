@@ -51,6 +51,7 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :xml_include => :on_start_xml_include,
       :v2          => :on_start_v2,
       :v3          => :on_start_v3,
+      :date        => :on_start_chara_only,
     })
     @end_context = Hash.new{|ht,k| raise "Unknown tag close #{k}"}.merge({
       :flt         => :on_end_flt,
@@ -94,6 +95,7 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :xml_include => :on_end_ignore,
       :v2          => :on_end_ignore,
       :v3          => :on_end_ignore,
+      :date        => :on_end_date,
     })
     super()
   end
@@ -117,6 +119,14 @@ end
 
 
 module XmlCallbacks
+  def on_end_date(ctx)
+    date_fields = ctx[:buf].split
+    raise "Invalid date: #{ctx[:buf]}" unless date_fields.size == 2 and date_fields[1] =~ /\A\d+\z/
+    on_start_rec :type => "DATE"
+    @esf.put_u   date_fields[1].to_i
+    @esf.put_asc date_fields[0]
+    @esf.end_rec
+  end
   def on_end_ignore(ctx)
   end
   def on_end_asc(ctx)

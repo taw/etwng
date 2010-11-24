@@ -211,10 +211,35 @@ module EsfParserDebug
   end
 end
 
+class SemanticFail < Exception
+  attr_reader :save_ofs
+  def initialize(save_ofs)
+    @save_ofs = save_ofs
+    super()
+  end
+end
+
+module EsfSemantic
+  ConvertSemanticRec = {
+    :DATE => :convert_date,
+  }
+  def convert_date
+    save_ofs = @ofs
+    end_ofs = get_u4
+    raise SemanticFail.new(save_ofs) unless get_byte  == 0x08 and end_ofs > @ofs
+    year = get_u4
+    raise SemanticFail.new(save_ofs) unless get_byte  == 0x0f and end_ofs > @ofs
+    season = get_ascii
+    raise SemanticFail.new(save_ofs) if season =~ /\s/ and end_ofs == @ofs
+    @xmlout.out!("<date>#{season.xml_escape} #{year}</date>")
+  end
+end
+
 class EsfParser
   include EsfBasicBinaryOps
   include EsfDefaultConvert
   include EsfParserDebug
+  include EsfSemantic
   
   attr_accessor :ofs
   attr_reader :data, :out_dir, :done
@@ -298,29 +323,57 @@ class EsfParser
     end
   end
   XmlSplit = {
-    :CAI_BDI_POOL              => "bdi_pool/",
-    :CAI_INTERFACE             => "cai",
-    :CAI_WORLD                 => "cai_world",
-    :CAMPAIGN_PATHFINDER       => "pathfinder",
-    :FACTION                   => "faction/",
-    :QUAD_TREE_BIT_ARRAY       => "quadtree/",
-    :black_shroud_outlines     => "black_shroud",
-    :grid_data                 => "grid_data",
-    :pathfinding_areas         => "pathfinding_areas",
-    :query_info                => "query_info",
-    :region_data               => "region_data",
-    :regions                   => "region/",
-    :theatre                   => "theatre",
-    :MAPS                      => "maps",
-    :UNIT_CLASS_NAME_ALLOCATOR => 'unit_name_alloc/',
-    :SAVE_GAME_HEADER          => 'save_game_header',
-    :CAMPAIGN_PREOPEN_MAP_INFO => 'preopen_map_info',
-    :REGION                    => 'region/',
-    :HEIGHT_FIELD              => "height_field",
-    :BMD_TEXTURES              => "bmd_textures",
-    :GROUND_TYPE_FIELD         => "ground_type_field",
+    :CAI_BDI_POOL                  => "bdi_pool/",
+    :FACTION                       => "faction/",
+    :QUAD_TREE_BIT_ARRAY           => "quadtree/",
+    :black_shroud_outlines         => "black_shroud",
+    :grid_data                     => "grid_data",
+    :pathfinding_areas             => "pathfinding_areas",
+    :query_info                    => "query_info",
+    :region_data                   => "region_data",
+    :regions                       => "region/",
+    :theatre                       => "theatre",
+    :UNIT_CLASS_NAME_ALLOCATOR     => 'unit_name_alloc/',
+    :REGION                        => 'region/',
+    :HEIGHT_FIELD                  => "height_field",
+    :BMD_TEXTURES                  => "bmd_textures",
+    :GROUND_TYPE_FIELD             => "ground_type_field",
+    :SAVE_GAME_HEADER              => "save_game_header/",
+    :MAPS                          => "save_game_header/maps",
+    :CAMPAIGN_PREOPEN_MAP_INFO     => "preopen_map_info/info",
+    :REGION_OWNERSHIPS_BY_THEATRE  => "region_ownership/theater",
+    :VICTORY_CONDITION_OPTIONS     => "victory_conditions/faction",
+    :CAMPAIGN_ENV                  => "campaign_env/env",
+    :CAMPAIGN_SETUP_LOCAL          => "campaign_env/campaign_setup_local",
+    :CAMPAIGN_SETUP                => "campaign_env/campaign_setup",
+    :CAMPAIGN_MODEL                => "campaign_env/campaign_model",
+    :CAMPAIGN_MAP_DATA             => "campaign_env/campaign_map_data",
+    :CAMPAIGN_CALENDAR             => "campaign_env/campaign_calendar",
+    :WORLD                         => "campaign_env/world",
+    :FACTION_ARRAY                 => "factions/faction",
+    :REGIONS_ARRAY                 => "regions/region",
+    :CAI_INTERFACE                 => "cai_interface/cai",
+    :CAI_WORLD                     => "cai_interface/cai_world",
+    :CAI_WORLD_FACTIONS            => "cai_factions/faction",
+    :CAI_WORLD_REGIONS             => "cai_regions/region",
+    :CAI_WORLD_REGION_BOUNDARIES   => "cai_boundaries/boundary",
+    :CAI_WORLD_SETTLEMENTS         => "cai_settlements/settlement",
+    :CAI_WORLD_BUILDING_SLOTS      => "cai_building_slots/building_slot",
+    :CAI_WORLD_REGION_SLOTS        => "cai_region_slots/region_slot",
+    :CAI_WORLD_CHARACTERS          => "cai_characters/character",
+    :CAI_WORLD_REOURCE_MOBILES     => "cai_armies/army",
+    :CAI_WORLD_UNITS               => "cai_units/unit",
+    :CAI_WORLD_REGION_HLICS        => "cai_region_hlics/hlics",
+    :CAI_INTERFACE_MANAGERS        => "cai_interface_managers/manager",
+    :CAMPAIGN_PATHFINDER           => "campaign-pathfinder/",
+    :PATHFINDING_GRID              => "campaign-pathfinder/grid",
   }
   def convert_rec!(node_type, version)
+    begin
+      return send(ConvertSemanticRec[node_type]) if version.nil? && ConvertSemanticRec[node_type]
+    rescue SemanticFail => exn
+      @ofs = exn.save_ofs
+    end
     xml_nested(XmlSplit[node_type]) do
       @xmlout.tag!("rec", :type=>node_type, :version=>version) do
         convert_until_ofs!(get_u4)
@@ -339,9 +392,13 @@ class EsfParser
     ofs_end   = get_u4
     count     = get_u4
     version   = nil if version == DefaultVersions[node_type]
-    @xmlout.tag!("ary", :type=>node_type, :version=>version) do
-      count.times do
-        convert_rec!(node_type, nil)
+    if count == 0
+      @xmlout.tag!("ary", :type=>node_type, :version=>version)
+    else
+      @xmlout.tag!("ary", :type=>node_type, :version=>version) do
+        count.times do
+          convert_rec!(node_type, nil)
+        end
       end
     end
   end

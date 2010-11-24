@@ -72,10 +72,10 @@ class EsfBuilder
     @data << ary_data
   end
   def put_u4_ary(elems)
-    put_4x("\x44", elems.pack("V*"))
+    put_4x("\x48", elems.pack("V*"))
   end
   def put_i4_ary(elems)
-    put_4x("\x48", elems.pack("V*"))
+    put_4x("\x44", elems.pack("V*"))
   end
   def put_i2_ary(elems)
     put_4x("\x40", elems.pack("v*"))
