@@ -1,0 +1,13 @@
+Examples of each semantic tag:
+
+== regions.esf ==
+<bounds_block xmin='-581.6795' ymin='253.953' xmax='-567.31494' ymax='266.0332'/>
+<climate_map pgm='climate_map-0001.pgm'/>
+<connectivity mask='00070000' from='79' to='113'/>
+
+== startpos.esf ==
+<agent_ability ability='can_research' level='-1' attribute=''/>
+<agent_ability ability='can_duel' level='1' attribute='duelling_pistols'/>
+<agent_attribute attribute='management' level='4'/>
+<agent_attribute attribute='subterfuge' level='-1'/>
+<date>summer 1676</date>

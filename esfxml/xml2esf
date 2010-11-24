@@ -4,12 +4,14 @@ require 'rubygems'
 require "nokogiri"
 require "esf_builder"
 require "pp"
+require "pgm"
 
 class XMLParserCallbacks < Nokogiri::XML::SAX::Document
   def initialize(xml2esf)
     @xml2esf = xml2esf
     @stack = @xml2esf.stack
     @start_context = Hash.new{|ht,k| raise "Unknown tag open #{k}"}.merge({
+      # Basic
       :flt         => :on_start_chara_only,
       :byte        => :on_start_chara_only,
       :s           => :on_start_chara_only,
@@ -51,9 +53,16 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :xml_include => :on_start_xml_include,
       :v2          => :on_start_v2,
       :v3          => :on_start_v3,
-      :date        => :on_start_chara_only,
+      # Semantic
+      :date             => :on_start_chara_only,
+      :agent_ability    => :on_start_agent_ability,
+      :agent_attribute  => :on_start_agent_attribute,
+      :climate_map      => :on_start_climate_map,
+      :connectivity     => :on_start_connectivity,
+      :bounds_block     => :on_start_bounds_block,
     })
     @end_context = Hash.new{|ht,k| raise "Unknown tag close #{k}"}.merge({
+      # Basic
       :flt         => :on_end_flt,
       :byte        => :on_end_byte,
       :s           => :on_end_s,
@@ -95,7 +104,13 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :xml_include => :on_end_ignore,
       :v2          => :on_end_ignore,
       :v3          => :on_end_ignore,
-      :date        => :on_end_date,
+      # Semantic
+      :date             => :on_end_date,
+      :agent_ability    => :on_end_ignore,
+      :agent_attribute  => :on_end_ignore,
+      :climate_map      => :on_end_ignore,
+      :connectivity     => :on_end_ignore,
+      :bounds_block     => :on_end_ignore,
     })
     super()
   end
@@ -117,8 +132,8 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
   end
 end
 
-
-module XmlCallbacks
+module XmlCallbacks 
+  # Semantic
   def on_end_date(ctx)
     date_fields = ctx[:buf].split
     raise "Invalid date: #{ctx[:buf]}" unless date_fields.size == 2 and date_fields[1] =~ /\A\d+\z/
@@ -127,6 +142,47 @@ module XmlCallbacks
     @esf.put_asc date_fields[0]
     @esf.end_rec
   end
+  
+  def on_start_agent_ability(attributes)
+    on_start_rec :type => "AgentAbilities"
+    @esf.put_s attributes[:ability]
+    @esf.put_i attributes[:level].to_i
+    @esf.put_s attributes[:attribute]
+    @esf.end_rec
+  end
+  
+  def on_start_agent_attribute(attributes)
+    on_start_rec :type => "AgentAttributes"
+    @esf.put_s attributes[:attribute]
+    @esf.put_i attributes[:level].to_i
+    @esf.end_rec
+  end
+  
+  def on_start_climate_map(attributes)
+    xsz, ysz, data = File.read_pgm(File.join(@in_dir, attributes[:pgm]))
+    on_start_rec :type => "climate_map"
+    @esf.put_u xsz
+    @esf.put_u ysz
+    @esf.put_4x("\x46", data)
+    @esf.end_rec
+  end
+  
+  def on_start_connectivity(attributes)
+    on_start_rec :type => "connectivity"
+    @esf.put_u attributes[:mask].hex
+    @esf.put_u attributes[:from].to_i
+    @esf.put_u attributes[:to].to_i
+    @esf.end_rec
+  end
+  
+  def on_start_bounds_block(attributes)
+    on_start_rec :type => "BOUNDS_BLOCK"
+    @esf.put_v2 attributes[:xmin].to_f, attributes[:ymin].to_f
+    @esf.put_v2 attributes[:xmax].to_f, attributes[:ymax].to_f
+    @esf.end_rec
+  end
+
+  # Basic
   def on_end_ignore(ctx)
   end
   def on_end_asc(ctx)

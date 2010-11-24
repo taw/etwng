@@ -3,6 +3,8 @@
 require "default_versions"
 require "fileutils"
 require "pp"
+require "esf_parser"
+require "pgm"
 
 class Float
   def pretty_single
@@ -43,160 +45,6 @@ class String
   end
 end
 
-module EsfBasicBinaryOps
-  def get_u4
-    rv = @data[@ofs,4].unpack("V")[0]
-    @ofs += 4
-    rv
-  end
-  def get_i4
-    rv = @data[@ofs,4].unpack("l")[0]
-    @ofs += 4
-    rv
-  end
-  def get_i2
-    rv = @data[@ofs,2].unpack("s")[0]
-    @ofs += 2
-    rv
-  end
-  def get_float
-    rv = @data[@ofs,4].unpack("f")[0]
-    @ofs += 4
-    rv.pretty_single
-  end
-  def get_u2
-    rv = @data[@ofs,2].unpack("v")[0]
-    @ofs += 2
-    rv
-  end
-  def get_bytes(sz)
-    rv = @data[@ofs, sz]
-    @ofs += sz
-    rv
-  end
-  def get_ascii
-    get_bytes(get_u2)
-  end
-  def get_str
-    get_bytes(get_u2*2).unpack("v*").pack("U*")
-  end
-  def get_byte
-    rv = @data[@ofs]
-    @ofs += 1
-    rv
-  end
-  def get_bool
-    case b = get_byte
-    when 1
-      true
-    when 0
-      false
-    else
-      warn "Weird boolean value: #{b}"
-      true
-    end
-  end    
-  def with_temp_ofs(tmp)
-    orig = @ofs
-    begin
-      @ofs = tmp
-      yield
-    ensure
-      @ofs = orig
-    end
-  end
-  def size
-    @data.size
-  end
-end
-
-module EsfDefaultConvert
-  def convert_00!
-    @xmlout.out!("<i2>#{get_i2}</i2>")
-  end
-  def convert_01!
-    @xmlout.out!(get_bool ? "<yes/>" : "<no/>")
-  end
-  def convert_04!
-    @xmlout.out!("<i>#{get_i4}</i>")
-  end
-  def convert_06!
-    @xmlout.out!("<byte>#{get_byte}</byte>")
-  end
-  def convert_07!
-    @xmlout.out!("<u2>#{get_u2}</u2>")
-  end
-  def convert_08!
-    @xmlout.out!("<u>#{get_u4}</u>")
-  end
-  def convert_0a!
-    @xmlout.out!("<flt>#{get_float}</flt>")
-  end
-  def convert_0c!
-    @xmlout.out!("<v2 x='#{get_float}' y='#{get_float}'/>")
-  end
-  def convert_0d!
-    @xmlout.out!("<v3 x='#{get_float}' y='#{get_float}' z='#{get_float}'/>")
-  end
-  def convert_0e!
-    @xmlout.out!("<s>#{get_str.xml_escape}</s>")
-  end
-  def convert_0f!
-    @xmlout.out!("<asc>#{get_ascii.xml_escape}</asc>")
-  end
-  def convert_10!
-    @xmlout.out!("<u2x>#{get_u2}</u2x>")
-  end
-  def convert_40!
-    @xmlout.out!("<bin0>#{get_ofs_bytes.to_hex_dump}</bin0>")
-  end
-  def convert_41!
-    @xmlout.out!("<bin1>#{get_ofs_bytes.to_hex_dump}</bin1>")
-  end
-  def convert_42!
-    @xmlout.out!("<bin2>#{get_ofs_bytes.to_hex_dump}</bin2>")
-  end
-  def convert_43!
-    @xmlout.out!("<bin3>#{get_ofs_bytes.to_hex_dump}</bin3>")
-  end
-  def convert_44!
-    @xmlout.out!("<i4_ary>#{get_ofs_bytes.unpack("l*").join(" ")}</i4_ary>")
-  end
-  def convert_45!
-    @xmlout.out!("<bin5>#{get_ofs_bytes.to_hex_dump}</bin5>")
-  end
-  def convert_46!
-    @xmlout.out!("<bin6>#{get_ofs_bytes.to_hex_dump}</bin6>")
-  end
-  def convert_47!
-    @xmlout.out!("<u2_ary>#{get_ofs_bytes.unpack("v*").join(" ")}</u2_ary>")
-  end
-  def convert_48!
-    @xmlout.out!("<u4_ary>#{get_ofs_bytes.unpack("V*").join(" ")}</u4_ary>")
-  end
-  def convert_49!
-    @xmlout.out!("<bin9>#{get_ofs_bytes.to_hex_dump}</bin9>")
-  end
-  def convert_4a!
-    @xmlout.out!("<flt_ary>#{get_ofs_bytes.to_flt_dump}</flt_ary>")
-  end
-  def convert_4b!
-    @xmlout.out!("<binB>#{get_ofs_bytes.to_hex_dump}</binB>")
-  end
-  def convert_4c!
-    @xmlout.out!("<v2_ary>#{get_ofs_bytes.to_v2_dump}</v2_ary>")
-  end
-  def convert_4d!
-    @xmlout.out!("<v3_ary>#{get_ofs_bytes.to_v3_dump}</v3_ary>")
-  end
-  def convert_4e!
-    @xmlout.out!("<binE>#{get_ofs_bytes.to_hex_dump}</binE>")
-  end
-  def convert_4f!
-    @xmlout.out!("<binF>#{get_ofs_bytes.to_hex_dump}</binF>")
-  end
-end
-
 module EsfParserDebug
   def progressbar_thread
     Thread.new{
@@ -221,16 +69,54 @@ end
 
 module EsfSemantic
   ConvertSemanticRec = {
-    :DATE => :convert_date,
+    :DATE             => :convert_date,
+    :AgentAbilities   => :convert_agent_abilities,
+    :AgentAttributes  => :convert_agent_attributes,
+    :climate_map      => :convert_climate_map,
+    :connectivity     => :convert_connectivity,
+    :BOUNDS_BLOCK     => :convert_bounds_block,
   }
-  def convert_date
-    save_ofs = @ofs
+  def get_rec_contents(exn, *expect_types)
+    out     = []
     end_ofs = get_u4
-    raise SemanticFail.new(save_ofs) unless get_byte  == 0x08 and end_ofs > @ofs
-    year = get_u4
-    raise SemanticFail.new(save_ofs) unless get_byte  == 0x0f and end_ofs > @ofs
-    season = get_ascii
-    raise SemanticFail.new(save_ofs) if season =~ /\s/ and end_ofs == @ofs
+    while @ofs < end_ofs
+      t, *v = send(@esf_type_handlers_get[get_byte])
+      raise exn unless t == expect_types.shift
+      out.push *v
+    end
+    out
+  end
+  def convert_bounds_block
+    exn = SemanticFail.new(@ofs)
+    xmin, ymin, xmax, ymax = get_rec_contents(exn, :v2, :v2)
+    @xmlout.out!("<bounds_block xmin='#{xmin}' ymin='#{ymin}' xmax='#{xmax}' ymax='#{ymax}'/>")
+  end
+  def convert_connectivity
+    exn = SemanticFail.new(@ofs)
+    mask, cfrom, cto = get_rec_contents(exn, :u4, :u4, :u4)
+    @xmlout.out!("<connectivity mask='#{"%08x" % mask}' from='#{cfrom}' to='#{cto}'/>")
+  end
+  def convert_climate_map
+    exn = SemanticFail.new(@ofs)
+    xsz, ysz, data = get_rec_contents(exn, :u4, :u4, :bin6)
+    path, rel_path = alloc_new_path("climate_map", ".pgm")
+    File.write_pgm(path, xsz, ysz, data)
+    @xmlout.out!("<climate_map pgm='#{rel_path}'/>")
+  end
+  def convert_agent_attributes
+    exn = SemanticFail.new(@ofs)
+    attribute, level = get_rec_contents(exn, :s, :i4)
+    @xmlout.out!("<agent_attribute attribute='#{attribute.xml_escape}' level='#{level}'/>")
+  end
+  def convert_agent_abilities
+    exn = SemanticFail.new(@ofs)
+    ability, level, attribute = get_rec_contents(exn, :s, :i4, :s)
+    @xmlout.out!("<agent_ability ability='#{ability.xml_escape}' level='#{level}' attribute='#{attribute.xml_escape}'/>")
+  end
+  def convert_date
+    exn = SemanticFail.new(@ofs)
+    year, season = get_rec_contents(exn, :u4, :asc)
+    raise exn if season =~ /\s/
     @xmlout.out!("<date>#{season.xml_escape} #{year}</date>")
   end
 end
@@ -239,25 +125,30 @@ class EsfParser
   include EsfBasicBinaryOps
   include EsfDefaultConvert
   include EsfParserDebug
+  include EsfGetData
   include EsfSemantic
   
   attr_accessor :ofs
   attr_reader :data, :out_dir, :done
   attr_reader :magic, :node_types
 
-  def open_xml(name)
+  def alloc_new_path(name, ext=".xml")
     file_num = 1
     while true
       if name =~ /\/\z/
-        rel_path = "%s%04d.xml" % [name, file_num]
+        rel_path = "%s%04d%s" % [name, file_num, ext]
       else
-        rel_path = "%s-%04d.xml" % [name, file_num]
+        rel_path = "%s-%04d%s" % [name, file_num, ext]
       end
       path     = File.join(out_dir, rel_path)
       FileUtils.mkdir_p File.dirname(path)
-      return XMLPrinter.new(path, rel_path) unless File.exist?(path)
+      return [path, rel_path] unless File.exist?(path)
       file_num += 1
     end
+  end
+
+  def open_xml(name)
+    return XMLPrinter.new(*alloc_new_path(name, ".xml"))
   end
 
   def initialize(in_fh, out_dir)
@@ -267,14 +158,21 @@ class EsfParser
     @ofs     = 0
     get_header
     @esf_type_handlers = setup_esf_type_handlers
+    @esf_type_handlers_get = setup_esf_type_handlers_get
   end
 
   def setup_esf_type_handlers
-    out = Hash.new{|ht,node_type|
-      raise "Unknown type 0x%02x at %d" % [node_type, ofs]
-    }
+    out = Hash.new{|ht,node_type| raise "Unknown type 0x%02x at %d" % [node_type, ofs] }
     (0..255).each{|i|
       name = ("convert_%02x!" % i).to_sym
+      out[i] = name if respond_to?(name)
+    }
+    out
+  end
+  def setup_esf_type_handlers_get
+    out = Hash.new{|ht,node_type| raise "Unknown type 0x%02x at %d" % [node_type, ofs] }
+    (0..255).each{|i|
+      name = ("get_%02x!" % i).to_sym
       out[i] = name if respond_to?(name)
     }
     out
@@ -324,14 +222,14 @@ class EsfParser
   end
   XmlSplit = {
     :CAI_BDI_POOL                  => "bdi_pool/",
-    :FACTION                       => "faction/",
+    :FACTION                       => "factions/faction",
     :QUAD_TREE_BIT_ARRAY           => "quadtree/",
     :black_shroud_outlines         => "black_shroud",
     :grid_data                     => "grid_data",
     :pathfinding_areas             => "pathfinding_areas",
     :query_info                    => "query_info",
     :region_data                   => "region_data",
-    :regions                       => "region/",
+    :regions                       => "regions/region",
     :theatre                       => "theatre",
     :UNIT_CLASS_NAME_ALLOCATOR     => 'unit_name_alloc/',
     :REGION                        => 'region/',
@@ -348,10 +246,7 @@ class EsfParser
     :CAMPAIGN_SETUP                => "campaign_env/campaign_setup",
     :CAMPAIGN_MODEL                => "campaign_env/campaign_model",
     :CAMPAIGN_MAP_DATA             => "campaign_env/campaign_map_data",
-    :CAMPAIGN_CALENDAR             => "campaign_env/campaign_calendar",
     :WORLD                         => "campaign_env/world",
-    :FACTION_ARRAY                 => "factions/faction",
-    :REGIONS_ARRAY                 => "regions/region",
     :CAI_INTERFACE                 => "cai_interface/cai",
     :CAI_WORLD                     => "cai_interface/cai_world",
     :CAI_WORLD_FACTIONS            => "cai_factions/faction",
