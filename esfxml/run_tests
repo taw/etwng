@@ -12,5 +12,5 @@ system *%W[./xml2esf tmp/sdir tmp/s.esf]
 
 system *%W[diff tmp/t.esf samples/trade_routes.esf]
 system *%W[diff tmp/r.esf samples/regions.esf]
-system *%W[diff tmp/b.esf samples/bmd.esf]
+system *%W[diff tmp/b.esf samples/bmd.dat]
 system *%W[diff tmp/s.esf samples/startpos.esf]
