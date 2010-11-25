@@ -9,6 +9,7 @@ class File
       "P5\n#{xsz} #{ysz}\n255\n"
     end
     def write_pgm(path,xsz,ysz,data)
+      warn "PGM #{path} has size #{xsz}x#{ysz} (#{xsz*ysz}) but data has #{data.size} bytes" unless xsz*ysz == data.size
       open(path, 'wb'){|fh|
         fh.write pgm_header(xsz,ysz)
         fh.write data
