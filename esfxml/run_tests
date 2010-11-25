@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+system *%W[./esf2xml samples/trade_routes.esf tmp/tdir]
+system *%W[./esf2xml samples/regions.esf tmp/rdir]
+system *%W[./esf2xml samples/bmd.dat tmp/bdir]
+system *%W[./esf2xml samples/startpos.esf tmp/sdir]
+
+system *%W[./xml2esf tmp/tdir tmp/t.esf]
+system *%W[./xml2esf tmp/rdir tmp/r.esf]
+system *%W[./xml2esf tmp/bdir tmp/b.esf]
+system *%W[./xml2esf tmp/sdir tmp/s.esf]
+
+system *%W[diff tmp/t.esf samples/trade_routes.esf]
+system *%W[diff tmp/r.esf samples/regions.esf]
+system *%W[diff tmp/b.esf samples/bmd.esf]
+system *%W[diff tmp/s.esf samples/startpos.esf]
