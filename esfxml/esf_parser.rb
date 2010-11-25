@@ -85,13 +85,13 @@ module EsfDefaultConvert
     @xmlout.out!("<u>#{get_u4}</u>")
   end
   def convert_0a!
-    @xmlout.out!("<flt>#{get_float}</flt>")
+    @xmlout.out!("<flt>#{get_float.pretty_single}</flt>")
   end
   def convert_0c!
-    @xmlout.out!("<v2 x='#{get_float}' y='#{get_float}'/>")
+    @xmlout.out!("<v2 x='#{get_float.pretty_single}' y='#{get_float.pretty_single}'/>")
   end
   def convert_0d!
-    @xmlout.out!("<v3 x='#{get_float}' y='#{get_float}' z='#{get_float}'/>")
+    @xmlout.out!("<v3 x='#{get_float.pretty_single}' y='#{get_float.pretty_single}' z='#{get_float.pretty_single}'/>")
   end
   def convert_0e!
     @xmlout.out!("<s>#{get_str.xml_escape}</s>")

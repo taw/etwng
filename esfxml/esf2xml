@@ -29,11 +29,11 @@ class String
     unpack("H2" * size).join(" ")
   end
   def to_flt_dump
-    unpack("f*").join(" ")
+    unpack("f*").map(&:pretty_single).join(" ")
   end
   def to_v2_dump
     out = []
-    data = unpack("f*")
+    data = unpack("f*").map(&:pretty_single)
     out << "#{data.shift},#{data.shift}" until data.empty?
     out.join(" ")
   end
@@ -89,7 +89,7 @@ module EsfSemantic
   def convert_bounds_block
     exn = SemanticFail.new(@ofs)
     xmin, ymin, xmax, ymax = get_rec_contents(exn, :v2, :v2)
-    @xmlout.out!("<bounds_block xmin='#{xmin}' ymin='#{ymin}' xmax='#{xmax}' ymax='#{ymax}'/>")
+    @xmlout.out!("<bounds_block xmin='#{xmin.pretty_single}' ymin='#{ymin.pretty_single}' xmax='#{xmax.pretty_single}' ymax='#{ymax.pretty_single}'/>")
   end
   def convert_connectivity
     exn = SemanticFail.new(@ofs)
