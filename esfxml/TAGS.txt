@@ -51,9 +51,9 @@ Examples of each semantic tag:
 </land_indices>
 
 <region_keys>
- maryland=-539.66406
- virginia=-546.64398
- pennsylvania=-541.46509
+ maryland=-539.66406,272.13196
+ virginia=-546.64398,265.37799
+ pennsylvania=-541.46509,295.31482
 </region_keys>
 
 <sea_indices>
