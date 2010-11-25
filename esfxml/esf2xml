@@ -133,17 +133,16 @@ class EsfParser
   attr_reader :magic, :node_types
 
   def alloc_new_path(name, ext=".xml")
-    file_num = 1
     while true
       if name =~ /\/\z/
-        rel_path = "%s%04d%s" % [name, file_num, ext]
+        rel_path = "%s%04d%s" % [name, @path_allocator[[name, ext]], ext]
       else
-        rel_path = "%s-%04d%s" % [name, file_num, ext]
+        rel_path = "%s-%04d%s" % [name, @path_allocator[[name, ext]], ext]
       end
       path     = File.join(out_dir, rel_path)
       FileUtils.mkdir_p File.dirname(path)
       return [path, rel_path] unless File.exist?(path)
-      file_num += 1
+      @path_allocator[[name, ext]] += 1
     end
   end
 
@@ -152,10 +151,11 @@ class EsfParser
   end
 
   def initialize(in_fh, out_dir)
-    @data    = in_fh.read
-    @out_dir = out_dir
-    @xmlout  = XMLPrinter.new(File.join(out_dir, 'esf.xml'), 'esf.xml')
-    @ofs     = 0
+    @data        = in_fh.read
+    @out_dir     = out_dir
+    @xmlout      = XMLPrinter.new(File.join(out_dir, 'esf.xml'), 'esf.xml')
+    @ofs         = 0
+    @path_allocator = Hash.new(1)
     get_header
     @esf_type_handlers = setup_esf_type_handlers
     @esf_type_handlers_get = setup_esf_type_handlers_get
