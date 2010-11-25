@@ -40,6 +40,15 @@ module EsfSemantic
 
 ## Utility functions
 
+  def get_rec_contents_dynamic
+    out     = []
+    end_ofs = get_u4
+    while @ofs < end_ofs
+      out.push send(@esf_type_handlers_get[get_byte])
+    end
+    out
+  end
+
   def get_rec_contents(*expect_types)
     out     = []
     end_ofs = get_u4
@@ -55,17 +64,14 @@ module EsfSemantic
     data = []
     ofs_end   = get_u4
     count     = get_u4
-    while @ofs < ofs_end
-      data.push get_rec_contents(*expect_types)
-    end
+    data.push get_rec_contents(*expect_types) while @ofs < ofs_end
     data
   end
+  
   def convert_ary_contents_str(tag)
     data = get_ary_contents(:s).flatten
     raise SemanticFail.new if data.any?{|name| name =~ /\s/}
-    @xmlout.out!("<#{tag}>")
-    data.each{|name| @xmlout.out!(" #{name.xml_escape}") }
-    @xmlout.out!("</#{tag}>")
+    @xmlout.out_ary!(tag, "", data.map{|name| " #{name.xml_escape}" })
   end
 
 ## Tag converters
