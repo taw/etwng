@@ -35,6 +35,11 @@ module EsfBasicBinaryOps
   def get_str
     get_bytes(get_u2*2).unpack("v*").pack("U*")
   end
+  def lookahead_str
+    return nil unless @data[@ofs+4, 1] == "\x0e"
+    sz, = @data[@ofs+5, 2].unpack("v")
+    @data[@ofs+7, sz*2].unpack("v*").pack("U*")
+  end
   def get_byte
     rv = @data[@ofs]
     @ofs += 1
@@ -139,10 +144,20 @@ module EsfDefaultConvert
     @xmlout.out!("<binB>#{get_ofs_bytes.to_hex_dump}</binB>")
   end
   def convert_4c!
-    @xmlout.out!("<v2_ary>#{get_ofs_bytes.to_v2_dump}</v2_ary>")
+    @xmlout.out!("<v2_ary>")
+    data = get_ofs_bytes.unpack("f*").map(&:pretty_single)
+    until data.empty?
+      @xmlout.out!(" #{data.shift},#{data.shift}")
+    end
+    @xmlout.out!("</v2_ary>")
   end
   def convert_4d!
-    @xmlout.out!("<v3_ary>#{get_ofs_bytes.to_v3_dump}</v3_ary>")
+    @xmlout.out!("<v3_ary>")
+    data = get_ofs_bytes.unpack("f*").map(&:pretty_single)
+    until data.empty?
+      @xmlout.out!(" #{data.shift},#{data.shift},#{data.shift}")
+    end
+    @xmlout.out!("</v3_ary>")
   end
   def convert_4e!
     @xmlout.out!("<binE>#{get_ofs_bytes.to_hex_dump}</binE>")
@@ -215,5 +230,14 @@ module EsfGetData
   end
   def get_48!
     [:bin8, get_ofs_bytes]
+  end
+  def get_4a!
+    [:flt_ary, get_ofs_bytes.unpack("f*").map(&:pretty_single)]
+  end
+  def get_4c!
+    [:v2_ary, get_ofs_bytes.unpack("f*").map(&:pretty_single)]
+  end
+  def get_4d!
+    [:v3_ary, get_ofs_bytes.unpack("f*").map(&:pretty_single)]
   end
 end

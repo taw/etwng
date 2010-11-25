@@ -1,13 +1,233 @@
+Right now 20 semantic tags are supported, everything else gets generic
+low-level representation which is actually quite adequate most of the time.
+
 Examples of each semantic tag:
 
 == regions.esf ==
 <bounds_block xmin='-581.6795' ymin='253.953' xmax='-567.31494' ymax='266.0332'/>
+
 <climate_map pgm='climate_map-0001.pgm'/>
+
 <connectivity mask='00070000' from='79' to='113'/>
 
+<black_shroud_outlines name='shroud_map_1_2'>
+ -571.66217,260.03384
+ -560.8075,260.03732
+ -549.95288,260.04083
+ -539.09821,260.04431
+ -539.25452,260.5755
+ -539.41089,261.10672
+ -539.56726,261.63791
+ ...
+</black_shroud_outlines>
+
+<land_indices>
+ e3_america=34
+ e3_arid=35
+ e3_england=33
+ lc_am_desert=15
+ lc_am_great_plains=18
+ lc_am_jungle=20
+ lc_am_s_arid=21
+ lc_am_se_usa=16
+ lc_am_tropical_humid=13
+ lc_am_us_central=32
+ lc_am_us_east=17
+ lc_as_temp_humid=9
+ lc_as_temp_s_arid=10
+ lc_as_trop_humid=7
+ lc_as_trop_s_arid=5
+ lc_boreal=1
+ lc_desert=6
+ lc_eu_central_humid=14
+ lc_eu_north_humid=19
+ lc_eu_north_s_arid=12
+ lc_eu_south_humid=3
+ lc_eu_south_s_arid=2
+ lc_mediterranean=4
+ lc_sand_desert=11
+ lc_steppe=8
+ lc_tundra=0
+</land_indices>
+
+<region_keys>
+ maryland=-539.66406
+ virginia=-546.64398
+ pennsylvania=-541.46509
+</region_keys>
+
+<sea_indices>
+ sc_arctic=22
+ sc_arctic_coast=27
+ sc_lake=31
+ sc_mediterranean=26
+ sc_subtropic=24
+ sc_subtropic_coast=29
+ sc_temperate=23
+ sc_temperate_coast=28
+ sc_tropic=25
+ sc_tropic_coast=30
+</sea_indices>
+
+<groundtype_index>
+ grassland
+ hilly_light_forest
+ light_forest
+ hills
+ dense_forest
+</groundtype_index>
+
+<wind_map xsz='168' ysz='184' unknown='0.00729600992053747' data='wind_map-0001.bin'/>
+
 == startpos.esf ==
+
 <agent_ability ability='can_research' level='-1' attribute=''/>
 <agent_ability ability='can_duel' level='1' attribute='duelling_pistols'/>
+
 <agent_attribute attribute='management' level='4'/>
 <agent_attribute attribute='subterfuge' level='-1'/>
+
 <date>summer 1676</date>
+
+<resources_array>
+ displaced_scots
+ africa_west_indies
+ displaced_irish
+ global
+ americas_coastal
+ colonial_euro_factions
+ americas
+</resources_array>
+
+<REGION_KEYS>
+ flanders
+ new_andalusia
+ french_guyana
+ carnatica
+ netherlands
+ new_york
+ curacao
+ ceylon
+ dutch_guyana
+</REGION_KEYS>
+
+<commodities_order>
+ res_spices
+ res_tobacco
+ res_sugar
+ res_ivory
+ res_tea
+ res_cotton
+ res_coffee
+ res_furs
+</commodities_order>
+
+<resources_order>
+ res_rice
+ res_sheep
+ res_coffee
+ res_tea
+ res_cattle
+ res_timber
+ res_fish
+ res_silver
+ res_tobacco
+ res_wheat
+ res_wine
+ res_ivory
+ res_spices
+ res_furs
+ res_gold
+ res_sugar
+ res_corn
+ res_cotton
+ res_gems
+ res_iron
+</resources_order>
+
+<port_indices>
+ port:guatemala:puerto_barrios=1
+ port:france:marseille=2
+ port:new_spain:campeche=0
+ port:persia:bandar_abbas=3
+ port:anatolia:antalya=4
+ port:malta:marsaxlokk=5
+ ...
+</port_indices>
+
+<settlement_indices>
+ ruperts_land=143
+ komi=151
+ netherlands=158
+ baluchistan=183
+ michigan_territory=160
+ georgia_usa=137
+ don_voisko=169
+ rajpootana=173
+ astrakhan=171
+ cuba=262
+ afghanistan=180
+ west_prussia=237
+ carnatica=146
+ guatemala=245
+ arkhangelsk=154
+ cherokee_territory=167
+ ...
+</settlement_indices>
+
+<religion_breakdown>
+ rel_hindu=0.0
+ rel_nonconformist=0.0
+ rel_sikh=0.0
+ rel_animist=0.1
+ rel_orthodox=0.0
+ rel_buddhist=0.0
+ rel_catholic=0.7
+ rel_islamic=0.0
+ rel_protestant=0.2
+</religion_breakdown>
+
+<region_ownership>
+ iroquois_territory=iroquoi
+ great_plains=plains
+ new_england=thirteen_colonies
+ french_guyana=france
+ lower_louisiana=louisiana
+ hispaniola=spain
+ northwest_territories=huron
+ ruperts_land=britain
+ tejas=pueblo
+ upper_louisiana=louisiana
+ dutch_guyana=netherlands
+ virginia=thirteen_colonies
+ trinidad_tobago=pirates
+ carolinas=thirteen_colonies
+ windward_islands=france
+ maine=thirteen_colonies
+ new_andalusia=new_spain
+ new_york=thirteen_colonies
+ guatemala=new_spain
+ leeward_islands=pirates
+ algonquin_territory=iroquoi
+ huron_territory=huron
+ florida=spain
+ new_spain=new_spain
+ labrador=inuit
+ maryland=thirteen_colonies
+ panama=new_spain
+ cuba=spain
+ new_france=france
+ pennsylvania=thirteen_colonies
+ georgia_usa=cherokee
+ newfoundland=france
+ bahamas=britain
+ cherokee_territory=cherokee
+ ontario=france
+ kaintuck_territory=cherokee
+ jamaica=britain
+ michigan_territory=iroquoi
+ new_mexico=new_spain
+ curacao=netherlands
+ new_grenada=new_spain
+ acadia=france
+</region_ownership>

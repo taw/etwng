@@ -53,13 +53,35 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :xml_include => :on_start_xml_include,
       :v2          => :on_start_v2,
       :v3          => :on_start_v3,
-      # Semantic
-      :date             => :on_start_chara_only,
-      :agent_ability    => :on_start_agent_ability,
-      :agent_attribute  => :on_start_agent_attribute,
-      :climate_map      => :on_start_climate_map,
-      :connectivity     => :on_start_connectivity,
-      :bounds_block     => :on_start_bounds_block,
+
+      ## Semantic
+      # rec / startpos.esf
+      :date                  => :on_start_chara_only,
+      :agent_ability         => :on_start_agent_ability,
+      :agent_attribute       => :on_start_agent_attribute,
+
+      # rec / regions.esf
+      :climate_map           => :on_start_climate_map,
+      :connectivity          => :on_start_connectivity,
+      :bounds_block          => :on_start_bounds_block,
+      :wind_map              => :on_start_wind_map,
+      :black_shroud_outlines => :on_start_black_shroud_outlines,
+
+      # ary / regions.esf
+      :groundtype_index      => :on_start_chara_only,
+      :land_indices          => :on_start_chara_only,
+      :sea_indices           => :on_start_chara_only,
+      :region_keys           => :on_start_chara_only,
+
+      # ary / startpos.esf
+      :resources_array       => :on_start_chara_only,
+      :religion_breakdown    => :on_start_chara_only,
+      :REGION_KEYS           => :on_start_chara_only,
+      :commodities_order     => :on_start_chara_only,
+      :resources_order       => :on_start_chara_only,
+      :port_indices          => :on_start_chara_only,
+      :settlement_indices    => :on_start_chara_only,
+      :region_ownership      => :on_start_chara_only,
     })
     @end_context = Hash.new{|ht,k| raise "Unknown tag close #{k}"}.merge({
       # Basic
@@ -104,13 +126,35 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :xml_include => :on_end_ignore,
       :v2          => :on_end_ignore,
       :v3          => :on_end_ignore,
-      # Semantic
-      :date             => :on_end_date,
-      :agent_ability    => :on_end_ignore,
-      :agent_attribute  => :on_end_ignore,
-      :climate_map      => :on_end_ignore,
-      :connectivity     => :on_end_ignore,
-      :bounds_block     => :on_end_ignore,
+
+      ## Semantic
+      # rec / startpos.esf
+      :date                  => :on_end_date,
+      :agent_ability         => :on_end_ignore,
+      :agent_attribute       => :on_end_ignore,
+
+      # rec / regions.esf
+      :climate_map           => :on_end_ignore,
+      :connectivity          => :on_end_ignore,
+      :bounds_block          => :on_end_ignore,
+      :wind_map              => :on_end_ignore,
+      :black_shroud_outlines => :on_end_black_shroud_outlines,
+
+      # ary / regions.esf
+      :groundtype_index      => :on_end_groundtype_index,
+      :land_indices          => :on_end_land_indices,
+      :sea_indices           => :on_end_sea_indices,
+      :region_keys           => :on_end_region_keys,
+
+      # ary / startpos.esf
+      :resources_array       => :on_end_resources_array,
+      :religion_breakdown    => :on_end_religion_breakdown,
+      :REGION_KEYS           => :on_end_REGION_KEYS,
+      :commodities_order     => :on_end_commodities_order,
+      :resources_order       => :on_end_resources_order,
+      :port_indices          => :on_end_port_indices,
+      :settlement_indices    => :on_end_settlement_indices,
+      :region_ownership      => :on_end_region_ownership,
     })
     super()
   end
@@ -134,8 +178,147 @@ end
 
 module XmlCallbacks 
   # Semantic
+  def on_end_resources_array(ctx)
+    data = ctx[:buf].strip.split(/\s+/)
+    on_start_ary :type => "RESOURCES_ARRAY"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+  
+  def on_end_REGION_KEYS(ctx)
+    data = ctx[:buf].strip.split(/\s+/)
+    on_start_ary :type => "REGION_KEYS"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+  
+  def on_end_commodities_order(ctx)
+    data = ctx[:buf].strip.split(/\s+/)
+    on_start_ary :type => "COMMODITIES_ORDER"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+  
+  def on_end_resources_order(ctx)
+    data = ctx[:buf].strip.split(/\s+/)
+    on_start_ary :type => "RESOURCES_ORDER"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+  
+  def on_end_port_indices(ctx)
+    data = ctx[:buf].strip.split(/[\s+|=]+/)
+    on_start_ary :type => "PORT_INDICES"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.put_u data.shift.to_i
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+  
+  def on_end_settlement_indices(ctx)
+    data = ctx[:buf].strip.split(/[\s+|=]+/)
+    on_start_ary :type => "SETTLEMENT_INDICES"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.put_u data.shift.to_i
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+  
+  def on_end_religion_breakdown(ctx)
+    data = ctx[:buf].strip.split(/[\s+|=]+/)
+    on_start_ary :type => "RELIGION_BREAKDOWN"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.put_flt data.shift.to_f
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+  
+  def on_end_region_ownership(ctx)
+    data = ctx[:buf].strip.split(/[\s+|=]+/)
+    on_start_ary :type => "REGION_OWNERSHIPS"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.put_s data.shift
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+
+  def on_end_region_keys(ctx)
+    data = ctx[:buf].strip.split(/[\s=,]+/)
+    on_start_ary :type => "region_keys"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.put_v2 data.shift.to_f, data.shift.to_f
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+  
+  def on_end_sea_indices(ctx)
+    data = ctx[:buf].strip.split(/[\s=]+/)
+    on_start_ary :type => "sea_indices"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.put_byte data.shift.to_i
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+
+  def on_end_land_indices(ctx)
+    data = ctx[:buf].strip.split(/[\s=]+/)
+    on_start_ary :type => "land_indices"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.put_byte data.shift.to_i
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+
+  def on_end_groundtype_index(ctx)
+    data = ctx[:buf].strip.split(/\s+/)
+    on_start_ary :type => "groundtype_index"
+    until data.empty?
+      @esf.start_elem
+      @esf.put_s data.shift
+      @esf.end_rec
+    end
+    @esf.end_ary
+  end
+    
   def on_end_date(ctx)
-    date_fields = ctx[:buf].split
+    date_fields = ctx[:buf].strip.split(/\s+/)
     raise "Invalid date: #{ctx[:buf]}" unless date_fields.size == 2 and date_fields[1] =~ /\A\d+\z/
     on_start_rec :type => "DATE"
     @esf.put_u   date_fields[1].to_i
@@ -166,12 +349,33 @@ module XmlCallbacks
     @esf.put_4x("\x46", data)
     @esf.end_rec
   end
+
+  def on_start_wind_map(attributes)
+    path = File.join(@in_dir, attributes[:data])
+    on_start_rec :type => "wind_map"
+    @esf.put_u attributes[:xsz].to_i
+    @esf.put_u attributes[:ysz].to_i
+    @esf.put_flt attributes[:unknown].to_f
+    @esf.put_4x("\x42", File.open(path, "rb", &:read))
+    @esf.end_rec
+  end
   
   def on_start_connectivity(attributes)
     on_start_rec :type => "connectivity"
     @esf.put_u attributes[:mask].hex
     @esf.put_u attributes[:from].to_i
     @esf.put_u attributes[:to].to_i
+    @esf.end_rec
+  end
+  
+  def on_start_black_shroud_outlines(attributes)
+    {:buf => "", :name => attributes[:name]}
+  end
+  
+  def on_end_black_shroud_outlines(ctx)
+    on_start_rec :type => "black_shroud_outlines"
+    @esf.put_s ctx[:name]
+    @esf.put_v2_ary ctx[:buf].strip.split(/[\s,]+/).map(&:to_f)
     @esf.end_rec
   end
   
@@ -222,70 +426,70 @@ module XmlCallbacks
     @esf.end_ary
   end
   def on_end_u4_ary(ctx)
-    @esf.put_u4_ary ctx[:buf].split.map(&:to_i)
+    @esf.put_u4_ary ctx[:buf].strip.split(/\s+/).map(&:to_i)
   end
   def on_end_i4_ary(ctx)
-    @esf.put_i4_ary ctx[:buf].split.map(&:to_i)
+    @esf.put_i4_ary ctx[:buf].strip.split(/\s+/).map(&:to_i)
   end
   def on_end_u2_ary(ctx)
-    @esf.put_u2_ary ctx[:buf].split.map(&:to_i)
+    @esf.put_u2_ary ctx[:buf].strip.split(/\s+/).map(&:to_i)
   end
   def on_end_flt_ary(ctx)
-    @esf.put_flt_ary ctx[:buf].split.map(&:to_f)
+    @esf.put_flt_ary ctx[:buf].strip.split(/\s+/).map(&:to_f)
   end
   def on_end_v2_ary(ctx)
-    @esf.put_v2_ary ctx[:buf].split(/[, ]/).map(&:to_f)
+    @esf.put_v2_ary ctx[:buf].strip.split(/[\s,]+/).map(&:to_f)
   end
   def on_end_v3_ary(ctx)
-    @esf.put_v3_ary ctx[:buf].split(/[, ]/).map(&:to_f)
+    @esf.put_v3_ary ctx[:buf].strip.split(/[\s,]+/).map(&:to_f)
   end
   def on_end_bin0(ctx)
-    @esf.put_4x(0x40, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x40, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_bin1(ctx)
-    @esf.put_4x(0x41, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x41, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_bin2(ctx)
-    @esf.put_4x(0x42, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x42, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_bin3(ctx)
-    @esf.put_4x(0x43, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x43, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_bin4(ctx)
-    @esf.put_4x(0x44, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x44, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_bin5(ctx)
-    @esf.put_4x(0x45, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x45, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_bin6(ctx)
-    @esf.put_4x(0x46, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x46, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_bin7(ctx)
-    @esf.put_4x(0x47, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x47, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_bin8(ctx)
-    @esf.put_4x(0x48, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x48, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_bin9(ctx)
-    @esf.put_4x(0x49, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x49, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_binA(ctx)
-    @esf.put_4x(0x4A, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x4A, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_binB(ctx)
-    @esf.put_4x(0x4B, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x4B, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_binC(ctx)
-    @esf.put_4x(0x4C, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x4C, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_binD(ctx)
-    @esf.put_4x(0x4D, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x4D, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_binE(ctx)
-    @esf.put_4x(0x4E, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x4E, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_end_binF(ctx)
-    @esf.put_4x(0x4F, ctx[:buf].split.map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x(0x4F, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_start_chara_only(attrs)
     {:buf => ""}

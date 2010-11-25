@@ -4,6 +4,8 @@ require "default_versions"
 require "fileutils"
 require "pp"
 require "esf_parser"
+require "esf_semantic_parser"
+require "xml_split"
 require "pgm"
 
 class Float
@@ -59,68 +61,6 @@ module EsfParserDebug
   end
 end
 
-class SemanticFail < Exception
-  attr_reader :save_ofs
-  def initialize(save_ofs)
-    @save_ofs = save_ofs
-    super()
-  end
-end
-
-module EsfSemantic
-  ConvertSemanticRec = {
-    :DATE             => :convert_date,
-    :AgentAbilities   => :convert_agent_abilities,
-    :AgentAttributes  => :convert_agent_attributes,
-    :climate_map      => :convert_climate_map,
-    :connectivity     => :convert_connectivity,
-    :BOUNDS_BLOCK     => :convert_bounds_block,
-  }
-  def get_rec_contents(exn, *expect_types)
-    out     = []
-    end_ofs = get_u4
-    while @ofs < end_ofs
-      t, *v = send(@esf_type_handlers_get[get_byte])
-      raise exn unless t == expect_types.shift
-      out.push *v
-    end
-    out
-  end
-  def convert_bounds_block
-    exn = SemanticFail.new(@ofs)
-    xmin, ymin, xmax, ymax = get_rec_contents(exn, :v2, :v2)
-    @xmlout.out!("<bounds_block xmin='#{xmin.pretty_single}' ymin='#{ymin.pretty_single}' xmax='#{xmax.pretty_single}' ymax='#{ymax.pretty_single}'/>")
-  end
-  def convert_connectivity
-    exn = SemanticFail.new(@ofs)
-    mask, cfrom, cto = get_rec_contents(exn, :u4, :u4, :u4)
-    @xmlout.out!("<connectivity mask='#{"%08x" % mask}' from='#{cfrom}' to='#{cto}'/>")
-  end
-  def convert_climate_map
-    exn = SemanticFail.new(@ofs)
-    xsz, ysz, data = get_rec_contents(exn, :u4, :u4, :bin6)
-    path, rel_path = alloc_new_path("climate_map", ".pgm")
-    File.write_pgm(path, xsz, ysz, data)
-    @xmlout.out!("<climate_map pgm='#{rel_path}'/>")
-  end
-  def convert_agent_attributes
-    exn = SemanticFail.new(@ofs)
-    attribute, level = get_rec_contents(exn, :s, :i4)
-    @xmlout.out!("<agent_attribute attribute='#{attribute.xml_escape}' level='#{level}'/>")
-  end
-  def convert_agent_abilities
-    exn = SemanticFail.new(@ofs)
-    ability, level, attribute = get_rec_contents(exn, :s, :i4, :s)
-    @xmlout.out!("<agent_ability ability='#{ability.xml_escape}' level='#{level}' attribute='#{attribute.xml_escape}'/>")
-  end
-  def convert_date
-    exn = SemanticFail.new(@ofs)
-    year, season = get_rec_contents(exn, :u4, :asc)
-    raise exn if season =~ /\s/
-    @xmlout.out!("<date>#{season.xml_escape} #{year}</date>")
-  end
-end
-
 class EsfParser
   include EsfBasicBinaryOps
   include EsfDefaultConvert
@@ -132,22 +72,22 @@ class EsfParser
   attr_reader :data, :out_dir, :done
   attr_reader :magic, :node_types
 
-  def alloc_new_path(name, ext=".xml")
+  def alloc_new_path(base_name, semantic_name=nil, ext=".xml")
+    alloc_key = [base_name, semantic_name, ext]
+    name = base_name
+    name += "-" unless name =~ /[-\/]\z/
+    name += "#{semantic_name}-" if semantic_name
     while true
-      if name =~ /\/\z/
-        rel_path = "%s%04d%s" % [name, @path_allocator[[name, ext]], ext]
-      else
-        rel_path = "%s-%04d%s" % [name, @path_allocator[[name, ext]], ext]
-      end
+      rel_path = "%s%04d%s" % [name, @path_allocator[alloc_key], ext]
       path     = File.join(out_dir, rel_path)
       FileUtils.mkdir_p File.dirname(path)
       return [path, rel_path] unless File.exist?(path)
-      @path_allocator[[name, ext]] += 1
+      @path_allocator[alloc_key] += 1
     end
   end
 
-  def open_xml(name)
-    return XMLPrinter.new(*alloc_new_path(name, ".xml"))
+  def open_xml(base_name, semantic_name)
+    return XMLPrinter.new(*alloc_new_path(base_name, semantic_name, ".xml"))
   end
 
   def initialize(in_fh, out_dir)
@@ -205,9 +145,9 @@ class EsfParser
   def convert_until_ofs!(ofs_end)
     convert_value! while @ofs < ofs_end
   end
-  def xml_nested(name)
-    if name
-      orig, nested = @xmlout, open_xml(name)
+  def xml_nested(base_name)
+    if base_name
+      orig, nested = @xmlout, open_xml(base_name, lookahead_str)
       begin
         @xmlout = nested
         yield
@@ -220,54 +160,12 @@ class EsfParser
       yield
     end
   end
-  XmlSplit = {
-    :CAI_BDI_POOL                  => "bdi_pool/",
-    :FACTION                       => "factions/faction",
-    :QUAD_TREE_BIT_ARRAY           => "quadtree/",
-    :black_shroud_outlines         => "black_shroud",
-    :grid_data                     => "grid_data",
-    :pathfinding_areas             => "pathfinding_areas",
-    :query_info                    => "query_info",
-    :region_data                   => "region_data",
-    :regions                       => "regions/region",
-    :theatre                       => "theatre",
-    :UNIT_CLASS_NAME_ALLOCATOR     => 'unit_name_alloc/',
-    :REGION                        => 'region/',
-    :HEIGHT_FIELD                  => "height_field",
-    :BMD_TEXTURES                  => "bmd_textures",
-    :GROUND_TYPE_FIELD             => "ground_type_field",
-    :SAVE_GAME_HEADER              => "save_game_header/",
-    :MAPS                          => "save_game_header/maps",
-    :CAMPAIGN_PREOPEN_MAP_INFO     => "preopen_map_info/info",
-    :REGION_OWNERSHIPS_BY_THEATRE  => "region_ownership/theater",
-    :VICTORY_CONDITION_OPTIONS     => "victory_conditions/faction",
-    :CAMPAIGN_ENV                  => "campaign_env/env",
-    :CAMPAIGN_SETUP_LOCAL          => "campaign_env/campaign_setup_local",
-    :CAMPAIGN_SETUP                => "campaign_env/campaign_setup",
-    :CAMPAIGN_MODEL                => "campaign_env/campaign_model",
-    :CAMPAIGN_MAP_DATA             => "campaign_env/campaign_map_data",
-    :WORLD                         => "campaign_env/world",
-    :CAI_INTERFACE                 => "cai_interface/cai",
-    :CAI_WORLD                     => "cai_interface/cai_world",
-    :CAI_WORLD_FACTIONS            => "cai_factions/faction",
-    :CAI_WORLD_REGIONS             => "cai_regions/region",
-    :CAI_WORLD_REGION_BOUNDARIES   => "cai_boundaries/boundary",
-    :CAI_WORLD_SETTLEMENTS         => "cai_settlements/settlement",
-    :CAI_WORLD_BUILDING_SLOTS      => "cai_building_slots/building_slot",
-    :CAI_WORLD_REGION_SLOTS        => "cai_region_slots/region_slot",
-    :CAI_WORLD_CHARACTERS          => "cai_characters/character",
-    :CAI_WORLD_REOURCE_MOBILES     => "cai_armies/army",
-    :CAI_WORLD_UNITS               => "cai_units/unit",
-    :CAI_WORLD_REGION_HLICS        => "cai_region_hlics/hlics",
-    :CAI_INTERFACE_MANAGERS        => "cai_interface_managers/manager",
-    :CAMPAIGN_PATHFINDER           => "campaign-pathfinder/",
-    :PATHFINDING_GRID              => "campaign-pathfinder/grid",
-  }
   def convert_rec!(node_type, version)
     begin
+      save_ofs = @ofs
       return send(ConvertSemanticRec[node_type]) if version.nil? && ConvertSemanticRec[node_type]
-    rescue SemanticFail => exn
-      @ofs = exn.save_ofs
+    rescue SemanticFail
+      @ofs = save_ofs
     end
     xml_nested(XmlSplit[node_type]) do
       @xmlout.tag!("rec", :type=>node_type, :version=>version) do
@@ -284,9 +182,15 @@ class EsfParser
   def convert_81!
     node_type = get_node_type
     version   = get_byte
+    version   = nil if version == DefaultVersions[node_type]
+    begin
+      save_ofs = @ofs
+      return send(ConvertSemanticAry[node_type]) if version.nil? && ConvertSemanticAry[node_type]
+    rescue SemanticFail
+      @ofs = save_ofs
+    end
     ofs_end   = get_u4
     count     = get_u4
-    version   = nil if version == DefaultVersions[node_type]
     if count == 0
       @xmlout.tag!("ary", :type=>node_type, :version=>version)
     else
