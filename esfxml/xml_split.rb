@@ -10,7 +10,6 @@ XmlSplit = {
   :UNIT_CLASS_NAME_ALLOCATOR     => 'unit_name_alloc/',
   :REGION                        => 'region/',
   :SAVE_GAME_HEADER              => "save_game_header/",
-  :MAPS                          => "save_game_header/maps",
   :CAMPAIGN_PREOPEN_MAP_INFO     => "preopen_map_info/info",
   :REGION_OWNERSHIPS_BY_THEATRE  => "region_ownership/",
   :VICTORY_CONDITION_OPTIONS     => "victory_conditions/",

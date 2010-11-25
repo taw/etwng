@@ -232,12 +232,12 @@ module EsfGetData
     [:bin8, get_ofs_bytes]
   end
   def get_4a!
-    [:flt_ary, get_ofs_bytes.unpack("f*").map(&:pretty_single)]
+    [:flt_ary, get_ofs_bytes]
   end
   def get_4c!
-    [:v2_ary, get_ofs_bytes.unpack("f*").map(&:pretty_single)]
+    [:v2_ary, get_ofs_bytes]
   end
   def get_4d!
-    [:v3_ary, get_ofs_bytes.unpack("f*").map(&:pretty_single)]
+    [:v3_ary, get_ofs_bytes]
   end
 end

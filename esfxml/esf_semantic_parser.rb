@@ -1,42 +1,9 @@
 class SemanticFail < Exception
-  attr_reader :save_ofs
-  def initialize(save_ofs)
-    @save_ofs = save_ofs
-    super()
-  end
 end
 
 module EsfSemantic
-  ConvertSemanticAry = {
-    # startpos.esf
-    :RESOURCES_ARRAY       => :convert_resources_ary,
-    :RELIGION_BREAKDOWN    => :convert_religion_breakdown_ary,
-    :REGION_KEYS           => :convert_REGION_KEYS_ary,
-    :COMMODITIES_ORDER     => :convert_commodities_order_ary,
-    :RESOURCES_ORDER       => :convert_resources_order_ary,
-    :PORT_INDICES          => :convert_port_indices_ary,
-    :SETTLEMENT_INDICES    => :convert_settlement_indices_ary,
-    :REGION_OWNERSHIPS     => :convert_region_ownership_ary,
-
-    # regions.esf
-    :groundtype_index      => :convert_groundtype_index_ary,
-    :land_indices          => :convert_land_indices_ary,
-    :sea_indices           => :convert_sea_indices_ary,
-    :region_keys           => :convert_region_keys_ary,
-  }
-  ConvertSemanticRec = {
-    # startpos.esf
-    :DATE                  => :convert_date,
-    :AgentAbilities        => :convert_agent_abilities,
-    :AgentAttributes       => :convert_agent_attributes,
-
-    # regions.esf
-    :connectivity          => :convert_connectivity,
-    :BOUNDS_BLOCK          => :convert_bounds_block,
-    :climate_map           => :convert_climate_map,
-    :wind_map              => :convert_wind_map,
-    :black_shroud_outlines => :convert_black_shroud_outlines,
-  }
+  ConvertSemanticAry = {}
+  ConvertSemanticRec = {}
 
 ## Utility functions
 
@@ -76,71 +43,51 @@ module EsfSemantic
 
 ## Tag converters
 
-  def convert_region_ownership_ary
+## startpos.esf arrays
+
+  def convert_ary_REGION_OWNERSHIP
     data = get_ary_contents(:s, :s)
     raise SemanticFali.new if data.any?{|region, owner| region =~ /\s|=/ or owner =~ /\s|=/}
-    @xmlout.out!("<region_ownership>")
-    data.each{|region,owner| @xmlout.out!(" #{region.xml_escape}=#{owner.xml_escape}") }
-    @xmlout.out!("</region_ownership>")
+    @xmlout.out!("region_ownership", "", data.map{|region,owner| " #{region.xml_escape}=#{owner.xml_escape}" })
   end
-    
-  def convert_religion_breakdown_ary
+
+  def convert_ary_RELIGION_BREAKDOWN
     data = get_ary_contents(:s, :flt)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
-    @xmlout.out!("<religion_breakdown>")
-    data.each{|name,value| @xmlout.out!(" #{name.xml_escape}=#{value.pretty_single}") }
-    @xmlout.out!("</religion_breakdown>")
+    @xmlout.out_ary!("religion_breakdown", "", data.map{|name,value| " #{name.xml_escape}=#{value.pretty_single}" })
   end
 
-  def convert_port_indices_ary
-    data = get_ary_contents(:s, :u4)
-    raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
-    @xmlout.out!("<port_indices>")
-    data.each{|name,value| @xmlout.out!(" #{name.xml_escape}=#{value}") }
-    @xmlout.out!("</port_indices>")
-  end
-
-  def convert_settlement_indices_ary
-    data = get_ary_contents(:s, :u4)
-    raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
-    @xmlout.out!("<settlement_indices>")
-    data.each{|name,value| @xmlout.out!(" #{name.xml_escape}=#{value}") }
-    @xmlout.out!("</settlement_indices>")
-  end
-
-  def convert_groundtype_index_ary
-    convert_ary_contents_str("groundtype_index")
-  end
-  def convert_resources_ary
+  def convert_ary_RESOURCES_ARRAY
     convert_ary_contents_str("resources_array")
   end
-  def convert_REGION_KEYS_ary
+
+  def convert_ary_REGION_KEYS
     convert_ary_contents_str("REGION_KEYS")
   end
-  def convert_commodities_order_ary
+
+  def convert_ary_COMMODITIES_ORDER
     convert_ary_contents_str("commodities_order")
   end
-  def convert_resources_order_ary
+
+  def convert_ary_RESOURCES_ORDER
     convert_ary_contents_str("resources_order")
   end
-
-  def convert_land_indices_ary
-    data = get_ary_contents(:s, :byte)
+  
+  def convert_ary_PORT_INDICES
+    data = get_ary_contents(:s, :u4)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
-    @xmlout.out!("<land_indices>")
-    data.each{|name,value| @xmlout.out!(" #{name.xml_escape}=#{value}") }
-    @xmlout.out!("</land_indices>")
+    @xmlout.out_ary!("port_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
 
-  def convert_sea_indices_ary
-    data = get_ary_contents(:s, :byte)
+  def convert_ary_SETTLEMENT_INDICES
+    data = get_ary_contents(:s, :u4)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
-    @xmlout.out!("<sea_indices>")
-    data.each{|name,value| @xmlout.out!(" #{name.xml_escape}=#{value}") }
-    @xmlout.out!("</sea_indices>")
+    @xmlout.out_ary!("settlement_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
+  
+## regions.esf arrays
 
-  def convert_region_keys_ary
+  def convert_ary_region_keys
     data = get_ary_contents(:s, :v2)
     raise SemanticFali.new if data.any?{|name, x, y| name =~ /\s|=|,/}
     @xmlout.out!("<region_keys>")
@@ -148,50 +95,162 @@ module EsfSemantic
     @xmlout.out!("</region_keys>")
   end
 
-  def convert_bounds_block
+  def convert_ary_groundtype_index
+    convert_ary_contents_str("groundtype_index")
+  end
+
+  def convert_land_indices_ary
+    data = get_ary_contents(:s, :byte)
+    raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
+    @xmlout.out_ary!("land_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
+  end
+
+  def convert_sea_indices_ary
+    data = get_ary_contents(:s, :byte)
+    raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
+    @xmlout.out_ary!("sea_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
+  end
+  
+## traderoutes.esf arrays
+
+  def convert_ary_SETTLEMENTS
+    convert_ary_contents_str("settlements")
+  end
+
+## regions.esf records
+
+  def convert_rec_BOUNDS_BLOCK
     xmin, ymin, xmax, ymax = get_rec_contents(:v2, :v2)
     @xmlout.out!("<bounds_block xmin='#{xmin.pretty_single}' ymin='#{ymin.pretty_single}' xmax='#{xmax.pretty_single}' ymax='#{ymax.pretty_single}'/>")
   end
 
-  def convert_black_shroud_outlines
+  def convert_rec_black_shroud_outlines
     name, data = get_rec_contents(:s, :v2_ary)
+    data = data.unpack("f*").map(&:pretty_single)
     @xmlout.out!("<black_shroud_outlines name='#{name.xml_escape}'>")
     @xmlout.out!(" #{data.shift},#{data.shift}") until data.empty?
     @xmlout.out!("</black_shroud_outlines>")
   end
 
-  def convert_connectivity
+  def convert_rec_connectivity
     mask, cfrom, cto = get_rec_contents(:u4, :u4, :u4)
     @xmlout.out!("<connectivity mask='#{"%08x" % mask}' from='#{cfrom}' to='#{cto}'/>")
   end
 
-  def convert_climate_map
+  def convert_rec_climate_map
     xsz, ysz, data = get_rec_contents(:u4, :u4, :bin6)
     path, rel_path = alloc_new_path("climate_map", nil, ".pgm")
     File.write_pgm(path, xsz, ysz, data)
     @xmlout.out!("<climate_map pgm='#{rel_path}'/>")
   end
 
-  def convert_wind_map
+  def convert_rec_wind_map
     xsz, ysz, unknown, data = get_rec_contents(:u4, :u4, :flt, :bin2)
-    path, rel_path = alloc_new_path("wind_map", nil, ".bin")
-    File.write(path, data)
-    @xmlout.out!("<wind_map xsz='#{xsz}' ysz='#{ysz}' unknown='#{unknown.pretty_single}' data='#{rel_path}'/>")
+    path, rel_path = alloc_new_path("wind_map", nil, ".pgm")
+    File.write_pgm(path, xsz*2, ysz, data)
+    @xmlout.out!("<wind_map unknown='#{unknown.pretty_single}' pgm='#{rel_path.xml_escape}'/>")
   end
 
-  def convert_agent_attributes
+## startpos.esf records
+
+  def convert_rec_AgentAttributes
     attribute, level = get_rec_contents(:s, :i4)
     @xmlout.out!("<agent_attribute attribute='#{attribute.xml_escape}' level='#{level}'/>")
   end
 
-  def convert_agent_abilities
+  def convert_rec_AgentAbilities
     ability, level, attribute = get_rec_contents(:s, :i4, :s)
     @xmlout.out!("<agent_ability ability='#{ability.xml_escape}' level='#{level}' attribute='#{attribute.xml_escape}'/>")
   end
 
-  def convert_date
+  def convert_rec_DATE
     year, season = get_rec_contents(:u4, :asc)
     raise SemanticFail.new if season =~ /\s/
-    @xmlout.out!("<date>#{season.xml_escape} #{year}</date>")
+    if season == "summer" and year == 0
+      @xmlout.out!("<date/>")
+    else
+      @xmlout.out!("<date>#{season.xml_escape} #{year}</date>")
+    end
   end
+
+  def convert_rec_MAPS
+    name, x, y, unknown, data = get_rec_contents(:s, :u4, :u4, :i4, :bin8)
+    raise SemanticFail.new if name =~ /\s/
+    path, rel_path = alloc_new_path("map", nil, ".pgm")
+    File.write_pgm(path, x*4, y, data)
+    @xmlout.out!("<map name='#{name.xml_escape}' unknown='#{unknown}' pgm='#{rel_path.xml_escape}'/>")
+  end
+
+  def convert_rec_CAMPAIGN_LOCALISATION
+    data = get_rec_contents_dynamic
+    if data == [[:s, ""], [:s, ""]]
+      @xmlout.out!("<loc/>")
+    elsif data.size == 1 and data[0][0] == :s and data[0][1] != ""
+      @xmlout.out!("<loc>#{data[0][1].xml_escape}</loc>")
+    else
+      raise SemanticFail.new
+    end
+  end
+
+## bmd.dat records
+
+  def convert_rec_HEIGHT_FIELD
+    xi, yi, xf, yf, data, unknown, hmin, hmax = get_rec_contents(:u4, :u4, :v2, :flt_ary, :i4, :flt, :flt)
+    path, rel_path = alloc_new_path("height_field", nil, ".pgm")
+    File.write_pgm(path, 4*xi, yi, data)
+    @xmlout.out!("<height_field xsz='#{xf.pretty_single}' ysz='#{yf.pretty_single}' pgm='#{rel_path.xml_escape}' unknown='#{unknown}' hmin='#{hmin.pretty_single}' hmax='#{hmax.pretty_single}'/>")
+  end
+  
+  def convert_rec_GROUND_TYPE_FIELD
+    xi, yi, xf, yf, data = get_rec_contents(:u4, :u4, :v2, :bin4)
+    path, rel_path = alloc_new_path("group_type_field", nil, ".pgm")
+    File.write_pgm(path, 4*xi, yi, data)
+    @xmlout.out!("<ground_type_field xsz='#{xf.pretty_single}' ysz='#{yf.pretty_single}' pgm='#{rel_path.xml_escape}'/>")
+  end
+  
+  def convert_rec_BMD_TEXTURES
+    data = get_rec_contents_dynamic
+    @xmlout.tag!("bmd_textures") do
+      until data.empty?
+        if data.size == 3 and data.map{|t,v| t} == [:u4, :u4, :bin6]
+          xsz, ysz, pxdata = data.map{|t,v| v}
+          path, rel_path = alloc_new_path("bmd_textures/texture", nil, ".pgm")
+          File.write_pgm(path, 4*xsz, ysz, pxdata)
+          @xmlout.out!(" <bmd_pgm pgm='#{rel_path.xml_escape}'/>")
+          break
+        end        
+        t, v = data.shift
+        case t
+        when :s
+          @xmlout.out!(" <s>#{v.xml_escape}</s>")
+        when :i4
+          @xmlout.out!(" <i>#{v}</i>")
+        when :u4
+          @xmlout.out!(" <u>#{v}</u>")
+        when :bool
+          if v
+            @xmlout.out!(" <yes/>")
+          else
+            @xmlout.out!(" <no/>")
+          end
+        when :bin6
+          rel_path = save_binfile("bmd_textures/texture", nil, ".jpg", v)
+          @xmlout.out!(" <bin6ext path='#{rel_path.xml_escape}'/>")
+        else
+          # Should be possible to recover from it, isn't just yet
+          raise "Total failure while converting BMD_TEXTURES"
+        end
+      end
+    end
+  end
+  
+## autoconfigure everything
+
+  self.instance_methods.each{|m|
+    if m.to_s =~ /\Aconvert_ary_(.*)\z/
+      ConvertSemanticAry[$1.to_sym] = m
+    elsif m.to_s =~ /\Aconvert_rec_(.*)\z/
+      ConvertSemanticRec[$1.to_sym] = m
+    end
+  }
 end

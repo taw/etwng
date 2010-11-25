@@ -1,7 +1,15 @@
-Right now 20 semantic tags are supported, everything else gets generic
+Right now 26 semantic tags (+2 virtual tags) are supported, everything else gets generic
 low-level representation which is actually quite adequate most of the time.
 
-Examples of each semantic tag:
+Examples of each semantic tag below:
+
+== traderoutes.esf ==
+
+<settlements>
+ maryland
+ virginia
+ pennsylvania
+</settlements>
 
 == regions.esf ==
 <bounds_block xmin='-581.6795' ymin='253.953' xmax='-567.31494' ymax='266.0332'/>
@@ -77,9 +85,14 @@ Examples of each semantic tag:
  dense_forest
 </groundtype_index>
 
-<wind_map xsz='168' ysz='184' unknown='0.00729600992053747' data='wind_map-0001.bin'/>
+<wind_map unknown='0.00729600992053747' pgm='wind_map-0001.pgm'/>
 
 == startpos.esf ==
+
+<loc/>
+<loc>unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_167</loc>
+
+<map name='europe' unknown='1600' pgm='map-0002.pgm'/>
 
 <agent_ability ability='can_research' level='-1' attribute=''/>
 <agent_ability ability='can_duel' level='1' attribute='duelling_pistols'/>
@@ -87,6 +100,7 @@ Examples of each semantic tag:
 <agent_attribute attribute='management' level='4'/>
 <agent_attribute attribute='subterfuge' level='-1'/>
 
+<date/>
 <date>summer 1676</date>
 
 <resources_array>
@@ -231,3 +245,40 @@ Examples of each semantic tag:
  new_grenada=new_spain
  acadia=france
 </region_ownership>
+
+== bmd.dat ==
+
+<bmd_textures>
+  <s>Dry</s>
+  <s>BattleTerrain/cliff_maps/Aridrock</s>
+  <s>BattleTerrain/rock_maps/Aridrock</s>
+  <s>BattleTerrain/tiled_maps/soil1a</s>
+  <u>4</u>
+  <s>BattleTerrain/detail_maps/arid_l0</s>
+  <s>BattleTerrain/detail_maps/arid_l1</s>
+  <s>BattleTerrain/detail_maps/arid_l1</s>
+  <s>BattleTerrain/detail_maps/arid_l1</s>
+  <u>4</u>
+  <i>0</i>
+  <bin6ext path='bmd_textures/texture-0001.jpg'/>
+  <bin6ext path='bmd_textures/texture-0002.jpg'/>
+  <i>0</i>
+  <bin6ext path='bmd_textures/texture-0003.jpg'/>
+  <bin6ext path='bmd_textures/texture-0004.jpg'/>
+  <i>0</i>
+  <bin6ext path='bmd_textures/texture-0005.jpg'/>
+  <bin6ext path='bmd_textures/texture-0006.jpg'/>
+  <i>0</i>
+  <bin6ext path='bmd_textures/texture-0007.jpg'/>
+  <bin6ext path='bmd_textures/texture-0008.jpg'/>
+  <yes/>
+  <i>0</i>
+  <bin6ext path='bmd_textures/texture-0009.jpg'/>
+  <bin6ext path='bmd_textures/texture-0010.jpg'/>
+  <yes/>
+  <bmd_pgm pgm='bmd_textures/texture-0001.pgm'/>
+</bmd_textures>
+
+<height_field xsz='2048.0' ysz='2048.0' pgm='height_field-0001.pgm' unknown='3' hmin='-3.40282346638529e+38' hmax='3.40282346638529e+38'/>
+
+<ground_type_field xsz='2048.0' ysz='2048.0' pgm='group_type_field-0001.pgm'/>
