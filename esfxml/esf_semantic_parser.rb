@@ -26,6 +26,21 @@ module EsfSemantic
     end
     out
   end
+  def get_81!
+    node_type = get_node_type
+    version   = get_byte
+    version   = nil if version == DefaultVersions[node_type]
+    ofs_end   = get_u4
+    count     = get_u4
+    [[:ary, node_type, version], *(0...count).map{ get_rec_contents_dynamic }]
+  end
+
+  def get_80!
+    node_type = get_node_type
+    version   = get_byte
+    version   = nil if version == DefaultVersions[node_type]
+    [[:rec, node_type, version], *get_rec_contents_dynamic]
+  end
 
   def get_ary_contents(*expect_types)
     data = []
@@ -83,6 +98,16 @@ module EsfSemantic
     data = get_ary_contents(:s, :u4)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
     @xmlout.out_ary!("settlement_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
+  end
+  
+  def convert_ary_AgentAttributes
+    data = get_ary_contents(:s, :i4)
+    @xmlout.out_ary!("agent_attributes", "", data.map{|attribute,level| " #{attribute.xml_escape}=#{level}" })
+  end
+  
+  def convert_ary_AgentAttributeBonuses
+    data = get_ary_contents(:s, :u4)
+    @xmlout.out_ary!("agent_attribute_bonuses", "", data.map{|attribute,level| " #{attribute.xml_escape}=#{level}" })
   end
   
 ## regions.esf arrays
@@ -153,11 +178,6 @@ module EsfSemantic
 
 ## startpos.esf records
 
-  def convert_rec_AgentAttributes
-    attribute, level = get_rec_contents(:s, :i4)
-    @xmlout.out!("<agent_attribute attribute='#{attribute.xml_escape}' level='#{level}'/>")
-  end
-
   def convert_rec_AgentAbilities
     ability, level, attribute = get_rec_contents(:s, :i4, :s)
     @xmlout.out!("<agent_ability ability='#{ability.xml_escape}' level='#{level}' attribute='#{attribute.xml_escape}'/>")
@@ -190,6 +210,31 @@ module EsfSemantic
     else
       raise SemanticFail.new
     end
+  end
+
+  def convert_rec_LAND_RECORD_KEY
+    key, = get_rec_contents(:s)
+    @xmlout.out!("<land_key>#{key.xml_escape}</land_key>")
+  end
+
+  def convert_rec_UNIT_RECORD_KEY
+    key, = get_rec_contents(:s)
+    @xmlout.out!("<unit_key>#{key.xml_escape}</unit_key>")
+  end
+
+  def convert_rec_NAVAL_RECORD_KEY
+    key, = get_rec_contents(:s)
+    @xmlout.out!("<naval_key>#{key.xml_escape}</naval_key>")
+  end
+
+  def convert_rec_TRAITS
+    traits = get_rec_contents([:ary, :TRAIT, nil])
+    traits = traits.map do |trait|
+      raise SemanticFail.new unless trait.map{|t,v| t} == [:s, :i4]
+      trait.map{|t,v| v}
+    end
+    raise SemanticFail.new if traits.any?{|trait, level| trait =~ /\s|=/}
+    @xmlout.out_ary!("traits", "", traits.map{|trait, level| " #{trait.xml_escape}=#{level}" })
   end
 
 ## bmd.dat records

@@ -1,5 +1,7 @@
-Right now 26 semantic tags (+2 virtual tags) are supported, everything else gets generic
-low-level representation which is actually quite adequate most of the time.
+Right now 31 semantic tags (+2 virtual tags) are supported,
+for about 1000 node types across all esf varieties.
+Everything else gets generic low-level representation which is
+actually quite adequate most of the time.
 
 Examples of each semantic tag below:
 
@@ -88,6 +90,35 @@ Examples of each semantic tag below:
 <wind_map unknown='0.00729600992053747' pgm='wind_map-0001.pgm'/>
 
 == startpos.esf ==
+
+
+<naval_key>6th_rate_british</naval_key>
+
+<unit_key>6th_rate_british</unit_key>
+
+<land_key>euro_line_infantry_britain</land_key>
+
+<agent_attributes>
+ command_land=-1
+ command_sea=-1
+ duelling_pistols=-1
+ duelling_swords=-1
+ management=2
+ land_siege_engineering=-1
+ morale_land=-1
+ morale_sea=-1
+ movement_points_land=-1
+ trade=-1
+</agent_attributes>
+
+<agent_attribute_bonuses>
+ dummy=0
+</agent_attribute_bonuses
+
+<traits>
+ C_Minister_Industrialist=2
+ C_Minister_Reactionary=1
+</traits>
 
 <loc/>
 <loc>unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_167</loc>

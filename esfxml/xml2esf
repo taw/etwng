@@ -56,11 +56,16 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
 
       ## Semantic
       # rec / startpos.esf
-      :date                  => :on_start_chara_only,
-      :agent_ability         => :on_start_agent_ability,
-      :agent_attribute       => :on_start_agent_attribute,
-      :loc                   => :on_start_chara_only,
-      :map                   => :on_start_map,
+      :date                    => :on_start_chara_only,
+      :agent_ability           => :on_start_agent_ability,
+      :loc                     => :on_start_chara_only,
+      :map                     => :on_start_map,
+      :land_key                => :on_start_chara_only,
+      :naval_key               => :on_start_chara_only,
+      :unit_key                => :on_start_chara_only,
+      :traits                  => :on_start_chara_only,
+      :agent_attribute_bonuses => :on_start_chara_only,
+      :agent_attributes        => :on_start_chara_only,
 
       # rec / regions.esf
       :climate_map           => :on_start_climate_map,
@@ -141,11 +146,16 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
 
       ## Semantic
       # rec / startpos.esf
-      :date                  => :on_end_date,
-      :agent_ability         => :on_end_ignore,
-      :agent_attribute       => :on_end_ignore,
-      :loc                   => :on_end_loc,
-      :map                   => :on_end_ignore,
+      :date                    => :on_end_date,
+      :agent_ability           => :on_end_ignore,
+      :loc                     => :on_end_loc,
+      :map                     => :on_end_ignore,
+      :land_key                => :on_end_land_key,
+      :naval_key               => :on_end_naval_key,
+      :unit_key                => :on_end_unit_key,
+      :traits                  => :on_end_traits,
+      :agent_attribute_bonuses => :on_end_agent_attribute_bonuses,
+      :agent_attributes        => :on_end_agent_attributes,
 
       # rec / regions.esf
       :climate_map           => :on_end_ignore,
@@ -300,6 +310,30 @@ module XmlCallbacks
       @esf.put_u idx.to_i
     end
   end
+
+  def on_end_traits(ctx)
+    on_start_rec :type => "TRAITS"
+    semantic_put_ary("TRAIT", ctx[:buf].strip.split(/[\s=]+/), 2) do |trait, level|
+      @esf.put_s trait
+      @esf.put_i level.to_i
+    end
+    @esf.end_rec
+  end
+
+  def on_end_agent_attribute_bonuses(ctx)
+    semantic_put_ary("AgentAttributeBonuses", ctx[:buf].strip.split(/[\s=]+/), 2) do |attr_bonus, level|
+      @esf.put_s attr_bonus
+      @esf.put_u level.to_i
+    end
+  end
+
+  def on_end_agent_attributes(ctx)
+    semantic_put_ary("AgentAttributes", ctx[:buf].strip.split(/[\s=]+/), 2) do |attribute, level|
+      @esf.put_s attribute
+      @esf.put_i level.to_i
+    end
+  end
+
   
   def on_end_settlement_indices(ctx)
     semantic_put_ary("SETTLEMENT_INDICES", ctx[:buf].strip.split(/[\s=]+/), 2) do |name, idx|
@@ -363,18 +397,29 @@ module XmlCallbacks
     @esf.end_rec
   end
   
+  def on_end_land_key(ctx)
+    on_start_rec :type => "LAND_RECORD_KEY"
+    @esf.put_s ctx[:buf]
+    @esf.end_rec
+  end
+
+  def on_end_naval_key(ctx)
+    on_start_rec :type => "NAVAL_RECORD_KEY"
+    @esf.put_s ctx[:buf]
+    @esf.end_rec
+  end
+
+  def on_end_unit_key(ctx)
+    on_start_rec :type => "UNIT_RECORD_KEY"
+    @esf.put_s ctx[:buf]
+    @esf.end_rec
+  end
+  
   def on_start_agent_ability(attributes)
     on_start_rec :type => "AgentAbilities"
     @esf.put_s attributes[:ability]
     @esf.put_i attributes[:level].to_i
     @esf.put_s attributes[:attribute]
-    @esf.end_rec
-  end
-  
-  def on_start_agent_attribute(attributes)
-    on_start_rec :type => "AgentAttributes"
-    @esf.put_s attributes[:attribute]
-    @esf.put_i attributes[:level].to_i
     @esf.end_rec
   end
   
