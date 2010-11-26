@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+FileUtils.mkdir_p "out"
+
+Dir["samples/*"].each{|s|
+  next if File.directory?(s)
+  out = "out/" + File.basename(s).gsub(/[\._ ]+/, "_")
+  system *%W[jruby --server ./esf2xml #{s} #{out}]
+}
