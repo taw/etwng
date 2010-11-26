@@ -31,7 +31,12 @@ XmlSplit = {
   :CAI_WORLD_REOURCE_MOBILES     => "cai_armies/army",
   :CAI_WORLD_UNITS               => "cai_units/unit",
   :CAI_WORLD_REGION_HLICS        => "cai_region_hlics/hlics",
+  :CAI_WORLD_TRADING_POSTS       => "cai_trading_posts/trading_post",
+  :CAI_WORLD_RESOURCE_MOBILES    => "cai_mobiles/mobile",
   :CAI_INTERFACE_MANAGERS        => "cai_interface_managers/manager",
   :CAMPAIGN_PATHFINDER           => "campaign-pathfinder/",
   :PATHFINDING_GRID              => "campaign-pathfinder/grid",
+  :DIPLOMACY_MANAGER             => "diplomacy/",
+  :FACTION_TECHNOLOGY_MANAGER    => "technology/",
+  :ARMY_ARRAY                    => "army/",
 }
