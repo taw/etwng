@@ -70,9 +70,13 @@ class CS2File
   def get_primary_data_array
     get_u4_ary{|i|
       a, b = get(5).unpack("VC")
-      raise "Expected #{i}, got #{a} as row index" if a != i
+      raise "ALMOST-FAIL: Expected #{i}, got #{a} as row index" if a != i
       [b < 2 ? [false, true][b] : b, *get(19*4).unpack("l*")]
     }
+  end
+  def get_collision3d
+    data = [get_str, get_v3a, get_primary_data_array.size]
+    "Collision(#{data[0]}, #{data[1].size}x/#{data[2].size}x)"
   end
 end
 
@@ -99,9 +103,13 @@ files_sample_small = %W[
   samples/rigidmodels-buildings-prop_town_plant_pot02-prop_town_plant_pot02_tech.cs2.parsed
 
   samples/buildings-ottoman_warehouse04-ottoman_warehouse04_tech.cs2.parsed
+  samples/rigidmodels-buildings-fort_euro_wooden-fort_euro_wooden_tech.cs2.parsed
 ]
 
 files_all = Dir["samples/*"].sort_by{|fn| [File.size(fn), fn]}
+
+# This looks misparsed:
+# samples/buildings-fort_euro_wooden-fort_euro_wooden_tech.cs2.parsed
 
 files_all.each{|fn|
   begin
@@ -115,25 +123,34 @@ files_all.each{|fn|
     p [cs2.get_u4, cs2.get_str, cs2.get_str]
     p (0..7).map{ cs2.get_flt }
     p (0..7).map{ cs2.get_flt }
-    p [cs2.get_u4, cs2.get_str]
 
-    p [cs2.get_z4, cs2.get_str]
+    # Levels of destruction ???
+    cnt = cs2.get_u4
+    p [:cnt, cnt]
 
-    puts "V3s: #{cs2.get_v3a.size} elems"
-    puts "Primary data: #{cs2.get_primary_data_array.size} elems"
+    p [:nth, 0]
+    p [cs2.get_str]
+    p [cs2.get_z4]
+    p cs2.get_collision3d
+    pp cs2.get_u4_ary{ cs2.get_collision3d } # Windows
+    pp cs2.get_u4_ary{ cs2.get_collision3d } # Doors
+    pp cs2.get_u4_ary{ cs2.get_collision3d } # Gates
 
-    cs2.get_u4.times{
-      p [:ely, cs2.get_str]
-      puts "V3s: #{cs2.get_v3a.size} elems"
-      puts "Primary data: #{cs2.get_primary_data_array.size} elems"
-    }
 
-    # p (0..2).map{ cs2.get_u4 }
-    # p cs2.get_str
+    if cnt > 1
+      p [:nth, 1]
+      p [cs2.get_u4, cs2.get_str]
+      p cs2.get_v3a
+
+      # pp cs2.get(64).unpack("V*")
+    end
+
+    # puts "#{cs2.bytes_left-60} bytes skipped ..."
+    # cs2.get(cs2.bytes_left-60)
+
+    # p [cs2.get_u4, cs2.get_str]
     
-    
-    
-    # cs2.get_u4_ary{ cs2.get_v3 }
+    # cs2.get_v3a
     # (0..2).map{ cs2.get_u4 }
     # cs2.get_u4_ary{ cs2.get(12).unpack("ffV") }
     # 
@@ -145,13 +162,12 @@ files_all.each{|fn|
 
     # cs2.get(13*4).unpack("f*")
     # cs2.get_str
+
     # pp cs2.get(8).unpack("v*")
     # pp cs2.get_v3
     # pp cs2.get_v3
-    # pp cs2.get(4*7).unpack("V*")
-    
-    # p cs2.get(cs2.bytes_left).unpack("V*")
-    
+    # pp cs2.get(28).unpack("V*")
+  
     puts "#{cs2.bytes_left}/#{cs2.size} bytes to go" 
     puts "", "", ""
     
