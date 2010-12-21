@@ -193,6 +193,7 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
     super()
   end
   def start_element(element, attributes)
+    attributes = attributes.flatten
     raise "Cannot nest tags in this context" unless @xml2esf.stack[-1][:nest]
     attrs = {}
     attrs[attributes.shift.to_sym] = attributes.shift until attributes.empty?
