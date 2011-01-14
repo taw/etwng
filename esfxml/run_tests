@@ -1,16 +1,31 @@
 #!/usr/bin/env ruby
 
-system *%W[./esf2xml samples/trade_routes.esf tmp/tdir]
-system *%W[./esf2xml samples/regions.esf tmp/rdir]
-system *%W[./esf2xml samples/bmd.dat tmp/bdir]
-system *%W[./esf2xml samples/startpos.esf tmp/sdir]
+require "fileutils"
 
-system *%W[./xml2esf tmp/tdir tmp/t.esf]
-system *%W[./xml2esf tmp/rdir tmp/r.esf]
-system *%W[./xml2esf tmp/bdir tmp/b.esf]
-system *%W[./xml2esf tmp/sdir tmp/s.esf]
+FileUtils.mkdir_p "tmp"
 
-system *%W[diff tmp/t.esf samples/trade_routes.esf]
-system *%W[diff tmp/r.esf samples/regions.esf]
-system *%W[diff tmp/b.esf samples/bmd.dat]
-system *%W[diff tmp/s.esf samples/startpos.esf]
+samples = %W[
+  trade_routes.esf
+  sea_grids.esf
+  poi.esf
+  pathfinding.esf
+  regions.esf
+  bmd.dat
+  startpos.esf
+].sort_by{|fn| File.size("samples/#{fn}") }
+
+samples.each do |filename|
+  source    = "samples/#{filename}"
+  xmldir    = "tmp/" + filename.gsub(".", "_") + "_dir"
+  recreated = "tmp/recreated_#{filename}"
+  
+  puts "Verifying #{filename}"
+  
+  FileUtils.rm_rf xmldir
+  system "./esf2xml", source, xmldir
+
+  FileUtils.rm_rf recreated
+  system "./xml2esf", xmldir, recreated
+
+  system "diff", source, recreated
+end
