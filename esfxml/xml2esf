@@ -538,58 +538,61 @@ module XmlCallbacks
   def on_end_v3_ary(ctx)
     @esf.put_v3_ary ctx[:buf].strip.split(/[\s,]+/).map(&:to_f)
   end
+  def on_end_bin_hex(type, ctx)
+    @esf.put_4x(type, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+  end
   def on_end_bin0(ctx)
-    @esf.put_4x(0x40, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x40, ctx)
   end
   def on_end_bin1(ctx)
-    @esf.put_4x(0x41, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x41, ctx)
   end
   def on_end_bin2(ctx)
-    @esf.put_4x(0x42, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x42, ctx)
   end
   def on_end_bin3(ctx)
-    @esf.put_4x(0x43, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x43, ctx)
   end
   def on_end_bin4(ctx)
-    @esf.put_4x(0x44, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x44, ctx)
   end
   def on_end_bin5(ctx)
-    @esf.put_4x(0x45, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x45, ctx)
   end
   def on_end_bin6(ctx)
-    @esf.put_4x(0x46, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x46, ctx)
   end
   def on_end_bin7(ctx)
-    @esf.put_4x(0x47, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x47, ctx)
   end
   def on_end_bin8(ctx)
-    @esf.put_4x(0x48, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x48, ctx)
   end
   def on_end_bin9(ctx)
-    @esf.put_4x(0x49, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x49, ctx)
   end
   def on_end_binA(ctx)
-    @esf.put_4x(0x4A, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x4A, ctx)
   end
   def on_end_binB(ctx)
-    @esf.put_4x(0x4B, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x4B, ctx)
   end
   def on_end_binC(ctx)
-    @esf.put_4x(0x4C, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x4C, ctx)
   end
   def on_end_binD(ctx)
-    @esf.put_4x(0x4D, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x4D, ctx)
   end
   def on_end_binE(ctx)
-    @esf.put_4x(0x4E, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x4E, ctx)
   end
   def on_end_binF(ctx)
-    @esf.put_4x(0x4F, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))
+    on_end_bin_hex(0x4F, ctx)
   end
-  def on_start_chara_only(attrs)
+  def on_start_chara_only(attributes)
     {:buf => ""}
   end
-  def on_start_yes(attrs)
+  def on_start_yes(attributes)
     @esf.put_yes
     {}
   end
