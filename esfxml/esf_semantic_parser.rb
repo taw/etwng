@@ -124,13 +124,13 @@ module EsfSemantic
     convert_ary_contents_str("groundtype_index")
   end
 
-  def convert_land_indices_ary
+  def convert_ary_land_indices
     data = get_ary_contents(:s, :byte)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
     @xmlout.out_ary!("land_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
 
-  def convert_sea_indices_ary
+  def convert_ary_sea_indices
     data = get_ary_contents(:s, :byte)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
     @xmlout.out_ary!("sea_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
@@ -291,11 +291,11 @@ module EsfSemantic
   
 ## autoconfigure everything
 
-  self.instance_methods.each{|m|
+  self.instance_methods.each do |m|
     if m.to_s =~ /\Aconvert_ary_(.*)\z/
       ConvertSemanticAry[$1.to_sym] = m
     elsif m.to_s =~ /\Aconvert_rec_(.*)\z/
       ConvertSemanticRec[$1.to_sym] = m
     end
-  }
+  end
 end
