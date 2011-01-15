@@ -27,18 +27,14 @@ module EsfSemantic
     out
   end
   def get_81!
-    node_type = get_node_type
-    version   = get_byte
-    version   = nil if version == DefaultVersions[node_type]
+    node_type, version = get_node_type_and_version
     ofs_end   = get_u4
     count     = get_u4
     [[:ary, node_type, version], *(0...count).map{ get_rec_contents_dynamic }]
   end
 
   def get_80!
-    node_type = get_node_type
-    version   = get_byte
-    version   = nil if version == DefaultVersions[node_type]
+    node_type, version = get_node_type_and_version
     [[:rec, node_type, version], *get_rec_contents_dynamic]
   end
 
@@ -164,14 +160,14 @@ module EsfSemantic
 
   def convert_rec_climate_map
     xsz, ysz, data = get_rec_contents(:u4, :u4, :bin6)
-    path, rel_path = alloc_new_path("climate_map", nil, ".pgm")
+    path, rel_path = dir_builder.alloc_new_path("climate_map", nil, ".pgm")
     File.write_pgm(path, xsz, ysz, data)
     @xmlout.out!("<climate_map pgm='#{rel_path}'/>")
   end
 
   def convert_rec_wind_map
     xsz, ysz, unknown, data = get_rec_contents(:u4, :u4, :flt, :bin2)
-    path, rel_path = alloc_new_path("wind_map", nil, ".pgm")
+    path, rel_path = dir_builder.alloc_new_path("wind_map", nil, ".pgm")
     File.write_pgm(path, xsz*2, ysz, data)
     @xmlout.out!("<wind_map unknown='#{unknown.pretty_single}' pgm='#{rel_path.xml_escape}'/>")
   end
@@ -196,7 +192,7 @@ module EsfSemantic
   def convert_rec_MAPS
     name, x, y, unknown, data = get_rec_contents(:s, :u4, :u4, :i4, :bin8)
     raise SemanticFail.new if name =~ /\s/
-    path, rel_path = alloc_new_path("map", nil, ".pgm")
+    path, rel_path = dir_builder.alloc_new_path("map", nil, ".pgm")
     File.write_pgm(path, x*4, y, data)
     @xmlout.out!("<map name='#{name.xml_escape}' unknown='#{unknown}' pgm='#{rel_path.xml_escape}'/>")
   end
@@ -241,14 +237,14 @@ module EsfSemantic
 
   def convert_rec_HEIGHT_FIELD
     xi, yi, xf, yf, data, unknown, hmin, hmax = get_rec_contents(:u4, :u4, :v2, :flt_ary, :i4, :flt, :flt)
-    path, rel_path = alloc_new_path("height_field", nil, ".pgm")
+    path, rel_path = dir_builder.alloc_new_path("height_field", nil, ".pgm")
     File.write_pgm(path, 4*xi, yi, data)
     @xmlout.out!("<height_field xsz='#{xf.pretty_single}' ysz='#{yf.pretty_single}' pgm='#{rel_path.xml_escape}' unknown='#{unknown}' hmin='#{hmin.pretty_single}' hmax='#{hmax.pretty_single}'/>")
   end
   
   def convert_rec_GROUND_TYPE_FIELD
     xi, yi, xf, yf, data = get_rec_contents(:u4, :u4, :v2, :bin4)
-    path, rel_path = alloc_new_path("group_type_field", nil, ".pgm")
+    path, rel_path = dir_builder.alloc_new_path("group_type_field", nil, ".pgm")
     File.write_pgm(path, 4*xi, yi, data)
     @xmlout.out!("<ground_type_field xsz='#{xf.pretty_single}' ysz='#{yf.pretty_single}' pgm='#{rel_path.xml_escape}'/>")
   end
@@ -259,7 +255,7 @@ module EsfSemantic
       until data.empty?
         if data.size == 3 and data.map{|t,v| t} == [:u4, :u4, :bin6]
           xsz, ysz, pxdata = data.map{|t,v| v}
-          path, rel_path = alloc_new_path("bmd_textures/texture", nil, ".pgm")
+          path, rel_path = dir_builder.alloc_new_path("bmd_textures/texture", nil, ".pgm")
           File.write_pgm(path, 4*xsz, ysz, pxdata)
           @xmlout.out!(" <bmd_pgm pgm='#{rel_path.xml_escape}'/>")
           break
@@ -279,7 +275,7 @@ module EsfSemantic
             @xmlout.out!(" <no/>")
           end
         when :bin6
-          rel_path = save_binfile("bmd_textures/texture", nil, ".jpg", v)
+          rel_path = dir_builder.save_binfile("bmd_textures/texture", nil, ".jpg", v)
           @xmlout.out!(" <bin6ext path='#{rel_path.xml_escape}'/>")
         else
           # Should be possible to recover from it, isn't just yet

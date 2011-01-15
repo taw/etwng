@@ -56,6 +56,19 @@ module EsfBasicBinaryOps
       true
     end
   end    
+  def get_magic
+    case magic = get_u4
+    when 0xABCD
+      [0xABCD]
+    when 0xABCE
+      a = get_u4
+      b = get_u4
+      raise "Incorrect ESF magic followup" unless a == 0
+      [0xABCE, a, b]
+    else
+      raise "Incorrect ESF magic: %X" % magic
+    end
+  end
   def get_node_types
     (0...get_u2()).map{ get_ascii.to_sym }
   end
@@ -70,6 +83,12 @@ module EsfBasicBinaryOps
   end
   def get_ofs_bytes
     get_bytes(get_u4 - @ofs)
+  end
+  def get_node_type_and_version
+    node_type = @node_types[get_u2]
+    version   = get_byte
+    version   = nil if version == DefaultVersions[node_type]
+    [node_type, version]
   end
   def size
     @data.size

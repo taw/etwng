@@ -6,6 +6,7 @@ require "pp"
 require "esf_parser"
 require "esf_semantic_parser"
 require "xml_split"
+require "dir_builder"
 require "pgm"
 
 class Float
@@ -57,44 +58,21 @@ class EsfParser
   include EsfSemantic
   
   attr_accessor :ofs
-  attr_reader :data, :out_dir, :done
+  attr_reader :data, :dir_builder, :done
   attr_reader :magic, :node_types
 
-  def save_binfile(base_name, semantic_name, ext, data)
-    path, rel_path = alloc_new_path(base_name, semantic_name, ext)
-    File.open(path, 'wb'){|fh| fh.write data}
-    rel_path
-  end
-
-  def alloc_new_path(base_name, semantic_name, ext)
-    alloc_key = [base_name, semantic_name, ext]
-    name = base_name
-    name += "-" unless name =~ /[-\/]\z/
-    name += "#{semantic_name}-" if semantic_name
-    while true
-      rel_path = "%s%04d%s" % [name, @path_allocator[alloc_key], ext]
-      path     = File.join(out_dir, rel_path)
-      FileUtils.mkdir_p File.dirname(path)
-      return [path, rel_path] unless File.exist?(path)
-      @path_allocator[alloc_key] += 1
-    end
-  end
-
-  def open_xml(base_name, semantic_name)
-    return XMLPrinter.new(*alloc_new_path(base_name, semantic_name, ".xml"))
-  end
-
-  def initialize(in_fh, out_dir)
-    @data        = in_fh.read
-    @out_dir     = out_dir
-    @xmlout      = XMLPrinter.new(File.join(out_dir, 'esf.xml'), 'esf.xml')
-    @ofs         = 0
-    @path_allocator = Hash.new(1)
-    get_header
-    @esf_type_handlers = setup_esf_type_handlers
+  def initialize(in_fh, dir_builder)
+    # Setup input
+    @data                  = in_fh.read
+    @ofs                   = 0
+    @magic                 = get_magic
+    @node_types            = with_temp_ofs(get_u4) { get_node_types }
+    # Setup output
+    @dir_builder           = dir_builder
+    @xmlout                = dir_builder.open_esf_xml
+    @esf_type_handlers     = setup_esf_type_handlers
     @esf_type_handlers_get = setup_esf_type_handlers_get
   end
-
   def setup_esf_type_handlers
     out = Hash.new{|ht,node_type| raise "Unknown type 0x%02x at %d" % [node_type, ofs] }
     (0..255).each{|i|
@@ -111,34 +89,15 @@ class EsfParser
     }
     out
   end
-  def get_header
-    case magic = get_u4
-    when 0xABCD
-      @magic = [0xABCD]
-    when 0xABCE
-      a = get_u4
-      b = get_u4
-      raise "Incorrect ESF magic followup" unless a == 0
-      @magic = [0xABCE, a, b]
-    else
-      raise "Incorrect ESF magic: %X" % magic
-    end
-    with_temp_ofs(get_u4) {
-      @node_types = get_node_types
-    }
-  end
   def inspect
-    "EsfParser(#{@ofs})"
-  end
-  def get_node_type
-    @node_types[get_u2]
+    "#{self.class}(ofs=#{@ofs})"
   end
   def convert_until_ofs!(ofs_end)
     convert_value! while @ofs < ofs_end
   end
   def xml_nested(base_name)
     if base_name
-      orig, nested = @xmlout, open_xml(base_name, lookahead_str)
+      orig, nested = @xmlout, dir_builder.open_xml(base_name, lookahead_str)
       begin
         @xmlout = nested
         yield
@@ -165,15 +124,11 @@ class EsfParser
     end
   end
   def convert_80!
-    node_type   = get_node_type
-    version     = get_byte
-    version     = nil if version == DefaultVersions[node_type]
+    node_type, version = get_node_type_and_version
     convert_rec!(node_type, version)
   end
   def convert_81!
-    node_type = get_node_type
-    version   = get_byte
-    version   = nil if version == DefaultVersions[node_type]
+    node_type, version = get_node_type_and_version
     begin
       save_ofs = @ofs
       return send(ConvertSemanticAry[node_type]) if version.nil? && ConvertSemanticAry[node_type]
@@ -210,71 +165,6 @@ class EsfParser
   end
 end
 
-class XMLPrinter
-  attr_reader :out_buf, :out_path, :rel_path
-  def initialize(out_path, rel_path)
-    @out_path = out_path
-    @rel_path = rel_path
-    @out_fh   = File.open(out_path, 'wb')
-    @out_buf  = ""
-    @stack    = []
-    @indent   = Hash.new{|ht,k| ht[k]=" "*k}
-  end
-  def flush
-    @out_fh.write @out_buf
-    @out_buf = ""
-  end
-  def tag!(name, *args)
-    raise ArgumentError.new("Too many arguments") if args.size > 2
-    
-    attrs_s = ""
-    cnt = nil
-
-    if args.size == 2
-      attrs_s = attrs_to_s(args[0])
-      cnt = args[1]
-    elsif args.size == 1
-      if args[0].is_a?(Hash)
-        attrs_s = attrs_to_s(args[0])
-      else
-        cnt = args[0]
-      end
-    end
-    
-    cnt = nil if cnt == ""
-
-    if block_given?
-      raise ArgumentError.new("Cannot use content argument and bolck at the same time") if cnt
-      out! "<#{name}#{attrs_s}>"
-      @stack << name
-      yield
-      @stack.pop
-      out! "</#{name}>"
-    elsif cnt.nil?
-      out! "<#{name}#{attrs_s}/>"
-    else
-      out! "<#{name}#{attrs_s}>#{cnt}</#{name}>"
-    end
-  end
-  def out!(str)
-    @out_buf << @indent[@stack.size] << str << "\n"
-    flush if @out_buf.size > 1_000_000
-  end
-  def out_ary!(tag, attrs, data)
-    if data.empty?
-      out! "<#{tag}#{attrs}/>"
-    else
-      out! "<#{tag}#{attrs}>"
-      data.each{|line| out! line}
-      out! "</#{tag}>"
-    end
-  end
-  private
-  def attrs_to_s(attrs={})
-    attrs.to_a.map{|k,v| v.nil? ? "" : " #{k}='#{v.to_s.xml_attr_escape}'"}.join
-  end
-end
-
 verbose = true
 if ARGV[0] == "--quiet"
   ARGV.shift
@@ -297,8 +187,8 @@ if File.exist?(out_dir)
   STDERR.puts "#{out_dir} already exists"
   exit 1
 end
-FileUtils.mkdir_p out_dir
 
-esf = EsfParser.new(in_file, out_dir)
+dir_builder = DirBuilder.new(out_dir)
+esf = EsfParser.new(in_file, dir_builder)
 thr = esf.progressbar_thread if verbose
 esf.convert!
