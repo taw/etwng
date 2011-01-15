@@ -71,6 +71,10 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :traits                  => :on_start_chara_only,
       :agent_attribute_bonuses => :on_start_chara_only,
       :agent_attributes        => :on_start_chara_only,
+      :agent_ancillaries       => :on_start_chara_only,
+      :region_ownerships_by_theatre => :on_start_region_ownerships_by_theatre,
+      :building                => :on_start_building,
+      :ancillary_uniqueness_monitor => :on_start_chara_only,
 
       # rec / regions.esf
       :climate_map           => :on_start_climate_map,
@@ -162,6 +166,10 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :traits                  => :on_end_traits,
       :agent_attribute_bonuses => :on_end_agent_attribute_bonuses,
       :agent_attributes        => :on_end_agent_attributes,
+      :agent_ancillaries       => :on_end_agent_ancillaries,
+      :region_ownerships_by_theatre => :on_end_region_ownerships_by_theatre,
+      :building                => :on_end_ignore,
+      :ancillary_uniqueness_monitor => :on_end_ancillary_uniqueness_monitor,
 
       # rec / regions.esf
       :climate_map           => :on_end_ignore,
@@ -242,6 +250,37 @@ module XmlCallbacks
   end
   
   ## Semantic
+  def on_start_building(attributes)
+    put_rec "BUILDING" do
+      @esf.put_u attributes[:health].to_i
+      @esf.put_s attributes[:name]
+      @esf.put_s attributes[:faction]
+      @esf.put_s attributes[:government]
+    end
+  end
+  
+  def on_start_region_ownerships_by_theatre(attributes)
+    {:buf => '', :theatre => attributes[:theatre]}
+  end
+
+  def on_end_region_ownerships_by_theatre(ctx)
+    put_rec "REGION_OWNERSHIPS_BY_THEATRE" do
+      @esf.put_s ctx[:theatre]
+      semantic_put_ary("REGION_OWNERSHIPS", ctx[:buf].strip.split(/[\s=]+/), 2) do |region, owner|
+        @esf.put_s region
+        @esf.put_s owner
+      end
+    end
+  end
+  
+  def on_end_ancillary_uniqueness_monitor(ctx)
+    put_rec "ANCILLARY_UNIQUENESS_MONITOR" do
+      semantic_put_ary("ENTRIES", ctx[:buf].strip.split(/\s+/)) do |entry|
+        @esf.put_s entry
+      end
+    end
+  end
+  
   def on_end_loc(ctx)
     put_rec "CAMPAIGN_LOCALISATION" do
       if ctx[:buf] == ""
@@ -397,6 +436,12 @@ module XmlCallbacks
   def on_end_groundtype_index(ctx)
     semantic_put_ary("groundtype_index", ctx[:buf].strip.split(/\s+/)) do |name|
       @esf.put_s name
+    end
+  end
+
+  def on_end_agent_ancillaries(ctx)
+    semantic_put_ary("AgentAncillaries", ctx[:buf].strip.split(/\s+/)) do |ancillary|
+      @esf.put_s ancillary
     end
   end
     

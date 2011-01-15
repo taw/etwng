@@ -1,4 +1,4 @@
-Right now 31 semantic tags (+2 virtual tags) are supported,
+Right now 35 semantic tags (+2 virtual tags) are supported,
 for about 1000 node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -91,6 +91,38 @@ Examples of each semantic tag below:
 
 == startpos.esf ==
 
+<agent_ancillaries>
+ Ancillary_Government_Secretary_Gobby
+ Ancillary_Mistress_Gorgeous
+</agent_ancillaries>
+
+<ancillary_uniqueness_monitor>
+ Ancillary_Army_Merc_Artilleryman
+ Ancillary_Government_Comptroller
+</ancillary_uniqueness_monitor>
+
+<building health='100' name='minor_magistrate' faction='france' government='gov_absolute_monarchy'/>
+
+<region_ownerships theatre='india'>
+ malwa=mughal
+ kashmir=mughal
+ gujarat=mughal
+ ceylon=netherlands
+ sindh=mughal
+ hindustan=mughal
+ bijapur=maratha
+ carnatica=maratha
+ berar=mughal
+ bengal=mughal
+ afghanistan=safavids
+ mysore=mysore
+ hyderabad=mughal
+ rajpootana=mughal
+ malabar=portugal
+ orissa=mughal
+ punjab=mughal
+ ahmadnagar=mughal
+</region_ownerships>
 
 <naval_key>6th_rate_british</naval_key>
 

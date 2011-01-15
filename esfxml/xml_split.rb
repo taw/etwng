@@ -11,7 +11,6 @@ XmlSplit = {
   :REGION                        => 'region/',
   :SAVE_GAME_HEADER              => "save_game_header/",
   :CAMPAIGN_PREOPEN_MAP_INFO     => "preopen_map_info/info",
-  :REGION_OWNERSHIPS_BY_THEATRE  => "region_ownership/",
   :VICTORY_CONDITION_OPTIONS     => "victory_conditions/",
   :CAMPAIGN_ENV                  => "campaign_env/env",
   :CAMPAIGN_SETUP_LOCAL          => "campaign_env/campaign_setup_local",

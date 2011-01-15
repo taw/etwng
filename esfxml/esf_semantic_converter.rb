@@ -9,6 +9,15 @@ module EsfSemanticConverter
     out_ary!(tag, "", data.map{|name| " #{name.xml_escape}" })
   end
 
+  def ensure_types(data, *expected_types)
+    out = []
+    data.each do |t, *v|
+      raise SemanticFail.new unless t == expected_types.shift
+      out.push *v
+    end
+    out
+  end
+
 ## Tag converters
 
 ## startpos.esf arrays
@@ -61,6 +70,10 @@ module EsfSemanticConverter
   def convert_ary_AgentAttributeBonuses
     data = get_ary_contents(:s, :u4)
     out_ary!("agent_attribute_bonuses", "", data.map{|attribute,level| " #{attribute.xml_escape}=#{level}" })
+  end
+  
+  def convert_ary_AgentAncillaries
+    convert_ary_contents_str("agent_ancillaries")
   end
   
 ## regions.esf arrays
@@ -135,7 +148,12 @@ module EsfSemanticConverter
     ability, level, attribute = get_rec_contents(:s, :i4, :s)
     out!("<agent_ability ability='#{ability.xml_escape}' level='#{level}' attribute='#{attribute.xml_escape}'/>")
   end
-
+  
+  def convert_rec_BUILDING
+    health, name, faction, gov = get_rec_contents(:u4, :s, :s, :s)
+    out!("<building health='#{health}' name='#{name.xml_escape}' faction='#{faction.xml_escape}' government='#{gov.xml_escape}'/>")
+  end
+  
   def convert_rec_DATE
     year, season = get_rec_contents(:u4, :asc)
     raise SemanticFail.new if season =~ /\s/
@@ -182,12 +200,23 @@ module EsfSemanticConverter
 
   def convert_rec_TRAITS
     traits = get_rec_contents([:ary, :TRAIT, nil])
-    traits = traits.map do |trait|
-      raise SemanticFail.new unless trait.map{|t,v| t} == [:s, :i4]
-      trait.map{|t,v| v}
-    end
+    traits = traits.map{|trait| ensure_types(trait, :s, :i4)}
     raise SemanticFail.new if traits.any?{|trait, level| trait =~ /\s|=/}
     out_ary!("traits", "", traits.map{|trait, level| " #{trait.xml_escape}=#{level}" })
+  end
+
+  def convert_rec_ANCILLARY_UNIQUENESS_MONITOR
+    entries = get_rec_contents([:ary, :ENTRIES, nil])
+    entries = entries.map{|entry| ensure_types(entry, :s)}.flatten
+    raise SemanticFail.new if entries.any?{|entry| entry =~ /\s|=/}
+    out_ary!("ancillary_uniqueness_monitor", "", entries.map{|entry| " #{entry.xml_escape}" })
+  end
+  
+  def convert_rec_REGION_OWNERSHIPS_BY_THEATRE
+    theatre, *ownerships = get_rec_contents(:s, [:ary, :REGION_OWNERSHIPS, nil])
+    ownerships = ownerships.map{|o| ensure_types(o, :s, :s)}
+    raise SemanticFail.new if ownerships.any?{|region, owner| region =~ /\s|=/ or owner =~ /\s|=/}
+    out_ary!("region_ownerships_by_theatre", " theatre='#{theatre.xml_escape}'", ownerships.map{|region, owner| " #{region.xml_escape}=#{owner.xml_escape}" })
   end
 
 ## bmd.dat records
