@@ -3,9 +3,13 @@ end
 
 class Float
   def pretty_single
-    rv = (((100_000.0 * self).round / 100_000.0) rescue self)
-    return rv if [self].pack("f") == [rv].pack("f")
-    self
+    begin
+      rv = (100_000.0 * self).round / 100_000.0
+      return rv if self != rv and [self].pack("f") == [rv].pack("f")
+      self
+    rescue
+      self
+    end
   end
 end
 

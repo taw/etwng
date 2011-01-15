@@ -157,7 +157,7 @@ class EsfConverter < EsfParser
           convert_until_ofs!(get_u4)
         end
       end
-      tag!("xml_include", :path => rel_path)
+      out!("<xml_include path='#{rel_path.xml_escape}'/>")
     else
       tag!("rec", :type=>node_type, :version=>version) do
         convert_until_ofs!(get_u4)
@@ -166,7 +166,7 @@ class EsfConverter < EsfParser
   end
 
   def convert_until_ofs!(ofs_end)
-    convert_value! while ofs < ofs_end
+    send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
   end
 
   def convert_80!
@@ -194,14 +194,10 @@ class EsfConverter < EsfParser
     end
   end
 
-  def convert_value!
-    send(@esf_type_handlers[get_byte])
-  end
-
   def put_node_types!
     tag!("node_types") do
       node_types.each do |n|
-        tag!("node_type", :name => n)
+        out!("<node_type name='#{n.to_s.xml_escape}'/>")
       end
     end
   end
@@ -211,7 +207,7 @@ class EsfConverter < EsfParser
     @dir_builder.open_main_xml do
       tag!("esf", :magic => magic.join(" ")) do
         put_node_types!
-        convert_value!
+        send(@esf_type_handlers[get_byte])
       end
     end
     @done = true
@@ -234,7 +230,7 @@ class EsfConverter < EsfParser
     @dir_builder.xml_printer.tag!(*attrs, &blk)
   end
   def out!(str)
-    @dir_builder.xml_printer.out! str
+    @dir_builder.xml_printer.out!(str)
   end
   def out_ary!(tag, attrs, data)
     @dir_builder.xml_printer.out_ary!(tag, attrs, data)

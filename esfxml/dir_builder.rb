@@ -69,32 +69,16 @@ class XMLPrinter
     flush!
     @out_fh.close
   end
-  def tag!(name, *args)
-    raise ArgumentError.new("Too many arguments") if args.size > 2
-    attrs_s = ""
-    cnt = nil
-    if args.size == 2
-      attrs_s = attrs_to_s(args[0])
-      cnt = args[1]
-    elsif args.size == 1
-      if args[0].is_a?(Hash)
-        attrs_s = attrs_to_s(args[0])
-      else
-        cnt = args[0]
-      end
-    end
-    cnt = nil if cnt == ""
+  def tag!(name, attrs=nil)
+    attrs = attrs_to_s(attrs) if attrs
     if block_given?
-      raise ArgumentError.new("Cannot use content argument and bolck at the same time") if cnt
-      out! "<#{name}#{attrs_s}>"
+      out! "<#{name}#{attrs}>"
       @stack << name
       yield
       @stack.pop
       out! "</#{name}>"
-    elsif cnt.nil?
-      out! "<#{name}#{attrs_s}/>"
     else
-      out! "<#{name}#{attrs_s}>#{cnt}</#{name}>"
+      out! "<#{name}#{attrs}/>"
     end
   end
   def out!(str)
