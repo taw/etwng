@@ -53,7 +53,7 @@ module EsfSemanticConverter
   def convert_ary_RELIGION_BREAKDOWN
     data = get_ary_contents(:s, :flt)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
-    out_ary!("religion_breakdown", "", data.map{|name,value| " #{name.xml_escape}=#{value.pretty_single}" })
+    out_ary!("religion_breakdown", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
 
   def convert_ary_RESOURCES_ARRAY
@@ -104,7 +104,7 @@ module EsfSemanticConverter
     data = get_ary_contents(:s, :v2)
     raise SemanticFali.new if data.any?{|name, x, y| name =~ /\s|=|,/}
     out!("<region_keys>")
-    data.each{|name,x,y| out!(" #{name.xml_escape}=#{x.pretty_single},#{y.pretty_single}") }
+    data.each{|name,x,y| out!(" #{name.xml_escape}=#{x},#{y}") }
     out!("</region_keys>")
   end
 
@@ -134,7 +134,7 @@ module EsfSemanticConverter
 
   def convert_rec_BOUNDS_BLOCK
     xmin, ymin, xmax, ymax = get_rec_contents(:v2, :v2)
-    out!("<bounds_block xmin='#{xmin.pretty_single}' ymin='#{ymin.pretty_single}' xmax='#{xmax.pretty_single}' ymax='#{ymax.pretty_single}'/>")
+    out!("<bounds_block xmin='#{xmin}' ymin='#{ymin}' xmax='#{xmax}' ymax='#{ymax}'/>")
   end
 
   def convert_rec_black_shroud_outlines
@@ -161,7 +161,7 @@ module EsfSemanticConverter
     xsz, ysz, unknown, data = get_rec_contents(:u4, :u4, :flt, :bin2)
     path, rel_path = dir_builder.alloc_new_path("wind_map", nil, ".pgm")
     File.write_pgm(path, xsz*2, ysz, data)
-    out!("<wind_map unknown='#{unknown.pretty_single}' pgm='#{rel_path.xml_escape}'/>")
+    out!("<wind_map unknown='#{unknown}' pgm='#{rel_path.xml_escape}'/>")
   end
 
 ## startpos.esf records
@@ -175,7 +175,7 @@ module EsfSemanticConverter
     data = get_rec_contents(:s, :u4, :flt, :u4, :bin8, :u4)
     name, unknown1, research_points, unknown2, unknown3, unknown4 = *data
     unknown3 = unknown3.unpack("V*").join(" ")
-    out!("<techs name='#{name.xml_escape}' unknown1='#{unknown1}' research_points='#{research_points.pretty_single}' unknown2='#{unknown2}' unknown3='#{unknown3}' unknown4='#{unknown4}'/>")
+    out!("<techs name='#{name.xml_escape}' unknown1='#{unknown1}' research_points='#{research_points}' unknown2='#{unknown2}' unknown3='#{unknown3}' unknown4='#{unknown4}'/>")
   end
 
   def convert_rec_COMMANDER_DETAILS
@@ -267,14 +267,14 @@ module EsfSemanticConverter
     xi, yi, xf, yf, data, unknown, hmin, hmax = get_rec_contents(:u4, :u4, :v2, :flt_ary, :i4, :flt, :flt)
     path, rel_path = dir_builder.alloc_new_path("height_field", nil, ".pgm")
     File.write_pgm(path, 4*xi, yi, data)
-    out!("<height_field xsz='#{xf.pretty_single}' ysz='#{yf.pretty_single}' pgm='#{rel_path.xml_escape}' unknown='#{unknown}' hmin='#{hmin.pretty_single}' hmax='#{hmax.pretty_single}'/>")
+    out!("<height_field xsz='#{xf}' ysz='#{yf}' pgm='#{rel_path.xml_escape}' unknown='#{unknown}' hmin='#{hmin}' hmax='#{hmax}'/>")
   end
   
   def convert_rec_GROUND_TYPE_FIELD
     xi, yi, xf, yf, data = get_rec_contents(:u4, :u4, :v2, :bin4)
     path, rel_path = dir_builder.alloc_new_path("group_type_field", nil, ".pgm")
     File.write_pgm(path, 4*xi, yi, data)
-    out!("<ground_type_field xsz='#{xf.pretty_single}' ysz='#{yf.pretty_single}' pgm='#{rel_path.xml_escape}'/>")
+    out!("<ground_type_field xsz='#{xf}' ysz='#{yf}' pgm='#{rel_path.xml_escape}'/>")
   end
   
   def convert_rec_BMD_TEXTURES

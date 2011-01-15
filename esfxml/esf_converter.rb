@@ -25,13 +25,13 @@ module EsfConvertBasic
     out!("<u>#{get_u4}</u>")
   end
   def convert_0a!
-    out!("<flt>#{get_float.pretty_single}</flt>")
+    out!("<flt>#{get_float}</flt>")
   end
   def convert_0c!
-    out!("<v2 x='#{get_float.pretty_single}' y='#{get_float.pretty_single}'/>")
+    out!("<v2 x='#{get_float}' y='#{get_float}'/>")
   end
   def convert_0d!
-    out!("<v3 x='#{get_float.pretty_single}' y='#{get_float.pretty_single}' z='#{get_float.pretty_single}'/>")
+    out!("<v3 x='#{get_float}' y='#{get_float}' z='#{get_float}'/>")
   end
   def convert_0e!
     str = get_str
