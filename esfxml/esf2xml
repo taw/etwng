@@ -33,31 +33,19 @@ class String
   def to_flt_dump
     unpack("f*").map(&:pretty_single).join(" ")
   end
-  def to_v2_dump
-    out = []
-    data = unpack("f*").map(&:pretty_single)
-    out << "#{data.shift},#{data.shift}" until data.empty?
-    out.join(" ")
-  end
-  def to_v3_dump
-    out = []
-    data = unpack("f*")
-    out << "#{data.shift},#{data.shift},#{data.shift}" until data.empty?
-    out.join(" ")
-  end
 end
 
 module EsfParserDebug
   def progressbar_thread
-    Thread.new{
+    Thread.new do
       begin
         puts "Done: %0.1f%%" % (100.0 * @ofs.to_f / @data.size)
-        5.times {
+        5.times do
           sleep 1
           break if @done
-        }
+        end
       end until @done
-    }
+    end
   end
 end
 
@@ -139,9 +127,6 @@ class EsfParser
       @node_types = get_node_types
     }
   end
-  def get_node_types
-    (0...get_u2()).map{ get_ascii.to_sym }
-  end
   def inspect
     "EsfParser(#{@ofs})"
   end
@@ -209,9 +194,6 @@ class EsfParser
   end
   def convert_value!
     send(@esf_type_handlers[get_byte])
-  end
-  def get_ofs_bytes
-    get_bytes(get_u4 - @ofs)
   end
   def convert!
     @done = false

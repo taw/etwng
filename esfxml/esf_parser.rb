@@ -56,6 +56,9 @@ module EsfBasicBinaryOps
       true
     end
   end    
+  def get_node_types
+    (0...get_u2()).map{ get_ascii.to_sym }
+  end
   def with_temp_ofs(tmp)
     orig = @ofs
     begin
@@ -64,6 +67,9 @@ module EsfBasicBinaryOps
     ensure
       @ofs = orig
     end
+  end
+  def get_ofs_bytes
+    get_bytes(get_u4 - @ofs)
   end
   def size
     @data.size

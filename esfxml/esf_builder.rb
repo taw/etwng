@@ -86,10 +86,10 @@ class EsfBuilder
   def put_flt_ary(elems)
     put_4x("\x4a", elems.pack("f*"))
   end
-  def put_v2_ary(elems) # Contrary to name, it contains floats
+  def put_v2_ary(elems) # Contrary to name, elems contains floats
     put_4x("\x4c", elems.pack("f*"))
   end
-  def put_v3_ary(elems) # Contrary to name, it contains floats
+  def put_v3_ary(elems) # Contrary to name, elems contains floats
     put_4x("\x4d", elems.pack("f*"))
   end
   def start_rec(type_str, version_str)
