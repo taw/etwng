@@ -54,7 +54,7 @@ module EsfConvertBasic
     convert_4x!("bin0", &:to_hex_dump)
   end
   def convert_41!
-    convert_4x!("bin1", &:to_hex_dump)
+    convert_4x!("bool_ary"){|data| data.unpack("C*").join(" ")}
   end
   def convert_42!
     convert_4x!("bin2", &:to_hex_dump)

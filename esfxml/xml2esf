@@ -31,6 +31,7 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :u2_ary      => :on_start_chara_only,
       :v2_ary      => :on_start_chara_only,
       :v3_ary      => :on_start_chara_only,
+      :bool_ary    => :on_start_chara_only,
       :bin0        => :on_start_chara_only,
       :bin1        => :on_start_chara_only,
       :bin2        => :on_start_chara_only,
@@ -121,6 +122,7 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :u2_ary      => :on_end_u2_ary,
       :v2_ary      => :on_end_v2_ary,
       :v3_ary      => :on_end_v3_ary,
+      :bool_ary    => :on_end_bool_ary,
       :bin0        => :on_end_bin0,
       :bin1        => :on_end_bin1,
       :bin2        => :on_end_bin2,
@@ -551,6 +553,9 @@ module XmlCallbacks
   end
   def on_end_v3_ary(ctx)
     @esf.put_v3_ary ctx[:buf].strip.split(/[\s,]+/).map(&:to_f)
+  end
+  def on_end_bool_ary(ctx)
+    @esf.put_bool_ary ctx[:buf].strip.split(/[\s,]+/).map(&:to_i)
   end
   def on_end_bin_hex(type, ctx)
     @esf.put_4x(type, ctx[:buf].strip.split(/\s+/).map{|x| x.to_i(16)}.pack("C*"))

@@ -92,6 +92,9 @@ class EsfBuilder
   def put_v3_ary(elems) # Contrary to name, elems contains floats
     put_4x("\x4d", elems.pack("f*"))
   end
+  def put_bool_ary(elems) # Contrary to name, elems contains ints
+    put_4x("\x41", elems.pack("C*"))
+  end
   def start_rec(type_str, version_str)
     type_code = @type_codes[type_str]
     version = version_str ? version_str.to_i : DefaultVersions[type_str.to_sym]
