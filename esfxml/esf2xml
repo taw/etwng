@@ -2,11 +2,6 @@
 
 require "fileutils"
 require "pp"
-require "pgm"
-require "default_versions"
-require "xml_split"
-require "esf_parser"
-require "dir_builder"
 require "esf_converter"
 
 verbose = true

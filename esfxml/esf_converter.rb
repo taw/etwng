@@ -1,4 +1,9 @@
-require "esf_semantic_parser"
+require "pgm"
+require "default_versions"
+require "xml_split"
+require "esf_parser"
+require "dir_builder"
+require "esf_semantic_converter"
 
 module EsfConvertBasic
   def convert_00!
