@@ -39,4 +39,6 @@ XmlSplit = {
   :DIPLOMACY_MANAGER             => "diplomacy/",
   :FACTION_TECHNOLOGY_MANAGER    => "technology/",
   :ARMY_ARRAY                    => "army/",
+  :DOMESTIC_TRADE_ROUTES         => "domestic_trade_routes/",
+  :INTERNATIONAL_TRADE_ROUTES    => "international_trade_routes/"
 }
