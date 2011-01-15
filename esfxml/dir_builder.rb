@@ -16,6 +16,7 @@ class DirBuilder
   end
   
   def open_xml(new_xml_printer)
+    @xml_printer.flush! if @xml_printer
     prev_printer = @xml_printer
     @xml_printer = new_xml_printer
     yield
