@@ -195,6 +195,10 @@ module EsfParserSemantic
     end
     out
   end
+  
+  def get_value!
+    send(@esf_type_handlers_get[get_byte])
+  end
 
   def get_rec_contents(*expect_types)
     out     = []
