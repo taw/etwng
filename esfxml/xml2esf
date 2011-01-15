@@ -6,6 +6,10 @@ require "esf_builder"
 require "pp"
 require "pgm"
 
+# API is pretty lame, you need two handlers:
+# on_start_X(attributes) -> context_hash
+# on_end_X(context_hash) -> nil
+
 class XMLParserCallbacks < Nokogiri::XML::SAX::Document
   def initialize(xml2esf)
     @xml2esf = xml2esf
@@ -214,6 +218,17 @@ end
 module XmlCallbacks 
   ## Utilities
   
+  def put_rec(type, version=nil)
+    if @stack[-1][:ary]
+      @esf.start_elem
+    else
+      @esf.start_rec type, version
+    end
+    yield
+    @esf.end_rec
+    {}
+  end
+  
   def semantic_put_ary(type, data, n=1)
     on_start_ary :type => type
     until data.empty?
@@ -226,14 +241,14 @@ module XmlCallbacks
   
   ## Semantic
   def on_end_loc(ctx)
-    on_start_rec :type => "CAMPAIGN_LOCALISATION"
-    if ctx[:buf] == ""
-      @esf.put_s ""
-      @esf.put_s ""
-    else
-      @esf.put_s ctx[:buf]
+    put_rec "CAMPAIGN_LOCALISATION" do
+      if ctx[:buf] == ""
+        @esf.put_s ""
+        @esf.put_s ""
+      else
+        @esf.put_s ctx[:buf]
+      end
     end
-    @esf.end_rec
   end
   
   def on_start_bmd_textures(attributes)
@@ -254,25 +269,25 @@ module XmlCallbacks
   
   def on_start_ground_type_field(attributes)
     xsz, ysz, data = File.read_pgm(File.join(@in_dir, attributes[:pgm]))
-    on_start_rec :type => "GROUND_TYPE_FIELD"
-    @esf.put_u xsz/4
-    @esf.put_u ysz
-    @esf.put_v2 attributes[:xsz].to_f, attributes[:ysz].to_f
-    @esf.put_4x("\x44", data)
-    @esf.end_rec
+    put_rec "GROUND_TYPE_FIELD" do
+      @esf.put_u xsz/4
+      @esf.put_u ysz
+      @esf.put_v2 attributes[:xsz].to_f, attributes[:ysz].to_f
+      @esf.put_4x("\x44", data)
+    end
   end
 
   def on_start_height_field(attributes)
     xsz, ysz, data = File.read_pgm(File.join(@in_dir, attributes[:pgm]))
-    on_start_rec :type => "HEIGHT_FIELD"
-    @esf.put_u xsz/4
-    @esf.put_u ysz
-    @esf.put_v2 attributes[:xsz].to_f, attributes[:ysz].to_f
-    @esf.put_4x("\x4a", data)
-    @esf.put_i attributes[:unknown].to_i
-    @esf.put_flt attributes[:hmin].to_f
-    @esf.put_flt attributes[:hmax].to_f
-    @esf.end_rec
+    put_rec "HEIGHT_FIELD" do
+      @esf.put_u xsz/4
+      @esf.put_u ysz
+      @esf.put_v2 attributes[:xsz].to_f, attributes[:ysz].to_f
+      @esf.put_4x("\x4a", data)
+      @esf.put_i attributes[:unknown].to_i
+      @esf.put_flt attributes[:hmin].to_f
+      @esf.put_flt attributes[:hmax].to_f
+    end
   end
 
   def on_end_settlements(ctx)
@@ -313,12 +328,12 @@ module XmlCallbacks
   end
 
   def on_end_traits(ctx)
-    on_start_rec :type => "TRAITS"
-    semantic_put_ary("TRAIT", ctx[:buf].strip.split(/[\s=]+/), 2) do |trait, level|
-      @esf.put_s trait
-      @esf.put_i level.to_i
+    put_rec "TRAITS" do
+      semantic_put_ary("TRAIT", ctx[:buf].strip.split(/[\s=]+/), 2) do |trait, level|
+        @esf.put_s trait
+        @esf.put_i level.to_i
+      end
     end
-    @esf.end_rec
   end
 
   def on_end_agent_attribute_bonuses(ctx)
@@ -335,7 +350,6 @@ module XmlCallbacks
     end
   end
 
-  
   def on_end_settlement_indices(ctx)
     semantic_put_ary("SETTLEMENT_INDICES", ctx[:buf].strip.split(/[\s=]+/), 2) do |name, idx|
       @esf.put_s name
@@ -385,70 +399,70 @@ module XmlCallbacks
   end
     
   def on_end_date(ctx)
-    on_start_rec :type => "DATE"
     if ctx[:buf] == ""
-      @esf.put_u 0
-      @esf.put_asc 'summer'
+      year, season = 0, 'summer' 
     else
       date_fields = ctx[:buf].strip.split(/\s+/)
       raise "Invalid date: `#{ctx[:buf]}'" unless date_fields.size == 2 and date_fields[1] =~ /\A\d+\z/
-      @esf.put_u date_fields[1].to_i
-      @esf.put_asc date_fields[0]
+      year, season = date_fields[1].to_i, date_fields[0]
     end
-    @esf.end_rec
+    put_rec "DATE" do
+      @esf.put_u year
+      @esf.put_asc season
+    end
   end
   
   def on_end_land_key(ctx)
-    on_start_rec :type => "LAND_RECORD_KEY"
-    @esf.put_s ctx[:buf]
-    @esf.end_rec
+    put_rec "LAND_RECORD_KEY" do
+      @esf.put_s ctx[:buf]
+    end
   end
 
   def on_end_naval_key(ctx)
-    on_start_rec :type => "NAVAL_RECORD_KEY"
-    @esf.put_s ctx[:buf]
-    @esf.end_rec
+    put_rec "NAVAL_RECORD_KEY" do
+      @esf.put_s ctx[:buf]
+    end
   end
 
   def on_end_unit_key(ctx)
-    on_start_rec :type => "UNIT_RECORD_KEY"
-    @esf.put_s ctx[:buf]
-    @esf.end_rec
+    put_rec "UNIT_RECORD_KEY" do
+      @esf.put_s ctx[:buf]
+    end
   end
   
   def on_start_agent_ability(attributes)
-    on_start_rec :type => "AgentAbilities"
-    @esf.put_s attributes[:ability]
-    @esf.put_i attributes[:level].to_i
-    @esf.put_s attributes[:attribute]
-    @esf.end_rec
+    put_rec "AgentAbilities" do
+      @esf.put_s attributes[:ability]
+      @esf.put_i attributes[:level].to_i
+      @esf.put_s attributes[:attribute]
+    end
   end
   
   def on_start_climate_map(attributes)
     xsz, ysz, data = File.read_pgm(File.join(@in_dir, attributes[:pgm]))
-    on_start_rec :type => "climate_map"
-    @esf.put_u xsz
-    @esf.put_u ysz
-    @esf.put_4x("\x46", data)
-    @esf.end_rec
+    put_rec "climate_map" do
+      @esf.put_u xsz
+      @esf.put_u ysz
+      @esf.put_4x("\x46", data)
+    end
   end
 
   def on_start_wind_map(attributes)
     xsz, ysz, data = File.read_pgm(File.join(@in_dir, attributes[:pgm]))
-    on_start_rec :type => "wind_map"
-    @esf.put_u xsz/2
-    @esf.put_u ysz
-    @esf.put_flt attributes[:unknown].to_f
-    @esf.put_4x("\x42", data)
-    @esf.end_rec
+    put_rec "wind_map" do
+      @esf.put_u xsz/2
+      @esf.put_u ysz
+      @esf.put_flt attributes[:unknown].to_f
+      @esf.put_4x("\x42", data)
+    end
   end
   
   def on_start_connectivity(attributes)
-    on_start_rec :type => "connectivity"
-    @esf.put_u attributes[:mask].hex
-    @esf.put_u attributes[:from].to_i
-    @esf.put_u attributes[:to].to_i
-    @esf.end_rec
+    put_rec "connectivity" do
+      @esf.put_u attributes[:mask].hex
+      @esf.put_u attributes[:from].to_i
+      @esf.put_u attributes[:to].to_i
+    end
   end
   
   def on_start_black_shroud_outlines(attributes)
@@ -456,28 +470,28 @@ module XmlCallbacks
   end
   
   def on_end_black_shroud_outlines(ctx)
-    on_start_rec :type => "black_shroud_outlines"
-    @esf.put_s ctx[:name]
-    @esf.put_v2_ary ctx[:buf].strip.split(/[\s,]+/).map(&:to_f)
-    @esf.end_rec
+    put_rec "black_shroud_outlines" do
+      @esf.put_s ctx[:name]
+      @esf.put_v2_ary ctx[:buf].strip.split(/[\s,]+/).map(&:to_f)
+    end
   end
   
   def on_start_bounds_block(attributes)
-    on_start_rec :type => "BOUNDS_BLOCK"
-    @esf.put_v2 attributes[:xmin].to_f, attributes[:ymin].to_f
-    @esf.put_v2 attributes[:xmax].to_f, attributes[:ymax].to_f
-    @esf.end_rec
+    put_rec "BOUNDS_BLOCK" do
+      @esf.put_v2 attributes[:xmin].to_f, attributes[:ymin].to_f
+      @esf.put_v2 attributes[:xmax].to_f, attributes[:ymax].to_f
+    end
   end
   
   def on_start_map(attributes)
     xsz, ysz, data = File.read_pgm(File.join(@in_dir, attributes[:pgm]))
-    on_start_rec :type => "MAPS"
-    @esf.put_s attributes[:name]
-    @esf.put_u xsz/4
-    @esf.put_u ysz
-    @esf.put_i attributes[:unknown].to_i
-    @esf.put_4x("\x48", data)
-    @esf.end_rec
+    put_rec "MAPS" do
+      @esf.put_s attributes[:name]
+      @esf.put_u xsz/4
+      @esf.put_u ysz
+      @esf.put_i attributes[:unknown].to_i
+      @esf.put_4x("\x48", data)
+    end
   end
 
 ## Basic
