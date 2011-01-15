@@ -34,10 +34,20 @@ module EsfConvertBasic
     out!("<v3 x='#{get_float.pretty_single}' y='#{get_float.pretty_single}' z='#{get_float.pretty_single}'/>")
   end
   def convert_0e!
-    out!("<s>#{get_str.xml_escape}</s>")
+    str = get_str
+    if str.empty?
+      out!("<s/>")
+    else
+      out!("<s>#{str.xml_escape}</s>")
+    end
   end
   def convert_0f!
-    out!("<asc>#{get_ascii.xml_escape}</asc>")
+    str = get_ascii
+    if str.empty?
+      out!("<asc/>")
+    else
+      out!("<asc>#{str.xml_escape}</asc>")
+    end
   end
   def convert_10!
     out!("<u2x>#{get_u2}</u2x>")
