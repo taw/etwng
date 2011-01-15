@@ -18,14 +18,36 @@ module EsfSemanticConverter
     out
   end
 
+  def ensure_loc(data)
+    if data == [[:s, ""], [:s, ""]]
+      ""
+    elsif data.size == 1 and data[0][0] == :s and data[0][1] != ""
+      data[0][1]
+    else
+      raise SemanticFail.new
+    end
+  end
+
 ## Tag converters
 
 ## startpos.esf arrays
-
+  def convert_ary_UNIT_CLASS_NAMES_LIST
+    data = get_ary_contents_dynamic
+    data = data.map{|rec|
+      raise SemanticFail.new unless rec.map{|t,*v| t} == [[:rec, :CAMPAIGN_LOCALISATION, nil], :bool]
+      loc, used = rec.map{|t,*v| v}
+      loc = ensure_loc(loc)
+      raise SemanticFail.new if loc =~ /\s|=/
+      used = used[0]
+      [loc, used]
+    }
+    out_ary!("unit_class_names_list", "", data.map{|loc, used| " #{loc}=#{used ? 'yes' : 'no'}"})
+  end
+  
   def convert_ary_REGION_OWNERSHIP
     data = get_ary_contents(:s, :s)
     raise SemanticFali.new if data.any?{|region, owner| region =~ /\s|=/ or owner =~ /\s|=/}
-    out!("region_ownership", "", data.map{|region,owner| " #{region.xml_escape}=#{owner.xml_escape}" })
+    out_ary!("region_ownership", "", data.map{|region,owner| " #{region.xml_escape}=#{owner.xml_escape}" })
   end
 
   def convert_ary_RELIGION_BREAKDOWN
@@ -144,6 +166,28 @@ module EsfSemanticConverter
 
 ## startpos.esf records
 
+  def convert_rec_DIPLOMACY_RELATIONSHIP_ATTITUDES_ARRAY
+    data = get_rec_contents(:i4, :i4, :i4, :bool, :i4, :bool)
+    out!("<draa a='#{data[0]}' b='#{data[1]}' c='#{data[2]}' d='#{data[3] ? 'yes' : 'no'}' e='#{data[4]}' f='#{data[5] ? 'yes' : 'no'}'/>")
+  end
+
+  def convert_rec_techs
+    data = get_rec_contents(:s, :u4, :flt, :u4, :bin8, :u4)
+    name, unknown1, research_points, unknown2, unknown3, unknown4 = *data
+    unknown3 = unknown3.unpack("V*").join(" ")
+    out!("<techs name='#{name.xml_escape}' unknown1='#{unknown1}' research_points='#{research_points.pretty_single}' unknown2='#{unknown2}' unknown3='#{unknown3}' unknown4='#{unknown4}'/>")
+  end
+
+  def convert_rec_COMMANDER_DETAILS
+    data = get_rec_contents_dynamic
+    raise SemanticFail.new unless data.map{|t,*v| t} == [[:rec, :CAMPAIGN_LOCALISATION, nil], [:rec, :CAMPAIGN_LOCALISATION, nil], :s]
+    fnam, lnam, faction = data.map{|t,*v| v}
+    fnam = ensure_loc(fnam)
+    lnam = ensure_loc(lnam)
+    faction = faction[0]
+    out!("<commander_details name='#{fnam.xml_escape}' surname='#{lnam.xml_escape}' faction='#{faction.xml_escape}'/>")
+  end
+
   def convert_rec_AgentAbilities
     ability, level, attribute = get_rec_contents(:s, :i4, :s)
     out!("<agent_ability ability='#{ability.xml_escape}' level='#{level}' attribute='#{attribute.xml_escape}'/>")
@@ -173,13 +217,11 @@ module EsfSemanticConverter
   end
 
   def convert_rec_CAMPAIGN_LOCALISATION
-    data = get_rec_contents_dynamic
-    if data == [[:s, ""], [:s, ""]]
+    loc = ensure_loc(get_rec_contents_dynamic)
+    if loc.empty?
       out!("<loc/>")
-    elsif data.size == 1 and data[0][0] == :s and data[0][1] != ""
-      out!("<loc>#{data[0][1].xml_escape}</loc>")
     else
-      raise SemanticFail.new
+      out!("<loc>#{loc.xml_escape}</loc>")
     end
   end
 

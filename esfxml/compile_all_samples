@@ -7,5 +7,7 @@ FileUtils.mkdir_p "out"
 Dir["samples/*"].each{|s|
   next if File.directory?(s)
   out = "out/" + File.basename(s).gsub(/[\._ ]+/, "_")
+  next if File.exist?(out)
+  puts "Compiling #{s}"
   system *%W[jruby --server ./esf2xml #{s} #{out}]
 }

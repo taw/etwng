@@ -147,7 +147,7 @@ class EsfConverter < EsfParser
 
   def convert_rec!(node_type, version)
     if version.nil? && ConvertSemanticRec[node_type]
-      try_semantic do
+      try_semantic(node_type) do
         return send(ConvertSemanticRec[node_type]) 
       end
     end
@@ -177,7 +177,7 @@ class EsfConverter < EsfParser
   def convert_81!
     node_type, version = get_node_type_and_version
     if version.nil? && ConvertSemanticAry[node_type]
-      try_semantic do
+      try_semantic(node_type) do
         return send(ConvertSemanticAry[node_type]) 
       end
     end

@@ -75,6 +75,9 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :region_ownerships_by_theatre => :on_start_region_ownerships_by_theatre,
       :building                => :on_start_building,
       :ancillary_uniqueness_monitor => :on_start_chara_only,
+      :commander_details       => :on_start_commander_details,
+      :techs                   => :on_start_techs,
+      :draa                    => :on_start_draa,
 
       # rec / regions.esf
       :climate_map           => :on_start_climate_map,
@@ -98,6 +101,7 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :port_indices          => :on_start_chara_only,
       :settlement_indices    => :on_start_chara_only,
       :region_ownership      => :on_start_chara_only,
+      :unit_class_names_list => :on_start_chara_only,
       
       # ary / traderoutes.esf
       :settlements           => :on_start_chara_only,
@@ -170,6 +174,9 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :region_ownerships_by_theatre => :on_end_region_ownerships_by_theatre,
       :building                => :on_end_ignore,
       :ancillary_uniqueness_monitor => :on_end_ancillary_uniqueness_monitor,
+      :commander_details => :on_end_ignore,
+      :techs             => :on_end_ignore,
+      :draa              => :on_end_ignore,
 
       # rec / regions.esf
       :climate_map           => :on_end_ignore,
@@ -193,6 +200,7 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       :port_indices          => :on_end_port_indices,
       :settlement_indices    => :on_end_settlement_indices,
       :region_ownership      => :on_end_region_ownership,
+      :unit_class_names_list => :on_end_unit_class_names_list,
 
       # ary / traderoutes.esf
       :settlements           => :on_end_settlements,
@@ -220,7 +228,7 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
     if @stack[-1][:buf]
       @stack[-1][:buf] << chars
     elsif chars =~ /\S/
-      raise "Illegal place for non-whitespace characters" 
+      raise "Illegal place for non-whitespace characters: #{@stack.inspect} #{chars.inspect}" 
     end
   end
 end
@@ -247,6 +255,17 @@ module XmlCallbacks
       @esf.end_rec
     end
     @esf.end_ary
+  end
+
+  def put_loc(loc)
+    put_rec "CAMPAIGN_LOCALISATION" do
+      if loc == ""
+        @esf.put_s ""
+        @esf.put_s ""
+      else
+        @esf.put_s loc
+      end
+    end
   end
   
   ## Semantic
@@ -282,14 +301,7 @@ module XmlCallbacks
   end
   
   def on_end_loc(ctx)
-    put_rec "CAMPAIGN_LOCALISATION" do
-      if ctx[:buf] == ""
-        @esf.put_s ""
-        @esf.put_s ""
-      else
-        @esf.put_s ctx[:buf]
-      end
-    end
+    put_loc ctx[:buf]
   end
   
   def on_start_bmd_textures(attributes)
@@ -328,6 +340,36 @@ module XmlCallbacks
       @esf.put_i attributes[:unknown].to_i
       @esf.put_flt attributes[:hmin].to_f
       @esf.put_flt attributes[:hmax].to_f
+    end
+  end
+
+  def on_start_draa(attributes)
+    put_rec "DIPLOMACY_RELATIONSHIP_ATTITUDES_ARRAY" do
+      @esf.put_i attributes[:a].to_i
+      @esf.put_i attributes[:b].to_i
+      @esf.put_i attributes[:c].to_i
+      @esf.put_bool(attributes[:d] == 'yes')
+      @esf.put_i attributes[:e].to_i
+      @esf.put_bool(attributes[:f] == 'yes')
+    end
+  end
+
+  def on_start_techs(attributes)
+    put_rec "techs" do
+      @esf.put_s attributes[:name]
+      @esf.put_u attributes[:unknown1].to_i
+      @esf.put_flt attributes[:research_points]
+      @esf.put_u attributes[:unknown2].to_i
+      @esf.put_4x("\x48", attributes[:unknown3].split(/\s+/).map(&:to_i).pack("V*"))
+      @esf.put_u attributes[:unknown4].to_i
+    end
+  end
+
+  def on_start_commander_details(attributes)
+    put_rec "COMMANDER_DETAILS" do
+      put_loc attributes[:name]
+      put_loc attributes[:surname]
+      @esf.put_s attributes[:faction]
     end
   end
 
@@ -374,6 +416,13 @@ module XmlCallbacks
         @esf.put_s trait
         @esf.put_i level.to_i
       end
+    end
+  end
+
+  def on_end_unit_class_names_list(ctx)
+    semantic_put_ary("UNIT_CLASS_NAMES_LIST", ctx[:buf].strip.split(/[\s=]+/), 2) do |loc, used|
+      put_loc loc
+      @esf.put_bool(used=='yes')
     end
   end
 

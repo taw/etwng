@@ -225,12 +225,21 @@ module EsfParserSemantic
     data.push get_rec_contents(*expect_types) while @ofs < ofs_end
     data
   end
+
+  def get_ary_contents_dynamic
+    data = []
+    ofs_end   = get_u4
+    count     = get_u4
+    data.push get_rec_contents_dynamic while @ofs < ofs_end
+    data
+  end
   
-  def try_semantic
+  def try_semantic(node_type)
     begin
       save_ofs = @ofs
       yield
     rescue SemanticFail
+      pp [:semantic_rollback, @ofs, save_ofs, node_type]
       @ofs = save_ofs
     end
   end

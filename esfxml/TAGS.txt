@@ -1,4 +1,4 @@
-Right now 35 semantic tags (+2 virtual tags) are supported,
+Right now 39 semantic tags (+2 virtual tags) are supported,
 for about 1000 node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -90,6 +90,25 @@ Examples of each semantic tag below:
 <wind_map unknown='0.00729600992053747' pgm='wind_map-0001.pgm'/>
 
 == startpos.esf ==
+
+<techs name='military_army_plug_bayonet' unknown1='2' research_points='0.0' unknown2='0' unknown3='' unknown4='0'/>
+
+<draa a='0' b='-10' c='0 d='no' e='0' f='no'/>
+
+<commander_details name='names_name_names_englishMathew' surname='names_name_names_englishAbbot' faction='britain'/>
+
+<unit_class_names_list>
+ unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_213=yes
+ unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_214=no
+ unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_215=no
+ unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_216=no
+ unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_217=no
+ unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_218=no
+ unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_219=no
+ unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_220=no
+ unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_221=no
+ ...
+</unit_class_names_list>
 
 <agent_ancillaries>
  Ancillary_Government_Secretary_Gobby

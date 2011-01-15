@@ -22,6 +22,9 @@ class EsfBuilder
   def put_no
     @data << "\x01\x00"
   end
+  def put_bool(val)
+    @data << (val ? "\x01\x01" : "\x01\x00")
+  end
   def put_v2(x,y)
     @data << [0x0c, x, y].pack("Cff")
   end
