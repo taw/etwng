@@ -124,6 +124,44 @@ module EsfSemanticConverter
     out_ary!("sea_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
   
+  def convert_ary_DIPLOMACY_RELATIONSHIP_ATTITUDES_ARRAY
+    draa_labels = [
+      "State gift received",
+      "Military alliance",
+      "Alliance Broken",
+      "Alliances not honoured",
+      "Enemy of my enemy",
+      "Trade Agreement",
+      "Trade Agreement broken",
+      "War",
+      "Peace Treaty",
+      "Allied with enemy nation",
+      "War declared on friend",
+      "Unreliable ally",
+      "Territorial expansion",
+      "Backstabber! Attacked by forces given safe passage",
+      "Assassination attempts",
+      "Religion",
+      "Government type",
+      "Historical Friendship/Grievance",
+      "Acts of sabotage",
+      "Acts of espionage",
+      "Threats of Attack",
+      "Unknown (does not seem to do anything)",
+    ]
+    data = get_ary_contents(:i4, :i4, :i4, :bool, :i4, :bool)
+    out!("<ary type='DIPLOMACY_RELATIONSHIP_ATTITUDES_ARRAY'>")
+    data.each_with_index do |entry, i|
+      label = draa_labels[i] || "Unknown #{i}"
+      a,b,c,d,e,f = *entry
+      d = d ? 'yes' : 'no'
+      f = f ? 'yes' : 'no'
+      out!(" <!-- #{label.xml_escape} -->")
+      out!(" <draa a='#{a}' b='#{b}' c='#{c}' d='#{d}' e='#{e}' f='#{f}'/>")
+    end
+    out!("</ary>")
+  end
+  
 ## traderoutes.esf arrays
 
   def convert_ary_SETTLEMENTS
@@ -165,11 +203,6 @@ module EsfSemanticConverter
   end
 
 ## startpos.esf records
-
-  def convert_rec_DIPLOMACY_RELATIONSHIP_ATTITUDES_ARRAY
-    data = get_rec_contents(:i4, :i4, :i4, :bool, :i4, :bool)
-    out!("<draa a='#{data[0]}' b='#{data[1]}' c='#{data[2]}' d='#{data[3] ? 'yes' : 'no'}' e='#{data[4]}' f='#{data[5] ? 'yes' : 'no'}'/>")
-  end
 
   def convert_rec_techs
     data = get_rec_contents(:s, :u4, :flt, :u4, :bin8, :u4)
