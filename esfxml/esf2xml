@@ -1,169 +1,13 @@
 #!/usr/bin/env ruby
 
-require "default_versions"
 require "fileutils"
 require "pp"
-require "esf_parser"
-require "esf_semantic_parser"
-require "xml_split"
-require "dir_builder"
 require "pgm"
-
-class Float
-  def pretty_single
-    rv = (((100_000.0 * self).round / 100_000.0) rescue self)
-    return rv if [self].pack("f") == [rv].pack("f")
-    self
-  end
-end
-
-class String
-  # Escape string for output as XML text (< > &)
-  def xml_escape
-    replacements = {"<" => "&lt;", ">" => "&gt;", "&" => "&amp;" }
-    gsub(/([<>&])/) { replacements[$1] }
-  end
-  # Escape characters for output as XML attribute values (< > & ' ")
-  def xml_attr_escape
-    replacements = {"<" => "&lt;", ">" => "&gt;", "&" => "&amp;", "\"" => "&quot;", "'" => "&apos;"}
-    gsub(/([<>&\'\"])/) { replacements[$1] }
-  end
-  def to_hex_dump
-    unpack("H2" * size).join(" ")
-  end
-  def to_flt_dump
-    unpack("f*").map(&:pretty_single).join(" ")
-  end
-end
-
-module EsfParserDebug
-  def progressbar_thread
-    Thread.new do
-      begin
-        puts "Done: %0.1f%%" % (100.0 * @ofs.to_f / @data.size)
-        5.times do
-          sleep 1
-          break if @done
-        end
-      end until @done
-    end
-  end
-end
-
-class EsfParser
-  include EsfBasicBinaryOps
-  include EsfDefaultConvert
-  include EsfParserDebug
-  include EsfGetData
-  include EsfSemantic
-  
-  attr_accessor :ofs
-  attr_reader :data, :dir_builder, :done
-  attr_reader :magic, :node_types
-
-  def initialize(in_fh, dir_builder)
-    # Setup input
-    @data                  = in_fh.read
-    @ofs                   = 0
-    @magic                 = get_magic
-    @node_types            = with_temp_ofs(get_u4) { get_node_types }
-    # Setup output
-    @dir_builder           = dir_builder
-    @xmlout                = dir_builder.open_esf_xml
-    @esf_type_handlers     = setup_esf_type_handlers
-    @esf_type_handlers_get = setup_esf_type_handlers_get
-  end
-  def setup_esf_type_handlers
-    out = Hash.new{|ht,node_type| raise "Unknown type 0x%02x at %d" % [node_type, ofs] }
-    (0..255).each{|i|
-      name = ("convert_%02x!" % i).to_sym
-      out[i] = name if respond_to?(name)
-    }
-    out
-  end
-  def setup_esf_type_handlers_get
-    out = Hash.new{|ht,node_type| raise "Unknown type 0x%02x at %d" % [node_type, ofs] }
-    (0..255).each{|i|
-      name = ("get_%02x!" % i).to_sym
-      out[i] = name if respond_to?(name)
-    }
-    out
-  end
-  def inspect
-    "#{self.class}(ofs=#{@ofs})"
-  end
-  def convert_until_ofs!(ofs_end)
-    convert_value! while @ofs < ofs_end
-  end
-  def xml_nested(base_name)
-    if base_name
-      orig, nested = @xmlout, dir_builder.open_xml(base_name, lookahead_str)
-      begin
-        @xmlout = nested
-        yield
-      ensure
-        @xmlout = orig
-        nested.flush
-      end
-      @xmlout.tag!("xml_include", :path => nested.rel_path)
-    else
-      yield
-    end
-  end
-  def convert_rec!(node_type, version)
-    begin
-      save_ofs = @ofs
-      return send(ConvertSemanticRec[node_type]) if version.nil? && ConvertSemanticRec[node_type]
-    rescue SemanticFail
-      @ofs = save_ofs
-    end
-    xml_nested(XmlSplit[node_type]) do
-      @xmlout.tag!("rec", :type=>node_type, :version=>version) do
-        convert_until_ofs!(get_u4)
-      end
-    end
-  end
-  def convert_80!
-    node_type, version = get_node_type_and_version
-    convert_rec!(node_type, version)
-  end
-  def convert_81!
-    node_type, version = get_node_type_and_version
-    begin
-      save_ofs = @ofs
-      return send(ConvertSemanticAry[node_type]) if version.nil? && ConvertSemanticAry[node_type]
-    rescue SemanticFail
-      @ofs = save_ofs
-    end
-    ofs_end   = get_u4
-    count     = get_u4
-    if count == 0
-      @xmlout.tag!("ary", :type=>node_type, :version=>version)
-    else
-      @xmlout.tag!("ary", :type=>node_type, :version=>version) do
-        count.times do
-          convert_rec!(node_type, nil)
-        end
-      end
-    end
-  end
-  def convert_value!
-    send(@esf_type_handlers[get_byte])
-  end
-  def convert!
-    @done = false
-    @xmlout.tag!("esf", :magic => @magic.join(" ")) do
-      @xmlout.tag!("node_types") do
-        node_types.each do |n|
-          @xmlout.tag!("node_type", :name => n)
-        end
-      end
-      convert_value!
-    end
-    @xmlout.flush
-    @done = true
-  end
-end
+require "default_versions"
+require "xml_split"
+require "esf_parser"
+require "dir_builder"
+require "esf_converter"
 
 verbose = true
 if ARGV[0] == "--quiet"
@@ -188,7 +32,6 @@ if File.exist?(out_dir)
   exit 1
 end
 
-dir_builder = DirBuilder.new(out_dir)
-esf = EsfParser.new(in_file, dir_builder)
-thr = esf.progressbar_thread if verbose
-esf.convert!
+esf_converter = EsfConverter.new(in_file, out_dir)
+thr = esf_converter.progressbar_thread if verbose
+esf_converter.convert!

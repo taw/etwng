@@ -1,3 +1,33 @@
+class SemanticFail < Exception
+end
+
+class Float
+  def pretty_single
+    rv = (((100_000.0 * self).round / 100_000.0) rescue self)
+    return rv if [self].pack("f") == [rv].pack("f")
+    self
+  end
+end
+
+class String
+  # Escape string for output as XML text (< > &)
+  def xml_escape
+    replacements = {"<" => "&lt;", ">" => "&gt;", "&" => "&amp;" }
+    gsub(/([<>&])/) { replacements[$1] }
+  end
+  # Escape characters for output as XML attribute values (< > & ' ")
+  def xml_attr_escape
+    replacements = {"<" => "&lt;", ">" => "&gt;", "&" => "&amp;", "\"" => "&quot;", "'" => "&apos;"}
+    gsub(/([<>&\'\"])/) { replacements[$1] }
+  end
+  def to_hex_dump
+    unpack("H2" * size).join(" ")
+  end
+  def to_flt_dump
+    unpack("f*").map(&:pretty_single).join(" ")
+  end
+end
+
 module EsfBasicBinaryOps
   def get_u4
     rv = @data[@ofs,4].unpack("V")[0]
@@ -72,15 +102,6 @@ module EsfBasicBinaryOps
   def get_node_types
     (0...get_u2()).map{ get_ascii.to_sym }
   end
-  def with_temp_ofs(tmp)
-    orig = @ofs
-    begin
-      @ofs = tmp
-      yield
-    ensure
-      @ofs = orig
-    end
-  end
   def get_ofs_bytes
     get_bytes(get_u4 - @ofs)
   end
@@ -92,115 +113,6 @@ module EsfBasicBinaryOps
   end
   def size
     @data.size
-  end
-end
-
-module EsfDefaultConvert
-  def convert_00!
-    @xmlout.out!("<i2>#{get_i2}</i2>")
-  end
-  def convert_01!
-    @xmlout.out!(get_bool ? "<yes/>" : "<no/>")
-  end
-  def convert_04!
-    @xmlout.out!("<i>#{get_i4}</i>")
-  end
-  def convert_06!
-    @xmlout.out!("<byte>#{get_byte}</byte>")
-  end
-  def convert_07!
-    @xmlout.out!("<u2>#{get_u2}</u2>")
-  end
-  def convert_08!
-    @xmlout.out!("<u>#{get_u4}</u>")
-  end
-  def convert_0a!
-    @xmlout.out!("<flt>#{get_float.pretty_single}</flt>")
-  end
-  def convert_0c!
-    @xmlout.out!("<v2 x='#{get_float.pretty_single}' y='#{get_float.pretty_single}'/>")
-  end
-  def convert_0d!
-    @xmlout.out!("<v3 x='#{get_float.pretty_single}' y='#{get_float.pretty_single}' z='#{get_float.pretty_single}'/>")
-  end
-  def convert_0e!
-    @xmlout.out!("<s>#{get_str.xml_escape}</s>")
-  end
-  def convert_0f!
-    @xmlout.out!("<asc>#{get_ascii.xml_escape}</asc>")
-  end
-  def convert_10!
-    @xmlout.out!("<u2x>#{get_u2}</u2x>")
-  end
-  def convert_4x!(tag)
-    data = get_ofs_bytes
-    if data.empty?
-      @xmlout.out!("<#{tag}/>")
-    else
-      @xmlout.out!("<#{tag}>#{yield(data)}</#{tag}>")
-    end
-  end
-  def convert_40!
-    convert_4x!("bin0", &:to_hex_dump)
-  end
-  def convert_41!
-    convert_4x!("bin1", &:to_hex_dump)
-  end
-  def convert_42!
-    convert_4x!("bin2", &:to_hex_dump)
-  end
-  def convert_43!
-    convert_4x!("bin3", &:to_hex_dump)
-  end
-  def convert_44!
-    convert_4x!("i4_ary"){|data| data.unpack("l*").join(" ")}
-  end
-  def convert_45!
-    convert_4x!("bin5", &:to_hex_dump)
-  end
-  def convert_46!
-    convert_4x!("bin6", &:to_hex_dump)
-  end
-  def convert_47!
-    convert_4x!("u2_ary"){|data| data.unpack("v*").join(" ")}
-  end
-  def convert_48!
-    convert_4x!("u4_ary"){|data| data.unpack("V*").join(" ")}
-  end
-  def convert_49!
-    convert_4x!("bin9", &:to_hex_dump)
-  end
-  def convert_4a!
-    convert_4x!("flt_ary", &:to_flt_dump)
-  end
-  def convert_4b!
-    convert_4x!("binB", &:to_hex_dump)
-  end
-  def convert_4c!
-    data = get_ofs_bytes.unpack("f*").map(&:pretty_single)
-    if data.empty?
-      @xmlout.out!("<v2_ary/>")
-    else
-      @xmlout.out!("<v2_ary>")
-      @xmlout.out!(" #{data.shift},#{data.shift}") until data.empty?
-      @xmlout.out!("</v2_ary>")
-    end
-  end
-  def convert_4d!
-    data = get_ofs_bytes.unpack("f*").map(&:pretty_single)
-    if data.empty?
-      @xmlout.out!("<v3_ary/>")
-    else
-      @xmlout.out!("<v3_ary>")
-      @xmlout.out!(" #{data.shift},#{data.shift},#{data.shift}") until data.empty?
-      @xmlout.out!("</v3_ary>")
-    end
-  end
-  def convert_4e!
-    convert_4x!("binE", &:to_hex_dump)
-  end
-  def convert_4f!
-    convert_4x!("binF", &:to_hex_dump)
   end
 end
 
@@ -276,5 +188,95 @@ module EsfGetData
   end
   def get_4d!
     [:v3_ary, get_ofs_bytes]
+  end
+end
+
+module EsfParserSemantic
+  def get_rec_contents_dynamic
+    out     = []
+    end_ofs = get_u4
+    while @ofs < end_ofs
+      out.push send(@esf_type_handlers_get[get_byte])
+    end
+    out
+  end
+
+  def get_rec_contents(*expect_types)
+    out     = []
+    end_ofs = get_u4
+    while @ofs < end_ofs
+      t, *v = send(@esf_type_handlers_get[get_byte])
+      raise SemanticFail.new unless t == expect_types.shift
+      out.push *v
+    end
+    out
+  end
+  def get_81!
+    node_type, version = get_node_type_and_version
+    ofs_end   = get_u4
+    count     = get_u4
+    [[:ary, node_type, version], *(0...count).map{ get_rec_contents_dynamic }]
+  end
+
+  def get_80!
+    node_type, version = get_node_type_and_version
+    [[:rec, node_type, version], *get_rec_contents_dynamic]
+  end
+
+  def get_ary_contents(*expect_types)
+    data = []
+    ofs_end   = get_u4
+    count     = get_u4
+    data.push get_rec_contents(*expect_types) while @ofs < ofs_end
+    data
+  end
+  
+  def try_semantic
+    begin
+      save_ofs = @ofs
+      yield
+    rescue SemanticFail
+      @ofs = save_ofs
+    end
+  end
+end
+
+class EsfParser
+  include EsfBasicBinaryOps
+  include EsfGetData
+  include EsfParserSemantic
+
+  attr_accessor :ofs
+  attr_reader :magic, :node_types
+
+  def with_temp_ofs(tmp)
+    orig = @ofs
+    begin
+      @ofs = tmp
+      yield
+    ensure
+      @ofs = orig
+    end
+  end
+
+  def percent_done
+    (100.0 * @ofs.to_f / @data.size)
+  end
+  
+  def initialize(esf_fh)
+    @data       = esf_fh.read
+    @ofs        = 0
+    @magic      = get_magic
+    @node_types = with_temp_ofs(get_u4) { get_node_types }
+    @esf_type_handlers_get = setup_esf_type_handlers_get
+  end
+
+  def setup_esf_type_handlers_get
+    out = Hash.new{|ht,node_type| raise "Unknown type 0x%02x at %d" % [node_type, ofs] }
+    (0..255).each{|i|
+      name = ("get_%02x!" % i).to_sym
+      out[i] = name if respond_to?(name)
+    }
+    out
   end
 end
