@@ -10,13 +10,8 @@ class Float
 end
 
 class String
-  # Escape string for output as XML text (< > &)
-  def xml_escape
-    replacements = {"<" => "&lt;", ">" => "&gt;", "&" => "&amp;" }
-    gsub(/([<>&])/) { replacements[$1] }
-  end
   # Escape characters for output as XML attribute values (< > & ' ")
-  def xml_attr_escape
+  def xml_escape
     replacements = {"<" => "&lt;", ">" => "&gt;", "&" => "&amp;", "\"" => "&quot;", "'" => "&apos;"}
     gsub(/([<>&\'\"])/) { replacements[$1] }
   end
