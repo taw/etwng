@@ -107,63 +107,75 @@ module EsfDefaultConvert
   def convert_10!
     @xmlout.out!("<u2x>#{get_u2}</u2x>")
   end
+  def convert_4x!(tag)
+    data = get_ofs_bytes
+    if data.empty?
+      @xmlout.out!("<#{tag}/>")
+    else
+      @xmlout.out!("<#{tag}>#{yield(data)}</#{tag}>")
+    end
+  end
   def convert_40!
-    @xmlout.out!("<bin0>#{get_ofs_bytes.to_hex_dump}</bin0>")
+    convert_4x!("bin0", &:to_hex_dump)
   end
   def convert_41!
-    @xmlout.out!("<bin1>#{get_ofs_bytes.to_hex_dump}</bin1>")
+    convert_4x!("bin1", &:to_hex_dump)
   end
   def convert_42!
-    @xmlout.out!("<bin2>#{get_ofs_bytes.to_hex_dump}</bin2>")
+    convert_4x!("bin2", &:to_hex_dump)
   end
   def convert_43!
-    @xmlout.out!("<bin3>#{get_ofs_bytes.to_hex_dump}</bin3>")
+    convert_4x!("bin3", &:to_hex_dump)
   end
   def convert_44!
-    @xmlout.out!("<i4_ary>#{get_ofs_bytes.unpack("l*").join(" ")}</i4_ary>")
+    convert_4x!("i4_ary"){|data| data.unpack("l*").join(" ")}
   end
   def convert_45!
-    @xmlout.out!("<bin5>#{get_ofs_bytes.to_hex_dump}</bin5>")
+    convert_4x!("bin5", &:to_hex_dump)
   end
   def convert_46!
-    @xmlout.out!("<bin6>#{get_ofs_bytes.to_hex_dump}</bin6>")
+    convert_4x!("bin6", &:to_hex_dump)
   end
   def convert_47!
-    @xmlout.out!("<u2_ary>#{get_ofs_bytes.unpack("v*").join(" ")}</u2_ary>")
+    convert_4x!("u2_ary"){|data| data.unpack("v*").join(" ")}
   end
   def convert_48!
-    @xmlout.out!("<u4_ary>#{get_ofs_bytes.unpack("V*").join(" ")}</u4_ary>")
+    convert_4x!("u4_ary"){|data| data.unpack("V*").join(" ")}
   end
   def convert_49!
-    @xmlout.out!("<bin9>#{get_ofs_bytes.to_hex_dump}</bin9>")
+    convert_4x!("bin9", &:to_hex_dump)
   end
   def convert_4a!
-    @xmlout.out!("<flt_ary>#{get_ofs_bytes.to_flt_dump}</flt_ary>")
+    convert_4x!("flt_ary", &:to_flt_dump)
   end
   def convert_4b!
-    @xmlout.out!("<binB>#{get_ofs_bytes.to_hex_dump}</binB>")
+    convert_4x!("binB", &:to_hex_dump)
   end
   def convert_4c!
-    @xmlout.out!("<v2_ary>")
     data = get_ofs_bytes.unpack("f*").map(&:pretty_single)
-    until data.empty?
-      @xmlout.out!(" #{data.shift},#{data.shift}")
+    if data.empty?
+      @xmlout.out!("<v2_ary/>")
+    else
+      @xmlout.out!("<v2_ary>")
+      @xmlout.out!(" #{data.shift},#{data.shift}") until data.empty?
+      @xmlout.out!("</v2_ary>")
     end
-    @xmlout.out!("</v2_ary>")
   end
   def convert_4d!
-    @xmlout.out!("<v3_ary>")
     data = get_ofs_bytes.unpack("f*").map(&:pretty_single)
-    until data.empty?
-      @xmlout.out!(" #{data.shift},#{data.shift},#{data.shift}")
+    if data.empty?
+      @xmlout.out!("<v3_ary/>")
+    else
+      @xmlout.out!("<v3_ary>")
+      @xmlout.out!(" #{data.shift},#{data.shift},#{data.shift}") until data.empty?
+      @xmlout.out!("</v3_ary>")
     end
-    @xmlout.out!("</v3_ary>")
   end
   def convert_4e!
-    @xmlout.out!("<binE>#{get_ofs_bytes.to_hex_dump}</binE>")
+    convert_4x!("binE", &:to_hex_dump)
   end
   def convert_4f!
-    @xmlout.out!("<binF>#{get_ofs_bytes.to_hex_dump}</binF>")
+    convert_4x!("binF", &:to_hex_dump)
   end
 end
 
