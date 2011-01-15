@@ -2,30 +2,43 @@
 
 require "fileutils"
 
+class SampleTest
+  def initialize(filename)
+    @filename = filename
+  end
+  def source
+    "samples/#{@filename}"
+  end
+  def xmldir
+    "tmp/" + @filename.gsub(".", "_") + "_dir"
+  end
+  def recreated
+    "tmp/recreated_#{@filename}"
+  end
+  def size
+    File.size(source)
+  end
+  def run!
+    puts "Verifying #{@filename}"
+    FileUtils.rm_rf xmldir
+    system "./esf2xml", source, xmldir
+    FileUtils.rm_rf recreated
+    system "./xml2esf", xmldir, recreated
+    system "diff", source, recreated
+  end
+end
+
+sample_tests = [
+  "trade_routes.esf",
+  "sea_grids.esf",
+  "poi.esf",
+  "pathfinding.esf",
+  "regions.esf",
+  "bmd.dat",
+  "startpos.esf",
+].map{|filename| SampleTest.new(filename)}.sort_by(&:size)
+
 FileUtils.mkdir_p "tmp"
-
-samples = %W[
-  trade_routes.esf
-  sea_grids.esf
-  poi.esf
-  pathfinding.esf
-  regions.esf
-  bmd.dat
-  startpos.esf
-].sort_by{|fn| File.size("samples/#{fn}") }
-
-samples.each do |filename|
-  source    = "samples/#{filename}"
-  xmldir    = "tmp/" + filename.gsub(".", "_") + "_dir"
-  recreated = "tmp/recreated_#{filename}"
-  
-  puts "Verifying #{filename}"
-  
-  FileUtils.rm_rf xmldir
-  system "./esf2xml", source, xmldir
-
-  FileUtils.rm_rf recreated
-  system "./xml2esf", xmldir, recreated
-
-  system "diff", source, recreated
+sample_tests.each do |test|
+  test.run!
 end
