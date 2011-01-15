@@ -41,9 +41,12 @@ class DirBuilder
     while true
       rel_path = "%s%04d%s" % [name, @path_allocator[alloc_key], ext]
       path     = File.join(@out_dir, rel_path)
-      FileUtils.mkdir_p File.dirname(path)
-      return [path, rel_path] unless File.exist?(path)
       @path_allocator[alloc_key] += 1
+      unless File.exist?(path)
+        dirname  = File.dirname(path)
+        FileUtils.mkdir_p dirname unless File.exist?(dirname)
+        return [path, rel_path]
+      end
     end
   end
 end
