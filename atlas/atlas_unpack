@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+def parse_atlas(file_name)
+  data = File.open(file_name, 'rb'){|fh| fh.read}
+
+  raise "Incorrect format of atlas file" unless data.unpack("VV") == [1, 0]
+
+  records_count = data[8,4].unpack("V")[0]
+  record_size   = 512+512+4*6
+  expected_file_size = 12 + records_count * record_size
+  raise "Expected file size #{expected_file_size} but is #{data.size}" unless data.size == expected_file_size
+
+  out = []
+
+  records_count.times do |i|
+    str1 = data[12 + record_size * i, 512].unpack("v*").pack("U*").gsub(/\x00*\z/, "")
+    str2 = data[12 + record_size * i + 512, 512].unpack("v*").pack("U*").gsub(/\x00*\z/, "")
+    nums = data[12 + record_size * i + 1024, 4*6].unpack("ffffff")
+    out << [str1, str2, *nums]
+  end
+  
+  out
+end
+
+def save_atlas(file_name, data)
+  File.open(file_name, "wb") do |fh|
+    fh.puts data.map{|record| record.join("\t") }
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} file.atlas file.tsv"
+  exit 1
+end
+
+input_file, output_file = *ARGV
+save_atlas(output_file, parse_atlas(input_file))
