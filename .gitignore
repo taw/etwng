@@ -14,3 +14,6 @@ markers/samples
 cs2parsed/samples*
 atlas/samples
 atlas/tmp
+luac/src
+luac/build
+luac/luadec
