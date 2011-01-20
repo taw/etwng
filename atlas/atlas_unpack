@@ -22,7 +22,7 @@ def parse_atlas(file_name)
   out
 end
 
-def save_atlas(file_name, data)
+def save_tsv(file_name, data)
   File.open(file_name, "wb") do |fh|
     fh.puts data.map{|record| record.join("\t") }
   end
@@ -34,4 +34,4 @@ unless ARGV.size == 2
 end
 
 input_file, output_file = *ARGV
-save_atlas(output_file, parse_atlas(input_file))
+save_tsv(output_file, parse_atlas(input_file))

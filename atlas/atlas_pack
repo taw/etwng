@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+class String
+  def to_padded_utf16
+    data = unpack("U*")
+    raise "Too many characters, max 256" if data.size > 256
+    (0..255).map{|i| data[i] || 0}.pack("v*")
+  end
+end
+
+def parse_tsv(file_name)
+  File.open(file_name, 'rb'){|fh|
+    fh.readlines.map{|line|
+      line.sub(/\r/, "").chomp.split(/\t/)
+    }
+  }
+end
+
+def save_atlas(file_name, data)
+  out = [1,0,data.size].pack("VVV")
+  data.each{|str1,str2,*nums|
+    out << str1.to_padded_utf16
+    out << str2.to_padded_utf16
+    out << nums.pack("f6")
+  }
+  File.open(file_name, 'wb'){|fh|
+    fh.write(out)
+  }
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} file.tsv file.atlas"
+  exit 1
+end
+
+input_file, output_file = *ARGV
+save_atlas(output_file, parse_tsv(input_file))
