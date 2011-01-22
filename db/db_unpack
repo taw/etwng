@@ -1,0 +1,140 @@
+#!/usr/bin/env ruby
+
+require "db_schemata"
+
+class DbFile
+  attr_reader :version, :rows, :data, :file_name, :table_name, :schema
+  def initialize(file_name, table_name)
+    @file_name = file_name
+    @table_name = table_name
+    
+    @data = File.open(file_name, 'rb', &:read)
+    if @data[0, 1] == "\x01"
+      @version = 1
+      @data = @data[1..-1]
+    elsif @data[0, 4] == "\374\375\376\377" and @data[5, 4] == "\000\000\000\001"
+      @version = @data[4, 1].unpack("C")[0] + 1
+      @data = @data[9..-1]
+    else
+      raise "Unknown file: #{@data[0, 9].inspect}"
+    end
+    @rows = @data[0, 4].unpack("V")[0]
+    @data = @data[4..-1]
+    
+    @schema = DbSchemata.instance.get_schema(@table_name, @version)
+  end
+  
+  def empty?
+    @rows == 0
+  end
+  
+  def get(sz)
+    rv = @data[@ofs, sz]
+    @ofs += sz
+    rv
+  end
+  
+  def get_float
+    rv = @data[@ofs, 4].unpack('f')[0]
+    @ofs += 4
+    rv
+  end
+  
+  def get_byte
+    rv = @data[@ofs, 1].unpack("C")[0]
+    @ofs += 1
+    rv
+  end
+  
+  def get_bool
+    case b = get_byte
+    when 0
+      false
+    when 1
+      true
+    else
+      raise "Expected 0 or 1, got #{b}"
+    end
+  end
+  
+  def get_u2
+    rv = @data[@ofs, 2].unpack('v')[0]
+    @ofs += 2
+    rv
+  end
+
+  def get_i4
+    rv = @data[@ofs, 4].unpack('l')[0]
+    @ofs += 4
+    rv
+  end
+  
+  def get_string
+    sz = get_u2
+    rv = @data[@ofs, 2*sz].unpack('v*').pack("U*")
+    @ofs += 2*sz
+    rv
+  end
+  
+  def get_field(field_type)
+    case field_type
+    when "boolean"
+      get_bool
+    when "float"
+      get_float
+    when "int"
+      get_i4
+    when "short"
+      get_u2
+    when "string"
+      get_string
+    when "optstring"
+      if get_bool
+        get_string
+      else
+        nil
+      end
+    when /\Ablob:(\d+)/
+      get($1.to_i)
+    else
+      raise "Unknown type #{field_type}"
+    end
+  end
+  
+  def parse_data
+    @ofs = 0
+    rv = (0...@rows).map{ @schema.map{|name, field_type| get_field(field_type) } }
+    raise "Not all data parsed" unless @ofs == @data.size
+    rv
+  end
+  
+  def to_tsv
+    if !schema
+      if empty?
+        return "version #{@version}, empty, no schema\n"
+      else
+        return "version #{@version}, no schema, cannot convert\n"
+      end
+    end
+
+    #data = (parse_data rescue [])
+    data = parse_data
+    return [
+      "version #{@version}, #{@rows} rows",
+      schema.map{|name, field_type| "#{name}(#{field_type})"}.join("\t"),
+      *data.map{|row| row.map(&:inspect).join("\t") }
+    ].join("\n") + "\n"
+  end
+end
+
+schemata = DbSchemata.new
+
+Dir["samples/db/*/*"].each{|file_name|
+  table_name = Pathname(file_name).dirname.basename.to_s
+
+  file = DbFile.new(file_name, table_name)
+
+  puts file_name
+  puts file.to_tsv
+  puts ""
+}

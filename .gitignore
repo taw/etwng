@@ -17,3 +17,5 @@ atlas/tmp
 luac/src
 luac/build
 luac/luadec
+luac/samples*
+db/samples*
