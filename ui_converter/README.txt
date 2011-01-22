@@ -1,23 +1,38 @@
 This directory contains ui<->xml converter.
 
-Code was originally written by alpaca (Stefan Reutter).
+Most of the code was originally written by alpaca (Stefan Reutter).
 
-What you see in this directory is based on alpaca's
-version 1.1 from 25th August 2010, with various patches,
-mostly support for older versions of ui layout files
-(for ETW).
+What you see in this directory is based on alpaca's version 1.1
+from 25th August 2010, with various patches by taw (Tomasz Wegrzanowski),
+mostly support for older versions of ui layout files (for ETW).
+
+== Versions of UI layout format ==
 
 Right now three versions of ui layout files are supported:
-* Version032 - a few ETW files
-* Version033 - most of ETW files
+* Version032 - a few ETW and NTW files
+* Version033 - most of ETW files, a few NTW files
 * Version039 - most of NTW files
 
-A handful of files have older versions but they're not supported yet.
+Between ETW and NTW and ignoring duplicates between games,
+number of UI layout files by format version are:
 
-At the moment each version has separate Python script,
-it would be obviously a lot more convenient to merge them in the future.
+  1 Version025
+  1 Version027
+  2 Version028
+  3 Version029
+  1 Version030
+  1 Version031
+ 12 Version032
+112 Version033
+133 Version039
+
+In other words, it's not a huge loss that versions older than 032 are not supported.
+If you really need to open one of the pre-Version032 files, contact taw.
 
 === Usage ===
+
+At the moment each version has separate Python script.
+It would be obviously a lot more convenient to merge them in the future.
 
 Depending on version of ui layout file you want to convert do one of the following:
 
