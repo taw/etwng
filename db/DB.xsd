@@ -273,7 +273,7 @@
 		<xs:attribute name="Season" type="xs:string" use="required" />
 		<xs:attribute name="Colour_Map" type="xs:string" use="required" />
 		<xs:attribute name="Blend_Map" type="xs:string" use="required" />
-		<xs:attribute name="unknown2" type="xs:string" />
+		<xs:attribute name="unknown2" type="xs:string"  Optional="true" />
 		<xs:attribute name="Cliff_Map" type="xs:string" use="required" />
 		<xs:attribute name="Rock_Map" type="xs:string" use="required" />
 		<xs:attribute name="Tiled_Map" type="xs:string" use="required" />
@@ -1414,7 +1414,7 @@
 		<xs:attribute name="Category" type="xs:string" use="required" />
 		<xs:attribute name="Class" type="xs:string" use="required" />
 		<xs:attribute name="MP_Cost_Early" type="xs:int" use="required" />
-		<xs:attribute name="MP_Cost_Late" msprop:VersionStart="2" type="xs:int" />
+		<xs:attribute name="MP_Cost_Late" msprop:VersionStart="2" type="xs:int" use="required" />
 		<xs:attribute name="Turns_to_Build" type="xs:int" use="required" />
 		<xs:attribute name="Cost" type="xs:int" use="required" />
 		<xs:attribute name="Upkeep" type="xs:int" use="required" />
@@ -1476,6 +1476,7 @@
 	</xs:complexType>
 	<xs:complexType name="warscape_equipment_items_tables">
 		<xs:attribute name="Item_ID" type="xs:string" use="required" />
+		<xs:attribute name="Item_Type" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="warscape_equipment_themes_tables">
 		<xs:attribute name="Warscape_Equipment_Theme_ID" type="xs:string" use="required" />
