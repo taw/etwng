@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+
+require "pp"
+require "fileutils"
+
+$stats = Hash.new(0)
+
+def run_test(source, xml, out, version)
+  FileUtils.mkdir_p File.dirname(xml)
+  case version
+  when 'Version039', 'Version033', 'Version032'
+    ver = version[-2..-1]
+    puts "Convesion of #{source} to #{xml}"
+    system "./convert_ui_v#{ver}.py", "-u", source, xml
+    puts "Conversion of #{xml} back to #{out}"
+    system "./convert_ui_v#{ver}.py", "-x", xml, out
+    ok = system "diff", source, out
+    $stats[[version, ok]] += 1
+  else
+    warn "#{version} not supported"
+  end
+end
+
+Dir["../ui/samples*/**/*"].each{|file_name|
+  next unless File.file?(file_name)
+  basename = "tmp/" + file_name.gsub(/\A\.\.\/ui\/samples_/, "").gsub(/[ \/]/, "_")
+  xml = basename + ".xml"
+  out = basename + ".out"
+  version = File.open(file_name, 'rb').read(10)
+  
+  run_test(file_name, xml, out, version)
+}
+
+pp $stats

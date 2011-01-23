@@ -26,14 +26,16 @@ class TypeCastReader(io.BufferedReader):
         return(struct.unpack("d",self.read(8))[0])
     def readBool(self):
         return(self.read(1) != b'\x00')
+    # Returns xml-escaped strings because the rest of the program doesn't
+    # handle escaping anywhere
     def readUTF16(self):
         length = self.readUShort()
         encodedString = self.read(length*2)
-        return(encodedString.decode("UTF-16"))
+        return(encodedString.decode("UTF-16").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
     def readASCII(self):
         length = self.readUShort()
         encodedString = self.read(length)
-        return(encodedString.decode("ascii"))
+        return(encodedString.decode("ascii").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
         
 class TypeCastWriter(io.BufferedWriter):
     def writeByte(self,arg):
@@ -180,10 +182,7 @@ class uiEntry:
         
         for i in range(self.numChildren):
             child = uiEntry(self.indent + 2)
-            try:
-                child.readFrom(handle)
-            except:
-                print("Error")
+            child.readFrom(handle)
             self.children.append(child)
         
         self.template = handle.readASCII()
@@ -273,7 +272,7 @@ class uiEntry:
 %(indent+1)s<flag4>%(flag4)i</flag4>
 %(indent+1)s<script>%(script)s</script>
 %(indent+1)s<tgas num="%(numTGAs)i">
-"""%{"indent": "\t"*self.indent, "indent+1": "\t"*(self.indent + 1), "id": self.id, "title": self.title, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "script": self.script.replace("<", "&lt;"), "numTGAs": self.numTGAs})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "script": self.script.replace("<", "&lt;"), "numTGAs": self.numTGAs})
         for i in range(self.numTGAs):
             self.TGAs[i].writeToXML(handle)
         
@@ -281,7 +280,7 @@ class uiEntry:
 %(indent+1)s<int5>%(int5)i</int5>
 %(indent+1)s<int6>%(int6)i</int6>
 %(indent+1)s<states num="%(numStates)i">
-"""%{"indent": "\t"*self.indent, "indent+1": "\t"*(self.indent + 1), "int5": self.int5, "int6": self.int6, "numStates": self.numStates})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "int5": self.int5, "int6": self.int6, "numStates": self.numStates})
 
         for i in range(self.numStates):
             self.states[i].writeToXML(handle)
@@ -289,22 +288,22 @@ class uiEntry:
         handle.write("""%(indent+1)s</states>
 %(indent+1)s<int26>%(int26)i</int26>
 %(indent+1)s<events>
-"""%{"indent": "\t"*self.indent, "indent+1": "\t"*(self.indent + 1), "int26": self.int26})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "int26": self.int26})
         
         for ev in self.events:
-            handle.write("%(indent+2)s<event>%(ev)s</event>\n"%{"indent+2": "\t"*(self.indent + 2), "ev": ev})
+            handle.write("%(indent+2)s<event>%(ev)s</event>\n"%{"indent+2": "  "*(self.indent + 2), "ev": ev})
         
         handle.write("""%(indent+1)s</events>
 %(indent+1)s<eventsEnd>%(eventsEnd)s</eventsEnd>
 %(indent+1)s<int27>%(int27)i</int27>
 %(indent+1)s<int28>%(int28)i</int28>
 %(indent+1)s<children num="%(numChildren)i">
-"""%{"indent": "\t"*self.indent, "indent+1": "\t"*(self.indent + 1), "eventsEnd": self.eventsEnd, "int27": self.int27, "int28": self.int28, "numChildren": self.numChildren})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "eventsEnd": self.eventsEnd, "int27": self.int27, "int28": self.int28, "numChildren": self.numChildren})
         
         for i in range(self.numChildren):
             self.children[i].writeToXML(handle)
         
-        handle.write("%(indent+1)s</children>\n%(indent+1)s<template>%(template)s</template>\n%(indent)s</uiEntry>\n"%{"indent": "\t"*self.indent, "indent+1": "\t"*(self.indent + 1), "template": self.template})
+        handle.write("%(indent+1)s</children>\n%(indent+1)s<template>%(template)s</template>\n%(indent)s</uiEntry>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "template": self.template})
         
     def constructFromNode(self, node):
         """
@@ -435,7 +434,7 @@ class tgaEntry:
         """
         Writes to a text file handle
         """
-        handle.write("%(indent)s<tga>\n%(indent+1)s<id>%(id)i</id>\n%(indent+1)s<path>%(path)s</path>\n%(indent+1)s<width>%(width)i</width>\n%(indent+1)s<height>%(height)i</height>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent)s</tga>\n"%{"indent": "\t"*self.indent, "indent+1": "\t"*(self.indent+1), "id": self.id, "path": self.path, "width": self.width, "height": self.height, "int1": self.int1})
+        handle.write("%(indent)s<tga>\n%(indent+1)s<id>%(id)i</id>\n%(indent+1)s<path>%(path)s</path>\n%(indent+1)s<width>%(width)i</width>\n%(indent+1)s<height>%(height)i</height>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent)s</tga>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "id": self.id, "path": self.path, "width": self.width, "height": self.height, "int1": self.int1})
         
     def constructFromNode(self, node):
         """
@@ -535,7 +534,7 @@ class tgaUse:
         """
         Writes to a text file handle
         """
-        handle.write("%(indent)s<tgaUse>\n%(indent+1)s<id>%(id)i</id>\n%(indent+1)s<xOff>%(xOff)i</xOff>\n%(indent+1)s<yOff>%(yOff)i</yOff>\n%(indent+1)s<width>%(width)i</width>\n%(indent+1)s<height>%(height)i</height>\n%(indent+1)s<blueMultiply>%(blueMultiply)i</blueMultiply>\n%(indent+1)s<greenMultiply>%(greenMultiply)i</greenMultiply>\n%(indent+1)s<redMultiply>%(redMultiply)i</redMultiply>\n%(indent+1)s<alphaMultiply>%(alphaMultiply)i</alphaMultiply>\n%(indent+1)s<flag1>%(flag1)i</flag1>\n%(indent+1)s<mirror_horizontally>%(flag2)i</mirror_horizontally>\n%(indent+1)s<mirror_vertically>%(flag3)i</mirror_vertically>\n%(indent+1)s<position>%(position)i</position>\n%(indent+1)s<stretches_horizontally>%(flag4)i</stretches_horizontally>\n%(indent+1)s<stretches_vertically>%(flag5)i</stretches_vertically>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent+1)s<int2>%(int2)i</int2>\n%(indent+1)s<int3>%(int3)i</int3>\n%(indent)s</tgaUse>\n"%{"indent": "\t"*self.indent, "indent+1": "\t"*(self.indent+1), "id": self.id, "xOff": self.xOff, "yOff": self.yOff, "width": self.width, "height": self.height, "blueMultiply": self.blueMultiply, "greenMultiply": self.greenMultiply, "redMultiply": self.redMultiply, "alphaMultiply": self.alphaMultiply, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "position": self.position, "flag4": self.flag4, "flag5": self.flag5, "int1": self.int1, "int2": self.int2, "int3": self.int3})
+        handle.write("%(indent)s<tgaUse>\n%(indent+1)s<id>%(id)i</id>\n%(indent+1)s<xOff>%(xOff)i</xOff>\n%(indent+1)s<yOff>%(yOff)i</yOff>\n%(indent+1)s<width>%(width)i</width>\n%(indent+1)s<height>%(height)i</height>\n%(indent+1)s<blueMultiply>%(blueMultiply)i</blueMultiply>\n%(indent+1)s<greenMultiply>%(greenMultiply)i</greenMultiply>\n%(indent+1)s<redMultiply>%(redMultiply)i</redMultiply>\n%(indent+1)s<alphaMultiply>%(alphaMultiply)i</alphaMultiply>\n%(indent+1)s<flag1>%(flag1)i</flag1>\n%(indent+1)s<mirror_horizontally>%(flag2)i</mirror_horizontally>\n%(indent+1)s<mirror_vertically>%(flag3)i</mirror_vertically>\n%(indent+1)s<position>%(position)i</position>\n%(indent+1)s<stretches_horizontally>%(flag4)i</stretches_horizontally>\n%(indent+1)s<stretches_vertically>%(flag5)i</stretches_vertically>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent+1)s<int2>%(int2)i</int2>\n%(indent+1)s<int3>%(int3)i</int3>\n%(indent)s</tgaUse>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "id": self.id, "xOff": self.xOff, "yOff": self.yOff, "width": self.width, "height": self.height, "blueMultiply": self.blueMultiply, "greenMultiply": self.greenMultiply, "redMultiply": self.redMultiply, "alphaMultiply": self.alphaMultiply, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "position": self.position, "flag4": self.flag4, "flag5": self.flag5, "int1": self.int1, "int2": self.int2, "int3": self.int3})
 
     def constructFromNode(self, node):
         """
@@ -748,7 +747,7 @@ class state:
 %(indent+1)s<stateDescription>%(stateDescription)s</stateDescription>
 %(indent+1)s<eventText>%(eventText)s</eventText>
 %(indent+1)s<tgaUses num="%(numTGAUses)i">
-"""%{"indent": "\t"*self.indent, "indent+1": "\t"*(self.indent + 1), "id": self.id, "title": self.title, "width": self.width, "height": self.height, "stateText": self.stateText, "tooltip": self.tooltip, "int7": self.int7, "int8": self.int8, "int9": self.int9, "int10": self.int10, "int11": self.int11, "flag7": self.flag7, "localisationID": self.localisationID, "tooltipID": self.tooltipID, "font": self.font, "int12": self.int12, "int13": self.int13, "int14": self.int14, "int15": self.int15, "int16": self.int16, "int17": self.int17, "flag8": self.flag8, "flag9": self.flag9, "flag10": self.flag10, "normalt0": self.normalt0, "int18": self.int18, "int19": self.int19, "int20": self.int20, "int21": self.int21, "stateDescription": self.stateDescription, "eventText": self.eventText, "numTGAUses": self.numTGAUses})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "width": self.width, "height": self.height, "stateText": self.stateText, "tooltip": self.tooltip, "int7": self.int7, "int8": self.int8, "int9": self.int9, "int10": self.int10, "int11": self.int11, "flag7": self.flag7, "localisationID": self.localisationID, "tooltipID": self.tooltipID, "font": self.font, "int12": self.int12, "int13": self.int13, "int14": self.int14, "int15": self.int15, "int16": self.int16, "int17": self.int17, "flag8": self.flag8, "flag9": self.flag9, "flag10": self.flag10, "normalt0": self.normalt0, "int18": self.int18, "int19": self.int19, "int20": self.int20, "int21": self.int21, "stateDescription": self.stateDescription, "eventText": self.eventText, "numTGAUses": self.numTGAUses})
         
         for i in range(self.numTGAUses):
             self.TGAUses[i].writeToXML(handle)
@@ -757,12 +756,12 @@ class state:
 %(indent+1)s<int23>%(int23)i</int23>
 %(indent+1)s<int24>%(int24)i</int24>
 %(indent+1)s<transitions num="%(numTransitions)s">
-"""%{"indent": "\t"*self.indent, "indent+1": "\t"*(self.indent + 1), "int23": self.int23, "int24": self.int24, "numTransitions": self.numTransitions})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "int23": self.int23, "int24": self.int24, "numTransitions": self.numTransitions})
         
         for i in range(self.numTransitions):
             self.transitions[i].writeToXML(handle)
         
-        handle.write("%(indent+1)s</transitions>\n%(indent)s</state>\n"%{"indent": "\t"*self.indent, "indent+1": "\t"*(self.indent + 1)})
+        handle.write("%(indent+1)s</transitions>\n%(indent)s</state>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1)})
         
     def constructFromNode(self, node):
         """
@@ -890,7 +889,7 @@ class transition:
         """
         Writes to a text file handle
         """
-        handle.write("%(indent)s<transition>\n%(indent+1)s<type>%(type)i</type>\n%(indent+1)s<stateIDRef>%(id)i</stateIDRef>\n%(indent+1)s<short1>%(short1)i</short1>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent+1)s<int2>%(int2)i</int2>\n%(indent)s</transition>\n"%{"indent": "\t"*self.indent, "indent+1": "\t"*(self.indent+1), "type": self.type, "id": self.id, "short1": self.short1, "int1": self.int1, "int2": self.int2})
+        handle.write("%(indent)s<transition>\n%(indent+1)s<type>%(type)i</type>\n%(indent+1)s<stateIDRef>%(id)i</stateIDRef>\n%(indent+1)s<short1>%(short1)i</short1>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent+1)s<int2>%(int2)i</int2>\n%(indent)s</transition>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "type": self.type, "id": self.id, "short1": self.short1, "int1": self.int1, "int2": self.int2})
 
     def constructFromNode(self, node):
         """
