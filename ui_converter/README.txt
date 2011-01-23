@@ -6,6 +6,9 @@ What you see in this directory is based on alpaca's version 1.1
 from 25th August 2010, with various patches by taw (Tomasz Wegrzanowski),
 mostly support for older versions of ui layout files (for ETW).
 
+You need Python 3.x for this converter.
+It will not work with Python 2.x
+
 == Versions of UI layout format ==
 
 Right now three versions of ui layout files are supported:
