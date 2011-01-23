@@ -9,7 +9,7 @@ def run_test(source, xml, out, version)
   when 'Version039', 'Version033', 'Version032'
     ver = version[-2..-1]
 
-    puts "Convesion of #{source} to #{xml}"
+    puts "Conversion of #{source} to #{xml}"
     return 'ui->xml fail' unless system "./convert_ui_v#{ver}.py", "-u", source, xml
 
     puts "Conversion of #{xml} back to #{out}"
@@ -32,8 +32,13 @@ Dir["../ui/samples*/**/*"].each{|file_name|
   version = File.open(file_name, 'rb').read(10)
   
   status = run_test(file_name, xml, out, version)
-  $stats[version] ||= Hash.new(0)
+  $stats[version] ||= {}
+  $stats[version][status] ||= 0
   $stats[version][status] += 1
+  # $stats[version][status] ||= []
+  # $stats[version][status] << file_name
 }
 
-pp $stats
+$stats.to_a.sort.each{|v,ht|
+  puts "#{v}: #{ht.inspect}"
+}

@@ -275,8 +275,8 @@ class uiEntry:
 %(indent+1)s<script>%(script)s</script>
 %(indent+1)s<tgas num="%(numTGAs)i">
 """%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "script": self.script.replace("<", "&lt;"), "numTGAs": self.numTGAs})
-        for i in range(self.numTGAs):
-            self.TGAs[i].writeToXML(handle)
+        for tga in self.TGAs:
+            tga.writeToXML(handle)
         
         handle.write("""%(indent+1)s</tgas>
 %(indent+1)s<int5>%(int5)i</int5>
@@ -284,8 +284,8 @@ class uiEntry:
 %(indent+1)s<states num="%(numStates)i">
 """%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "int5": self.int5, "int6": self.int6, "numStates": self.numStates})
 
-        for i in range(self.numStates):
-            self.states[i].writeToXML(handle)
+        for state in self.states:
+            state.writeToXML(handle)
         
         handle.write("""%(indent+1)s</states>
 %(indent+1)s<int26>%(int26)i</int26>
@@ -302,8 +302,8 @@ class uiEntry:
 %(indent+1)s<children num="%(numChildren)i">
 """%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "eventsEnd": self.eventsEnd, "int27": self.int27, "int28": self.int28, "numChildren": self.numChildren})
         
-        for i in range(self.numChildren):
-            self.children[i].writeToXML(handle)
+        for child in self.children:
+            child.writeToXML(handle)
         
         handle.write("%(indent+1)s</children>\n%(indent+1)s<template>%(template)s</template>\n%(indent)s</uiEntry>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "template": self.template})
         
