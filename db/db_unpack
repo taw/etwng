@@ -116,11 +116,9 @@ class DbFile
         return "version #{@version}, no schema, cannot convert\n"
       end
     end
-
-    #data = (parse_data rescue [])
     data = parse_data
     return [
-      "version #{@version}, #{@rows} rows",
+      "version #{@version}",
       schema.map{|name, field_type| "#{name}(#{field_type})"}.join("\t"),
       *data.map{|row| row.map(&:inspect).join("\t") }
     ].join("\n") + "\n"
@@ -129,12 +127,22 @@ end
 
 schemata = DbSchemata.new
 
-Dir["samples/db/*/*"].each{|file_name|
-  table_name = Pathname(file_name).dirname.basename.to_s
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input/ output/"
+end
 
+source = Pathname(ARGV[0])
+target = Pathname(ARGV[1])
+
+Pathname(source).find{|file_name|
+  next unless file_name.file?
+  table_name = file_name.dirname.basename.to_s
+  current_target = Pathname((target+file_name.relative_path_from(source)).to_s + ".tsv")
+  
   file = DbFile.new(file_name, table_name)
-
-  puts file_name
-  puts file.to_tsv
-  puts ""
+  file_tsv = file.to_tsv
+  FileUtils.mkdir_p current_target.dirname
+  File.open(current_target, 'wb'){|fh|
+    fh.puts file_tsv
+  }
 }

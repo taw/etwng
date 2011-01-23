@@ -1,3 +1,15 @@
+=== DB<->TSV converter ===
+
+You can unpack either the whole tree or one file at a time:
+
+./db_unpack db/ converted/
+./db_unpack db/foo_tables/foo converted/foo_tables/foo.tsv
+
+When converting directories, the entire subdirectory structure
+will be recreated in target directory as well.
+
+=== DB format ===
+
 Tables in db formats need external schema for decoding.
 
 For all except two this schema is known (except minor issues

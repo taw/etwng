@@ -4,9 +4,7 @@ require "rubygems"
 require "nokogiri"
 require "pp"
 require "pathname"
-
-class TableSchema
-end
+require "fileutils"
 
 class DbSchemata
   def initialize
