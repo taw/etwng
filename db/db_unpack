@@ -2,6 +2,18 @@
 
 require "db_schemata"
 
+class Float
+  def pretty_single
+    begin
+      rv = (100_000.0 * self).round / 100_000.0
+      return rv if self != rv and [self].pack("f") == [rv].pack("f")
+      self
+    rescue
+      self
+    end
+  end
+end
+
 class DbFile
   attr_reader :version, :rows, :data, :file_name, :table_name, :schema
   def initialize(file_name, table_name)
@@ -37,7 +49,7 @@ class DbFile
   def get_float
     rv = @data[@ofs, 4].unpack('f')[0]
     @ofs += 4
-    rv
+    rv.pretty_single
   end
   
   def get_byte
