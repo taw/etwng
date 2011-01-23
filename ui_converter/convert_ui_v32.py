@@ -593,6 +593,7 @@ class tgaUse:
 class state:
     def __init__(self, indent):
         self.indent = indent
+        self.title = ""
         self.TGAUses = []
         self.transitions = []
         
