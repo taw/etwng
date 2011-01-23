@@ -136,7 +136,13 @@ class DbFile
     return [
       "version #{@version}",
       schema.map{|name, field_type| "#{name}(#{field_type})"}.join("\t"),
-      *data.map{|row| row.map(&:inspect).join("\t") }
+      *data.map{|row| row.map{|f|
+        if f.is_a?(Float) and f.to_i == f
+          f.to_i.inspect
+        else
+          f.inspect
+        end
+      }.join("\t") }
     ].join("\n") + "\n"
   end
 end
