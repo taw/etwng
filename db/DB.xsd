@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="DBDataSet" targetNamespace="http://etw-mod-tools.sourceforge.net/" xmlns:mstns="http://etw-mod-tools.sourceforge.net/" xmlns="http://etw-mod-tools.sourceforge.net/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="unqualified" elementFormDefault="qualified" msdata:schemafragmentcount="2">
 	<xs:complexType name="_kv_fatigue_tables">
 		<xs:attribute name="Key" type="xs:string" use="required" />
