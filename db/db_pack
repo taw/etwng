@@ -1,0 +1,114 @@
+#!/usr/bin/env ruby
+
+require "db_schemata"
+
+class DbTsvFile
+  def initialize(file_name, table_name)
+    @file_name = file_name
+    @table_name = table_name
+    @data = File.open(file_name, 'rb', &:readlines).map{|line|
+      line.sub(/\r?\n?\z/, "").split(/\t/)
+    }
+    metadata_line = @data.shift
+    case metadata_line[0]
+    when /\Aversion\s+(\d+)\s*\z/
+      @version = $1.to_i
+    when /\Aversion\s+(\d+), empty, no schema\s*\z/
+      @version = $1.to_i
+      @schema = nil
+      @data = []
+    else
+      raise "Metadata line unrecognized: #{metadata_line.inspect}"
+    end
+    labels = @data.shift
+    
+    @schema = DbSchemata.instance.get_schema(@table_name, @version)
+  end
+  
+  def field_to_binary(field_type, field_value)
+    case field_type
+    when "boolean"
+      if field_value == "true"
+        "\x01"
+      elsif field_value == "false"
+        "\x00"
+      else
+        raise "Expected true/false, got #{field_value}"
+      end
+    when "float"
+      [field_value.to_f].pack("f")
+    when "int"
+      [field_value.to_f].pack("l")
+    when "short"
+      [field_value.to_f].pack("v")
+    when "string"
+      str = eval(field_value).unpack("U*")
+      [str.size].pack("v") + str.pack("v*")
+    when "optstring"
+      str = eval(field_value)
+      if str.nil?
+        "\x00"
+      else
+        str = str.unpack("U*")
+        "\x01" + [str.size].pack("v") + str.pack("v*")
+      end
+    when /\Ablob:(\d+)/
+      bloblen = $1.to_i
+      str = eval(field_value)
+      raise "Blob expected to have #{bloblen} bytes, had #{str.size}" unless str.size == bloblen
+      str
+    else
+      warn "Unknown ft/fv #{field_type} #{field_value}"
+      "x"
+    end
+  end
+  
+  def row_to_binary(row)
+    raise "Expected #{@schema.size} elements in row, got #{row.size}" unless @schema.size == row.size
+    out = ""
+    row.size.times{|i|
+      out << field_to_binary(@schema[i][1], row[i])
+    }
+    out
+  end
+  
+  def version_to_binary
+    if @version == 1
+      "\x01"
+    else
+      "\374\375\376\377" + [@version-1].pack("C") + "\000\000\000\001"
+    end
+  end
+  
+  def to_binary
+    out = version_to_binary
+    out << [@data.size].pack("V")
+    @data.each{|row|
+      out << row_to_binary(row)
+    }
+    out
+  end
+end
+
+schemata = DbSchemata.new
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input/ output/"
+end
+
+source = Pathname(ARGV[0])
+target = Pathname(ARGV[1])
+
+Pathname(source).find{|file_name|
+  next unless file_name.file?
+  table_name = file_name.dirname.basename.to_s
+  current_target = Pathname((target+file_name.relative_path_from(source)).to_s.sub(/\.tsv\z/, ""))
+  
+  file = DbTsvFile.new(file_name, table_name)
+
+  file_bin = file.to_binary
+  FileUtils.mkdir_p current_target.dirname
+  File.open(current_target, 'wb'){|fh|
+    fh.write file_bin
+  }
+}

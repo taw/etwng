@@ -36,6 +36,10 @@ class DbFile
     @schema = DbSchemata.instance.get_schema(@table_name, @version)
   end
   
+  def can_convert?
+    @schema or empty?
+  end
+  
   def empty?
     @rows == 0
   end
@@ -125,7 +129,7 @@ class DbFile
       if empty?
         return "version #{@version}, empty, no schema\n"
       else
-        return "version #{@version}, no schema, cannot convert\n"
+        raise "version #{@version}, no schema, cannot convert\n"
       end
     end
     data = parse_data
@@ -152,6 +156,11 @@ Pathname(source).find{|file_name|
   current_target = Pathname((target+file_name.relative_path_from(source)).to_s + ".tsv")
   
   file = DbFile.new(file_name, table_name)
+  if !file.can_convert?
+    warn "File #{file_name} cannot be converted, skipping"
+    next
+  end
+  
   file_tsv = file.to_tsv
   FileUtils.mkdir_p current_target.dirname
   File.open(current_target, 'wb'){|fh|

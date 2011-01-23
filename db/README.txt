@@ -6,7 +6,13 @@ You can unpack either the whole tree or one file at a time:
 ./db_unpack db/foo_tables/foo converted/foo_tables/foo.tsv
 
 When converting directories, the entire subdirectory structure
-will be recreated in target directory as well.
+will be recreated in target directory as well, skipping only
+files which are impossible to convert.
+
+To convert back do likewise:
+
+./db_pack tsvs/ db/
+./db_pack tsvs/foo_tables/foo.tsv db/foo_tables/foo
 
 === DB format ===
 
