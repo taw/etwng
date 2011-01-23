@@ -8,17 +8,7 @@ fuse/ directory contains filesystem driver which lets you mount
 .pack files and groups of .pack files directly as image,
 without unpacking.
 
-OSX only at the moment. FUSE works on everything except Windows,
-so Linux/etc. ports should be easy. You need to have MacFUSE or
-other relevant drivers installed.
-
-Compile:
-$ cd fuse
-$ make
-
-Mount at mount/path:
-$ mkdir -p mount/path
-$ ./packfs empire/directory/*.pack mount/path
+Check README.txt in fuse/ directory for compilation instructions.
 
 == FORMAT ==
 
