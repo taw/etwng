@@ -135,7 +135,7 @@ class EsfBuilder
     }
   end
 
-private
+# private
   def inc_children
     @children[-1] += 1
   end
