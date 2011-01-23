@@ -582,9 +582,9 @@ class tgaUse:
             elif child.nodeName == "int1":
                 self.int1 = int(child.firstChild.data)
             elif child.nodeName == "int2":
-                self.int1 = int(child.firstChild.data)
-            elif child.nodeName == "int2":
-                self.int1 = int(child.firstChild.data)
+                self.int2 = int(child.firstChild.data)
+            elif child.nodeName == "int3":
+                self.int3 = int(child.firstChild.data)
 
 class state:
     def __init__(self, indent):
