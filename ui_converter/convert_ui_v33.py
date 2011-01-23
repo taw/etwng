@@ -31,11 +31,13 @@ class TypeCastReader(io.BufferedReader):
     def readUTF16(self):
         length = self.readUShort()
         encodedString = self.read(length*2)
-        return(encodedString.decode("UTF-16").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+        string = encodedString.decode("UTF-16")
+        return(string.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\r", "&#x0D;"))
     def readASCII(self):
         length = self.readUShort()
         encodedString = self.read(length)
-        return(encodedString.decode("ascii").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+        string = encodedString.decode("ascii")
+        return(string.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\r", "&#x0D;"))
         
 class TypeCastWriter(io.BufferedWriter):
     def writeByte(self,arg):
