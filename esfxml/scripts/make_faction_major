@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class MakeFactionMajor < EsfScript
+  def run!(faction_to_change)
+    update_faction(faction_to_change) do |faction|
+      faction.xpath("yes|no")[2].name = 'yes'
+      true
+    end
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} extracted_esf_directory faction"
+  exit 1
+end
+
+xmldir = ARGV[0]
+faction = ARGV[1]
+
+MakeFactionMajor.new(xmldir).run!(faction)
