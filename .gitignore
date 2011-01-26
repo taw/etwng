@@ -19,3 +19,4 @@ luac/build
 luac/luadec
 luac/samples*
 db/samples*
+.redcar

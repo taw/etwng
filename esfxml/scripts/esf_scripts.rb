@@ -30,21 +30,20 @@ class EsfScript
       File.write(file_name, new_content)
     end
   end
-
-  def update_each_xml(glob, xpath)
+  
+  def update_xml(file_name, xpath)
+    content = File.open(file_name, 'rb', &:read)
+    doc = Nokogiri::XML.parse(content)
+    changed = false
+    doc.xpath(xpath).each do |elem|
+      changed = true if yield(elem)
+    end
+    File.write(file_name, doc.to_s) if changed
+  end
+    
+  def update_each_xml(glob, xpath, &blk)
     each_file(glob) do |file_name|
-      update_file(file_name) do |content|
-        doc = Nokogiri::XML.parse(content)
-        changed = false
-        doc.xpath(xpath).each do |elem|
-          changed = true if yield(elem)
-        end
-        if changed
-          doc.to_s
-        else
-          content
-        end
-      end
+      update_xml(file_name, xpath, &blk)      
     end
   end
 
@@ -67,5 +66,16 @@ class EsfScript
       end
     end
     @region_name_to_id
+  end
+
+  def update_factions_technologies(faction_to_change, &blk)
+    update_faction(faction_to_change) do |faction|
+      tech_includes = faction.xpath("xml_include").map{|node| node['path']}.grep(/\Atechnology\//)
+      unless tech_includes.size == 1
+        raise "Expected to find exactly one <xml_include path='technology/...'/>, got #{tech_includes.size}"
+      end
+      update_xml(xmldir+"/"+tech_includes[0], "//ary[@type='techs']", &blk)
+      false
+    end
   end
 end
