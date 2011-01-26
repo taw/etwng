@@ -1,5 +1,6 @@
 require "rubygems"
 require "nokogiri"
+require "pp"
 
 class File
   def self.write(path, content)
@@ -53,5 +54,18 @@ class EsfScript
       next unless faction_to_change == faction_name
       yield(faction)
     end
+  end
+
+  def region_name_to_id
+    unless @region_name_to_id
+      @region_name_to_id = {}
+      update_each_xml('region/*.xml', "//rec[@type='REGION']") do |region|
+        region_name = region.xpath("s")[0].content
+        region_id = region.xpath("i")[0].content
+        @region_name_to_id[region_name] = region_id
+        false
+      end
+    end
+    @region_name_to_id
   end
 end

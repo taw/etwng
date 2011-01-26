@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class FactionCapital < EsfScript
+  def run!(faction_to_change, new_capital_region)
+    new_capital_id = region_name_to_id[new_capital_region]
+    raise "Could not find region #{region_name}" unless new_capital_id
+    update_faction(faction_to_change) do |faction|
+      faction.xpath("i")[1].content = new_capital_id
+      faction.xpath("i")[2].content = new_capital_id
+      true
+    end
+  end
+end
+
+unless ARGV.size == 3
+  STDERR.puts "Usage: #{$0} extracted_esf_directory faction new_capital_region"
+  exit 1
+end
+
+xmldir = ARGV[0]
+faction = ARGV[1]
+capital = ARGV[2]
+
+FactionCapital.new(xmldir).run!(faction, capital)
