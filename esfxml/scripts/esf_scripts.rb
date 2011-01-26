@@ -46,4 +46,12 @@ class EsfScript
       end
     end
   end
+
+  def update_faction(faction_to_change)
+    update_each_xml("factions/*.xml", "//rec[@type='FACTION']") do |faction|
+      faction_name = faction.xpath("rec[@type='CAMPAIGN_PLAYER_SETUP']/s")[0].text
+      next unless faction_to_change == faction_name
+      yield(faction)
+    end
+  end
 end

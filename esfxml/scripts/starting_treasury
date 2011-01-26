@@ -5,11 +5,8 @@ require "esf_scripts"
 
 class StartingTreasury < EsfScript
   def run!(faction_to_change, treasury)
-    update_each_xml("factions/*.xml", "//rec[@type='FACTION']") do |faction|
-      faction_name = faction.xpath("rec[@type='CAMPAIGN_PLAYER_SETUP']/s")[0].text
-      next unless faction_to_change == faction_name
-      treasury_node = faction.xpath("rec[@type='FACTION_ECONOMICS']/i")[0]
-      treasury_node.content = treasury.to_s
+    update_faction(faction_to_change) do |faction|
+      faction.xpath("rec[@type='FACTION_ECONOMICS']/i")[0].content = treasury.to_s
       true
     end
   end
