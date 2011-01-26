@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class StartingTreasury < EsfScript
+  def run!(faction_to_change, treasury)
+    update_each_xml("factions/*.xml", "//rec[@type='FACTION']") do |faction|
+      faction_name = faction.xpath("rec[@type='CAMPAIGN_PLAYER_SETUP']/s")[0].text
+      next unless faction_to_change == faction_name
+      treasury_node = faction.xpath("rec[@type='FACTION_ECONOMICS']/i")[0]
+      treasury_node.content = treasury.to_s
+      true
+    end
+  end
+end
+
+unless ARGV.size == 3 and ARGV[2] =~ /\A\d+\z/
+  STDERR.puts "Usage: #{$0} extracted_esf_directory faction treasury"
+  exit 1
+end
+
+xmldir = ARGV[0]
+faction = ARGV[1]
+treasury = ARGV[2].to_i
+
+StartingTreasury.new(xmldir).run!(faction, treasury)
