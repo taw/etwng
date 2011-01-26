@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class MakeFactionPlayable < EsfScript
+  def run!(faction_to_change)
+    update_each_xml("preopen_map_info/info*.xml", "//rec[@type='FACTION_INFOS']") do |fi|
+      next unless fi.xpath("s")[0].content == faction_to_change
+      fi.xpath("yes|no")[0].name = 'yes'
+      fi.xpath("yes|no")[1].name = 'yes'
+      true
+    end
+    update_each_xml("preopen_map_info/info*.xml", "//rec[@type='CAMPAIGN_PLAYER_SETUP']") do |pa|
+      next unless pa.xpath("s")[0].content == faction_to_change
+      pa.xpath('yes|no')[1].name = 'yes'
+      true
+    end
+    update_each_xml("campaign_env/campaign_setup*.xml", "//rec[@type='CAMPAIGN_PLAYER_SETUP']") do |pa|
+      next unless pa.xpath("s")[0].content == faction_to_change
+      pa.xpath('yes|no')[1].name = 'yes'
+      true
+    end
+    update_faction(faction_to_change) do |faction|
+      cps = faction.xpath("//rec[@type='CAMPAIGN_PLAYER_SETUP']")[0]
+      cps.xpath('yes|no')[1].name = 'yes'
+      true
+    end
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} extracted_esf_directory faction"
+  exit 1
+end
+
+xmldir = ARGV[0]
+faction = ARGV[1]
+
+MakeFactionPlayable.new(xmldir).run!(faction)
