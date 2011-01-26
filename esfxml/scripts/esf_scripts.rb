@@ -3,9 +3,9 @@ require "nokogiri"
 
 class File
   def self.write(path, content)
-    File.open(path, 'wb'){|fh|
+    File.open(path, 'wb') do |fh|
       fh.write(content)
-    }
+    end
   end
 end
 
@@ -25,10 +25,7 @@ class EsfScript
   def update_file(file_name)
     content = File.open(file_name, 'rb', &:read)
     new_content = yield(content)
-    if content == new_content
-      puts "No changes to #{file_name}"
-    else
-      puts "Updating #{file_name}"
+    if content != new_content
       File.write(file_name, new_content)
     end
   end
