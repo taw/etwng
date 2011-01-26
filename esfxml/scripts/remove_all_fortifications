@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class RemoveAllFortifications < EsfScript
+  def run!
+    update_each_xml("region/*.xml", "//rec[@type='BUILDING_MANAGER']") do |bm|
+      is_present, building, = bm.xpath("*")
+      next unless is_present.name == 'yes'
+      next unless building.name == 'building'
+      name = building['name']
+      if ['settlement_fortifications', 'improved_settlement_fortifications'].include?(name)
+        puts "Removing #{name}"
+        is_present.name = 'no'
+        building.remove
+        true
+      else
+        puts "Keeping #{name}"
+        false
+      end
+    end
+  end
+
+  
+  # def run!
+  #   each_file("region_slot/slot-*.xml") do |file_name|
+  #     update_file(file_name) do |content|
+  #       doc = Nokogiri::XML.parse(content)
+  #       changed = false
+  #       doc.xpath("//rec[@type='BUILDING_MANAGER']").each do |bm|
+  #         is_present, building, = bm.xpath("*")
+  #         next unless is_present.name == 'yes'
+  #         next unless building.name == 'building'
+  #         name = building['name']
+  #         
+  #         if ['settlement_fortifications', 'improved_settlement_fortifications'].include?(name)
+  #           puts "Removing #{name}"
+  #           changed = true
+  #           is_present.name = 'no'
+  #           building.remove
+  #         else
+  #           puts "Keeping #{name}"
+  #         end
+  #       end
+  #       if changed
+  #         doc.to_s
+  #       else
+  #         content
+  #       end
+  #     end
+  #   end
+  # end
+end
+
+unless ARGV.size == 1 and File.exist?(ARGV[0])
+  STDERR.puts "Usage: #{$0} extracted_esf_directory"
+  exit 1
+end
+
+xmldir = ARGV[0]
+
+RemoveAllFortifications.new(xmldir).run!
