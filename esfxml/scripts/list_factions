@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class ListFactions < EsfScript
+  def run!
+    factions = []
+    update_each_xml("factions/*.xml", "//rec[@type='FACTION']") do |faction|
+      factions << faction.xpath("rec[@type='CAMPAIGN_PLAYER_SETUP']/s")[0].text
+      false
+    end
+    puts factions.sort
+  end
+end
+
+unless ARGV.size == 1
+  STDERR.puts "Usage: #{$0} extracted_esf_directory"
+  exit 1
+end
+
+xmldir = ARGV[0]
+
+ListFactions.new(xmldir).run!
