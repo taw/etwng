@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class MakeMoreVanillaFactionsPlayable < EsfScript
+  def run!
+    # Make default vanilla states playable except protectorates
+    # Not every one of them has sensible gameplay options
+
+    factions = %W[
+      bavaria                                                                
+      chechenya_dagestan
+      cherokee
+      denmark
+      genoa
+      georgia
+      hannover
+      huron
+      inuit
+      iroquoi
+      knights_stjohn
+      morocco
+      mughal
+      mysore
+      papal_states
+      piedmont_savoy
+      plains
+      portugal
+      pueblo
+      safavids
+      venice
+      westphalia
+      wurttemberg
+    ]
+
+    factions.each do |faction_to_change|
+      make_faction_playable(faction_to_change)
+    end
+  end
+end
+
+unless ARGV.size == 1
+  STDERR.puts "Usage: #{$0} extracted_esf_directory faction"
+  exit 1
+end
+
+xmldir = ARGV[0]
+
+MakeMoreVanillaFactionsPlayable.new(xmldir).run!

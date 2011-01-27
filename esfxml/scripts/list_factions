@@ -6,8 +6,8 @@ require "esf_scripts"
 class ListFactions < EsfScript
   def run!
     factions = []
-    update_each_xml("factions/*.xml", "//rec[@type='FACTION']") do |faction|
-      factions << faction.xpath("rec[@type='CAMPAIGN_PLAYER_SETUP']/s")[0].text
+    each_faction do |faction, faction_name|
+      factions << faction_name
       false
     end
     puts factions.sort

@@ -47,25 +47,35 @@ class EsfScript
     end
   end
 
-  def update_faction(faction_to_change)
-    update_each_xml("factions/*.xml", "//rec[@type='FACTION']") do |faction|
-      faction_name = faction.xpath("rec[@type='CAMPAIGN_PLAYER_SETUP']/s")[0].text
-      next unless faction_to_change == faction_name
-      yield(faction)
-    end
-  end
-
   def region_name_to_id
     unless @region_name_to_id
       @region_name_to_id = {}
-      update_each_xml('region/*.xml', "//rec[@type='REGION']") do |region|
-        region_name = region.xpath("s")[0].content
-        region_id = region.xpath("i")[0].content
-        @region_name_to_id[region_name] = region_id
+      each_region do |region|
+        @region_name_to_id[region.xpath("s")[0].content] = region.xpath("i")[0].content
         false
       end
     end
     @region_name_to_id
+  end
+
+  def each_region
+    update_each_xml('region/*.xml', "//rec[@type='REGION']") do |region|
+      yield(region)
+    end
+  end
+  
+  def each_faction
+    update_each_xml("factions/*.xml", "//rec[@type='FACTION']") do |faction|
+      faction_name = faction.xpath("rec[@type='CAMPAIGN_PLAYER_SETUP']/s")[0].text
+      yield(faction, faction_name)
+    end
+  end
+  
+  def update_faction(faction_to_change)
+    each_faction do |faction, faction_name|
+      next unless faction_to_change == faction_name
+      yield(faction)
+    end
   end
 
   def update_factions_technologies(faction_to_change, &blk)
@@ -76,6 +86,30 @@ class EsfScript
       end
       update_xml(xmldir+"/"+tech_includes[0], "//ary[@type='techs']", &blk)
       false
+    end
+  end
+
+  def make_faction_playable(faction_to_change)
+    update_each_xml("preopen_map_info/info*.xml", "//rec[@type='FACTION_INFOS']") do |fi|
+      next unless fi.xpath("s")[0].content == faction_to_change
+      fi.xpath("yes|no")[0].name = 'yes'
+      fi.xpath("yes|no")[1].name = 'yes'
+      true
+    end
+    update_each_xml("preopen_map_info/info*.xml", "//rec[@type='CAMPAIGN_PLAYER_SETUP']") do |pa|
+      next unless pa.xpath("s")[0].content == faction_to_change
+      pa.xpath('yes|no')[1].name = 'yes'
+      true
+    end
+    update_each_xml("campaign_env/campaign_setup*.xml", "//rec[@type='CAMPAIGN_PLAYER_SETUP']") do |pa|
+      next unless pa.xpath("s")[0].content == faction_to_change
+      pa.xpath('yes|no')[1].name = 'yes'
+      true
+    end
+    update_faction(faction_to_change) do |faction|
+      cps = faction.xpath("//rec[@type='CAMPAIGN_PLAYER_SETUP']")[0]
+      cps.xpath('yes|no')[1].name = 'yes'
+      true
     end
   end
 end
