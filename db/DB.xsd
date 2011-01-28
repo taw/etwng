@@ -1476,7 +1476,6 @@
 	</xs:complexType>
 	<xs:complexType name="warscape_equipment_items_tables">
 		<xs:attribute name="Item_ID" type="xs:string" use="required" />
-		<xs:attribute name="Item_Type" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="warscape_equipment_themes_tables">
 		<xs:attribute name="Warscape_Equipment_Theme_ID" type="xs:string" use="required" />
