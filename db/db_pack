@@ -36,7 +36,8 @@ class DbTsvFile
         raise "Expected true/false, got #{field_value}"
       end
     when "float"
-      [field_value.to_f].pack("f")
+      # Works with any of: "123", "123.4", "123,4"   
+      [field_value.sub(",", ".").to_f].pack("f")
     when "int"
       [field_value.to_f].pack("l")
     when "short"
@@ -90,16 +91,26 @@ class DbTsvFile
   end
 end
 
-schemata = DbSchemata.new
-
-unless ARGV.size == 2
-  STDERR.puts "Usage: #{$0} input/ output/"
+def parse_argv
+  # Comma mode doesn't actually do anything here, it works either way
+  if ARGV[0] == '--comma'
+    comma_mode = true
+    ARGV.shift
+  else
+    comma_mode = false
+  end
+  
+  unless ARGV.size == 2
+    STDERR.puts "Usage: #{$0} [--comma] input/ output/"
+  end
+  
+  [Pathname(ARGV[0]), Pathname(ARGV[1]), comma_mode]
 end
 
-source = Pathname(ARGV[0])
-target = Pathname(ARGV[1])
+schemata = DbSchemata.new
+source, target, $comma_mode = parse_argv
 
-Pathname(source).find{|file_name|
+source.find do |file_name|
   next unless file_name.file?
   table_name = file_name.dirname.basename.to_s
   current_target = Pathname((target+file_name.relative_path_from(source)).to_s.sub(/\.tsv\z/, ""))
@@ -110,5 +121,5 @@ Pathname(source).find{|file_name|
   FileUtils.mkdir_p current_target.dirname
   File.open(current_target, 'wb'){|fh|
     fh.write file_bin
-  }
-}
+    }
+end

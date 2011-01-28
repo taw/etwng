@@ -137,26 +137,44 @@ class DbFile
       "version #{@version}",
       schema.map{|name, field_type| "#{name}(#{field_type})"}.join("\t"),
       *data.map{|row| row.map{|f|
-        if f.is_a?(Float) and f.to_i == f
-          f.to_i.inspect
+        if f.is_a?(Float)
+          float_to_tsv(f)
         else
           f.inspect
         end
       }.join("\t") }
     ].join("\n") + "\n"
   end
+  
+  def float_to_tsv(f)
+    return f.to_i.to_s if f.to_i == f
+    if $comma_mode
+      f.inspect.sub(".", ",")
+    else
+      f.inspect
+    end
+  end
+end
+
+def parse_argv
+  if ARGV[0] == '--comma'
+    comma_mode = true
+    ARGV.shift
+  else
+    comma_mode = false
+  end
+  
+  unless ARGV.size == 2
+    STDERR.puts "Usage: #{$0} [--comma] input/ output/"
+  end
+  
+  [Pathname(ARGV[0]), Pathname(ARGV[1]), comma_mode]
 end
 
 schemata = DbSchemata.new
+source, target, $comma_mode = parse_argv
 
-unless ARGV.size == 2
-  STDERR.puts "Usage: #{$0} input/ output/"
-end
-
-source = Pathname(ARGV[0])
-target = Pathname(ARGV[1])
-
-Pathname(source).find{|file_name|
+source.find do |file_name|
   next unless file_name.file?
   table_name = file_name.dirname.basename.to_s
   current_target = Pathname((target+file_name.relative_path_from(source)).to_s + ".tsv")
@@ -172,4 +190,4 @@ Pathname(source).find{|file_name|
   File.open(current_target, 'wb'){|fh|
     fh.puts file_tsv
   }
-}
+end

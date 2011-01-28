@@ -14,6 +14,20 @@ To convert back do likewise:
 ./db_pack tsvs/ db/
 ./db_pack tsvs/foo_tables/foo.tsv db/foo_tables/foo
 
+If you have non-English locale which uses comma instead of period as
+decimal separator (3,14 vs 3.14), certain version of OpenOffice.org
+and possibly other programs might have troubles with such TSV.
+
+In such case you can either switch to English (US) locale,
+which is known to work, or pass --comma option to db_unpack/db_pack:
+
+./db_unpack --comma db/ tsvs/
+./db_pack --comma tsvs/ db/
+
+db_pack actually always accepts TSVs with either decimal format,
+so there's no way to make a mistake while converting back.
+It only takes --comma option for compatibility.
+
 === DB format ===
 
 Tables in db formats need external schema for decoding.
