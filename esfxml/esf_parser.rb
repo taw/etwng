@@ -65,9 +65,32 @@ module EsfBasicBinaryOps
     get_bytes(get_u2*2).unpack("v*").pack("U*")
   end
   def lookahead_str
-    return nil unless @data[@ofs+4, 1] == "\x0e"
-    sz, = @data[@ofs+5, 2].unpack("v")
-    @data[@ofs+7, sz*2].unpack("v*").pack("U*")
+    end_ofs = @data[@ofs, 4].unpack("V")[0]
+    la_ofs = @ofs + 4
+    # puts "Lookahead until #{end_ofs}"
+    while la_ofs < end_ofs
+      tag = @data[la_ofs, 1].unpack("C")[0]
+      # puts "At #{la_ofs}, tag #{"%02x" % tag}"
+      if tag == 0x0e
+        sz, = @data[la_ofs+1, 2].unpack("v")
+        rv = @data[la_ofs+3, sz*2].unpack("v*").pack("U*")
+        return nil if rv == ""
+        return rv
+      elsif tag <= 0x10
+        sz = [3, 2, nil, nil, 5, nil, 2, 3, 5, nil, 5, nil, 9, 13, nil, nil, 3][tag]
+        return nil unless sz
+        la_ofs += sz
+      elsif tag >= 0x40 and tag <= 0x4f
+        la_ofs = @data[la_ofs, 4].unpack("V")[0]
+      elsif tag == 0x80
+        la_ofs = @data[la_ofs+4, 4].unpack("V")[0]
+      elsif tag == 0x81
+        la_ofs = @data[la_ofs+4, 4].unpack("V")[0]
+      else
+        return nil
+      end
+    end
+    return nil
   end
   def get_byte
     rv = @data[@ofs]
