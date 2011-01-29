@@ -7,6 +7,7 @@ class DirBuilder
     @path_allocator = Hash.new(1)
     @xml_printer = nil
     FileUtils.mkdir_p @out_dir
+    @semantic_names_stack = []
   end
 
   def save_binfile(base_name, semantic_name, ext, data)
@@ -31,7 +32,11 @@ class DirBuilder
   end
 
   def open_nested_xml(base_name, semantic_name, &blk)
-    open_xml(XMLPrinter.new(*alloc_new_path(base_name, semantic_name, ".xml")), &blk)
+    @semantic_names_stack << semantic_name
+    use_semantic_name = @semantic_names_stack.compact[-1]
+    rv = open_xml(XMLPrinter.new(*alloc_new_path(base_name, use_semantic_name, ".xml")), &blk)
+    @semantic_names_stack.pop
+    rv
   end
 
   def alloc_new_path(base_name, semantic_name, ext)
