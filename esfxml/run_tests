@@ -18,15 +18,19 @@ class SampleTest
   def size
     File.size(source)
   end
+  def ruby
+    # %W[time jruby --server -J-Xmx2048m]
+    %W[ruby]
+  end
   def run!
     puts "Converting #{@filename}"
     FileUtils.rm_rf xmldir
-    system *%W[time jruby --server -J-Xmx2048m ./esf2xml #{source} #{xmldir}]
+    system *(ruby + ["./esf2xml", source, xmldir])
 
     puts "Recreating #{@filename}"
     FileUtils.rm_rf recreated
     # jruby --server -J-Xmx2048m
-    system *%W[time jruby --server -J-Xmx2048m ./xml2esf #{xmldir} #{recreated}]
+    system *(ruby + ["./xml2esf", xmldir, recreated])
 
     system "diff", source, recreated
   end
