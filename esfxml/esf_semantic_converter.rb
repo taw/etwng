@@ -157,7 +157,7 @@ module EsfSemanticConverter
       d = d ? 'yes' : 'no'
       f = f ? 'yes' : 'no'
       out!(" <!-- #{label.xml_escape} -->")
-      out!(" <draa drift=\"#{a}\" current=\"#{b}\" max=\"#{c}\" active1=\"#{d}\" extra=\"#{e}\" active2=\"#{f}\"/>")
+      out!(" <draa drift=\"#{a}\" current=\"#{b}\" limit=\"#{c}\" active1=\"#{d}\" extra=\"#{e}\" active2=\"#{f}\"/>")
     end
     out!("</ary>")
   end
