@@ -9,20 +9,18 @@ module EsfSemanticConverter
     out_ary!(tag, "", data.map{|name| " #{name.xml_escape}" })
   end
 
-  def ensure_types(data, *expected_types)
-    out = []
-    data.each do |t, *v|
-      raise SemanticFail.new unless t == expected_types.shift
-      out.push *v
-    end
-    out
+  def ensure_types(actual, *expected_types)
+    (actual_type, actual_data) = *actual
+    raise SemanticFail.new unless actual_type == expected_types
+    actual_data
   end
 
-  def ensure_loc(data)
-    if data == [[:s, ""], [:s, ""]]
+  def ensure_loc(loc)
+    loc_type, loc_data = loc
+    if loc_type == [:s, :s] and loc_data == ["", ""]
       ""
-    elsif data.size == 1 and data[0][0] == :s and data[0][1] != ""
-      data[0][1]
+    elsif loc_type == [:s] and loc_data != [""]
+      loc_data[0]
     else
       raise SemanticFail.new
     end
@@ -32,13 +30,10 @@ module EsfSemanticConverter
 
 ## startpos.esf arrays
   def convert_ary_UNIT_CLASS_NAMES_LIST
-    data = get_ary_contents_dynamic
-    data = data.map{|rec|
-      raise SemanticFail.new unless rec.map{|t,*v| t} == [[:rec, :CAMPAIGN_LOCALISATION, nil], :bool]
-      loc, used = rec.map{|t,*v| v}
+    data = get_ary_contents([:rec, :CAMPAIGN_LOCALISATION, nil], :bool)
+    data = data.map{|loc, used|
       loc = ensure_loc(loc)
       raise SemanticFail.new if loc =~ /\s|=/
-      used = used[0]
       [loc, used]
     }
     out_ary!("unit_class_names_list", "", data.map{|loc, used| " #{loc}=#{used ? 'yes' : 'no'}"})
@@ -102,10 +97,8 @@ module EsfSemanticConverter
 
   def convert_ary_region_keys
     data = get_ary_contents(:s, :v2)
-    raise SemanticFali.new if data.any?{|name, x, y| name =~ /\s|=|,/}
-    out!("<region_keys>")
-    data.each{|name,x,y| out!(" #{name.xml_escape}=#{x},#{y}") }
-    out!("</region_keys>")
+    raise SemanticFali.new if data.any?{|name, xy| name =~ /\s|=|,/}
+    out_ary!("region_keys", "", data.map{|name,(x,y)| " #{name.xml_escape}=#{x},#{y}"})
   end
 
   def convert_ary_groundtype_index
@@ -121,7 +114,7 @@ module EsfSemanticConverter
   def convert_ary_sea_indices
     data = get_ary_contents(:s, :byte)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
-    out_ary!("sea_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
+    out_ary!("sea_indices", "", data.map{|name, value| " #{name.xml_escape}=#{value}" })
   end
   
   def convert_ary_DIPLOMACY_RELATIONSHIP_ATTITUDES_ARRAY
@@ -181,7 +174,7 @@ module EsfSemanticConverter
 ## regions.esf records
 
   def convert_rec_BOUNDS_BLOCK
-    xmin, ymin, xmax, ymax = get_rec_contents(:v2, :v2)
+    (xmin, ymin), (xmax, ymax) = get_rec_contents(:v2, :v2)
     out!("<bounds_block xmin=\"#{xmin}\" ymin=\"#{ymin}\" xmax=\"#{xmax}\" ymax=\"#{ymax}\"/>")
   end
 
@@ -222,12 +215,9 @@ module EsfSemanticConverter
   end
 
   def convert_rec_COMMANDER_DETAILS
-    data = get_rec_contents_dynamic
-    raise SemanticFail.new unless data.map{|t,*v| t} == [[:rec, :CAMPAIGN_LOCALISATION, nil], [:rec, :CAMPAIGN_LOCALISATION, nil], :s]
-    fnam, lnam, faction = data.map{|t,*v| v}
+    fnam, lnam, faction = get_rec_contents([:rec, :CAMPAIGN_LOCALISATION, nil], [:rec, :CAMPAIGN_LOCALISATION, nil], :s)
     fnam = ensure_loc(fnam)
     lnam = ensure_loc(lnam)
-    faction = faction[0]
     out!("<commander_details name=\"#{fnam.xml_escape}\" surname=\"#{lnam.xml_escape}\" faction=\"#{faction.xml_escape}\"/>")
   end
 
@@ -252,8 +242,8 @@ module EsfSemanticConverter
   end
 
   def convert_rec_UNIT_HISTORY
-    year, season, a, b = get_rec_contents([:rec, :DATE, nil], :u4, :u4)
-    year, season = ensure_types([year, season], :u4, :asc)
+    date, a, b = get_rec_contents([:rec, :DATE, nil], :u4, :u4)
+    year, season = ensure_types(date, :u4, :asc)
     raise SemanticFail.new if a != 0 or b != 0 or season =~ /\s/
     out!("<unit_history>#{season.xml_escape} #{year}</unit_history>")
   end
@@ -291,21 +281,21 @@ module EsfSemanticConverter
   end
 
   def convert_rec_TRAITS
-    traits = get_rec_contents([:ary, :TRAIT, nil])
+    traits, = get_rec_contents([:ary, :TRAIT, nil])
     traits = traits.map{|trait| ensure_types(trait, :s, :i4)}
     raise SemanticFail.new if traits.any?{|trait, level| trait =~ /\s|=/}
     out_ary!("traits", "", traits.map{|trait, level| " #{trait.xml_escape}=#{level}" })
   end
 
   def convert_rec_ANCILLARY_UNIQUENESS_MONITOR
-    entries = get_rec_contents([:ary, :ENTRIES, nil])
+    entries, = get_rec_contents([:ary, :ENTRIES, nil])
     entries = entries.map{|entry| ensure_types(entry, :s)}.flatten
     raise SemanticFail.new if entries.any?{|entry| entry =~ /\s|=/}
     out_ary!("ancillary_uniqueness_monitor", "", entries.map{|entry| " #{entry.xml_escape}" })
   end
   
   def convert_rec_REGION_OWNERSHIPS_BY_THEATRE
-    theatre, *ownerships = get_rec_contents(:s, [:ary, :REGION_OWNERSHIPS, nil])
+    theatre, ownerships = get_rec_contents(:s, [:ary, :REGION_OWNERSHIPS, nil])
     ownerships = ownerships.map{|o| ensure_types(o, :s, :s)}
     raise SemanticFail.new if ownerships.any?{|region, owner| region =~ /\s|=/ or owner =~ /\s|=/}
     out_ary!("region_ownerships_by_theatre", " theatre=\"#{theatre.xml_escape}\"", ownerships.map{|region, owner| " #{region.xml_escape}=#{owner.xml_escape}" })
@@ -314,31 +304,32 @@ module EsfSemanticConverter
 ## bmd.dat records
 
   def convert_rec_HEIGHT_FIELD
-    xi, yi, xf, yf, data, unknown, hmin, hmax = get_rec_contents(:u4, :u4, :v2, :flt_ary, :i4, :flt, :flt)
+    xi, yi, (xf, yf), data, unknown, hmin, hmax = get_rec_contents(:u4, :u4, :v2, :flt_ary, :i4, :flt, :flt)
     path, rel_path = dir_builder.alloc_new_path("height_field", nil, ".pgm")
     File.write_pgm(path, 4*xi, yi, data)
     out!("<height_field xsz=\"#{xf}\" ysz=\"#{yf}\" pgm=\"#{rel_path.xml_escape}\" unknown=\"#{unknown}\" hmin=\"#{hmin}\" hmax=\"#{hmax}\"/>")
   end
   
   def convert_rec_GROUND_TYPE_FIELD
-    xi, yi, xf, yf, data = get_rec_contents(:u4, :u4, :v2, :bin4)
+    xi, yi, (xf, yf), data = get_rec_contents(:u4, :u4, :v2, :bin4)
     path, rel_path = dir_builder.alloc_new_path("group_type_field", nil, ".pgm")
     File.write_pgm(path, 4*xi, yi, data)
     out!("<ground_type_field xsz=\"#{xf}\" ysz=\"#{yf}\" pgm=\"#{rel_path.xml_escape}\"/>")
   end
   
   def convert_rec_BMD_TEXTURES
-    data = get_rec_contents_dynamic
+    types, data = get_rec_contents_dynamic
     tag!("bmd_textures") do
       until data.empty?
-        if data.size == 3 and data.map{|t,v| t} == [:u4, :u4, :bin6]
-          xsz, ysz, pxdata = data.map{|t,v| v}
+        if data.size == 3 and types == [:u4, :u4, :bin6]
+          xsz, ysz, pxdata = data
           path, rel_path = dir_builder.alloc_new_path("bmd_textures/texture", nil, ".pgm")
           File.write_pgm(path, 4*xsz, ysz, pxdata)
           out!(" <bmd_pgm pgm=\"#{rel_path.xml_escape}\"/>")
           break
-        end        
-        t, v = data.shift
+        end
+        t = types.shift
+        v = data.shift
         case t
         when :s
           out!(" <s>#{v.xml_escape}</s>")

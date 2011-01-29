@@ -165,10 +165,10 @@ module EsfGetData
     [:flt, get_float]
   end
   def get_0c!
-    [:v2, get_float, get_float]
+    [:v2, [get_float, get_float]]
   end
   def get_0d!
-    [:v3, get_float, get_float, get_float]
+    [:v3, [get_float, get_float, get_float]]
   end
   def get_0e!
     [:s, get_str]
@@ -219,38 +219,42 @@ end
 
 module EsfParserSemantic
   def get_rec_contents_dynamic
-    out     = []
+    types   = []
+    data    = []
     end_ofs = get_u4
     while @ofs < end_ofs
-      out.push send(@esf_type_handlers_get[get_byte])
+      t, d = send(@esf_type_handlers_get[get_byte])
+      types << t
+      data  << d
     end
-    out
+    [types, data]
   end
   
   def get_value!
     send(@esf_type_handlers_get[get_byte])
   end
-
+  
   def get_rec_contents(*expect_types)
-    out     = []
+    data    = []
     end_ofs = get_u4
     while @ofs < end_ofs
-      t, *v = send(@esf_type_handlers_get[get_byte])
+      t, d = send(@esf_type_handlers_get[get_byte])
       raise SemanticFail.new unless t == expect_types.shift
-      out.push *v
+      data << d
     end
-    out
+    data
   end
+  
   def get_81!
     node_type, version = get_node_type_and_version
     ofs_end   = get_u4
     count     = get_u4
-    [[:ary, node_type, version], *(0...count).map{ get_rec_contents_dynamic }]
+    [[:ary, node_type, version], (0...count).map{ get_rec_contents_dynamic }]
   end
 
   def get_80!
     node_type, version = get_node_type_and_version
-    [[:rec, node_type, version], *get_rec_contents_dynamic]
+    [[:rec, node_type, version], get_rec_contents_dynamic]
   end
 
   def get_ary_contents(*expect_types)
@@ -274,6 +278,7 @@ module EsfParserSemantic
       save_ofs = @ofs
       yield
     rescue SemanticFail
+      # This is debug only, it's normally perfectly safe
       pp [:semantic_rollback, @ofs, save_ofs, node_type]
       @ofs = save_ofs
     end
