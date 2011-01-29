@@ -107,7 +107,7 @@ Examples of each semantic tag below:
 
 == startpos.esf ==
 
-<techs name="military_army_plug_bayonet" status="2" research_points="0.0" unknown1="0" unknown2="" unknown3="0"/>
+<techs name="military_army_plug_bayonet" status="2" research_points="0.0" school_slot_id="0" unknown1="" unknown2="0"/>
 
 <draa drift="0" current="-10" limit="0 active1="no" extra="0" active2="no"/>
 
@@ -166,6 +166,7 @@ Examples of each semantic tag below:
 <land_key>euro_line_infantry_britain</land_key>
 
 <unit_history>summer 1700</unit_history>
+
 <agent_attributes>
  command_land=-1
  command_sea=-1

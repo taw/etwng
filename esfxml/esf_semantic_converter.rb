@@ -216,9 +216,9 @@ module EsfSemanticConverter
 
   def convert_rec_techs
     data = get_rec_contents(:s, :u4, :flt, :u4, :bin8, :u4)
-    name, status, research_points, unknown1, unknown2, unknown3 = *data
-    unknown2 = unknown2.unpack("V*").join(" ")
-    out!("<techs name=\"#{name.xml_escape}\" status=\"#{status}\" research_points=\"#{research_points}\" unknown1=\"#{unknown1}\" unknown2=\"#{unknown2}\" unknown3=\"#{unknown3}\"/>")
+    name, status, research_points, school_slot_id, unknown1, unknown2 = *data
+    unknown1 = unknown1.unpack("V*").join(" ")
+    out!("<techs name=\"#{name.xml_escape}\" status=\"#{status}\" research_points=\"#{research_points}\" school_slot_id=\"#{school_slot_id}\" unknown1=\"#{unknown1}\" unknown2=\"#{unknown2}\"/>")
   end
 
   def convert_rec_COMMANDER_DETAILS

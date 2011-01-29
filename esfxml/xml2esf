@@ -367,9 +367,9 @@ module XmlCallbacks
       @esf.put_s attributes[:name]
       @esf.put_u attributes[:status].to_i
       @esf.put_flt attributes[:research_points]
-      @esf.put_u attributes[:unknown1].to_i
-      @esf.put_4x("\x48", attributes[:unknown2].split(/\s+/).map(&:to_i).pack("V*"))
-      @esf.put_u attributes[:unknown3].to_i
+      @esf.put_u attributes[:school_slot_id].to_i
+      @esf.put_4x("\x48", attributes[:unknown1].split(/\s+/).map(&:to_i).pack("V*"))
+      @esf.put_u attributes[:unknown2].to_i
     end
   end
 
