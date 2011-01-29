@@ -1,9 +1,25 @@
-Right now 39 semantic tags (+2 virtual tags) are supported,
+Right now 40 semantic tags (+2 virtual tags) are supported,
 for about 1000 node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
 
 Examples of each semantic tag below:
+
+== pathfinding.esf ==
+
+<vertices>
+  -2047.99999904633,-2047.99999904633
+  -2047.99999904633,-2047.99999904633
+  -2047.99999904633,-2047.99999904633
+  -2047.99999904633,-2047.99999904633
+  -118.168151855469,140.0
+  265.800541877747,140.0
+  289.876801490784,140.0
+  411.354787826538,140.0
+  ...
+</vertices>
+
+
 
 == traderoutes.esf ==
 

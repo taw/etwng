@@ -168,6 +168,16 @@ module EsfSemanticConverter
     convert_ary_contents_str("settlements")
   end
 
+## pathfinding.esf arrays
+
+  def convert_ary_vertices
+    data = get_ary_contents(:i4, :i4)
+    scale = 0.5**20
+    out_ary!("vertices", "", data.map{|x,y|
+      " #{x*scale},#{y*scale}"
+    })
+  end
+  
 ## regions.esf records
 
   def convert_rec_BOUNDS_BLOCK

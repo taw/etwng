@@ -106,6 +106,9 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       # ary / traderoutes.esf
       :settlements           => :on_start_chara_only,
       
+      # ary / pathfinding.esf
+      :vertices              => :on_start_chara_only,
+      
       # rec / bmd.dat
       :bmd_textures          => :on_start_bmd_textures,
       :bin6ext               => :on_start_bin6ext,
@@ -204,7 +207,10 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
 
       # ary / traderoutes.esf
       :settlements           => :on_end_settlements,
-      
+
+      # ary / pathfinding.esf
+      :vertices              => :on_end_vertices,
+
       # rec / bmd.dat
       :bmd_textures          => :on_end_rec,
       :bin6ext               => :on_end_ignore,
@@ -493,7 +499,14 @@ module XmlCallbacks
       @esf.put_s ancillary
     end
   end
-    
+  
+  def on_end_vertices(ctx)
+    semantic_put_ary("vertices", ctx[:buf].strip.split(/[\s,]+/), 2) do |x, y|
+      @esf.put_i((x.to_f * 1048576.0).round.to_i)
+      @esf.put_i((y.to_f * 1048576.0).round.to_i)
+    end
+  end
+  
   def on_end_date(ctx)
     if ctx[:buf] == ""
       year, season = 0, 'summer' 
