@@ -1,4 +1,4 @@
-Right now 40 semantic tags (+2 virtual tags) are supported,
+Right now 41 semantic tags (+2 virtual tags) are supported,
 for about 1000 node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -165,6 +165,7 @@ Examples of each semantic tag below:
 
 <land_key>euro_line_infantry_britain</land_key>
 
+<unit_history>summer 1700</unit_history>
 <agent_attributes>
  command_land=-1
  command_sea=-1

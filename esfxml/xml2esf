@@ -62,6 +62,7 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       ## Semantic
       # rec / startpos.esf
       :date                    => :on_start_chara_only,
+      :unit_history            => :on_start_chara_only,
       :agent_ability           => :on_start_agent_ability,
       :loc                     => :on_start_chara_only,
       :map                     => :on_start_map,
@@ -164,6 +165,7 @@ class XMLParserCallbacks < Nokogiri::XML::SAX::Document
       ## Semantic
       # rec / startpos.esf
       :date                    => :on_end_date,
+      :unit_history            => :on_end_unit_history,
       :agent_ability           => :on_end_ignore,
       :loc                     => :on_end_loc,
       :map                     => :on_end_ignore,
@@ -518,6 +520,20 @@ module XmlCallbacks
     put_rec "DATE" do
       @esf.put_u year
       @esf.put_asc season
+    end
+  end
+  
+  def on_end_unit_history(ctx)
+    date_fields = ctx[:buf].strip.split(/\s+/)
+    raise "Invalid date: `#{ctx[:buf]}'" unless date_fields.size == 2 and date_fields[1] =~ /\A\d+\z/
+    year, season = date_fields[1].to_i, date_fields[0]
+    put_rec "UNIT_HISTORY" do
+      put_rec "DATE" do
+        @esf.put_u year
+        @esf.put_asc season
+      end
+      @esf.put_u 0
+      @esf.put_u 0
     end
   end
   

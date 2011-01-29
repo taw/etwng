@@ -251,6 +251,13 @@ module EsfSemanticConverter
     end
   end
 
+  def convert_rec_UNIT_HISTORY
+    year, season, a, b = get_rec_contents([:rec, :DATE, nil], :u4, :u4)
+    year, season = ensure_types([year, season], :u4, :asc)
+    raise SemanticFail.new if a != 0 or b != 0 or season =~ /\s/
+    out!("<unit_history>#{season.xml_escape} #{year}</unit_history>")
+  end
+  
   def convert_rec_MAPS
     name, x, y, unknown, data = get_rec_contents(:s, :u4, :u4, :i4, :bin8)
     raise SemanticFail.new if name =~ /\s/
