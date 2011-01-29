@@ -8,7 +8,7 @@ class GiveTechnology < EsfScript
     update_factions_technologies(faction_to_change) do |techs|
       tech_node = techs.xpath("techs[@name='#{tech}']")
       raise "No such tech #{tech_node}" unless tech_node.size == 1
-      tech_node[0]['unknown1'] = '0'
+      tech_node[0]['status'] = '0'
       # arbitrary value, doesn't seem to matter
       # real value is only available from db and varies from mod to mod
       tech_node[0]['research_points'] = '1000.0'

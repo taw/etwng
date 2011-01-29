@@ -14,13 +14,13 @@ Examples of each semantic tag below:
 </settlements>
 
 == regions.esf ==
-<bounds_block xmin='-581.6795' ymin='253.953' xmax='-567.31494' ymax='266.0332'/>
+<bounds_block xmin="-581.6795" ymin="253.953" xmax="-567.31494" ymax="266.0332"/>
 
-<climate_map pgm='climate_map-0001.pgm'/>
+<climate_map pgm="climate_map-0001.pgm"/>
 
-<connectivity mask='00070000' from='79' to='113'/>
+<connectivity mask="00070000" from="79" to="113"/>
 
-<black_shroud_outlines name='shroud_map_1_2'>
+<black_shroud_outlines name="shroud_map_1_2">
  -571.66217,260.03384
  -560.8075,260.03732
  -549.95288,260.04083
@@ -87,15 +87,15 @@ Examples of each semantic tag below:
  dense_forest
 </groundtype_index>
 
-<wind_map unknown='0.00729600992053747' pgm='wind_map-0001.pgm'/>
+<wind_map unknown="0.00729600992053747" pgm="wind_map-0001.pgm"/>
 
 == startpos.esf ==
 
-<techs name='military_army_plug_bayonet' unknown1='2' research_points='0.0' unknown2='0' unknown3='' unknown4='0'/>
+<techs name="military_army_plug_bayonet" status="2" research_points="0.0" unknown1="0" unknown2="" unknown3="0"/>
 
-<draa a='0' b='-10' c='0 d='no' e='0' f='no'/>
+<draa drift="0" current="-10" limit="0 active1="no" extra="0" active2="no"/>
 
-<commander_details name='names_name_names_englishMathew' surname='names_name_names_englishAbbot' faction='britain'/>
+<commander_details name="names_name_names_englishMathew" surname="names_name_names_englishAbbot" faction="britain"/>
 
 <unit_class_names_list>
  unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_213=yes
@@ -120,9 +120,9 @@ Examples of each semantic tag below:
  Ancillary_Government_Comptroller
 </ancillary_uniqueness_monitor>
 
-<building health='100' name='minor_magistrate' faction='france' government='gov_absolute_monarchy'/>
+<building health="100" name="minor_magistrate" faction="france" government="gov_absolute_monarchy"/>
 
-<region_ownerships theatre='india'>
+<region_ownerships theatre="india">
  malwa=mughal
  kashmir=mughal
  gujarat=mughal
@@ -174,13 +174,13 @@ Examples of each semantic tag below:
 <loc/>
 <loc>unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_167</loc>
 
-<map name='europe' unknown='1600' pgm='map-0002.pgm'/>
+<map name="europe" unknown="1600" pgm="map-0002.pgm"/>
 
-<agent_ability ability='can_research' level='-1' attribute=''/>
-<agent_ability ability='can_duel' level='1' attribute='duelling_pistols'/>
+<agent_ability ability="can_research" level="-1" attribute=""/>
+<agent_ability ability="can_duel" level="1" attribute="duelling_pistols"/>
 
-<agent_attribute attribute='management' level='4'/>
-<agent_attribute attribute='subterfuge' level='-1'/>
+<agent_attribute attribute="management" level="4"/>
+<agent_attribute attribute="subterfuge" level="-1"/>
 
 <date/>
 <date>summer 1676</date>
@@ -342,25 +342,25 @@ Examples of each semantic tag below:
   <s>BattleTerrain/detail_maps/arid_l1</s>
   <u>4</u>
   <i>0</i>
-  <bin6ext path='bmd_textures/texture-0001.jpg'/>
-  <bin6ext path='bmd_textures/texture-0002.jpg'/>
+  <bin6ext path="bmd_textures/texture-0001.jpg"/>
+  <bin6ext path="bmd_textures/texture-0002.jpg"/>
   <i>0</i>
-  <bin6ext path='bmd_textures/texture-0003.jpg'/>
-  <bin6ext path='bmd_textures/texture-0004.jpg'/>
+  <bin6ext path="bmd_textures/texture-0003.jpg"/>
+  <bin6ext path="bmd_textures/texture-0004.jpg"/>
   <i>0</i>
-  <bin6ext path='bmd_textures/texture-0005.jpg'/>
-  <bin6ext path='bmd_textures/texture-0006.jpg'/>
+  <bin6ext path="bmd_textures/texture-0005.jpg"/>
+  <bin6ext path="bmd_textures/texture-0006.jpg"/>
   <i>0</i>
-  <bin6ext path='bmd_textures/texture-0007.jpg'/>
-  <bin6ext path='bmd_textures/texture-0008.jpg'/>
+  <bin6ext path="bmd_textures/texture-0007.jpg"/>
+  <bin6ext path="bmd_textures/texture-0008.jpg"/>
   <yes/>
   <i>0</i>
-  <bin6ext path='bmd_textures/texture-0009.jpg'/>
-  <bin6ext path='bmd_textures/texture-0010.jpg'/>
+  <bin6ext path="bmd_textures/texture-0009.jpg"/>
+  <bin6ext path="bmd_textures/texture-0010.jpg"/>
   <yes/>
-  <bmd_pgm pgm='bmd_textures/texture-0001.pgm'/>
+  <bmd_pgm pgm="bmd_textures/texture-0001.pgm"/>
 </bmd_textures>
 
-<height_field xsz='2048.0' ysz='2048.0' pgm='height_field-0001.pgm' unknown='3' hmin='-3.40282346638529e+38' hmax='3.40282346638529e+38'/>
+<height_field xsz="2048.0" ysz="2048.0" pgm="height_field-0001.pgm" unknown="3" hmin="-3.40282346638529e+38" hmax="3.40282346638529e+38"/>
 
-<ground_type_field xsz='2048.0' ysz='2048.0' pgm='group_type_field-0001.pgm'/>
+<ground_type_field xsz="2048.0" ysz="2048.0" pgm="group_type_field-0001.pgm"/>

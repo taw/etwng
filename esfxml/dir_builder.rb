@@ -19,6 +19,7 @@ class DirBuilder
     @xml_printer.flush! if @xml_printer
     prev_printer = @xml_printer
     @xml_printer = new_xml_printer
+    @xml_printer.out!("<?xml version=\"1.0\"?>")
     yield
     @xml_printer.close
     @xml_printer = prev_printer
@@ -96,6 +97,6 @@ class XMLPrinter
   end
   private
   def attrs_to_s(attrs={})
-    attrs.to_a.map{|k,v| v.nil? ? "" : " #{k}='#{v.to_s.xml_escape}'"}.join
+    attrs.to_a.map{|k,v| v.nil? ? "" : " #{k}=\"#{v.to_s.xml_escape}\""}.join
   end
 end

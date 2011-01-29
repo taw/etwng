@@ -7,7 +7,7 @@ class GiveAllTechnologies < EsfScript
   def run!(faction_to_change)
     update_factions_technologies(faction_to_change) do |techs|
       techs.xpath("techs").each do |tech_node|
-        tech_node['unknown1'] = '0'
+        tech_node['status'] = '0'
         # arbitrary value, doesn't seem to matter
         # real value is only available from db and varies from mod to mod
         tech_node['research_points'] = '1000.0'

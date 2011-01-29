@@ -28,10 +28,10 @@ module EsfConvertBasic
     out!("<flt>#{get_float}</flt>")
   end
   def convert_0c!
-    out!("<v2 x='#{get_float}' y='#{get_float}'/>")
+    out!("<v2 x=\"#{get_float}\" y=\"#{get_float}\"/>")
   end
   def convert_0d!
-    out!("<v3 x='#{get_float}' y='#{get_float}' z='#{get_float}'/>")
+    out!("<v3 x=\"#{get_float}\" y=\"#{get_float}\" z=\"#{get_float}\"/>")
   end
   def convert_0e!
     str = get_str
@@ -157,7 +157,7 @@ class EsfConverter < EsfParser
           convert_until_ofs!(get_u4)
         end
       end
-      out!("<xml_include path='#{rel_path.xml_escape}'/>")
+      out!("<xml_include path=\"#{rel_path.xml_escape}\"/>")
     else
       tag!("rec", :type=>node_type, :version=>version) do
         convert_until_ofs!(get_u4)
@@ -197,7 +197,7 @@ class EsfConverter < EsfParser
   def put_node_types!
     tag!("node_types") do
       node_types.each do |n|
-        out!("<node_type name='#{n.to_s.xml_escape}'/>")
+        out!("<node_type name=\"#{n.to_s.xml_escape}\"/>")
       end
     end
   end

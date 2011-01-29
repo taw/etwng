@@ -345,23 +345,23 @@ module XmlCallbacks
 
   def on_start_draa(attributes)
     put_rec "DIPLOMACY_RELATIONSHIP_ATTITUDES_ARRAY" do
-      @esf.put_i attributes[:a].to_i
-      @esf.put_i attributes[:b].to_i
-      @esf.put_i attributes[:c].to_i
-      @esf.put_bool(attributes[:d] == 'yes')
-      @esf.put_i attributes[:e].to_i
-      @esf.put_bool(attributes[:f] == 'yes')
+      @esf.put_i attributes[:drift].to_i
+      @esf.put_i attributes[:current].to_i
+      @esf.put_i attributes[:limit].to_i
+      @esf.put_bool(attributes[:active1] == 'yes')
+      @esf.put_i attributes[:extra].to_i
+      @esf.put_bool(attributes[:active2] == 'yes')
     end
   end
 
   def on_start_techs(attributes)
     put_rec "techs" do
       @esf.put_s attributes[:name]
-      @esf.put_u attributes[:unknown1].to_i
+      @esf.put_u attributes[:status].to_i
       @esf.put_flt attributes[:research_points]
-      @esf.put_u attributes[:unknown2].to_i
-      @esf.put_4x("\x48", attributes[:unknown3].split(/\s+/).map(&:to_i).pack("V*"))
-      @esf.put_u attributes[:unknown4].to_i
+      @esf.put_u attributes[:unknown1].to_i
+      @esf.put_4x("\x48", attributes[:unknown2].split(/\s+/).map(&:to_i).pack("V*"))
+      @esf.put_u attributes[:unknown3].to_i
     end
   end
 
