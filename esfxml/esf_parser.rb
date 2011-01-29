@@ -75,13 +75,17 @@ module EsfBasicBinaryOps
         sz, = @data[la_ofs+1, 2].unpack("v")
         rv = @data[la_ofs+3, sz*2].unpack("v*").pack("U*")
         return nil if rv == ""
+        if rv.size > 128
+          puts "Warning: Too long name suggested for file name at #{@ofs}/#{la_ofs}: #{rv.inspect}"
+          return nil
+        end
         return rv
       elsif tag <= 0x10
         sz = [3, 2, nil, nil, 5, nil, 2, 3, 5, nil, 5, nil, 9, 13, nil, nil, 3][tag]
         return nil unless sz
         la_ofs += sz
       elsif tag >= 0x40 and tag <= 0x4f
-        la_ofs = @data[la_ofs, 4].unpack("V")[0]
+        la_ofs = @data[la_ofs+1, 4].unpack("V")[0]
       elsif tag == 0x80
         la_ofs = @data[la_ofs+4, 4].unpack("V")[0]
       elsif tag == 0x81
