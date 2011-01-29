@@ -6,19 +6,18 @@ require "esf_scripts"
 class StartingTreasury < EsfScript
   def run!(faction_to_change, treasury)
     update_faction(faction_to_change) do |faction|
-      faction.xpath("rec[@type='FACTION_ECONOMICS']/i")[0].content = treasury.to_s
+      faction.xpath("rec[@type='FACTION_ECONOMICS']/i")[0].content = treasury
       true
     end
   end
+  
+  def args
+    %W[faction treasury]
+  end
+  
+  def check_args(faction, treasury)
+    treasury =~ /\A\d+\z/
+  end
 end
 
-unless ARGV.size == 3 and ARGV[2] =~ /\A\d+\z/
-  STDERR.puts "Usage: #{$0} extracted_esf_directory faction treasury"
-  exit 1
-end
-
-xmldir = ARGV[0]
-faction = ARGV[1]
-treasury = ARGV[2].to_i
-
-StartingTreasury.new(xmldir).run!(faction, treasury)
+StartingTreasury.new

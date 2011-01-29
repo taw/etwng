@@ -40,11 +40,4 @@ class MakeMoreVanillaFactionsPlayable < EsfScript
   end
 end
 
-unless ARGV.size == 1
-  STDERR.puts "Usage: #{$0} extracted_esf_directory faction"
-  exit 1
-end
-
-xmldir = ARGV[0]
-
-MakeMoreVanillaFactionsPlayable.new(xmldir).run!
+MakeMoreVanillaFactionsPlayable.new

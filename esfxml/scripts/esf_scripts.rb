@@ -13,10 +13,24 @@ end
 class EsfScript
   attr_reader :xmldir
   
-  def initialize(xmldir)
+  def initialize
+    xmldir, *argv = *ARGV
+    unless ARGV.size == args.size + 1 and check_args(*argv)
+      STDERR.puts "Usage: #{$0} extracted_esf_directory #{args}"
+      exit 1
+    end
     raise "#{xmldir} doesn't exist" unless File.directory?(xmldir)
     raise "#{xmldir} doesn't look like unpacked esf file" unless File.exist?(xmldir + "/esf.xml")
     @xmldir = xmldir
+    run!(*argv)
+  end
+
+  def args
+    []
+  end
+
+  def check_args(*argv)
+    true
   end
 
   def each_file(glob, &blk)

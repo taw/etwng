@@ -14,11 +14,4 @@ class ListFactions < EsfScript
   end
 end
 
-unless ARGV.size == 1
-  STDERR.puts "Usage: #{$0} extracted_esf_directory"
-  exit 1
-end
-
-xmldir = ARGV[0]
-
-ListFactions.new(xmldir).run!
+ListFactions.new

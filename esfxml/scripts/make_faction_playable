@@ -7,14 +7,10 @@ class MakeFactionPlayable < EsfScript
   def run!(faction_to_change)
     make_faction_playable(faction_to_change)
   end
+  
+  def args
+    %W[faction]
+  end
 end
 
-unless ARGV.size == 2
-  STDERR.puts "Usage: #{$0} extracted_esf_directory faction"
-  exit 1
-end
-
-xmldir = ARGV[0]
-faction = ARGV[1]
-
-MakeFactionPlayable.new(xmldir).run!(faction)
+MakeFactionPlayable.new

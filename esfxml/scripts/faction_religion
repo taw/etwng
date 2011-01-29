@@ -11,15 +11,10 @@ class FactionReligion < EsfScript
       true
     end
   end
+  
+  def args
+    %W[faction religion]
+  end
 end
 
-unless ARGV.size == 3
-  STDERR.puts "Usage: #{$0} extracted_esf_directory faction religion"
-  exit 1
-end
-
-xmldir = ARGV[0]
-faction = ARGV[1]
-religion = ARGV[2]
-
-FactionReligion.new(xmldir).run!(faction, religion)
+FactionReligion.new

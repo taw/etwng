@@ -6,18 +6,18 @@ require "esf_scripts"
 class TurnsPerYear < EsfScript
   def run!(turns_per_year)
     update_each_xml("campaign_env/campaign_model*.xml", "//rec[@type='CAMPAIGN_CALENDAR']") do |calendar|
-      calendar.xpath('*')[0].content = turns_per_year.to_s
+      calendar.xpath('*')[0].content = turns_per_year
       true
     end
   end
+  
+  def args
+    %W[turns_per_year]
+  end
+  
+  def check_args(turns_per_year)
+    turns_per_year =~ /\A\d+\z/
+  end
 end
 
-unless ARGV.size == 2 and ARGV[1] =~ /\A\d+\z/
-  STDERR.puts "Usage: #{$0} extracted_esf_directory turns_per_year"
-  exit 1
-end
-
-xmldir = ARGV[0]
-turns_per_year = ARGV[1].to_i
-
-TurnsPerYear.new(xmldir).run!(turns_per_year)
+TurnsPerYear.new

@@ -15,15 +15,10 @@ class GiveTechnology < EsfScript
       true
     end
   end
+  
+  def args
+    %W[faction technology]
+  end
 end
 
-unless ARGV.size == 3
-  STDERR.puts "Usage: #{$0} extracted_esf_directory faction technology"
-  exit 1
-end
-
-xmldir = ARGV[0]
-faction = ARGV[1]
-technology = ARGV[2]
-
-GiveTechnology.new(xmldir).run!(faction, technology)
+GiveTechnology.new

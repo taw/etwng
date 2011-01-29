@@ -21,11 +21,4 @@ class RemoveAllFortifications < EsfScript
   end
 end
 
-unless ARGV.size == 1 and File.exist?(ARGV[0])
-  STDERR.puts "Usage: #{$0} extracted_esf_directory"
-  exit 1
-end
-
-xmldir = ARGV[0]
-
-RemoveAllFortifications.new(xmldir).run!
+RemoveAllFortifications.new
