@@ -1,3 +1,5 @@
+require "sea_grids"
+
 module EsfSemanticConverter
   ConvertSemanticAry = {}
   ConvertSemanticRec = {}
@@ -353,7 +355,40 @@ module EsfSemanticConverter
       end
     end
   end
-  
+
+## sea_grids.esf
+  def disabled_convert_rec_CAI_SEA_GRID_ROOT
+    sea_grids = SeaGridsEsfParser.new(*get_rec_contents_dynamic).get_sea_grids
+    
+    tag!("sea_grids") do
+      sea_grids.each do |grid_name, (min_x, min_y), (max_x, max_y), factor, areas, connections|
+        tag!("theatre_sea_grid",
+            :name => grid_name,
+            :minx => min_x, :miny => min_y, :maxx => max_x, :maxy => max_y,
+            :factor => factor
+          ) do
+          areas.each do |row|
+            tag!("sea_grid_row") do
+              row.each do |(cmin_x, cmin_y), (cmax_x, cmax_y), area_id, lands, seas, ports, numbers|
+                tag!("sea_grid_cell", :area_id => area_id, :minx => cmin_x, :miny => cmin_y, :maxx => :cmax_x, :maxy => cmax_y) do
+                  out_ary!("sea_grid_lands", "", lands.map{|x| " #{x}"})
+                  out_ary!("sea_grid_seas", "", seas.map{|x| " #{x}"})
+                  out_ary!("sea_grid_ports", "", ports.map{|x| " #{x}"})
+                  out_ary!("sea_grid_numbers", "", numbers.empty? ? "" : " " + numbers.join(" "))
+                end
+              end
+            end
+          end
+          tag!("sea_grid_connections") do
+            connections.each do |area1, area2, x|
+              out!("<sea_grid_connection area1=\"#{area1}\" area2=\"#{area2}\" value=\"#{x}\"/>")
+            end
+          end
+        end
+      end
+    end
+  end
+
 ## autoconfigure everything
 
   self.instance_methods.each do |m|
