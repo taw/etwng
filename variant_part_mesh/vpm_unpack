@@ -41,6 +41,9 @@ class VariantPartMeshUnpacker
   def get_u2
     get(2).unpack("v")[0]
   end
+  def get_byte
+    get(1).unpack("C")[0]
+  end
   # Size in UTF-16 characters, not bytes
   def get_str(size=nil)
     if size
@@ -55,24 +58,53 @@ class VariantPartMeshUnpacker
     get(4*16).unpack("f*").map(&:pretty_single)
   end
 
+  # Does not deal with denormals, NaNs etc.
+  def self.half_prec
+    unless @half_prec
+      @half_prec = {}
+      (0..0xFFFF).each do |i|
+        ip = [i].pack("v")
+        sign     = ((i & 0x8000) == 1) ? -1.0 : 1.0
+        if i & 0x7FFF == 0
+          @half_prec[ip] = 0.0 * sign
+        else
+          exponent = 2.0 ** (((i >> 10) & 0x1F) - 15)
+          mantissa = 1.0 + (i & 0x3FF) / 0x400.to_f
+          @half_prec[ip] = sign * exponent * mantissa
+        end
+      end
+    end
+    @half_prec
+  end
+
+  def get_half
+    VariantPartMeshUnpacker.half_prec[get(2)]
+  end
+
+  def get_pbvec
+    #  -1.0 to +1.0
+    get(3).unpack("C*").map{|x|
+      (x / 255.0) * 2.0 - 1.0
+    }
+  end
+
   # High level structures
   def get_lod_vertex
-  	# {
-  	# 	half, half, half : position0 x,y,z
-  	# 	half : u (texture coordinate, 0.0 to 1.0, wraps around for other values, meaning the texture is repeated twice in the range 0...2)
-  	# 	half, half, half : position1 x,y,z
-  	# 	half : v (texture coordinate)
-  	# 	half, half, half, half : vmmt flags, I don't know what this does or means. Only the first value seems to be used by the game, valid values are 0, 1 and 2
-  	# 	packed byte, packed byte, packed byte : normal 0
-  	# 	ubyte : bone index 0
-  	# 	packed byte, packed byte, packed byte : normal 1
-  	# 	ubyte : bone index 1
-  	# 	packed byte, packed byte, packed byte : tangent
-  	# 	ubyte : weight for bone 0, the other bone's weight is 255 - this
-  	# 	packed byte, packed byte, packed byte : binormal
-  	# 	ubyte : instance, is probably always 0 in files and only set to something different in game memory when necessary.
-  	# }
-    get(8+8+8+3+1+3+1+3+1+3+1)
+    {
+      :position0   => [get_half, get_half, get_half],
+      :u           => get_half,
+      :position1   => [get_half, get_half, get_half],
+      :v           => get_half,
+      :flags       => [get_half, get_half, get_half, get_half],
+      :normal0     => get_pbvec,
+      :bone0_index => get_byte,
+      :normal1     => get_pbvec,
+      :bone1_index => get_byte,
+      :tangent     => get_pbvec,
+      :bone0_weight=> get_byte,
+      :binormal    => get_pbvec,
+      :instance    => get_byte,
+    }
   end
   def get_lod
     vertices_count = get_u4
@@ -135,7 +167,7 @@ class VariantPartMeshUnpacker
     {
       :type => 1,
 
-      # :lods => lods,
+      :lods => lods,
       :attachments => attachments,
       :shader_settings_basic => shader_settings_basic,
       :shader_settings_advanced => shader_settings_advanced,
