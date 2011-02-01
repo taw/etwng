@@ -130,53 +130,31 @@ class VariantPartMeshUnpacker
     }
   end
   def get_shader_setting_advanced
-    name = get_str(32)
-    if %W[colourmapfa specfact specfactor].include?(name)
-      {:name => name, :full_name => get_str, :data => get(16).unpack("f*").map(&:pretty_single)}
-    else
-      # All the following are just a single float
-      # 'glossfactor'
-      # 'specpower'
-      # 'specbrightness'
-      # 'specfresnelpower'
-      # 'fresnelpower'
-      # 'offsetv0'
-      # 'offsetv1'
-      # 'offsetu0'
-      # 'offsetu1'
-      # 'reflect_factor'
-      # 'ambient_factor'
-      # 'bumpfactor'
-      # 'specularfresnelpower'
-      {:name => name, :value => get_flt}
-    end
+    {:name => get_str(32), :full_name => get_str, :data => get(16).unpack("f*").map(&:pretty_single)}
   end
   def parse_type_1
     attachments_count              = get_u4
     lod_levels                     = get_u4
     vertices_count                 = get_u4
     vertex_indices_count           = get_u4
-    shader_settings_advanced_count = get_u4
     shader_settings_basic_count    = get_u4
+    shader_settings_advanced_count = get_u4
 
     lods = (0...lod_levels).map{ get_lod }
     attachments = (0...attachments_count).map{ get_attachment }
     shader_settings_basic = (0...shader_settings_basic_count).map{ get_shader_setting_basic }
     shader_settings_advanced = (0...shader_settings_advanced_count).map{ get_shader_setting_advanced }
 
+    raise FormatError.new("Vertex count incorrect") unless vertices_count == lods.map{|x,y| x.size}.inject(&:+)
+    raise FormatError.new("Vertex indices count incorrect") unless vertex_indices_count == 3*lods.map{|x,y| y.size}.inject(&:+)
+    raise FormatError.new("Bytes left: #{bytes_left}") if bytes_left > 0
+
     {
       :type => 1,
-
       :lods => lods,
       :attachments => attachments,
       :shader_settings_basic => shader_settings_basic,
       :shader_settings_advanced => shader_settings_advanced,
-
-      # Are these control only?
-      :vertices_count => vertices_count,
-      :vertex_indices_count => vertex_indices_count,
-
-      :bytes_left => bytes_left
     }
   end
   def parse
@@ -198,7 +176,11 @@ class VariantPartMeshUnpacker
   end
 end
 
-samples = Dir["samples/*"].sort_by{|fn| File.size(fn) } # [0, 10]
+if ARGV.size > 0
+  samples = ARGV
+else
+  samples = Dir["samples/*"].sort_by{|fn| File.size(fn) }[0, 40]
+end
 
 samples.each do |file_name|
   vpm = VariantPartMeshUnpacker.new(file_name)
@@ -209,9 +191,3 @@ samples.each do |file_name|
   puts out
   puts ""
 end
-
-__END__
-Statistics by type:
-     28 {:type=>0}
-    246 {:type=>1}
-      2 {:type=>2}
