@@ -20,3 +20,5 @@ luac/luadec
 luac/samples*
 db/samples*
 .redcar
+variant_part_mesh/tmp
+variant_part_mesh/samples
