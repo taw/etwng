@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+class File
+  def self.write(file_name, data)
+    File.open(file_name, 'wb'){|fh|
+      fh.write data
+    }
+  end
+end
+
+def load_txt(file_name)
+  eval(File.open(file_name, 'rb', &:read))
+end
+
+def save_ase(data, file_name)
+  bindata = [data.size].pack("V") + data.map{|sample|
+    [sample.size].pack("V") + sample.map{|ab| ab.pack("fV")}.join
+  }.join
+  File.write(file_name, bindata)
+end
+
+unless ARGV.size == 2
+  STDERR.puts "#{$0} file.txt file.anim_sound_event"
+  exit 1
+end
+
+save_ase(load_txt(ARGV[0]), ARGV[1])

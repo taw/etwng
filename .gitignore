@@ -22,3 +22,5 @@ db/samples*
 .redcar
 variant_part_mesh/tmp
 variant_part_mesh/samples
+anim_sound_event/tmp
+anim_sound_event/samples

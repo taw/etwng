@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+FileUtils.mkdir_p "tmp"
+
+Dir["samples/**/*.anim_sound_event"].sort.each{|sample_fn|
+  puts "Converting #{sample_fn}"
+  base_name = "tmp/" + sample_fn.sub(/\Asamples\//, "").gsub("/", "_").sub(/\.anim_sound_event\z/, "")
+  txt_fn = "#{base_name}.txt"
+  out_fn = "#{base_name}.anim_sound_event"
+  
+  system "./ase_unpack", sample_fn, txt_fn
+  system "./ase_pack", txt_fn, out_fn
+  system "diff", sample_fn, out_fn
+}
