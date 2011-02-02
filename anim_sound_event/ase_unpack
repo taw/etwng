@@ -8,6 +8,14 @@ class File
   end
 end
 
+class Float
+  def pretty_single
+    rv = (((100_000.0 * self).round / 100_000.0) rescue self)
+    return rv if [self].pack("f") == [rv].pack("f")
+    self
+  end
+end
+
 class AnimSoundEvent
   def initialize(file_name)
     @data = File.open(file_name, 'rb', &:read)
@@ -21,6 +29,10 @@ class AnimSoundEvent
     rv
   end
   
+  def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+  
   def get_u4
     get(4).unpack("V")[0]
   end
@@ -31,7 +43,7 @@ class AnimSoundEvent
   
   def parse
     rv = (0...get_u4).map{
-      (0...get_u4).map{ get(8).unpack("fV") }
+      (0...get_u4).map{ [get_flt, get_u4] }
     }
     raise "Format Error, bytes left unprocessed" unless eof?
     rv
