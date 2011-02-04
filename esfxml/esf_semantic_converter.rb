@@ -208,7 +208,29 @@ module EsfSemanticConverter
   end
 
 ## startpos.esf records
-
+  def convert_rec_GARRISON_RESIDENCE
+    data, = get_rec_contents(:u4)
+    out!("<garrison_residence>#{data}</garrison_residence>")
+  end
+  
+  def convert_rec_OWNED_INDIRECT
+    data, = get_rec_contents(:u4)
+    out!("<owned_indirect>#{data}</owned_indirect>")
+  end
+  
+  def convert_rec_OWNED_DIRECT
+    data, = get_rec_contents(:u4)
+    out!("<owned_direct>#{data}</owned_direct>")
+  end
+  
+  def convert_rec_FACTION_FLAG_AND_COLOURS
+    path, r1,g1,b1, r2,g2,b2, r3,g3,b3 = get_rec_contents(:s, :byte,:byte,:byte, :byte,:byte,:byte, :byte,:byte,:byte)
+    color1 = "#%02x%02x%02x" % [r1,g1,b1]
+    color2 = "#%02x%02x%02x" % [r2,g2,b2]
+    color3 = "#%02x%02x%02x" % [r3,g3,b3]
+    out!("<flag_and_colours path=\"#{path.xml_escape}\" color1=\"#{color1.xml_escape}\" color2=\"#{color2.xml_escape}\" color3=\"#{color3.xml_escape}\"/>")
+  end
+  
   def convert_rec_techs
     data = get_rec_contents(:s, :u4, :flt, :u4, :bin8, :u4)
     name, status, research_points, school_slot_id, unknown1, unknown2 = *data

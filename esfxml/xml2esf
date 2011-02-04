@@ -124,6 +124,37 @@ module XmlTagHandlers
   end
 
   ## Semantic data types - startpos.esf
+  def on_text_node_owned_direct(attributes, buf, ctx)
+    put_rec "OWNED_DIRECT" do
+      @esf.put_u buf.to_i
+    end
+  end
+
+  def on_text_node_owned_indirect(attributes, buf, ctx)
+    put_rec "OWNED_INDIRECT" do
+      @esf.put_u buf.to_i
+    end
+  end
+  
+  def on_text_node_garrison_residence(attributes, buf, ctx)
+    put_rec "GARRISON_RESIDENCE" do
+      @esf.put_u buf.to_i
+    end
+  end
+
+  def on_empty_node_flag_and_colours(attributes, buf, ctx)
+    put_rec "FACTION_FLAG_AND_COLOURS" do
+      @esf.put_s attributes[:path]
+      [:color1, :color2, :color3].each do |ci|
+        cv = attributes[ci]
+        raise "Not a color: #{cv}" unless cv =~ /\A#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})\z/
+        @esf.put_byte $1.to_i(16)
+        @esf.put_byte $2.to_i(16)
+        @esf.put_byte $3.to_i(16)
+      end
+    end
+  end
+  
   def on_text_node_unit_class_names_list(attributes, buf, ctx)
     semantic_put_ary("UNIT_CLASS_NAMES_LIST", buf.strip.split(/[\s=]+/), 2) do |loc, used|
       put_loc loc

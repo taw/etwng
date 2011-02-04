@@ -50,4 +50,5 @@ XmlSplit = {
   :TREE_LOD_LIST                 => "tree_lod_list",
   :BATTLE_MAP_DEFINITION         => "battle_map_definition",
   :REGION_SLOT_ARRAY             => "region_slot/",
+  :CAI_HISTORY                   => "cai_interface/cai_history",
 }

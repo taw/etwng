@@ -1,4 +1,4 @@
-Right now 41 semantic tags (+2 virtual tags) are supported,
+Right now 45 semantic tags (+2 virtual tags) are supported,
 for about 1000 node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -345,6 +345,15 @@ Examples of each semantic tag below:
  new_grenada=new_spain
  acadia=france
 </region_ownership>
+
+<flag_and_colours path="data\ui\flags\british_republic" color1="#de0000" color2="#122e56" color3="#c01610"/>
+
+<garrison_residence>573864472</garrison_residence>
+
+<owned_indirect>0</owned_indirect>
+<owned_indirect>317</owned_indirect>
+
+<owned_direct>1304</owned_direct>
 
 == bmd.dat ==
 
