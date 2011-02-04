@@ -14,17 +14,22 @@ class EsfScript
   attr_reader :xmldir
   
   def initialize
-    xmldir, *argv = *ARGV
-    unless ARGV.size == args.size + 1 and check_args(*argv)
-      STDERR.puts "Usage: #{$0} extracted_esf_directory #{args}"
-      exit 1
-    end
-    raise "#{xmldir} doesn't exist" unless File.directory?(xmldir)
-    raise "#{xmldir} doesn't look like unpacked esf file" unless File.exist?(xmldir + "/esf.xml")
-    @xmldir = xmldir
+    self.xmldir, *argv = *ARGV
+    usage_error(args) unless argv.size == args.size and check_args(*argv)
     run!(*argv)
   end
 
+  def usage_error(args_spec)
+    STDERR.puts "Usage: #{$0} extracted_esf_directory #{args_spec}"
+    exit 1
+  end
+  
+  def xmldir=(xmldir)
+    raise "#{xmldir} doesn't exist" unless File.directory?(xmldir)
+    raise "#{xmldir} doesn't look like unpacked esf file" unless File.exist?(xmldir + "/esf.xml")
+    @xmldir = xmldir
+  end
+  
   def args
     []
   end
@@ -125,5 +130,13 @@ class EsfScript
       cps.xpath('yes|no')[1].name = 'yes'
       true
     end
+  end
+  
+  # * stands for arbitrary number of characters
+  # everything else is literal
+  # entire string much match
+  def build_regexp_from_globs(patterns)
+    patterns = patterns.map{|pattern| Regexp.escape(pattern).gsub("\\*", ".*")}
+    Regexp.compile("\\A(?:" + patterns.join("|") + ")\\z")
   end
 end

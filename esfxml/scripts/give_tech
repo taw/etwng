@@ -4,20 +4,29 @@ $: << File.dirname(__FILE__)
 require "esf_scripts"
 
 class GiveTechnology < EsfScript
-  def run!(faction_to_change, tech)
-    update_factions_technologies(faction_to_change) do |techs|
-      tech_node = techs.xpath("techs[@name='#{tech}']")
-      raise "No such tech #{tech_node}" unless tech_node.size == 1
-      tech_node[0]['status'] = '0'
-      # arbitrary value, doesn't seem to matter
-      # real value is only available from db and varies from mod to mod
-      tech_node[0]['research_points'] = '1000.0'
+  def run!(faction_to_change, *techs)
+    tech_regexp = build_regexp_from_globs(techs)
+    update_factions_technologies(faction_to_change) do |tech_nodes|
+      tech_nodes.xpath("techs").each do |tech_node|
+        next unless tech_node['name'] =~ tech_regexp
+        puts tech_node['name']
+        tech_node['status'] = '0'
+        # arbitrary value, doesn't seem to matter
+        # real value is only available from db and varies from mod to mod
+        tech_node['research_points'] = '1000.0'
+      end
       true
     end
   end
   
   def args
     %W[faction technology]
+  end
+
+  def initialize
+    self.xmldir, *argv = *ARGV
+    usage_error("faction tech1 tech2 tech_* ...") unless argv.size >= 2
+    run!(*argv)
   end
 end
 
