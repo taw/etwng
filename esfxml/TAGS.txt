@@ -1,4 +1,4 @@
-Right now 46 semantic tags (+2 virtual tags) are supported,
+Right now about 46 semantic tags (+4 virtual tags) are supported,
 for about 1000 node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -18,8 +18,6 @@ Examples of each semantic tag below:
   411.354787826538,140.0
   ...
 </vertices>
-
-
 
 == traderoutes.esf ==
 
@@ -107,14 +105,13 @@ Examples of each semantic tag below:
 
 == startpos.esf ==
 
-
-@@@@@@
-
 <techs name="military_army_plug_bayonet" status="2" research_points="0.0" school_slot_id="0" unknown1="" unknown2="0"/>
 
 <draa drift="0" current="-10" limit="0 active1="no" extra="0" active2="no"/>
 
 <commander_details name="names_name_names_englishMathew" surname="names_name_names_englishAbbot" faction="britain"/>
+<commander>thirteen_colonies Aston Morgan</commander>
+<commander>georgia/greek Eftihios Giannakos</commander>
 
 <unit_class_names_list>
  unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_213=yes
@@ -194,6 +191,7 @@ Examples of each semantic tag below:
 
 <loc/>
 <loc>unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_167</loc>
+<loc2>Misère</loc2>
 
 <map name="europe" unknown="1600" pgm="map-0002.pgm"/>
 

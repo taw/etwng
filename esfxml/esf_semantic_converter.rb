@@ -1,4 +1,5 @@
 require "sea_grids"
+require "commander_details"
 
 module EsfSemanticConverter
   ConvertSemanticAry = {}
@@ -248,7 +249,12 @@ module EsfSemanticConverter
     fnam, lnam, faction = get_rec_contents([:rec, :CAMPAIGN_LOCALISATION, nil], [:rec, :CAMPAIGN_LOCALISATION, nil], :s)
     fnam = ensure_loc(fnam)
     lnam = ensure_loc(lnam)
-    out!("<commander_details name=\"#{fnam.xml_escape}\" surname=\"#{lnam.xml_escape}\" faction=\"#{faction.xml_escape}\"/>")
+    commander = CommanderDetails.parse(fnam, lnam, faction)
+    if commander
+      out!("<commander>#{commander.xml_escape}</commander>")
+    else
+      out!("<commander_details name=\"#{fnam.xml_escape}\" surname=\"#{lnam.xml_escape}\" faction=\"#{faction.xml_escape}\"/>")
+    end
   end
 
   def convert_rec_AgentAbilities
@@ -287,11 +293,16 @@ module EsfSemanticConverter
   end
 
   def convert_rec_CAMPAIGN_LOCALISATION
-    loc = ensure_loc(get_rec_contents_dynamic)
-    if loc.empty?
+    loc_type, loc_data = get_rec_contents_dynamic
+    if loc_type == [:s] and loc_data != [""]
+      out!("<loc>#{loc_data[0].xml_escape}</loc>")
+    elsif loc_type == [:s, :s] and loc_data == ["", ""]
       out!("<loc/>")
+    elsif loc_type == [:s, :s] and loc_data[0] == "" and loc_data[1] != ""
+      loc_data[1]
+      out!("<loc2>#{loc_data[1].xml_escape}</loc2>")
     else
-      out!("<loc>#{loc.xml_escape}</loc>")
+      raise SemanticFail.new
     end
   end
 

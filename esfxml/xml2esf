@@ -5,6 +5,7 @@ require "nokogiri"
 require "esf_builder"
 require "pp"
 require "pgm"
+require "commander_details"
 
 module XmlTagHandlers
   ## Semantic data types - bmd.dat
@@ -247,8 +248,22 @@ module XmlTagHandlers
       @esf.put_s attributes[:faction]
     end
   end
+  def on_text_node_commander(attributes, buf, ctx)
+    lnam, snam, faction = CommanderDetails.recreate(buf)
+    put_rec "COMMANDER_DETAILS" do
+      put_loc lnam
+      put_loc snam
+      @esf.put_s faction
+    end
+  end
   def on_text_node_loc(attributes, buf, ctx)
     put_loc buf
+  end
+  def on_text_node_loc2(attributes, buf, ctx)
+    put_rec "CAMPAIGN_LOCALISATION" do
+      @esf.put_s ""
+      @esf.put_s buf
+    end
   end
   def on_text_node_date(attributes, buf, ctx)
     if buf == ""
