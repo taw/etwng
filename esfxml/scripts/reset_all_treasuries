@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class ResetAllTreasuries < EsfScript
+  def run!(treasury)
+    each_faction do |faction, faction_name|
+      faction.xpath("rec[@type='FACTION_ECONOMICS']/i")[0].content = treasury
+      true
+    end
+  end
+  
+  def args
+    %W[treasury]
+  end
+  
+  def check_args(treasury)
+    treasury =~ /\A\d+\z/
+  end
+end
+
+ResetAllTreasuries.new

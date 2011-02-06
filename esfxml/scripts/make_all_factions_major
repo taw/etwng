@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class MakeAllFactionsMajor < EsfScript
+  def run!
+    each_faction do |faction, faction_name|
+      faction.xpath("yes|no")[2].name = 'yes'
+      true
+    end
+  end
+end
+
+MakeAllFactionsMajor.new
