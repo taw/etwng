@@ -1,0 +1,190 @@
+#!/usr/bin/env ruby
+
+require "pp"
+
+class Float
+  def pretty_single
+    rv = (((100_000.0 * self).round / 100_000.0) rescue self)
+    return rv if [self].pack("f") == [rv].pack("f")
+    self
+  end
+end
+
+class SoundEvents
+  def initialize
+    @data = File.open("samples/etw_sound_events", 'rb', &:read)
+    @ofs = 0
+  end
+
+  def size
+    @data.size
+  end
+  
+  def bytes_left
+    size - @ofs
+  end
+  
+  def get(sz)
+    rv = @data[@ofs, sz]
+    @ofs += sz
+    rv
+  end
+  
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+  
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  
+  def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+  
+  def get_str
+    get(get_u2*2).unpack("v*").pack("U*")
+  end
+  
+  def get_str_ary
+    (0...get_u4).map{ get_str }
+  end
+  
+  def eof?
+    @ofs >= @data.size
+  end
+
+  def str?(ofs=@ofs)
+    sz, = @data[ofs, 2].unpack("v")
+    return false unless sz > 0 and sz <= 255
+    return false unless ofs + 2 + 2*sz <= @data.size
+    return false unless @data[ofs+2, sz*2].unpack("v").all?{|x| x >= 1 and x <= 127}
+    return ofs+2+sz*2
+  end
+  
+  def str_ary?(ofs=@ofs)
+    return false unless ofs + 4 <= @data.size
+    cnt, = @data[ofs, 4].unpack("V")
+    return false unless cnt > 0 and cnt <= 255
+    ofs += 4
+    cnt.times{
+      ofs = str?(ofs)
+      return false unless ofs
+    }
+    return ofs
+  end
+  
+  # def iisa_ary?(ofs=@ofs)
+  #   return false unless @ofs + 4 <= @data.size
+  #   cnt, = @data[ofs, 4].unpack("V")
+  #   
+  #   return unless cnt == 3579
+  #   
+  #   return false unless cnt > 0 and cnt <= 0xFFFF
+  #   ofs += 4
+  #   cnt.times{|i|
+  #     a, b = @data[ofs, 8].unpack("VV")
+  #     puts "ITER #{a} #{b} (#{i}/#{cnt})"
+  #     return false unless a >= 0 and a <= 255
+  #     return false unless b >= 0 and b <= 255
+  #     ofs += 8
+  #     ofs = str_ary?(ofs)
+  #     return false unless ofs
+  #   }
+  #   return ofs
+  # end
+  # 
+  # def get_iisa
+  #   (0...get_u4).map{
+  #     [get_u4, get_u4, get_str_ary]
+  #   }
+  # end
+  
+  def flt?(ofs=@ofs)
+    return false unless ofs + 4 <= @data.size
+    v, = @data[ofs, 4].unpack("f")
+    return false unless v == 0.0 or v.abs.between?(1.0e-6, 1.0e+6)
+    return ofs + 4
+  end
+  
+  def sf_ary?(ofs=@ofs)
+    return false unless ofs + 4 <= @data.size
+    cnt, = @data[ofs, 4].unpack("V")
+    return false unless cnt > 0 and cnt <= 255
+    ofs += 4
+    cnt.times{
+      ofs = str?(ofs)
+      return false unless ofs
+      ofs = flt?(ofs)
+      return false unless ofs
+    }
+    return ofs
+  end
+  
+  def get_sf_ary
+    (0...get_u4).map{ [get_str, get_flt] }
+  end
+
+  def get_uu_ffffff_ary
+    (0...get_u4).map{
+      [get_u4, get_u4, get_flt, get_flt, get_flt, get_flt, get_flt, get_flt]
+    }
+  end
+  
+  def parse
+    b = 0
+    until eof?
+      if sf_ary?
+        p [:data, b, @data[@ofs-b, b].unpack("V*")] if b > 0
+        b = 0
+        p [:sf_ary, get_sf_ary]
+      elsif str_ary?
+        p [:data, b, @data[@ofs-b, b].unpack("V*")] if b > 0
+        b = 0
+        p [:str_ary, get_str_ary]
+      elsif str?
+        p [:data, b, @data[@ofs-b, b].unpack("V*")] if b > 0
+        b = 0
+        p [:str, get_str]
+      elsif uu_ffffff_ary?
+        p [:data, b, @data[@ofs-b, b].unpack("V*")] if b > 0
+        b = 0
+        p [:uu_ffffff_ary, get_uu_ffffff_ary] 
+      else
+        b += 2
+        @ofs += 2
+      end
+    end
+    p [:data, b, @data[@ofs-b, b].unpack("V*")] if b > 0
+  end
+end
+
+SoundEvents.new.parse
+
+__END__
+i_s_i_sa
+i_i_sa
+i_sa_sa
+
+ii_ffffff   - ary_of ?
+
+[:data, 4, [2]]
+[:str, "industry_european.tga"]
+[:data, 4, [164]]
+[:str_ary, ["campaign\\interface\\events\\emp_ext182_industry1_v1.00_gme.wav"]]
+
+[:data, 4, [2]]
+[:str, "abolition2.tga"]
+[:data, 4, [164]]
+[:str_ary, ["campaign\\interface\\events\\emp_ext150_abolition2_v1.00_gme.wav"]]
+
+[:data, 4, [2]]
+[:str, "admiral appointment-otoman.tga"]
+[:data, 4, [165]]
+[:str_ary, ["campaign\\interface\\events\\emp_ext151_admiralappointment_v1.00_gme.wav"]]
+
+[:data, 4, [2]]
+[:str, "admiral appointment.tga"]
+[:data, 4, [165]]
+[:str_ary, ["campaign\\interface\\events\\emp_ext151_admiralappointment_v1.00_gme.wav"]]
+
