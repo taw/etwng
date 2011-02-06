@@ -113,6 +113,11 @@ module XmlTagHandlers
       @esf.put_s name
     end
   end
+  def on_text_node_cai_event_classes(attributes, buf, ctx)
+    semantic_put_ary("CAI_HISTORY_EVENT_HTML_CLASSES", buf.strip.split(/\s+/)) do |name|
+      @esf.put_asc name
+    end
+  end
   
   
   ## Semantic data types - pathfinding.esf

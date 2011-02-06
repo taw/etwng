@@ -1,5 +1,6 @@
 XmlSplit = {
   :CAI_INTERFACE                 => "cai_interface/cai",
+  :CAI_HISTORY                   => "cai_interface/cai_history",
   :CAI_WORLD                     => "cai_interface/cai_world",
   :CAI_WORLD_FACTIONS            => "cai_factions/faction",
   :CAI_WORLD_REGIONS             => "cai_regions/region",
@@ -15,6 +16,9 @@ XmlSplit = {
   :CAI_WORLD_RESOURCE_MOBILES    => "cai_mobiles/mobile",
   :CAI_INTERFACE_MANAGERS        => "cai_interface_managers/manager",
   :CAI_BDI_POOL                  => "bdi_pool/",
+  :CAI_WORLD_TRADE_ROUTES        => "cai_trade_routes/",
+  :CAI_WORLD_TECHNOLOGY_TREES    => "cai_tech_trees/",
+  :CAI_WORLD_GOVERNORSHIPS       => "cai_governorships/",
   :FACTION                       => "factions/",
   :QUAD_TREE_BIT_ARRAY           => "quadtree/",
   :grid_data                     => "grid_data",
@@ -50,5 +54,4 @@ XmlSplit = {
   :TREE_LOD_LIST                 => "tree_lod_list",
   :BATTLE_MAP_DEFINITION         => "battle_map_definition",
   :REGION_SLOT_ARRAY             => "region_slot/",
-  :CAI_HISTORY                   => "cai_interface/cai_history",
 }

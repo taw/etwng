@@ -31,6 +31,12 @@ module EsfSemanticConverter
 ## Tag converters
 
 ## startpos.esf arrays
+  def convert_ary_CAI_HISTORY_EVENT_HTML_CLASSES
+    data = get_ary_contents(:asc).flatten
+    raise SemanticFail.new if data.any?{|name| name =~ /\s/}
+    out_ary!("cai_event_classes", "", data.map{|name| " #{name.xml_escape}" })
+  end
+
   def convert_ary_UNIT_CLASS_NAMES_LIST
     data = get_ary_contents([:rec, :CAMPAIGN_LOCALISATION, nil], :bool)
     data = data.map{|loc, used|
