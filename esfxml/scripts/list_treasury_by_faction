@@ -3,7 +3,7 @@
 $: << File.dirname(__FILE__)
 require "esf_scripts"
 
-class ListStartingTreasury < EsfScript
+class ListTreasuryByFaction < EsfScript
   def run!
     factions = []
     each_faction do |faction, faction_name|
@@ -15,4 +15,4 @@ class ListStartingTreasury < EsfScript
   end
 end
 
-ListStartingTreasury.new
+ListTreasuryByFaction.new
