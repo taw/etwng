@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class ListStartingTreasury < EsfScript
+  def run!
+    factions = []
+    each_faction do |faction, faction_name|
+      starting_treasury = faction.xpath("rec[@type='FACTION_ECONOMICS']/i")[0].content.to_i
+      factions << [faction_name, starting_treasury]
+      false
+    end
+    puts factions.sort.map{|faction, treasury| "#{faction}: #{treasury}"}
+  end
+end
+
+ListStartingTreasury.new
