@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+
+out = []
+
+def decompile(source, target)
+  dir = File.dirname(target)
+  FileUtils.mkdir_p dir unless File.exist?(dir)
+  system "./luadec '#{source}' >'#{target}'"
+end
+
+def disassemble(source, target)
+  dir = File.dirname(target)
+  FileUtils.mkdir_p dir unless File.exist?(dir)
+  system "./luadec -dis '#{source}' >'#{target}'"
+end
+
+Dir["samples_*/**/*"].sort.each{|file_name|
+  next unless File.file?(file_name) and file_name =~ /\.luac\z/
+  target1 = "lua_decompiled/" + file_name.sub(/\Asamples_/, "").sub(/\.luac\z/, ".lua")
+  target2 = "lua_decompiled/" + file_name.sub(/\Asamples_/, "").sub(/\.luac\z/, ".asm")
+  ok1 = decompile(file_name, target1)
+  ok2 = disassemble(file_name, target2)
+  File.unlink target1 unless ok1
+  File.unlink target2 unless ok2
+}

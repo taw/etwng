@@ -23,28 +23,28 @@ class BuildLuadec
   end
 
   def build_lua
-    Dir.chdir("build/lua-5.1.4") do
+    Dir.chdir("build/lua-5.1.4/src") do
       if osx?
         system "make macosx"
-      else
-        system "make linux"
+      else # Linux
+        system "make all MYCFLAGS='-DLUA_USE_LINUX -m32' MYLIBS='-Wl,-E -ldl -lreadline -lhistory -lncurses' MYLDFLAGS='-m32'"
       end
     end
   end
   
   def cflags
     if osx?
-      "-Wall -DLUA_USE_LINUX -g"
+      "-Wall -g"
     else
-      "-Wall -DLUA_USE_LINUX -g"
+      "-Wall -DLUA_USE_LINUX -g -m32"
     end
   end
   
   def build_luadec
     Dir.chdir("build/luadec") do
-    system "gcc #{cflags} -I../lua-5.1.4/src *.c -c"
-    system "gcc #{cflags} -lm *.o ../lua-5.1.4/src/liblua.a -o ../../luadec"
-  end
+      system "gcc #{cflags} -I../lua-5.1.4/src *.c -c"
+      system "gcc #{cflags} -lm *.o ../lua-5.1.4/src/liblua.a -o ../../luadec"
+    end
   end
   
   def run
