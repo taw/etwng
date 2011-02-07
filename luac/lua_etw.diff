@@ -1,6 +1,6 @@
 diff -ruN build_orig/lua-5.1.4/src/luaconf.h build/lua-5.1.4/src/luaconf.h
 --- build_orig/lua-5.1.4/src/luaconf.h	2008-02-11 16:25:08.000000000 +0000
-+++ build/lua-5.1.4/src/luaconf.h	2010-10-04 09:42:58.000000000 +0100
++++ build/lua-5.1.4/src/luaconf.h	2011-02-07 04:19:57.000000000 +0000
 @@ -501,8 +501,8 @@
  ** ===================================================================
  */
@@ -23,7 +23,7 @@ diff -ruN build_orig/lua-5.1.4/src/luaconf.h build/lua-5.1.4/src/luaconf.h
  #define LUAI_MAXNUMBER2STR	32 /* 16 digits, sign, point, and \0 */
 diff -ruN build_orig/luadec/print.c build/luadec/print.c
 --- build_orig/luadec/print.c	2009-03-16 13:53:48.000000000 +0000
-+++ build/luadec/print.c	2010-10-04 09:42:36.000000000 +0100
++++ build/luadec/print.c	2011-02-07 04:19:57.000000000 +0000
 @@ -42,7 +42,7 @@
   */
  
@@ -33,3 +33,13 @@ diff -ruN build_orig/luadec/print.c build/luadec/print.c
  		return (char*)getstr(F->f->upvalues[r]);
  	} else {
  		char* s = malloc(20);
+diff -ruN build_orig/luadec/proto.c build/luadec/proto.c
+--- build_orig/luadec/proto.c	2009-02-07 13:04:34.000000000 +0000
++++ build/luadec/proto.c	2011-02-07 04:20:25.000000000 +0000
+@@ -1,6 +1,3 @@
+-
+-#include "proto.h"
+-
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>

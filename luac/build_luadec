@@ -1,18 +1,63 @@
-#!/bin/sh
+#!/usr/bin/env ruby
 
-mkdir -p src
-wget -nc http://www.lua.org/ftp/lua-5.1.4.tar.gz -O src/lua-5.1.4.tar.gz
-wget -nc http://luaforge.net/frs/download.php/4008/luadec51_2.0.tgz -O src/luadec51_2.0.tgz
+require 'fileutils'
 
-rm -rf build
+class BuildLuadec
+  include FileUtils
+  
+  def download_sources
+    mkdir_p "src"
+    system "wget -nc http://www.lua.org/ftp/lua-5.1.4.tar.gz -O src/lua-5.1.4.tar.gz"
+    system "wget -nc http://luaforge.net/frs/download.php/4008/luadec51_2.0.tgz -O src/luadec51_2.0.tgz"
+  end
 
-mkdir -p build
+  def prepare_build_area
+    rm_rf "build"
+    mkdir_p "build"
+  end
+  
+  def unpack_and_patch_sources
+    system "tar -C build -xz <src/lua-5.1.4.tar.gz"
+    system "tar -C build -xz <src/luadec51_2.0.tgz"
+    system "patch -p0 <lua_etw.diff"
+  end
 
-tar -C build -xz <src/lua-5.1.4.tar.gz
-tar -C build -xz <src/luadec51_2.0.tgz
+  def build_lua
+    Dir.chdir("build/lua-5.1.4") do
+      if osx?
+        system "make macosx"
+      else
+        system "make linux"
+      end
+    end
+  end
+  
+  def cflags
+    if osx?
+      "-Wall -DLUA_USE_LINUX -g"
+    else
+      "-Wall -DLUA_USE_LINUX -g"
+    end
+  end
+  
+  def build_luadec
+    Dir.chdir("build/luadec") do
+    system "gcc #{cflags} -I../lua-5.1.4/src *.c -c"
+    system "gcc #{cflags} -lm *.o ../lua-5.1.4/src/liblua.a -o ../../luadec"
+  end
+  end
+  
+  def run
+    download_sources
+    prepare_build_area
+    unpack_and_patch_sources
+    build_lua
+    build_luadec
+  end
+  
+  def osx?
+    `uname`.chomp == 'Darwin'
+  end
+end
 
-patch -p0 <lua_etw.diff
-
-(cd build/lua-5.1.4; make macosx)
-(cd build/luadec; gcc -Wall -I../lua-5.1.4/src *.c -c)
-(cd build/luadec; gcc -Wall *.o ../lua-5.1.4/src/liblua.a -o ../../luadec)
+BuildLuadec.new.run
