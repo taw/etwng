@@ -130,6 +130,83 @@ module XmlTagHandlers
   end
 
   ## Semantic data types - startpos.esf
+  def on_empty_node_land_unit(attributes, buf, ctx)
+    put_rec "LAND_UNIT" do
+      put_rec "LAND_RECORD_KEY" do
+        @esf.put_s attributes[:type]
+      end
+      put_rec "UNIT" do
+        put_rec "UNIT_RECORD_KEY" do
+          @esf.put_s attributes[:type]
+        end
+        put_rec "UNIT_HISTORY" do
+          date_fields = attributes[:created].strip.split(/\s+/)
+          raise "Invalid date: `#{attributes[:created]}" unless date_fields.size == 2 and date_fields[1] =~ /\A\d+\z/
+          year, season = date_fields[1].to_i, date_fields[0]
+          put_rec "DATE" do
+            @esf.put_u year
+            @esf.put_asc season
+          end
+          @esf.put_u 0
+          @esf.put_u 0
+        end
+        put_rec "COMMANDER_DETAILS" do
+          lnam, snam, faction = CommanderDetails.recreate(attributes[:commander])
+          put_loc lnam
+          put_loc snam
+          @esf.put_s faction
+        end
+        put_rec "TRAITS" do
+          @esf.start_ary "TRAIT", nil
+          @esf.end_ary
+        end
+        @esf.put_i attributes[:unit_id].to_i
+        size, max_size = attributes[:size].split(%r[\s*/\s*])
+        @esf.put_u size.to_i
+        @esf.put_u max_size.to_i
+        @esf.put_i attributes[:unknown].to_i
+        @esf.put_u attributes[:kills].to_i
+        @esf.put_u attributes[:deaths].to_i
+        @esf.put_u((attributes[:commander_id] || "0").to_i)
+        @esf.put_u attributes[:kills].to_i
+        @esf.put_u attributes[:deaths].to_i
+        @esf.put_byte attributes[:exp].to_i
+        put_loc attributes[:name]
+      end
+      @esf.put_u 0
+    end
+  end
+  
+  def on_empty_node_theatre_transition(attributes, buf, ctx)
+    put_rec "THEATRE_TRANSITION_INFO" do
+      put_rec "CAMPAIGN_MAP_TRANSITION_LINK" do
+        @esf.put_flt 0.0
+        if attributes.empty?
+          @esf.put_u 0
+          @esf.put_u 0xFFFF_FFFF
+          @esf.put_u 0xFFFF_FFFF
+        else
+          @esf.put_u attributes[:turns].to_i
+          @esf.put_u attributes[:destination].to_i
+          @esf.put_u attributes[:via].to_i
+        end
+      end
+      if attributes.empty?
+        @esf.put_no
+      else
+        @esf.put_yes        
+      end
+      @esf.put_no
+      @esf.put_u 0
+    end
+  end
+  
+  def on_text_node_rand_seed(attributes, buf, ctx)
+    put_rec "RandSeed" do
+      @esf.put_u buf.to_i
+    end
+  end
+  
   def on_text_node_owned_direct(attributes, buf, ctx)
     put_rec "OWNED_DIRECT" do
       @esf.put_u buf.to_i
@@ -193,6 +270,11 @@ module XmlTagHandlers
     semantic_put_ary("REGION_OWNERSHIP", buf.strip.split(/[\s=]+/), 2) do |region, owner|
       @esf.put_s region
       @esf.put_s owner
+    end
+  end
+  def on_text_node_unit_list(attributes, buf, ctx)
+    semantic_put_ary("UNIT LIST", buf.strip.split(/\s+/)) do |name|
+      @esf.put_s name
     end
   end
   def on_text_node_resources_array(attributes, buf, ctx)

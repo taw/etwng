@@ -29,9 +29,34 @@ module EsfSemanticConverter
     end
   end
 
+  def ensure_date(date)
+    year, season = ensure_types(date, :u4, :asc)
+    raise SemanticFail.new if season =~ /\s/
+    if year == 0 and season == "summer"
+      nil
+    else
+      "#{season} #{year}"
+    end
+  end
+  
+  def ensure_unit_history(unit_history)
+    date, a, b = ensure_types(unit_history, [:rec, :DATE, nil], :u4, :u4)
+    date = ensure_date(date)
+    raise SemanticFail.new unless a == 0 and b == 0 and date
+    date
+  end
+
 ## Tag converters
 
 ## startpos.esf arrays
+  def _convert_ary_UNIT_LIST
+    data = get_ary_contents(:s).flatten
+    raise SemanticFail.new if data.any?{|name| name =~ /\s/}
+    out_ary!("unit_list", "", data.map{|name| " #{name.xml_escape}" })
+  end
+  # Damn spaces ...
+  alias_method :"convert_ary_UNIT LIST", :"_convert_ary_UNIT_LIST"
+
   def convert_ary_CAI_HISTORY_EVENT_HTML_CLASSES
     data = get_ary_contents(:asc).flatten
     raise SemanticFail.new if data.any?{|name| name =~ /\s/}
@@ -215,6 +240,90 @@ module EsfSemanticConverter
   end
 
 ## startpos.esf records
+  def convert_rec_THEATRE_TRANSITION_INFO
+    link, a, b, c = get_rec_contents([:rec, :CAMPAIGN_MAP_TRANSITION_LINK, nil], :bool, :bool, :u4)
+    fl, time, dest, via = ensure_types(link, :flt, :u4, :u4, :u4)
+    raise SemanticFail.new if fl != 0.0 or b != false or c != 0
+    if [a, time, dest, via] == [false, 0, 0xFFFF_FFFF, 0xFFFF_FFFF]
+      out!("<theatre_transition/>")
+    elsif a == true and time > 0 and dest != 0xFFFF_FFFF and via != 0xFFFF_FFFF
+      out!(%Q[<theatre_transition turns="#{time}" destination="#{dest}" via="#{via}"/>])
+    else
+      pp [a, time, dest, via]
+      raise SemanticFail.new
+    end
+  end
+
+  def convert_rec_RandSeed
+    data, = get_rec_contents(:u4)
+    out!("<rand_seed>#{data}</rand_seed>")
+  end
+
+  def convert_rec_LAND_UNIT
+    unit_type, unit_data, zero = get_rec_contents([:rec, :LAND_RECORD_KEY, nil], [:rec, :UNIT, nil], :u4)
+    unit_type, = ensure_types(unit_type, :s)
+    raise SemanticError.new unless zero == 0
+    
+    unit_data = ensure_types(unit_data,
+      [:rec, :UNIT_RECORD_KEY, nil],
+      [:rec, :UNIT_HISTORY, nil],    
+      [:rec, :COMMANDER_DETAILS, nil],
+      [:rec, :TRAITS, nil],
+      :i4,
+      :u4,
+      :u4,
+      :i4,
+      :u4,
+      :u4,
+      :u4,
+      :u4,
+      :u4,
+      :byte,
+      [:rec, :CAMPAIGN_LOCALISATION, nil]
+    )
+    raise SemanticError.new unless unit_type == ensure_types(unit_data.shift, :s)[0]
+    unit_history = ensure_unit_history(unit_data.shift)
+    
+    fnam, lnam, faction = ensure_types(unit_data.shift, [:rec, :CAMPAIGN_LOCALISATION, nil], [:rec, :CAMPAIGN_LOCALISATION, nil], :s)
+    commander = CommanderDetails.parse(ensure_loc(fnam), ensure_loc(lnam), faction)
+    raise SemanticFail.new unless commander
+    
+    traits, = ensure_types(unit_data.shift, [:ary, :TRAIT, nil])
+    raise SemanticFail.new unless traits == []
+    
+    unit_id = unit_data.shift
+    current_size = unit_data.shift
+    max_size = unit_data.shift
+    unknown = unit_data.shift
+    kills  = unit_data.shift
+    deaths = unit_data.shift
+    commander_id = unit_data.shift
+    commander_id = nil if commander_id == 0
+    
+    raise SemanticFail.new unless unit_data.shift == kills
+    raise SemanticFail.new unless unit_data.shift == deaths
+    
+    exp = unit_data.shift
+    name = ensure_loc(unit_data.shift)
+    
+    raise SemanticFail.new unless unit_data == []
+
+    
+    tag!("land_unit",
+      :unit_id => unit_id,
+      :commander_id => commander_id,
+      :size => "#{current_size}/#{max_size}",
+      :name => name,
+      :commander => commander,
+      :exp => exp,
+      :kills => kills,
+      :deaths => deaths,
+      :unknown => unknown,
+      :created => unit_history,
+      :type => unit_type
+    )
+  end
+  
   def convert_rec_GARRISON_RESIDENCE
     data, = get_rec_contents(:u4)
     out!("<garrison_residence>#{data}</garrison_residence>")
@@ -268,20 +377,17 @@ module EsfSemanticConverter
   end
   
   def convert_rec_DATE
-    year, season = get_rec_contents(:u4, :asc)
-    raise SemanticFail.new if season =~ /\s/
-    if season == "summer" and year == 0
-      out!("<date/>")
+    date = ensure_date(get_rec_contents_dynamic)
+    if date
+      out!("<date>#{date.xml_escape}</date>")
     else
-      out!("<date>#{season.xml_escape} #{year}</date>")
+      out!("<date/>")
     end
   end
-
+    
   def convert_rec_UNIT_HISTORY
-    date, a, b = get_rec_contents([:rec, :DATE, nil], :u4, :u4)
-    year, season = ensure_types(date, :u4, :asc)
-    raise SemanticFail.new if a != 0 or b != 0 or season =~ /\s/
-    out!("<unit_history>#{season.xml_escape} #{year}</unit_history>")
+    date = ensure_unit_history(get_rec_contents_dynamic)
+    out!("<unit_history>#{date.xml_escape}</unit_history>")
   end
   
   def convert_rec_MAPS

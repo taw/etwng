@@ -1,4 +1,4 @@
-Right now about 46 semantic tags (+4 virtual tags) are supported,
+Right now about 50 semantic tags (+4 virtual tags) are supported,
 for about 1000 node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -104,6 +104,26 @@ Examples of each semantic tag below:
 <wind_map unknown="0.00729600992053747" pgm="wind_map-0001.pgm"/>
 
 == startpos.esf ==
+
+<rand_seed>572927789</rand_seed>
+
+<theatre_transition/>
+<theatre_transition turns="1" destination="6" via="0"/>
+
+<unit_list>
+ 24_lber_land_cannon_(demi_cannon)
+ 9_lber_land_cannon_(saker)
+ euro_line_infantry_militia_saxo
+ euro_line_infantry_saxony
+ netherlands_horse_guards_chevau_saxo
+</unit_list>
+
+<land_unit type="euro_generals_bodyguard" commander="austria Guido von_Starhemberg"
+  unknown="29" created="summer 1700" kills="0" deaths="0" size="64/64"
+  commander_id="747316048" name="" unit_id="747582568" exp="0"/>
+<land_unit type="euro_militia_infantry" commander="austria Felix Peters"
+  unknown="24"   created="summer 1700" kills="0" deaths="0" size="400/400"
+  name="unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_213" unit_id="747583312" exp="0"/>
 
 <techs name="military_army_plug_bayonet" status="2" research_points="0.0" school_slot_id="0" unknown1="" unknown2="0"/>
 
