@@ -164,7 +164,7 @@ module XmlTagHandlers
         size, max_size = attributes[:size].split(%r[\s*/\s*])
         @esf.put_u size.to_i
         @esf.put_u max_size.to_i
-        @esf.put_i attributes[:unknown].to_i
+        @esf.put_i attributes[:mp].to_i
         @esf.put_u attributes[:kills].to_i
         @esf.put_u attributes[:deaths].to_i
         @esf.put_u((attributes[:commander_id] || "0").to_i)
@@ -305,11 +305,11 @@ module XmlTagHandlers
   end
   def on_empty_node_draa(attributes, buf, ctx)
     put_rec "DIPLOMACY_RELATIONSHIP_ATTITUDES_ARRAY" do
-      @esf.put_i attributes[:drift].to_i
-      @esf.put_i attributes[:current].to_i
-      @esf.put_i attributes[:limit].to_i
+      @esf.put_i((attributes[:drift] || "0").to_i)
+      @esf.put_i((attributes[:current] || "0").to_i)
+      @esf.put_i((attributes[:limit] || "0").to_i)
       @esf.put_bool(attributes[:active1] == 'yes')
-      @esf.put_i attributes[:extra].to_i
+      @esf.put_i((attributes[:extra].to_i || "0").to_i)
       @esf.put_bool(attributes[:active2] == 'yes')
     end
   end

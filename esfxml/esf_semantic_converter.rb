@@ -162,11 +162,11 @@ module EsfSemanticConverter
       "Trade Agreement broken",
       "War",
       "Peace Treaty",
-      "Allied with enemy nation",
+      "Allied with enemy",
       "War declared on friend",
       "Unreliable ally",
       "Territorial expansion",
-      "Backstabber! Attacked by forces given safe passage",
+      "Backstabber",
       "Assassination attempts",
       "Religion",
       "Government type",
@@ -183,8 +183,17 @@ module EsfSemanticConverter
       a,b,c,d,e,f = *entry
       d = d ? 'yes' : 'no'
       f = f ? 'yes' : 'no'
-      out!(" <!-- #{label.xml_escape} -->")
-      out!(" <draa drift=\"#{a}\" current=\"#{b}\" limit=\"#{c}\" active1=\"#{d}\" extra=\"#{e}\" active2=\"#{f}\"/>")
+      if [a,b,c,d] == [0, 0, 0, 'no']
+        abcd = ""
+      else
+        abcd = %Q[ drift="#{a}" current="#{b}" limit="#{c}" active1="#{d}"]
+      end
+      if [e,f] == [0, 'no']
+        ef = ""
+      else
+        ef =  %Q[ extra="#{e}" active2="#{f}"]
+      end
+      out!(" <draa#{abcd}#{ef}/><!-- #{label.xml_escape} -->")
     end
     out!("</ary>")
   end
@@ -294,7 +303,7 @@ module EsfSemanticConverter
     unit_id = unit_data.shift
     current_size = unit_data.shift
     max_size = unit_data.shift
-    unknown = unit_data.shift
+    mp = unit_data.shift
     kills  = unit_data.shift
     deaths = unit_data.shift
     commander_id = unit_data.shift
@@ -318,7 +327,7 @@ module EsfSemanticConverter
       :exp => exp,
       :kills => kills,
       :deaths => deaths,
-      :unknown => unknown,
+      :mp => mp,
       :created => unit_history,
       :type => unit_type
     )
@@ -348,8 +357,10 @@ module EsfSemanticConverter
   end
   
   def convert_rec_techs
+    status_hint = {0 => " (done)", 2 => " (researchable)", 4 => " (not researchable)"}
     data = get_rec_contents(:s, :u4, :flt, :u4, :bin8, :u4)
     name, status, research_points, school_slot_id, unknown1, unknown2 = *data
+    status = "#{status}#{status_hint[status]}"
     unknown1 = unknown1.unpack("V*").join(" ")
     out!("<techs name=\"#{name.xml_escape}\" status=\"#{status}\" research_points=\"#{research_points}\" school_slot_id=\"#{school_slot_id}\" unknown1=\"#{unknown1}\" unknown2=\"#{unknown2}\"/>")
   end

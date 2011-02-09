@@ -119,15 +119,20 @@ Examples of each semantic tag below:
 </unit_list>
 
 <land_unit type="euro_generals_bodyguard" commander="austria Guido von_Starhemberg"
-  unknown="29" created="summer 1700" kills="0" deaths="0" size="64/64"
+  mp="29" created="summer 1700" kills="0" deaths="0" size="64/64"
   commander_id="747316048" name="" unit_id="747582568" exp="0"/>
 <land_unit type="euro_militia_infantry" commander="austria Felix Peters"
-  unknown="24"   created="summer 1700" kills="0" deaths="0" size="400/400"
+  mp="24"   created="summer 1700" kills="0" deaths="0" size="400/400"
   name="unit_regiment_names_localisation_lookup_unit_name_euro_infantry_units_213" unit_id="747583312" exp="0"/>
 
-<techs name="military_army_plug_bayonet" status="2" research_points="0.0" school_slot_id="0" unknown1="" unknown2="0"/>
+<techs name="military_navy_flintlock_cannon" status="2 (researchable)" research_points="0.0" school_slot_id="0" unknown1="" unknown2="0"/>
+<techs name="military_navy_seasoning" status="0 (done)" research_points="60.0" school_slot_id="0" unknown1="" unknown2="0"/>
+<techs name="military_ordnance_percussion_shells" status="4 (not researchable)" research_points="0.0" school_slot_id="0" unknown1="" unknown2="0"/>
 
 <draa drift="0" current="-10" limit="0 active1="no" extra="0" active2="no"/>
+<draa extra="-15" active2="yes"/>
+<draa drift="0" current="-10" limit="0 active1="no"/>
+<draa/>
 
 <commander_details name="names_name_names_englishMathew" surname="names_name_names_englishAbbot" faction="britain"/>
 <commander>thirteen_colonies Aston Morgan</commander>
