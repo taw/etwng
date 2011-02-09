@@ -650,16 +650,18 @@ module XmlTagHandlers
   OnEnd = Hash.new{|ht,k| raise "Unknown tag close #{k}"}
   
   self.instance_methods.each do |m|
-    if m.to_s =~ /\Aon_text_node_(.*)\z/
-      OnStart[$1.to_sym] = :on_start_text_node
-      OnEnd[$1.to_sym]   = m
-    elsif m.to_s =~ /\Aon_empty_node_(.*)\z/
-      OnStart[$1.to_sym] = :on_start_empty_node
-      OnEnd[$1.to_sym]   = m
-    elsif m.to_s =~ /\Aon_start_node_(.*)\z/
-      OnStart[$1.to_sym] = m
-    elsif m.to_s =~ /\Aon_end_node_(.*)\z/
-      OnEnd[$1.to_sym] = m
+    m = m.to_s
+    case m
+    when /\Aon_text_node_(.*)\z/
+      OnStart[$1] = :on_start_text_node
+      OnEnd[$1]   = m.to_sym
+    when /\Aon_empty_node_(.*)\z/
+      OnStart[$1] = :on_start_empty_node
+      OnEnd[$1]   = m.to_sym
+    when /\Aon_start_node_(.*)\z/
+      OnStart[$1] = m.to_sym
+    when /\Aon_end_node_(.*)\z/
+      OnEnd[$1] = m.to_sym
     end
   end
 end
@@ -668,23 +670,24 @@ class Xml2Esf < Nokogiri::XML::SAX::Document
   include XmlTagHandlers
   
   ## Nokogiri callbacks
-  def start_element(element, attributes)
-    attributes = attributes.flatten
+  def start_element_namespace(name, attributes, *namespace_stuff)
     raise "Cannot nest tags in this context" unless @stack[-1][0]
     attrs = {}
-    attrs[attributes.shift.to_sym] = attributes.shift until attributes.empty?
-    can_nest, buf, ctx = send(OnStart[element.to_sym], attrs)
-    @stack << [can_nest, buf, attrs, ctx]
+    attributes.each do |a|
+      attrs[a.localname.to_sym] = a.value
+    end
+    can_nest, buf, ctx = send(OnStart[name], attrs)
+    @stack << [can_nest, attrs, buf, ctx]
   end
 
-  def end_element(element)
-    can_nest, buf, attrs, ctx = *@stack.pop
-    send(OnEnd[element.to_sym], attrs, buf, ctx)
+  def end_element_namespace(name, *namespace_stuff)
+    can_nest, attrs, buf, ctx = *@stack.pop
+    send(OnEnd[name], attrs, buf, ctx)
   end
 
   def characters(chars)
-    if @stack[-1][1]
-      @stack[-1][1] << chars
+    if buf = @stack[-1][2]
+      buf << chars
     elsif chars =~ /\S/
       raise "Illegal place for non-whitespace characters: #{@stack.inspect} #{chars.inspect}" 
     end
