@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class ListFactionIds < EsfScript
+  def run!
+    factions = []
+    each_faction do |faction, faction_name|
+      id = faction.xpath("i")[0].content
+      factions << [faction_name, id]
+      false
+    end
+    puts factions.sort.map{|faction_name, id| "#{faction_name}: #{id}"}
+  end
+end
+
+ListFactionIds.new
