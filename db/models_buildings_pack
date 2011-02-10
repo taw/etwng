@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+
+class ModelsBuildings
+  def initialize(file_name)
+    @data = eval(File.open(file_name, 'rb', &:read))
+    @out = [1, @data.size].pack("CV")
+    @data.each{|row|
+      put_row(*row)
+    }
+  end
+
+  def put_str(str)
+    str = str.unpack("U*")
+    @out << [str.size].pack("v")
+    @out << str.pack("v*")
+  end
+  
+  def put_row(name, path, x, *lines)
+    put_str name
+    put_str path
+    put_u4 x
+    put_u4 lines.size
+    lines.each{|line|
+      put_line(*line)
+    }
+  end
+  
+  def put_line(name, x, v1, v2, v3)
+    put_str name
+    put_u4 x
+    put_v3 *v1
+    put_v3 *v2
+    put_v3 *v3
+  end
+
+  def put_u4(x)
+    @out << [x].pack("V")
+  end
+  
+  def put_v3(x,y,z)
+    @out << [x,y,z].pack("fff")
+  end
+  
+  attr_reader :out
+end
+
+
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input.txt output"
+end
+
+data = ModelsBuildings.new(ARGV[0]).out
+File.open(ARGV[1], 'wb'){|fh| fh.write data}

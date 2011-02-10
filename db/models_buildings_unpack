@@ -1,0 +1,77 @@
+#!/usr/bin/env ruby
+
+class Float
+  def pretty_single
+    begin
+      rv = (100_000.0 * self).round / 100_000.0
+      return rv if self != rv and [self].pack("f") == [rv].pack("f")
+      self
+    rescue
+      self
+    end
+  end
+end
+
+class ModelsBuildings
+  def initialize(file_name)
+    @data = File.open(file_name, 'rb', &:read)
+    @ofs = 0
+  end
+  
+  def get(sz)
+    raise "Not enough data available" if sz+@ofs > @data.size
+    rv = @data[@ofs, sz]
+    @ofs += sz
+    rv
+  end
+  
+  def get_byte
+    get(1).unpack("C")[0]
+  end
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+  def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+  def get_str
+    get(2*get_u2).unpack("v*").pack("U*")
+  end
+  def parse
+    raise "Only version 1 supported" unless get_byte == 1
+    (0...get_u4).map{
+      [
+        get_str,
+        get_str,
+        get_u4,
+        *(0...get_u4).map{ 
+          [
+            get_str,
+            get_u4,
+            (0..2).map{get_flt},
+            (0..2).map{get_flt},
+            (0..2).map{get_flt},
+          ]
+        }
+      ]
+    }
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input output.txt"
+end
+
+data = ModelsBuildings.new(ARGV[0]).parse
+File.open(ARGV[1], 'wb'){|fh|
+  fh.puts "["
+  data.each{|row|
+    fh.puts "  ["
+    fh.puts row.map{|x| "    #{x.inspect}," }
+    fh.puts "  ],"
+  }
+  fh.puts "]"
+}
