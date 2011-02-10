@@ -22,16 +22,23 @@ class SampleTest
     # %W[time jruby --server -J-Xmx2048m]
     %W[ruby]
   end
-  def run!
+  def convert!
     puts "Converting #{@filename}"
     FileUtils.rm_rf xmldir
     system *(ruby + ["./esf2xml", source, xmldir])
-
+  end
+  def convert_back!
     puts "Recreating #{@filename}"
     FileUtils.rm_rf recreated
     system *(ruby + ["./xml2esf", xmldir, recreated])
-    
+  end
+  def compare!
     system "diff", source, recreated
+  end
+  def run!
+    convert! or return 1
+    convert_back! or return 1
+    compare!
   end
 end
 
