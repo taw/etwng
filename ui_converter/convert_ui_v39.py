@@ -877,7 +877,7 @@ class transition:
         self.short1 = handle.readShort()
         self.int1 = handle.readInt()
         self.int2 = handle.readInt()
-    
+        
     def writeTo(self, handle):
         """
         Writes to a TypeCastWriter handle

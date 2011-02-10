@@ -3,42 +3,69 @@
 require "pp"
 require "fileutils"
 
-def run_test(source, xml, out, version)
-  FileUtils.mkdir_p File.dirname(xml)
-  case version
-  when 'Version039', 'Version033', 'Version032'
-    ver = version[-2..-1]
+class RunAllTests
+  def initialize
+    @stats = {}
+    @short_stats = {}
+  end
 
-    puts "Conversion of #{source} to #{xml}"
-    return 'ui->xml fail' unless system "./convert_ui_v#{ver}.py", "-u", source, xml
+  def print_stats
+    puts ""
+    @stats.to_a.sort.each{|v,ht|
+      puts "#{v}: #{ht.inspect}"
+    }
+    puts ""
+    @short_stats.to_a.sort.each{|v,ht|
+      puts "#{v}: #{ht.inspect}"
+    }
+    puts ""
+  end
+    
+  def run_test(source, xml, out, version)
+    FileUtils.mkdir_p File.dirname(xml)
+    case version
+    when 'Version039', 'Version033', 'Version032'
+      ver = version[-2..-1]
 
-    puts "Conversion of #{xml} back to #{out}"
-    return 'xml->ui fail' unless system "./convert_ui_v#{ver}.py", "-x", xml, out
-
-    return 'differ' unless system "diff", source, out
-    return 'ok'
-  else
-    'not supported'
+      puts "Conversion of #{source} to #{xml}"
+      return 'ui->xml fail' unless system "./convert_ui_v#{ver}.py", "-u", source, xml
+      
+      puts "Conversion of #{xml} back to #{out}"
+      return 'xml->ui fail' unless system "./convert_ui_v#{ver}.py", "-x", xml, out
+      
+      return 'differ' unless system "diff", source, out
+      return 'ok'
+    else
+      'not supported'
+    end
+  end
+  
+  def read_version(file_name)
+    version = File.open(file_name, 'rb'){|fh| fh.read(10)}
+  end
+  
+  def add_status(version, status, file_name)
+    @stats[version] ||= Hash.new{|ht,k| ht[k] = []}
+    @stats[version][status] << file_name
+    @short_stats[version] ||= Hash.new(0)
+    @short_stats[version][status] += 1
+  end
+    
+  def samples
+    Dir["samples*/**/*"].sort
+  end
+  
+  def run!
+    FileUtils.mkdir_p "tmp"
+    samples.each{|file_name|
+      next unless File.file?(file_name)
+      basename = "tmp/" + file_name.gsub(/\A\.\.\/ui\/samples_/, "").gsub(/[ \/]/, "_")
+      version = read_version(file_name)
+      status = run_test(file_name, "#{basename}.xml", "#{basename}.out", version)
+      add_status version, status, file_name
+    }
+    print_stats
   end
 end
 
-$stats = {}
-
-Dir["../ui/samples*/**/*"].each{|file_name|
-  next unless File.file?(file_name)
-  basename = "tmp/" + file_name.gsub(/\A\.\.\/ui\/samples_/, "").gsub(/[ \/]/, "_")
-  xml = basename + ".xml"
-  out = basename + ".out"
-  version = File.open(file_name, 'rb').read(10)
-  
-  status = run_test(file_name, xml, out, version)
-  $stats[version] ||= {}
-  $stats[version][status] ||= 0
-  $stats[version][status] += 1
-  # $stats[version][status] ||= []
-  # $stats[version][status] << file_name
-}
-
-$stats.to_a.sort.each{|v,ht|
-  puts "#{v}: #{ht.inspect}"
-}
+RunAllTests.new.run!

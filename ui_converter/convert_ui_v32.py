@@ -878,9 +878,6 @@ class transition:
         """
         self.type = handle.readInt()
         self.id = handle.readInt()
-        self.short1 = handle.readShort()
-        self.int1 = handle.readInt()
-        self.int2 = handle.readInt()
     
     def writeTo(self, handle):
         """
@@ -888,15 +885,12 @@ class transition:
         """
         handle.writeInt(self.type)
         handle.writeInt(self.id)
-        handle.writeShort(self.short1)
-        handle.writeInt(self.int1)
-        handle.writeInt(self.int2)
         
     def writeToXML(self, handle):
         """
         Writes to a text file handle
         """
-        handle.write("%(indent)s<transition>\n%(indent+1)s<type>%(type)i</type>\n%(indent+1)s<stateIDRef>%(id)i</stateIDRef>\n%(indent+1)s<short1>%(short1)i</short1>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent+1)s<int2>%(int2)i</int2>\n%(indent)s</transition>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "type": self.type, "id": self.id, "short1": self.short1, "int1": self.int1, "int2": self.int2})
+        handle.write("%(indent)s<transition>\n%(indent+1)s<type>%(type)i</type>\n%(indent+1)s<stateIDRef>%(id)i</stateIDRef>\n%(indent)s</transition>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "type": self.type, "id": self.id})
 
     def constructFromNode(self, node):
         """
