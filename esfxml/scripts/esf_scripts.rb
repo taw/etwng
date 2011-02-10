@@ -92,18 +92,24 @@ class EsfScript
   
   def update_faction(faction_to_change)
     each_faction do |faction, faction_name|
-      next unless faction_to_change == faction_name
+      next unless faction_to_change == "*" or faction_to_change == faction_name
       yield(faction)
     end
   end
 
   def update_factions_technologies(faction_to_change, &blk)
-    update_faction(faction_to_change) do |faction|
+    each_faction do |faction, faction_name|
+      next unless faction_to_change == "*" or faction_to_change == faction_name
       tech_includes = faction.xpath("xml_include").map{|node| node['path']}.grep(/\Atechnology\//)
-      unless tech_includes.size == 1
-        raise "Expected to find exactly one <xml_include path='technology/...'/>, got #{tech_includes.size}"
+      # Rebel faction ("") has no technologies and it's ok
+      # Other factions having no technologies are weird
+      if tech_includes.empty? and faction_name != ""
+        warn "No technology found for faction #{faction_name.inspect}"
+        next
       end
-      update_xml(xmldir+"/"+tech_includes[0], "//ary[@type='techs']", &blk)
+      tech_includes.each do |tech_include|
+        update_xml(xmldir+"/"+tech_include, "//ary[@type='techs']", &blk)
+      end
       false
     end
   end
