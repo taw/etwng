@@ -8,7 +8,7 @@ class EsfBuilder
     @adjust_ofs       = []
     @adjust_children  = []
     @children         = []
-    @type_codes       =  Hash.new{|ht,k| raise "Unknown node name #{k}"}
+    @type_codes       = Hash.new{|ht,k| raise "Unknown node name #{k.inspect}"}
     @node_types       = []
   end
   def add_type_code(name)
