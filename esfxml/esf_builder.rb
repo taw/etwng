@@ -39,6 +39,9 @@ class EsfBuilder
     @data << "\x0a"
     @data << [val].pack("f")
   end
+  def put_fix(val)
+    put_i((1048576.0 * val).round.to_i)
+  end
   def put_i2(val)
     @data << "\x00"
     @data << [val].pack("v")

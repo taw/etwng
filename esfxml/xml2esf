@@ -130,6 +130,33 @@ module XmlTagHandlers
   end
 
   ## Semantic data types - startpos.esf
+  def on_empty_node_cai_region_hlci(attributes, buf, ctx)
+    put_rec "CAI_REGION_HLCI" do
+      @esf.put_u attributes[:a].to_i
+      @esf.put_u attributes[:b].to_i
+      @esf.put_4x("\x48", attributes[:c].split(/\s+/).map(&:to_i).pack("V*"))
+      @esf.put_fix attributes[:x].to_f
+      @esf.put_fix attributes[:y].to_f
+    end
+  end
+  def on_empty_node_cai_situated(attributes, buf, ctx)
+    put_rec "CAI_SITUATED" do
+      @esf.put_fix attributes[:x].to_f
+      @esf.put_fix attributes[:y].to_f
+      @esf.put_u attributes[:a].to_i
+      @esf.put_4x("\x48", attributes[:b].split(/\s+/).map(&:to_i).pack("V*"))
+      @esf.put_u attributes[:c].to_i
+    end
+  end
+  def on_empty_node_cai_trading_post(attributes, buf, ctx)
+    put_rec "CAI_TRADING_POST" do
+      @esf.put_u attributes[:a].to_i
+      @esf.put_fix attributes[:x].to_f
+      @esf.put_fix attributes[:y].to_f
+      @esf.put_u attributes[:b].to_i
+    end
+  end
+  
   def on_empty_node_land_unit(attributes, buf, ctx)
     put_rec "LAND_UNIT" do
       put_rec "LAND_RECORD_KEY" do

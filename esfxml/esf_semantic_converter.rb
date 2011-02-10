@@ -249,6 +249,29 @@ module EsfSemanticConverter
   end
 
 ## startpos.esf records
+  def convert_rec_CAI_REGION_HLCI
+    a, b, c, x, y = get_rec_contents(:u4, :u4, :bin8, :i4, :i4)
+    x *= 0.5**20
+    y *= 0.5**20
+    c = c.unpack("V*").join(" ")
+    out!(%Q[<cai_region_hlci a="#{a}" b="#{b}" c="#{c}" x="#{x}" y="#{y}"/>])
+  end
+
+  def convert_rec_CAI_TRADING_POST
+    a, x, y, b = get_rec_contents(:u4, :i4, :i4, :u4)
+    x *= 0.5**20
+    y *= 0.5**20
+    out!(%Q[<cai_trading_post a="#{a}" x="#{x}" y="#{y}" b="#{b}"/>])
+  end
+
+  def convert_rec_CAI_SITUATED
+    x, y, a, b, c = get_rec_contents(:i4, :i4, :u4, :bin8, :u4)
+    x *= 0.5**20
+    y *= 0.5**20
+    b = b.unpack("V*").join(" ")
+    out!(%Q[<cai_situated x="#{x}" y="#{y}" a="#{a}" b="#{b}" c="#{c}"/>])
+  end
+  
   def convert_rec_THEATRE_TRANSITION_INFO
     link, a, b, c = get_rec_contents([:rec, :CAMPAIGN_MAP_TRANSITION_LINK, nil], :bool, :bool, :u4)
     fl, time, dest, via = ensure_types(link, :flt, :u4, :u4, :u4)
