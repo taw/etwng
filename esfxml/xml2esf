@@ -252,6 +252,35 @@ module XmlTagHandlers
     end
   end
 
+  def on_text_node_cai_technology_tree(attributes, buf, ctx)
+    put_rec "CAI_TECHNOLOGY_TREE" do
+      @esf.put_u buf.to_i
+    end
+  end
+
+  
+  def on_empty_node_famous_battle_info(attributes, buf, ctx)
+    put_rec "FAMOUS_BATTLE_INFO" do
+      @esf.put_fix attributes[:x].to_f
+      @esf.put_fix attributes[:y].to_f
+      @esf.put_s attributes[:name]
+      @esf.put_u attributes[:a].to_i
+      @esf.put_u attributes[:b].to_i
+      @esf.put_u attributes[:c].to_i
+      @esf.put_bool(attributes[:d] == "yes")
+    end
+  end
+  
+  def on_empty_node_cai_border_patrol_point(attributes, buf, ctx)
+    put_rec "CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC_PATROL_POINTS" do
+      put_rec "CAI_BORDER_PATROL_POINT" do
+        @esf.put_fix attributes[:x].to_f
+        @esf.put_fix attributes[:y].to_f
+        @esf.put_4x("\x48", attributes[:a].split(/\s+/).map(&:to_i).pack("V*"))
+      end
+    end
+  end
+
   def on_empty_node_flag_and_colours(attributes, buf, ctx)
     put_rec "FACTION_FLAG_AND_COLOURS" do
       @esf.put_s attributes[:path]
@@ -484,6 +513,7 @@ module XmlTagHandlers
   end
 
   def on_empty_node_xml_include(attributes, buf, ctx)
+    puts "Parsing #{attributes[:path]}"
     parse_file(attributes[:path])
   end
   
@@ -521,6 +551,10 @@ module XmlTagHandlers
   end
   def on_empty_node_v3(attributes, buf, ctx)
     @esf.put_v3 attributes[:x].to_f, attributes[:y].to_f, attributes[:z].to_f
+  end
+  def on_empty_node_v2x(attributes, buf, ctx)
+    @esf.put_fix attributes[:x].to_f
+    @esf.put_fix attributes[:y].to_f
   end
 
   def on_empty_node_yes(attributes, buf, ctx)
@@ -646,7 +680,10 @@ module XmlTagHandlers
     else
       @esf.start_rec type, version
     end
+    # hack to make sure it's not considered an array
+    @stack << [nil, nil, nil, {}]
     yield
+    @stack.pop
     @esf.end_rec
     [false, nil, {}]
   end
@@ -673,8 +710,8 @@ module XmlTagHandlers
   end
 
   ## Autoconfigure
-  OnStart = Hash.new{|ht,k| raise "Unknown tag open #{k}"}
-  OnEnd = Hash.new{|ht,k| raise "Unknown tag close #{k}"}
+  OnStart = Hash.new{|ht,k| raise "Unknown tag open #{k.inspect}"}
+  OnEnd = Hash.new{|ht,k| raise "Unknown tag close #{k.inspect}"}
   
   self.instance_methods.each do |m|
     m = m.to_s

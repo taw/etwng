@@ -249,6 +249,64 @@ module EsfSemanticConverter
   end
 
 ## startpos.esf records
+  def convert_rec_CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC_PATROL_POINTS
+    data, = get_rec_contents([:rec, :CAI_BORDER_PATROL_POINT, nil])
+    x, y, a = ensure_types(data, :i4, :i4, :bin8)
+    x *= 0.5**20
+    y *= 0.5**20
+    a = a.unpack("V*").join(" ")
+    out!(%Q[<cai_border_patrol_point x="#{x}" y="#{y}" a="#{a}"/>])
+  end
+  
+  
+  def convert_rec_LOCOMOTABLE
+    types, data = get_rec_contents_dynamic
+    
+    raise SemanticFail.new unless types[0, 4] == [:i4, :i4, :i4, :i4]
+
+    types = types[4..-1]
+    
+    tag!("rec", :type => "LOCOMOTABLE") do
+      x = data.shift * 0.5**20
+      y = data.shift * 0.5**20
+      out!(%Q[<v2x x="#{x}" y="#{y}"/>])
+      x = data.shift * 0.5**20
+      y = data.shift * 0.5**20
+      out!(%Q[<v2x x="#{x}" y="#{y}"/>])
+      until data.empty?
+        v = data.shift
+        t = types.shift
+        case t
+        when :i4
+          out!("<i>#{v}</i>")
+        when :u4
+          out!("<u>#{v}</u>")
+        when :flt
+          out!("<flt>#{v}</flt>")
+        when :u2x
+          out!("<u2x>#{v}</u2x>")
+        when :bool
+          if v
+            out!("<yes/>")
+          else
+            out!("<no/>")
+          end
+        else
+          # Should be possible to recover from it, isn't just yet
+          raise "Total failure while converting LOCOMOTABLE"
+        end
+      end
+    end
+  end
+  
+  def convert_rec_FAMOUS_BATTLE_INFO
+    x, y, name, a, b, c, d = get_rec_contents(:i4, :i4, :s, :i4, :i4, :i4, :bool)
+    x *= 0.5**20
+    y *= 0.5**20
+    d = d ? "yes" : "no"
+    out!(%Q[<famous_battle_info x="#{x}" y="#{y}" name="#{name}" a="#{a}" b="#{b}" c="#{c}" d="#{d}"/>])
+  end
+
   def convert_rec_CAI_REGION_HLCI
     a, b, c, x, y = get_rec_contents(:u4, :u4, :bin8, :i4, :i4)
     x *= 0.5**20
@@ -281,11 +339,15 @@ module EsfSemanticConverter
     elsif a == true and time > 0 and dest != 0xFFFF_FFFF and via != 0xFFFF_FFFF
       out!(%Q[<theatre_transition turns="#{time}" destination="#{dest}" via="#{via}"/>])
     else
-      pp [a, time, dest, via]
       raise SemanticFail.new
     end
   end
 
+  def convert_rec_CAI_TECHNOLOGY_TREE
+    data, = get_rec_contents(:u4)
+    out!("<cai_technology_tree>#{data}</cai_technology_tree>")
+  end
+  
   def convert_rec_RandSeed
     data, = get_rec_contents(:u4)
     out!("<rand_seed>#{data}</rand_seed>")
@@ -506,27 +568,28 @@ module EsfSemanticConverter
           xsz, ysz, pxdata = data
           path, rel_path = dir_builder.alloc_new_path("bmd_textures/texture", nil, ".pgm")
           File.write_pgm(path, 4*xsz, ysz, pxdata)
-          out!(" <bmd_pgm pgm=\"#{rel_path.xml_escape}\"/>")
+          out!("<bmd_pgm pgm=\"#{rel_path.xml_escape}\"/>")
           break
         end
         t = types.shift
         v = data.shift
+        
         case t
         when :s
-          out!(" <s>#{v.xml_escape}</s>")
+          out!("<s>#{v.xml_escape}</s>")
         when :i4
-          out!(" <i>#{v}</i>")
+          out!("<i>#{v}</i>")
         when :u4
-          out!(" <u>#{v}</u>")
+          out!("<u>#{v}</u>")
         when :bool
           if v
-            out!(" <yes/>")
+            out!("<yes/>")
           else
-            out!(" <no/>")
+            out!("<no/>")
           end
         when :bin6
           rel_path = dir_builder.save_binfile("bmd_textures/texture", nil, ".jpg", v)
-          out!(" <bin6ext path=\"#{rel_path.xml_escape}\"/>")
+          out!("<bin6ext path=\"#{rel_path.xml_escape}\"/>")
         else
           # Should be possible to recover from it, isn't just yet
           raise "Total failure while converting BMD_TEXTURES"

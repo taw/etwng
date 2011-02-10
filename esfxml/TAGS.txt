@@ -1,4 +1,4 @@
-Right now about 53 semantic tags (+4 virtual tags) are supported,
+Right now about 56 semantic tags (+5 virtual tags) are supported,
 for about 1000 node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -104,6 +104,14 @@ Examples of each semantic tag below:
 <wind_map unknown="0.00729600992053747" pgm="wind_map-0001.pgm"/>
 
 == startpos.esf ==
+
+<famous_battle_info x="-56.5" y="370.0" name="Battle of: Dublin" a="1502" b="1502" c="1250" d="no"/>
+
+<v2x x="122.730003356934" y="340.149993896484"/>
+
+<cai_technology_tree>580075616</cai_technology_tree>
+
+<cai_border_patrol_point x="667.338684082031" y="65.3495788574219" a="922"/>
 
 <cai_trading_post a="27" x="876.923095703125" y="-70.0838851928711" b="5596"/>
 
