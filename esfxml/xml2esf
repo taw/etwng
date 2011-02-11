@@ -264,9 +264,9 @@ module XmlTagHandlers
       @esf.put_fix attributes[:x].to_f
       @esf.put_fix attributes[:y].to_f
       @esf.put_s attributes[:name]
-      @esf.put_u attributes[:a].to_i
-      @esf.put_u attributes[:b].to_i
-      @esf.put_u attributes[:c].to_i
+      @esf.put_i attributes[:a].to_i
+      @esf.put_i attributes[:b].to_i
+      @esf.put_i attributes[:c].to_i
       @esf.put_bool(attributes[:d] == "yes")
     end
   end

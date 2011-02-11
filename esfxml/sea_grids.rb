@@ -2,48 +2,37 @@ class SeaGridsEsfParser
   def initialize(types, data)
     @types, @data = types, data
   end
-  def get_u4
-    raise SemanticFail.new unless @types.shift == :u4
+  def get(*tags)
+    raise SemanticFail.new unless @types.shift(tags.size) == tags
+    @data.shift(tags.size)
+  end
+  def get1(tag)
+    raise SemanticFail.new unless @types.shift == tag
     @data.shift
   end
-  def get_s
-    raise SemanticFail.new unless @types.shift == :s
-    @data.shift
-  end
-  def get_flt
-    raise SemanticFail.new unless @types.shift == :flt
-    @data.shift
-  end
-  def get_v2
-    raise SemanticFail.new unless @types.shift == :v2
-    @data.shift
+  def get_ary(&blk)
+    (0...get1(:u4)).map(&blk)
   end
   def get_s_ary
-    (0...get_u4).map{ get_s }
+    get_ary{ get1(:s) }
   end
   def get_u4_ary
-    (0...get_u4).map{ get_u4 }
+    get_ary{ get1(:u4) }
   end
   def get_area
     # area_id, lands, seas, ports, numbers
-    [get_u4, get_s_ary, get_s_ary, get_s_ary, get_u4_ary]
+    [get1(:u4), get_s_ary, get_s_ary, get_s_ary, get_u4_ary]
   end
   def get_bounding_boxes(xsize, ysize)
     (0...ysize).map{|yi|
       (0...xsize).map{|xi|
-        raise SemanticFail.new unless get_u4 == xi
-        raise SemanticFail.new unless get_u4 == yi
-        [get_v2, get_v2]
+        raise SemanticFail.new unless get(:u4, :u4) == [xi, yi]
+        get(:v2, :v2)
       }
     }
   end
   def get_theatre_grid
-    grid_name = get_s
-    min_xy = get_v2
-    max_xy = get_v2
-    factor = get_flt
-    xsize = get_u4
-    ysize = get_u4
+    grid_name, min_xy, max_xy, factor, xsize, ysize = get(:s, :v2, :v2, :flt, :u4, :u4)
     # Bounding boxes
     areas = get_bounding_boxes(xsize, ysize)
     (0...ysize).each{|yi|
@@ -51,11 +40,11 @@ class SeaGridsEsfParser
         areas[yi][xi] += get_area
       }
     }
-    connections = (0...get_u4).map{ [get_u4, get_u4, get_flt] }
+    connections = get_ary{ get(:u4, :u4, :flt) }
     [grid_name, min_xy, max_xy, factor, areas, connections]
   end
   def get_sea_grids
-    rv = (0...get_u4).map{ get_theatre_grid }
+    rv = get_ary{ get_theatre_grid }
     raise SemanticFail.new unless @types.empty? and @data.empty?
     rv
   end

@@ -1,4 +1,5 @@
 require "sea_grids"
+require "poi"
 require "commander_details"
 
 module EsfSemanticConverter
@@ -598,8 +599,49 @@ module EsfSemanticConverter
     end
   end
 
+## poi.esf
+  def convert_rec_CAI_POI_ROOT
+    pois = PoiEsfParser.new(*get_rec_contents_dynamic).get_pois
+    
+    tag!("pois") do
+      pois.each do |poi|
+        code1 = poi.shift
+        flag1 = poi.shift
+        x, y = poi.shift
+        region_name, region_id = poi.shift
+        val1 = poi.shift
+        ary1 = poi.shift
+        val2 = poi.shift
+        ary2 = poi.shift
+        ary3 = poi.shift
+        code2 = poi.shift
+        flag2 = poi.shift
+        raise SemanticFail.new unless poi == []
+        tag!("poi",
+          :x => x, :y => y,
+          :region_name => region_name,
+          :region_id => region_id,
+          :code1 => code1,
+          :code2 => code2,
+          :flag1 => flag1 ? 'yes' : 'no',
+          :flag2 => flag2 ? 'yes' : 'no',
+          :val1 => val1,
+          :val2 => val2,
+          :ids => ary3.join(" ")
+        ) do
+          ary1.each{|name, val|
+            out!(%Q[<poi_region1 name="#{name}" val="#{val}"/>])
+          }
+          ary2.each{|name, val|
+            out!(%Q[<poi_region2 name="#{name}" val="#{val}"/>])
+          }
+        end
+      end
+    end
+  end
+  
 ## sea_grids.esf
-  def disabled_convert_rec_CAI_SEA_GRID_ROOT
+  def convert_rec_CAI_SEA_GRID_ROOT
     sea_grids = SeaGridsEsfParser.new(*get_rec_contents_dynamic).get_sea_grids
     
     tag!("sea_grids") do
