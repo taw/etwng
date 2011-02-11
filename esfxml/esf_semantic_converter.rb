@@ -237,14 +237,14 @@ module EsfSemanticConverter
 
   def convert_rec_climate_map
     xsz, ysz, data = get_rec_contents(:u4, :u4, :bin6)
-    path, rel_path = dir_builder.alloc_new_path("climate_map", nil, ".pgm")
+    path, rel_path = dir_builder.alloc_new_path("maps/climate_map", nil, ".pgm")
     File.write_pgm(path, xsz, ysz, data)
     out!("<climate_map pgm=\"#{rel_path}\"/>")
   end
 
   def convert_rec_wind_map
     xsz, ysz, unknown, data = get_rec_contents(:u4, :u4, :flt, :bin2)
-    path, rel_path = dir_builder.alloc_new_path("wind_map", nil, ".pgm")
+    path, rel_path = dir_builder.alloc_new_path("maps/wind_map", nil, ".pgm")
     File.write_pgm(path, xsz*2, ysz, data)
     out!("<wind_map unknown=\"#{unknown}\" pgm=\"#{rel_path.xml_escape}\"/>")
   end
