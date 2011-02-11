@@ -102,6 +102,6 @@ class XMLPrinter
   end
   private
   def attrs_to_s(attrs={})
-    attrs.to_a.map{|k,v| v.nil? ? "" : " #{k}=\"#{v.to_s.xml_escape}\""}.join
+    attrs.to_a.map{|k,v| v.nil? ? "" : " #{k}=\"#{v.to_s.xml_escape}\""}.sort.join
   end
 end
