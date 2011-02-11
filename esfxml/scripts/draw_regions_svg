@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class DragRegionsSVG < EsfScript
+  def run!
+    update_each_xml("region_data*", "rec[@type='region_data']") do |rd|
+      vertices = []
+      data = rd.xpath("//rec[@type='vertices']/v2_ary")[0].content.strip.split(/[\s,]+/)
+      vertices << [data.shift.to_f, data.shift.to_f] until data.empty?
+      rd.xpath("//xml_include").each do |xi|
+        update_xml(xmldir + "/" + xi['path'], '/rec') do |region|
+          draw_region(region, vertices)
+          false
+        end
+      end
+      false
+    end
+  end    
+  
+  def draw_region(region, vertices)
+    name = region.xpath("s")[0].content
+    areas = region.xpath("//rec[@type='areas']")
+    areas = areas.map{|area_node| parse_area(area_node, vertices)}
+    svg = %Q@<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">@
+    areas.each{|area|
+      # area[:faces].each{|face|
+      #   svg << %Q[<path d="#{face}" />\n]
+      # }
+      area[:outlines].each_with_index{|outline, i|
+        color = ['red', 'blue', 'green', 'magenta', 'cyan', 'yellow'][i % 6]
+        svg << %Q[<path style="fill:none; stroke:#{color};" d="#{outline}" />\n]
+      }
+    }
+    svg << "</svg>\n"
+    File.open("regions_svgs/#{name}.svg", 'wb'){|fh| fh.write svg}
+  end
+  
+  def parse_area(area_node, vertices)
+    {
+      :faces => area_node.xpath("rec[@type='faces']/u4_ary").map{|face| u4_ary_to_path(face.content, vertices)},
+      :outlines => area_node.xpath("//rec[@type='outlines']/u4_ary").map{|face| u4_ary_to_path(face.content, vertices)},
+    }
+  end
+  
+  def u4_ary_to_path(u4_ary, vertices)
+    "M" + u4_ary.strip.split(/\s+/).map{|x| vertices[x.to_i].join(" ")}.join(" L") + " Z"
+  end
+end
+
+DragRegionsSVG.new
