@@ -1,9 +1,56 @@
-Right now about 56 semantic tags (+5 virtual tags) are supported,
+Right now about 58 semantic tags (+17 virtual tags) are supported,
 for about 1000 node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
 
 Examples of each semantic tag below:
+
+== poi.esf ==
+
+ <pois>
+  ...
+  <poi code1="1" code2="0" flag1="yes" flag2="yes" ids="" region_id="761" region_name="new_spain" val1="31.7936630249023" val2="2.06155276298523" x="-682.75" y="114.75">
+   <poi_region1 name="wilderness_mexico" val="69.6562957763672"/>
+   <poi_region1 name="guatemala" val="31.38471"/>
+   <poi_region1 name="the_caribbean_sea" val="50.5099"/>
+   <poi_region1 name="pacific_ocean" val="2.06155276298523"/>
+   <poi_region1 name="gulf_of_mexico" val="17.9025135040283"/>
+   <poi_region1 name="tejas" val="80.65358"/>
+  </poi>
+  ...
+  <poi code1="3" code2="0" flag1="yes" flag2="yes" ids="" region_id="754" region_name="new_spain" val1="68.55595" val2="-1.0" x="-641.011219024658" y="113.835540771484">
+   <poi_region2 name="guatemala" val="11.3317546844482"/>
+  </poi>
+  ...
+ </pois>
+
+== sea_grids.esf ==
+ <sea_grids>
+  <theatre_sea_grid factor="75.0" maxx="-340.0" maxy="460.0" minx="-760.0" miny="0.0" name="1">
+   <sea_grid_row>
+    <sea_grid_cell area_id="0" maxx="-685.0" maxy="75.0" minx="-760.0" miny="0.0">
+     <sea_grid_lands/>
+     <sea_grid_seas>
+      pacific_ocean
+      impassable
+     </sea_grid_seas>
+     <sea_grid_ports/>
+     <sea_grid_numbers/>
+    </sea_grid_cell>
+    ...
+   </sea_grid_row>
+   ...
+   <sea_grid_connections>
+    <sea_grid_connection area1="0" area2="1" value="0.0"/>
+    <sea_grid_connection area1="0" area2="2" value="0.0"/>
+    <sea_grid_connection area1="0" area2="3" value="-1.0"/>
+    <sea_grid_connection area1="0" area2="4" value="-1.0"/>
+    <sea_grid_connection area1="0" area2="5" value="-1.0"/>
+    ...
+   </sea_grid_connections>
+  </theatre_sea_grid>
+  ...
+ </sea_grids>
 
 == pathfinding.esf ==
 

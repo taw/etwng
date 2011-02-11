@@ -654,7 +654,7 @@ module EsfSemanticConverter
           areas.each do |row|
             tag!("sea_grid_row") do
               row.each do |(cmin_x, cmin_y), (cmax_x, cmax_y), area_id, lands, seas, ports, numbers|
-                tag!("sea_grid_cell", :area_id => area_id, :minx => cmin_x, :miny => cmin_y, :maxx => :cmax_x, :maxy => cmax_y) do
+                tag!("sea_grid_cell", :area_id => area_id, :minx => cmin_x, :miny => cmin_y, :maxx => cmax_x, :maxy => cmax_y) do
                   out_ary!("sea_grid_lands", "", lands.map{|x| " #{x}"})
                   out_ary!("sea_grid_seas", "", seas.map{|x| " #{x}"})
                   out_ary!("sea_grid_ports", "", ports.map{|x| " #{x}"})

@@ -501,6 +501,101 @@ module XmlTagHandlers
     end
   end
 
+  ## Semantic data types - sea_grids.esf
+
+  def on_start_node_sea_grids(attributes)
+    [true, nil, {:theatres => []}]
+  end
+  def on_end_node_sea_grids(attributes, buf, ctx)
+    put_rec "CAI_SEA_GRID_ROOT" do
+      theatres = ctx[:theatres]
+      @esf.put_u theatres.size
+      theatres.each do |ta, tc|
+        rows = tc[:rows]
+        connections = tc[:connections]
+        ysize = rows.size
+        xsize = rows[0].size
+        @esf.put_s ta[:name]
+        @esf.put_v2 ta[:minx].to_f, ta[:miny].to_f
+        @esf.put_v2 ta[:maxx].to_f, ta[:maxy].to_f
+        @esf.put_flt ta[:factor]
+        @esf.put_u xsize
+        @esf.put_u ysize
+        
+        rows.each_with_index do |row, yi|
+          row.each_with_index do |(ca, cc), xi|
+            @esf.put_u xi
+            @esf.put_u yi
+            @esf.put_v2 ca[:minx].to_f, ca[:miny].to_f
+            @esf.put_v2 ca[:maxx].to_f, ca[:maxy].to_f
+          end
+        end
+        
+        rows.each do |row|
+          row.each do |ca, cc|
+            @esf.put_u ca[:area_id].to_i
+            @esf.put_u cc[:lands].size
+            cc[:lands].each{|s| @esf.put_s s}
+            @esf.put_u cc[:seas].size
+            cc[:seas].each{|s| @esf.put_s s}
+            @esf.put_u cc[:ports].size
+            cc[:ports].each{|s| @esf.put_s s}
+            @esf.put_u cc[:numbers].size
+            cc[:numbers].each{|v| @esf.put_u v.to_i}
+          end
+        end
+        
+        @esf.put_u connections.size
+        connections.each do |conn|
+          @esf.put_u conn[:area1].to_i
+          @esf.put_u conn[:area2].to_i
+          @esf.put_flt conn[:value].to_f
+        end
+      end
+    end
+  end
+  def on_start_node_theatre_sea_grid(attributes)
+    [true, nil, {:rows => [], :connections => []}]
+  end
+  def on_end_node_theatre_sea_grid(attributes, buf, ctx)
+    @stack[-1][3][:theatres] << [attributes, ctx]
+  end
+  def on_start_node_sea_grid_row(attributes)
+    [true, nil, {:cells => []}]
+  end
+  def on_end_node_sea_grid_row(attributes, buf, ctx)
+    @stack[-1][3][:rows] << ctx[:cells]
+  end
+  def on_start_node_sea_grid_cell(attributes)
+    [true, nil, {:lands => [], :seas => [], :ports => [], :numbers => []}]
+  end
+  def on_end_node_sea_grid_cell(attributes, buf, ctx)
+    @stack[-1][3][:cells] << [attributes, ctx]
+  end
+  def on_text_node_sea_grid_lands(attributes, buf, ctx)
+    @stack[-1][3][:lands] += buf.strip.split(/\s+/)
+  end
+  def on_text_node_sea_grid_seas(attributes, buf, ctx)
+    @stack[-1][3][:seas] += buf.strip.split(/\s+/)
+  end
+  def on_text_node_sea_grid_ports(attributes, buf, ctx)
+    @stack[-1][3][:ports] += buf.strip.split(/\s+/)
+  end
+  def on_text_node_sea_grid_numbers(attributes, buf, ctx)
+    @stack[-1][3][:numbers] += buf.strip.split(/\s+/).map(&:to_i)
+  end
+
+  def on_start_node_sea_grid_connections(attributes)
+    [true, nil, {:connections => []}]
+  end
+  def on_end_node_sea_grid_connections(attributes, buf, ctx)
+    @stack[-1][3][:connections] = ctx[:connections]
+  end
+  def on_empty_node_sea_grid_connection(attributes, buf, ctx)
+    @stack[-1][3][:connections] << attributes
+  end
+
+
   ## Semantic data types - poi.esf
   def on_start_node_pois(attributes)
     [true, nil, {:pois => []}]
@@ -563,7 +658,7 @@ module XmlTagHandlers
   end
 
   def on_empty_node_xml_include(attributes, buf, ctx)
-    puts "Parsing #{attributes[:path]}"
+    # puts "Parsing #{attributes[:path]}"
     parse_file(attributes[:path])
   end
   
