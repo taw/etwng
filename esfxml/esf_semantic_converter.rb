@@ -50,13 +50,11 @@ module EsfSemanticConverter
 ## Tag converters
 
 ## startpos.esf arrays
-  def _convert_ary_UNIT_LIST
+  def convert_ary_UNIT__LIST
     data = get_ary_contents(:s).flatten
     raise SemanticFail.new if data.any?{|name| name =~ /\s/}
     out_ary!("unit_list", "", data.map{|name| " #{name.xml_escape}" })
   end
-  # Damn spaces ...
-  alias_method :"convert_ary_UNIT LIST", :"_convert_ary_UNIT_LIST"
 
   def convert_ary_CAI_HISTORY_EVENT_HTML_CLASSES
     data = get_ary_contents(:asc).flatten
@@ -250,6 +248,52 @@ module EsfSemanticConverter
   end
 
 ## startpos.esf records
+  def convert_rec_CAMPAIGN_VICTORY_CONDITIONS
+    campaign_type_labels = [" (short)", " (long)", " (prestige)", " (global domination)", " (unplayable)"]
+    data = get_rec_contents([:ary, :REGION_KEYS, nil], :bool, :u4, :u4, :bool, :u4, :bool, :bool)
+    regions, flag1, year, region_count, prestige_victory, campaign_type, flag2, flag3 = *data
+    regions = regions.map{|region| ensure_types(region, :s)}.flatten
+    campaign_type = "#{campaign_type}#{campaign_type_labels[campaign_type]}"
+    prestige_victory = prestige_victory ? 'yes' : 'no'
+    raise SemanticFail.new unless [flag1, flag2, flag3] == [false, false, false]
+    out_ary!("victory_conditions",
+      %Q[ year="#{year}" region_count="#{region_count}" prestige_victory="#{prestige_victory}" campaign_type="#{campaign_type}"],
+      regions.map{|name| " #{name.xml_escape}"})
+    end
+  
+  def convert_rec_CAMPAIGN_BONUS_VALUE_BLOCK
+    (types, data), = get_rec_contents([:rec, :CAMPAIGN_BONUS_VALUE, nil])
+    # types, data = get_rec_contents_dynamic
+    raise "Die in fire" unless types.shift(3) == [:u4, :i4, :flt]
+    type, subtype, value = *data.shift(3)
+    case [type, *types]
+    when [0, :s]
+      out!(%Q[<campaign_bonus_0 subtype="#{subtype}" value="#{value}" agent="#{data[0].xml_escape}"/>])
+    when [1]
+      out!(%Q[<campaign_bonus_1 subtype="#{subtype}" value="#{value}"/>])
+    when [2, :s]
+      raise "Die in fire" unless types == [:s]
+      out!(%Q[<campaign_bonus_2 subtype="#{subtype}" value="#{value}" slot_type="#{data[0].xml_escape}"/>])
+    when [3, :s]
+      out!(%Q[<campaign_bonus_3 subtype="#{subtype}" value="#{value}" resource="#{data[0].xml_escape}"/>])
+    when [6, :s]
+      raise "Die in fire" unless types == [:s]
+      out!(%Q[<campaign_bonus_6 subtype="#{subtype}" value="#{value}" social_class="#{data[0].xml_escape}"/>])
+    when [7, :s, :s]
+      out!(%Q[<campaign_bonus_7 subtype="#{subtype}" value="#{value}" social_class="#{data[0].xml_escape}" religion="#{data[1].xml_escape}"/>])
+    when [10, :s]
+      out!(%Q[<campaign_bonus_10 subtype="#{subtype}" value="#{value}" religion="#{data[0].xml_escape}"/>])
+    when [11, :s]
+      out!(%Q[<campaign_bonus_11 subtype="#{subtype}" value="#{value}" resource="#{data[0].xml_escape}"/>])
+    when [14, :s]
+      out!(%Q[<campaign_bonus_14 subtype="#{subtype}" value="#{value}" unit_type="#{data[0].xml_escape}"/>])
+    else
+      pp [:cbv, type, subtype, value, types, data]
+      puts ""
+      raise SemanticFail.new
+    end
+  end
+  
   def convert_rec_CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC_PATROL_POINTS
     data, = get_rec_contents([:rec, :CAI_BORDER_PATROL_POINT, nil])
     x, y, a = ensure_types(data, :i4, :i4, :bin8)
@@ -677,9 +721,9 @@ module EsfSemanticConverter
 
   self.instance_methods.each do |m|
     if m.to_s =~ /\Aconvert_ary_(.*)\z/
-      ConvertSemanticAry[$1.to_sym] = m
+      ConvertSemanticAry[$1.gsub("__", " ").to_sym] = m
     elsif m.to_s =~ /\Aconvert_rec_(.*)\z/
-      ConvertSemanticRec[$1.to_sym] = m
+      ConvertSemanticRec[$1.gsub("__", " ").to_sym] = m
     end
   end
 end

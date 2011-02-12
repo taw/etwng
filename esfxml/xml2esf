@@ -130,6 +130,84 @@ module XmlTagHandlers
   end
 
   ## Semantic data types - startpos.esf
+  def on_text_node_victory_conditions(attributes, buf, ctx)
+    put_rec "CAMPAIGN_VICTORY_CONDITIONS" do
+      semantic_put_ary("REGION_KEYS", buf.strip.split(/\s+/)) do |name|
+        @esf.put_s name
+      end
+      @esf.put_no
+      @esf.put_u attributes[:year].to_i
+      @esf.put_u attributes[:region_count].to_i
+      @esf.put_bool(attributes[:prestige_victory] == 'yes')
+      @esf.put_u attributes[:campaign_type].to_i
+      @esf.put_no
+      @esf.put_no
+    end
+  end
+  
+  def put_campaign_bonus(type, attributes)
+    put_rec "CAMPAIGN_BONUS_VALUE_BLOCK" do
+      put_rec "CAMPAIGN_BONUS_VALUE" do
+        @esf.put_u type
+        @esf.put_i attributes[:subtype].to_i
+        @esf.put_flt attributes[:value].to_f
+        yield
+      end
+    end
+  end
+
+  def on_empty_node_campaign_bonus_0(attributes, buf, ctx)
+    put_campaign_bonus(0, attributes) do
+      @esf.put_s attributes[:agent]
+    end
+  end
+
+  def on_empty_node_campaign_bonus_1(attributes, buf, ctx)
+    put_campaign_bonus(1, attributes) do
+    end
+  end
+
+  def on_empty_node_campaign_bonus_2(attributes, buf, ctx)
+    put_campaign_bonus(2, attributes) do
+      @esf.put_s attributes[:slot_type]
+    end
+  end
+
+  def on_empty_node_campaign_bonus_3(attributes, buf, ctx)
+    put_campaign_bonus(3, attributes) do
+      @esf.put_s attributes[:resource]
+    end
+  end
+
+  def on_empty_node_campaign_bonus_6(attributes, buf, ctx)
+    put_campaign_bonus(6, attributes) do
+      @esf.put_s attributes[:social_class]
+    end
+  end
+
+  def on_empty_node_campaign_bonus_7(attributes, buf, ctx)
+    put_campaign_bonus(7, attributes) do
+      @esf.put_s attributes[:social_class]
+      @esf.put_s attributes[:religion]
+    end
+  end
+
+  def on_empty_node_campaign_bonus_10(attributes, buf, ctx)
+    put_campaign_bonus(10, attributes) do
+      @esf.put_s attributes[:religion]
+    end
+  end
+  def on_empty_node_campaign_bonus_11(attributes, buf, ctx)
+    put_campaign_bonus(11, attributes) do
+      @esf.put_s attributes[:resource]
+    end
+  end
+  def on_empty_node_campaign_bonus_14(attributes, buf, ctx)
+    put_campaign_bonus(14, attributes) do
+      @esf.put_s attributes[:unit_type]
+    end
+  end
+
   def on_empty_node_cai_region_hlci(attributes, buf, ctx)
     put_rec "CAI_REGION_HLCI" do
       @esf.put_u attributes[:a].to_i

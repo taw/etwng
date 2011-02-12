@@ -1,5 +1,5 @@
-Right now about 58 semantic tags (+17 virtual tags) are supported,
-for about 1000 node types across all esf varieties.
+Right now about 85 xml tags corresponding to 60 esf node types are supported.
+There are about 1000 esf node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
 
@@ -151,6 +151,35 @@ Examples of each semantic tag below:
 <wind_map unknown="0.00729600992053747" pgm="wind_map-0001.pgm"/>
 
 == startpos.esf ==
+
+<victory_conditions year="1799" region_count="30" prestige_victory="no" campaign_type="1 (long)">
+ rumelia
+ venice
+ prussia
+ austria
+ west_prussia
+ west_pommerania
+ hungary
+ poland
+</victory_conditions>
+
+<campaign_bonus_0 subtype="2" value="1.0" agent="Eastern_Scholar"/>
+
+<campaign_bonus_1 subtype="33" value="2.0"/>
+
+<campaign_bonus_2 subtype="0" value="0.0" slot_type="industry-metal"/>
+
+<campaign_bonus_3 subtype="0" value="10.0" resource="res_furs"/>
+
+<campaign_bonus_6 subtype="2" value="1.0" social_class="upper"/>
+
+<campaign_bonus_7 subtype="0" value="1.0" social_class="middle" religion="rel_catholic"/>
+
+<campaign_bonus_10 subtype="1" value="1.0" religion="rel_catholic"/>
+
+<campaign_bonus_11 subtype="0" value="1.0" resource="res_gold"/>
+
+<campaign_bonus_14 subtype="3" value="0.0" unit_type="naval_line_of_battle"/>
 
 <famous_battle_info x="-56.5" y="370.0" name="Battle of: Dublin" a="1502" b="1502" c="1250" d="no"/>
 
