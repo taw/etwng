@@ -53,7 +53,10 @@ end
 
 class DragRegionsSVG < EsfScript
   def run!
+    i=0
     update_each_xml("region_data*", "rec[@type='region_data']") do |rd|
+      i+=1
+      @world = SVG.new
       vertices = []
       data = rd.xpath("//rec[@type='vertices']/v2_ary")[0].content.strip.split(/[\s,]+/)
       vertices << [data.shift.to_f, -data.shift.to_f] until data.empty?
@@ -63,17 +66,27 @@ class DragRegionsSVG < EsfScript
           false
         end
       end
+      @world.set_view(-1280.0, -640.0, 1280.0, 640.0)
+      File.write("regions_svgs/world-#{i}.svg", @world.to_s)
       false
     end
   end    
   
   def draw_region(region, vertices)
     name = region.xpath("s")[0].content
+    type = region.xpath("asc")[0].content
     areas = region.xpath("//rec[@type='areas']")
     areas = areas.map{|area_node| parse_area(area_node, vertices)}
     svg = SVG.new
     xs=[]
     ys=[]
+    
+    if type == 'land'
+      region_color = '#88FF88'
+    else
+      region_color = '#8888FF'
+    end
+    
     areas.each{|area|
       # area[:faces].each{|face|
       #   svg << %Q[<path d="#{face}" />\n]
@@ -86,6 +99,9 @@ class DragRegionsSVG < EsfScript
         color = ['red', 'blue', 'green', 'magenta', 'cyan', 'yellow', '#0F8'][i % 7]
         style="fill:#{color};fill-opacity:0.2;stroke:#{color};stroke-width:0.2px;"
         svg.add_path(outline, style)
+        
+        style2="stroke-width:0.5px;stroke:black;fill-opacity:0.2;fill:#{region_color}"
+        @world.add_path(outline, style2)
       }
     }
     svg.set_view(xs.min, ys.min, xs.max, ys.max)
