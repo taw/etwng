@@ -5,7 +5,7 @@ require "esf_scripts"
 
 class RemoveAllFortifications < EsfScript
   def run!
-    update_each_xml("region/*.xml", "//rec[@type='BUILDING_MANAGER']") do |bm|
+    update_each_xml("region*/*.xml", "//rec[@type='BUILDING_MANAGER']") do |bm|
       is_present, building, = bm.xpath("*")
       next unless is_present.name == 'yes'
       next unless building.name == 'building'
