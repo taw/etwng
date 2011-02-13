@@ -40,6 +40,7 @@ class DirBuilder
   end
 
   def alloc_new_path(base_name, semantic_name, ext)
+    semantic_name = semantic_name.gsub(/[:\/\/]/, "-") if semantic_name
     alloc_key = [base_name, semantic_name, ext]
     name = base_name
     name += "-" unless name =~ /[-\/]\z/
