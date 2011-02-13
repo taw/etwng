@@ -295,6 +295,8 @@ module EsfSemanticConverter
     end
   end
   
+  # end
+  
   def convert_rec_CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC_PATROL_POINTS
     data, = get_rec_contents([:rec, :CAI_BORDER_PATROL_POINT, nil])
     x, y, a = ensure_types(data, :i4, :i4, :bin8)
@@ -304,15 +306,31 @@ module EsfSemanticConverter
     out!(%Q[<cai_border_patrol_point x="#{x}" y="#{y}" a="#{a}"/>])
   end
   
+  # end
+  
   
   def lookahead_v2x?(ofs_end)
-    @ofs+10 < ofs_end and @data[@ofs, 1] == "\x04" and @data[@ofs+5, 1] == "\x04"
+    @ofs+10 <= ofs_end and @data[@ofs, 1] == "\x04" and @data[@ofs+5, 1] == "\x04"
   end
   
+  # Call only if lookahead_v2x? says it's ok
   def convert_v2x!
     x = get_value![1] * 0.5**20
     y = get_value![1] * 0.5**20
     out!(%Q[<v2x x="#{x}" y="#{y}"/>])
+  end
+  
+  def each_rec_member(type)
+    tag!("rec", :type => type) do
+      ofs_end = get_u4
+      i = 0
+      while @ofs < ofs_end
+        xofs = @ofs
+        yield(ofs_end, i)
+        send(@esf_type_handlers[get_byte]) if xofs == @ofs
+        i += 1
+      end
+    end
   end
   
   def convert_rec_LOCOMOTABLE
@@ -321,7 +339,86 @@ module EsfSemanticConverter
       convert_v2x! if lookahead_v2x?(ofs_end)
       convert_v2x! if lookahead_v2x?(ofs_end)
       send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
-    end      
+    end
+  end
+  
+  def convert_rec_FORT
+    tag!("rec", :type => "FORT") do
+      ofs_end = get_u4
+      convert_v2x! if lookahead_v2x?(ofs_end)
+      send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
+    end
+  end
+  
+  def convert_rec_SIEGEABLE_GARRISON_RESIDENCE
+    each_rec_member("SIEGEABLE_GARRISON_RESIDENCE") do |ofs_end, i|
+      convert_v2x! if i == 10 and lookahead_v2x?(ofs_end)
+    end
+  end
+  
+  def convert_rec_CAI_BDI_COMPONENT_PROPERTY_SET
+    each_rec_member("CAI_BDI_COMPONENT_PROPERTY_SET") do |ofs_end, i|
+      convert_v2x! if (i == 10 or i == 13) and lookahead_v2x?(ofs_end)
+    end
+  end
+  
+  def convert_rec_CAI_BDIM_WAIT_HERE
+    each_rec_member("CAI_BDIM_WAIT_HERE") do |ofs_end, i|
+      convert_v2x! if i == 0 and lookahead_v2x?(ofs_end)
+    end
+  end
+  
+  def convert_rec_CAI_BDIM_MOVE_TO_POSITION
+    each_rec_member("CAI_BDIM_MOVE_TO_POSITION") do |ofs_end, i|
+      convert_v2x! if (i == 1 or i == 5) and lookahead_v2x?(ofs_end)
+    end
+  end
+  
+  def convert_rec_CAI_BDI_RECRUITMENT_NEW_FORCE_OF_OR_REINFORCE_TO_STRENGTH
+    each_rec_member("CAI_BDI_RECRUITMENT_NEW_FORCE_OF_OR_REINFORCE_TO_STRENGTH") do |ofs_end, i|
+      convert_v2x! if i == 4 and lookahead_v2x?(ofs_end)
+    end
+  end
+  
+  # This is somewhat dubious
+  # Type seems to be:
+  # * u, false, v2x
+  # * u, true u, v2x
+  # Revert if it causes any problems
+  def convert_rec_CAI_TRADE_ROUTE_POI_RAID_ANALYSIS
+    each_rec_member("CAI_TRADE_ROUTE_POI_RAID_ANALYSIS") do |ofs_end, i|
+      convert_v2x! if (i == 2 or i == 3) and lookahead_v2x?(ofs_end)
+    end
+  end
+  
+  def convert_rec_CAI_BDIM_SIEGE_SH
+    each_rec_member("CAI_BDIM_SIEGE_SH") do |ofs_end, i|
+      convert_v2x! if i == 5 and lookahead_v2x?(ofs_end)
+    end
+  end
+  
+  def convert_rec_REGION_SLOT
+    each_rec_member("REGION_SLOT") do |ofs_end, i|
+      convert_v2x! if i == 6 and lookahead_v2x?(ofs_end)
+    end
+  end
+  
+  def convert_rec_CAI_HLPP_INFO
+    each_rec_member("CAI_HLPP_INFO") do |ofs_end, i|
+      convert_v2x! if i == 1 and lookahead_v2x?(ofs_end)
+    end
+  end
+  
+  def convert_rec_CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC
+    each_rec_member("CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC") do |ofs_end, i|
+      convert_v2x! if i == 3 and lookahead_v2x?(ofs_end)
+    end
+  end
+  
+  def convert_rec_CAI_BDI_UNIT_RECRUITMENT_NEW
+    each_rec_member("CAI_BDI_UNIT_RECRUITMENT_NEW") do |ofs_end, i|
+      convert_v2x! if i == 0 and lookahead_v2x?(ofs_end)
+    end
   end
   
   def convert_rec_FAMOUS_BATTLE_INFO
