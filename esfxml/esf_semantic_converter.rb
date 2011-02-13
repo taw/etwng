@@ -261,6 +261,7 @@ module EsfSemanticConverter
       regions.map{|name| " #{name.xml_escape}"})
     end
   
+  
   def convert_rec_CAMPAIGN_BONUS_VALUE_BLOCK
     (types, data), = get_rec_contents([:rec, :CAMPAIGN_BONUS_VALUE, nil])
     # types, data = get_rec_contents_dynamic
@@ -304,44 +305,23 @@ module EsfSemanticConverter
   end
   
   
+  def lookahead_v2x?(ofs_end)
+    @ofs+10 < ofs_end and @data[@ofs, 1] == "\x04" and @data[@ofs+5, 1] == "\x04"
+  end
+  
+  def convert_v2x!
+    x = get_value![1] * 0.5**20
+    y = get_value![1] * 0.5**20
+    out!(%Q[<v2x x="#{x}" y="#{y}"/>])
+  end
+  
   def convert_rec_LOCOMOTABLE
-    types, data = get_rec_contents_dynamic
-    
-    raise SemanticFail.new unless types[0, 4] == [:i4, :i4, :i4, :i4]
-
-    types = types[4..-1]
-    
     tag!("rec", :type => "LOCOMOTABLE") do
-      x = data.shift * 0.5**20
-      y = data.shift * 0.5**20
-      out!(%Q[<v2x x="#{x}" y="#{y}"/>])
-      x = data.shift * 0.5**20
-      y = data.shift * 0.5**20
-      out!(%Q[<v2x x="#{x}" y="#{y}"/>])
-      until data.empty?
-        v = data.shift
-        t = types.shift
-        case t
-        when :i4
-          out!("<i>#{v}</i>")
-        when :u4
-          out!("<u>#{v}</u>")
-        when :flt
-          out!("<flt>#{v}</flt>")
-        when :u2x
-          out!("<u2x>#{v}</u2x>")
-        when :bool
-          if v
-            out!("<yes/>")
-          else
-            out!("<no/>")
-          end
-        else
-          # Should be possible to recover from it, isn't just yet
-          raise "Total failure while converting LOCOMOTABLE"
-        end
-      end
-    end
+      ofs_end = get_u4
+      convert_v2x! if lookahead_v2x?(ofs_end)
+      convert_v2x! if lookahead_v2x?(ofs_end)
+      send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
+    end      
   end
   
   def convert_rec_FAMOUS_BATTLE_INFO
