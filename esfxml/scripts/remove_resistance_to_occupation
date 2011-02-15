@@ -5,8 +5,10 @@ require "esf_scripts"
 
 class RemoveResistanceToOccupation < EsfScript
   def run!
-    update_each_xml("population/*.xml", "//rec[@type='POPULATION_CLASS']") do |pc|
-      pc.xpath("i")[6].content = 0
+    update_each_xml("population/*.xml", "//population_class") do |pc|
+      # Do not remove positive resistance (against raids by enemy armies)
+      pc['resistance'] = '0' if pc['resistance'].to_i < 0
+      pc['foreign'] = '0' if pc['foreign'].to_i < 0
       true
     end
   end

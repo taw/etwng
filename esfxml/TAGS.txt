@@ -1,4 +1,4 @@
-Right now about 85 xml tags corresponding to 60 esf node types are supported.
+Right now about 86 xml tags corresponding to 60 esf node types are supported.
 There are about 1000 esf node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -151,6 +151,39 @@ Examples of each semantic tag below:
 <wind_map unknown="0.00729600992053747" pgm="wind_map-0001.pgm"/>
 
 == startpos.esf ==
+
+
+<population_class
+   social_class="upper"
+   gov_type_happy="1"
+   taxes="-10"
+   religion="-1"
+   events="0"
+   culture="0"
+   industry="0"
+   characters_happy="-4"
+   war="0"
+   reform="0"
+   bankrupcy="0"
+   resistance="0"
+   gov_type="3"
+   gov_buildings="1"
+   characters="1"
+   policing="5"
+   garrison="0"
+   crackdown="0"
+   happy_total="1"
+   unhappy_total="-15"
+   repression_total="10"
+   unknown_1="88"
+   turns_rioting="2"
+   unknown_3="3"
+   unknown_4="1"
+   unknown_5="6"
+   unknown_zero="0"
+   foreign="0"
+/>
+
 
 <victory_conditions year="1799" region_count="30" prestige_victory="no" campaign_type="1 (long)">
  rumelia

@@ -295,7 +295,55 @@ module EsfSemanticConverter
     end
   end
   
-  # end
+  def convert_rec_POPULATION__CLASSES
+    data, = get_rec_contents([:rec, :POPULATION_CLASS, nil])
+    data = ensure_types(data, :s, :bin4, :bin4, :i4,:i4,:i4,:i4,:i4, :u4,:u4,:u4, :i4,:i4)
+    cls = data.shift
+    a1 = data.shift.unpack("l*")
+    a2 = data.shift.unpack("l*")
+    raise SemanticFail.new unless a1.size == 11
+    raise SemanticFail.new unless a2.size == 6
+    attrs = [
+      ["social_class", cls.xml_escape],
+
+      ["gov_type_happy", a1.shift],
+      ["taxes", a1.shift],
+      ["religion", a1.shift],
+      ["events", a1.shift],
+      ["culture", a1.shift],
+      ["industry", a1.shift],
+      ["characters_happy", a1.shift],
+      ["war", a1.shift],
+      ["reform", a1.shift],
+      ["bankrupcy", a1.shift],
+      ["resistance", a1.shift],
+      
+      ["gov_type", a2.shift],
+      ["gov_buildings", a2.shift],
+      ["characters", a2.shift],
+      ["policing", a2.shift],
+      ["garrison", a2.shift],
+      ["crackdown", a2.shift],
+    
+      ["happy_total", data.shift],
+      ["unhappy_total", data.shift],
+      ["repression_total", data.shift],
+      
+      ["unknown_1", data.shift],    # rioting-related
+      ["turns_rioting", data.shift],
+      ["unknown_3", data.shift],    # (uint) rioting related
+      ["unknown_4", data.shift],    # (uint) rioting-related
+      ["unknown_5", data.shift],    # (uint) 7 is normal, 1/2/6/10 also seen, rioting-related
+      ["unknown_zero", data.shift],
+      ["foreign", data.shift],
+    ]
+    raise SemanticFail.new unless a1 == [] and a2 == [] and data == []
+    out!("<population_class")
+    attrs.each{|name,value|
+      out!(%Q[  #{name}="#{value}"])
+    }
+    out!("/>")
+  end
   
   def convert_rec_CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC_PATROL_POINTS
     data, = get_rec_contents([:rec, :CAI_BORDER_PATROL_POINT, nil])
