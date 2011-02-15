@@ -257,4 +257,6 @@ DefaultVersions = Hash.new(0).merge({
   :WORLD => 4,
   :CHARACTER_JOIN_GARRISON_CONTROLLER => 2,
   :GARRISON_ATTACK_ACTION_CONTROLLER => 3,
+  :REBEL_DATA_INNARDS => 1,
+  :REBEL_SETUP => 1,
 })
