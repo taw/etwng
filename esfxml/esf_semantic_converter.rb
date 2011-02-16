@@ -50,6 +50,45 @@ module EsfSemanticConverter
 ## Tag converters
 
 ## startpos.esf arrays
+  def lookahead_faction_ids
+    save_ofs = @ofs
+    ofs_end = get_u4
+    count = get_u4
+    
+    rv = {}
+    id = nil
+    
+    count.times do
+      rec_end_ofs = get_u4
+      return nil unless get_byte == 0x80
+      return nil unless get_node_type_and_version == [:FACTION, nil]
+      return nil unless rec_end_ofs == get_u4
+      while @ofs < rec_end_ofs
+        t = get_byte
+        if t == 0x80 or t == 0x81
+          @ofs += 3
+          @ofs  = get_u4
+        elsif t == 4
+          id = get_u4
+        elsif t == 14
+          rv[id] = get_str
+          @ofs = rec_end_ofs
+        else
+          warn "Unexpected field type #{t} during lookahead of faction ids"
+          return nil
+        end
+      end
+    end
+    return rv
+  ensure
+    @ofs = save_ofs
+  end
+
+  def convert_ary_FACTION_ARRAY
+    @faction_ids = lookahead_faction_ids
+    raise QuietSemanticFail.new
+  end
+
   def convert_ary_UNIT__LIST
     data = get_ary_contents(:s).flatten
     raise SemanticFail.new if data.any?{|name| name =~ /\s/}
@@ -499,7 +538,7 @@ module EsfSemanticConverter
     b = b.unpack("V*").join(" ")
     out!(%Q[<cai_situated x="#{x}" y="#{y}" a="#{a}" b="#{b}" c="#{c}"/>])
   end
-  
+    
   def convert_rec_THEATRE_TRANSITION_INFO
     link, a, b, c = get_rec_contents([:rec, :CAMPAIGN_MAP_TRANSITION_LINK, nil], :bool, :bool, :u4)
     fl, time, dest, via = ensure_types(link, :flt, :u4, :u4, :u4)
@@ -572,7 +611,6 @@ module EsfSemanticConverter
     
     raise SemanticFail.new unless unit_data == []
 
-    
     tag!("land_unit",
       :unit_id => unit_id,
       :commander_id => commander_id,
@@ -712,6 +750,17 @@ module EsfSemanticConverter
     ownerships = ownerships.map{|o| ensure_types(o, :s, :s)}
     raise SemanticFail.new if ownerships.any?{|region, owner| region =~ /\s|=/ or owner =~ /\s|=/}
     out_ary!("region_ownerships_by_theatre", " theatre=\"#{theatre.xml_escape}\"", ownerships.map{|region, owner| " #{region.xml_escape}=#{owner.xml_escape}" })
+  end
+  
+  def convert_rec_DIPLOMACY_RELATIONSHIP
+    each_rec_member("DIPLOMACY_RELATIONSHIP") do |ofs_end, i|
+      if i == 0 and ofs_end >= @ofs+5 and @data[@ofs, 1] == "\x04"
+        id = get_value![1]
+        tag = "<i>#{id}</i>"        
+        tag += "<!-- #{@faction_ids[id].xml_escape} -->" if @faction_ids and @faction_ids[id]
+        out!(tag)
+      end
+    end
   end
 
 ## bmd.dat records
