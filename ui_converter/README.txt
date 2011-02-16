@@ -34,17 +34,8 @@ If you really need to open one of the pre-Version032 files, contact taw.
 
 === Usage ===
 
-At the moment each version has separate Python script.
-It would be obviously a lot more convenient to merge them in the future.
-
+There's now a single script which handles Version032, Version033, and Version039.
 Depending on version of ui layout file you want to convert do one of the following:
 
-$ python3.1 convert_ui_v39.py -u uifile uifile.xml
-$ python3.1 convert_ui_v39.py -x uifile.xml uifile
-
-$ python3.1 convert_ui_v33.py -u uifile uifile.xml
-$ python3.1 convert_ui_v33.py -x uifile.xml uifile
-
-$ python3.1 convert_ui_v32.py -u uifile uifile.xml
-$ python3.1 convert_ui_v32.py -x uifile.xml uifile
-
+$ python3.1 convert_ui.py -u uifile uifile.xml
+$ python3.1 convert_ui.py -x uifile.xml uifile

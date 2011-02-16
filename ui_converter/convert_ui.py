@@ -147,19 +147,20 @@ class uiEntry:
         self.tooltipText = handle.readUTF16()
         
         self.int3 = handle.readInt()
+
         if self.version >= 33:
           self.flag4 = handle.readByte()
         if self.version >= 39:
           self.int4 = handle.readInt()
         
         self.script = handle.readASCII()
-        
+
         self.numTGAs = handle.readInt()
         for i in range(self.numTGAs):
             tga = tgaEntry(self.version, self.indent + 2)
             tga.readFrom(handle)
             self.TGAs.append(tga)
-        
+
         self.int5 = handle.readInt()
         self.int6 = handle.readInt()
 
@@ -169,7 +170,7 @@ class uiEntry:
             newstate = state(self.version, self.indent + 2)
             newstate.readFrom(handle)
             self.states.append(newstate)
-        
+
         self.int26 = handle.readInt()
         
         ev = handle.readASCII()
@@ -178,9 +179,12 @@ class uiEntry:
             ev = handle.readASCII()
         
         self.eventsEnd = ev
+
         self.int27 = handle.readInt()
         if self.version >= 39:
           self.int28 = handle.readInt()
+
+
         self.numChildren = handle.readInt()
         
         for i in range(self.numChildren):
@@ -889,7 +893,7 @@ class transition:
           self.short1 = handle.readShort()
           self.int1 = handle.readInt()
           self.int2 = handle.readInt()
-        
+    
     def writeTo(self, handle):
         """
         Writes to a TypeCastWriter handle
@@ -932,11 +936,15 @@ def convertUIToXML(uiFilename, textFilename):
     uiFile = TypeCastReader(open(uiFilename, "rb"))
     
     versionString = uiFile.read(10)
-    if versionString != b"Version039":
+    if versionString[0:7] != b"Version":
         print("Not a UI layout file or unknown file version: "+uiFilename)
         return
-    
     versionNumber = int(versionString[7:10])
+
+    if versionNumber not in [32, 33, 39]:
+      print("Version %d not supported" % versionNumber)
+      return
+    
     outFile = open(textFilename, "w")
     outFile.write("<ui>\n\t<version>%03d</version>\n" % versionNumber)
     

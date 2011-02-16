@@ -23,21 +23,19 @@ class RunAllTests
     
   def run_test(source, xml, out, version)
     FileUtils.mkdir_p File.dirname(xml)
-    case version
-    when 'Version039', 'Version033', 'Version032'
-      ver = version[-2..-1]
-
+    # case version
+    # when 'Version039', 'Version033', 'Version032'
       puts "Conversion of #{source} to #{xml}"
-      return 'ui->xml fail' unless system "./convert_ui_v#{ver}.py", "-u", source, xml
+      return 'ui->xml fail' unless system "./convert_ui.py", "-u", source, xml
       
       puts "Conversion of #{xml} back to #{out}"
-      return 'xml->ui fail' unless system "./convert_ui_v#{ver}.py", "-x", xml, out
+      return 'xml->ui fail' unless system "./convert_ui.py", "-x", xml, out
       
       return 'differ' unless system "diff", source, out
       return 'ok'
-    else
-      'not supported'
-    end
+    # else
+    #   'not supported'
+    # end
   end
   
   def read_version(file_name)
