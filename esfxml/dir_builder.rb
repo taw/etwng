@@ -50,14 +50,16 @@ class DirBuilder
       name += "#{semantic_name}"
     end
     while true
+      rel_path = name
       i = (@path_allocator[alloc_key] ||= (name =~ /%d/ ? 1 : 0))
       @path_allocator[alloc_key] += 1
       ix = "%04d" % i
-      rel_path = name
       if name =~ /%d/
         rel_path = rel_path.sub("%d", ix)
       elsif i > 0
         rel_path += "-" unless rel_path =~ /[-\/]\z/
+        rel_path += ix
+      elsif rel_path =~ /[-\/]\z/
         rel_path += ix
       end
       rel_path += ext
