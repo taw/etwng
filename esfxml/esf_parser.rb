@@ -1,5 +1,7 @@
 class SemanticFail < Exception
 end
+class QuietSemanticFail < SemanticFail
+end
 
 class Float
   def pretty_single
@@ -277,6 +279,9 @@ module EsfParserSemantic
     begin
       save_ofs = @ofs
       yield
+    rescue QuietSemanticFail
+      # Simple fall-through, used for some lookahead
+      @ofs = save_ofs
     rescue SemanticFail
       # This is debug only, it's normally perfectly safe
       pp [:semantic_rollback, @ofs, save_ofs, node_type]
