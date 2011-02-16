@@ -235,7 +235,7 @@ module EsfSemanticConverter
 
   def convert_rec_climate_map
     xsz, ysz, data = get_rec_contents(:u4, :u4, :bin6)
-    path, rel_path = dir_builder.alloc_new_path("maps/climate_map", nil, ".pgm")
+    path, rel_path = dir_builder.alloc_new_path("maps/climate_map-%d", nil, ".pgm")
     File.write_pgm(path, xsz, ysz, data)
     out!("<climate_map pgm=\"#{rel_path}\"/>")
   end
@@ -659,7 +659,7 @@ module EsfSemanticConverter
   def convert_rec_MAPS
     name, x, y, unknown, data = get_rec_contents(:s, :u4, :u4, :i4, :bin8)
     raise SemanticFail.new if name =~ /\s/
-    path, rel_path = dir_builder.alloc_new_path("map", nil, ".pgm")
+    path, rel_path = dir_builder.alloc_new_path("map-%d", nil, ".pgm")
     File.write_pgm(path, x*4, y, data)
     out!("<map name=\"#{name.xml_escape}\" unknown=\"#{unknown}\" pgm=\"#{rel_path.xml_escape}\"/>")
   end
@@ -718,7 +718,7 @@ module EsfSemanticConverter
 
   def convert_rec_HEIGHT_FIELD
     xi, yi, (xf, yf), data, unknown, hmin, hmax = get_rec_contents(:u4, :u4, :v2, :flt_ary, :i4, :flt, :flt)
-    path, rel_path = dir_builder.alloc_new_path("height_field", nil, ".pgm")
+    path, rel_path = dir_builder.alloc_new_path("height_field-%d", nil, ".pgm")
     File.write_pgm(path, 4*xi, yi, data)
     out!("<height_field xsz=\"#{xf}\" ysz=\"#{yf}\" pgm=\"#{rel_path.xml_escape}\" unknown=\"#{unknown}\" hmin=\"#{hmin}\" hmax=\"#{hmax}\"/>")
   end
@@ -736,7 +736,7 @@ module EsfSemanticConverter
       until data.empty?
         if data.size == 3 and types == [:u4, :u4, :bin6]
           xsz, ysz, pxdata = data
-          path, rel_path = dir_builder.alloc_new_path("bmd_textures/texture", nil, ".pgm")
+          path, rel_path = dir_builder.alloc_new_path("bmd_textures/texture-%d", nil, ".pgm")
           File.write_pgm(path, 4*xsz, ysz, pxdata)
           out!("<bmd_pgm pgm=\"#{rel_path.xml_escape}\"/>")
           break

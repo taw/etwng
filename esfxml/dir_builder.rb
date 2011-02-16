@@ -4,7 +4,7 @@ class DirBuilder
   
   def initialize(out_dir)
     @out_dir = out_dir
-    @path_allocator = Hash.new(1)
+    @path_allocator = Hash.new
     @xml_printer = nil
     FileUtils.mkdir_p @out_dir
     @semantic_names_stack = []
@@ -43,14 +43,27 @@ class DirBuilder
     semantic_name = semantic_name.gsub(/[:\/\/]/, "-") if semantic_name
     alloc_key = [base_name, semantic_name, ext]
     name = base_name
-    name += "-" unless name =~ /[-\/]\z/
-    name += "#{semantic_name}-" if semantic_name
+    if name =~ /%s/
+      name = name.sub("%s", semantic_name || "")
+    elsif semantic_name
+      name += "-" unless name =~ /[-\/]\z/
+      name += "#{semantic_name}"
+    end
     while true
-      rel_path = "%s%04d%s" % [name, @path_allocator[alloc_key], ext]
-      path     = File.join(@out_dir, rel_path)
+      i = (@path_allocator[alloc_key] ||= (name =~ /%d/ ? 1 : 0))
       @path_allocator[alloc_key] += 1
+      ix = "%04d" % i
+      rel_path = name
+      if name =~ /%d/
+        rel_path = rel_path.sub("%d", ix)
+      elsif i > 0
+        rel_path += "-" unless rel_path =~ /[-\/]\z/
+        rel_path += ix
+      end
+      rel_path += ext
+      path = File.join(@out_dir, rel_path)
       unless File.exist?(path)
-        dirname  = File.dirname(path)
+        dirname = File.dirname(path)
         FileUtils.mkdir_p dirname unless File.exist?(dirname)
         return [path, rel_path]
       end
