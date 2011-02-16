@@ -68,7 +68,8 @@ class TypeCastWriter(io.BufferedWriter):
         
         
 class uiEntry:
-    def __init__(self, indent):
+    def __init__(self, version, indent):
+        self.version = version
         self.indent = indent
         self.id = 0
         self.title = "" #ascii
@@ -145,14 +146,16 @@ class uiEntry:
         self.tooltipText = handle.readUTF16()
         
         self.int3 = handle.readInt()
-        self.flag4 = handle.readByte()
-        # self.int4 = handle.readInt()
+        if self.version >= 33:
+          self.flag4 = handle.readByte()
+        if self.version >= 39:
+          self.int4 = handle.readInt()
         
         self.script = handle.readASCII()
 
         self.numTGAs = handle.readInt()
         for i in range(self.numTGAs):
-            tga = tgaEntry(self.indent + 2)
+            tga = tgaEntry(self.version, self.indent + 2)
             tga.readFrom(handle)
             self.TGAs.append(tga)
 
@@ -163,7 +166,7 @@ class uiEntry:
 
 
         for i in range(self.numStates):
-            newstate = state(self.indent + 2)
+            newstate = state(self.version, self.indent + 2)
             newstate.readFrom(handle)
             self.states.append(newstate)
 
@@ -177,13 +180,14 @@ class uiEntry:
         self.eventsEnd = ev
 
         self.int27 = handle.readInt()
-        # self.int28 = handle.readInt()
+        if self.version >= 39:
+          self.int28 = handle.readInt()
 
 
         self.numChildren = handle.readInt()
         
         for i in range(self.numChildren):
-            child = uiEntry(self.indent + 2)
+            child = uiEntry(self.version, self.indent + 2)
             child.readFrom(handle)
             self.children.append(child)
         
@@ -214,8 +218,10 @@ class uiEntry:
         handle.writeUTF16(self.tooltipText)
         
         handle.writeInt(self.int3)
-        handle.writeByte(self.flag4)
-        # handle.writeInt(self.int4)
+        if self.version >= 33:
+          handle.writeByte(self.flag4)
+        if self.version >= 39:
+          handle.writeInt(self.int4)
         
         handle.writeASCII(self.script)
         
@@ -240,7 +246,8 @@ class uiEntry:
         handle.writeASCII(self.eventsEnd)
         
         handle.writeInt(self.int27)
-        # handle.writeInt(self.int28)
+        if self.version >= 39:
+          handle.writeInt(self.int28)
         
         handle.writeInt(self.numChildren)
         
@@ -363,7 +370,7 @@ class uiEntry:
                 self.numTGAs = int(child.attributes.getNamedItem("num").firstChild.data)
                 for tgaNode in child.childNodes:
                     if tgaNode.nodeName == "tga":
-                        tga = tgaEntry(self.indent)
+                        tga = tgaEntry(self.version, self.indent)
                         tga.constructFromNode(tgaNode)
                         self.TGAs.append(tga)
             elif child.nodeName == "int5":
@@ -374,7 +381,7 @@ class uiEntry:
                 self.numStates = int(child.attributes.getNamedItem("num").firstChild.data)
                 for stateNode in child.childNodes:
                     if stateNode.nodeName == "state":
-                        astate = state(self.indent)
+                        astate = state(self.version, self.indent)
                         astate.constructFromNode(stateNode)
                         self.states.append(astate)
             elif child.nodeName == "int26":
@@ -396,7 +403,7 @@ class uiEntry:
                 self.numChildren = int(child.attributes.getNamedItem("num").firstChild.data)
                 for childNode in child.childNodes:
                     if childNode.nodeName == "uiEntry":
-                        ui = uiEntry(self.indent)
+                        ui = uiEntry(self.version, self.indent)
                         ui.constructFromNode(childNode)
                         self.children.append(ui)
             elif child.nodeName == "template":
@@ -404,7 +411,8 @@ class uiEntry:
                     self.template = child.firstChild.data
                         
 class tgaEntry:
-    def __init__(self, indent):
+    def __init__(self, version, indent):
+        self.version = version
         self.indent = indent
         self.id = 0 #int
         self.path = "" #ascii
@@ -460,7 +468,8 @@ class tgaEntry:
                 self.int1 = int(child.firstChild.data)
 
 class tgaUse:
-    def __init__(self, indent):
+    def __init__(self, version, indent):
+        self.version = version
         self.indent = indent
         self.id = 0 #int
         self.xOff = 0
@@ -587,7 +596,8 @@ class tgaUse:
                 self.int3 = int(child.firstChild.data)
 
 class state:
-    def __init__(self, indent):
+    def __init__(self, version, indent):
+        self.version = version
         self.indent = indent
         self.title = ""
         self.TGAUses = []
@@ -644,7 +654,7 @@ class state:
         
         self.numTGAUses = handle.readInt()
         for i in range(self.numTGAUses):
-            tga = tgaUse(self.indent + 2)
+            tga = tgaUse(self.version, self.indent + 2)
             tga.readFrom(handle)
             self.TGAUses.append(tga)
         
@@ -653,7 +663,7 @@ class state:
         
         self.numTransitions = handle.readInt()
         for i in range(self.numTransitions):
-            trans = transition(self.indent + 2)
+            trans = transition(self.version, self.indent + 2)
             trans.readFrom(handle)
             self.transitions.append(trans)
     
@@ -849,7 +859,7 @@ class state:
                 self.numTGAUses = int(child.attributes.getNamedItem("num").firstChild.data)
                 for tgaUseNode in child.childNodes:
                     if tgaUseNode.nodeName == "tgaUse":
-                        atgaUse = tgaUse(self.indent)
+                        atgaUse = tgaUse(self.version, self.indent)
                         atgaUse.constructFromNode(tgaUseNode)
                         self.TGAUses.append(atgaUse)
             elif child.nodeName == "int23":
@@ -860,13 +870,17 @@ class state:
                 self.numTransitions = int(child.attributes.getNamedItem("num").firstChild.data)
                 for transitionNode in child.childNodes:
                     if transitionNode.nodeName == "transition":
-                        atransition = transition(self.indent)
+                        atransition = transition(self.version, self.indent)
                         atransition.constructFromNode(transitionNode)
                         self.transitions.append(atransition)
 
 class transition:
-    def __init__(self, indent):
+    def __init__(self, version, indent):
+        self.version = version
         self.indent = indent
+        self.short1 = 0
+        self.int1 = 0
+        self.int2 = 0
         
     def readFrom(self, handle):
         """
@@ -874,6 +888,10 @@ class transition:
         """
         self.type = handle.readInt()
         self.id = handle.readInt()
+        if self.version >= 39:
+          self.short1 = handle.readShort()
+          self.int1 = handle.readInt()
+          self.int2 = handle.readInt()
         
     def writeTo(self, handle):
         """
@@ -881,12 +899,16 @@ class transition:
         """
         handle.writeInt(self.type)
         handle.writeInt(self.id)
+        if self.version >= 39:
+          handle.writeShort(self.short1)
+          handle.writeInt(self.int1)
+          handle.writeInt(self.int2)
         
     def writeToXML(self, handle):
         """
         Writes to a text file handle
         """
-        handle.write("%(indent)s<transition>\n%(indent+1)s<type>%(type)i</type>\n%(indent+1)s<stateIDRef>%(id)i</stateIDRef>\n%(indent)s</transition>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "type": self.type, "id": self.id})
+        handle.write("%(indent)s<transition>\n%(indent+1)s<type>%(type)i</type>\n%(indent+1)s<stateIDRef>%(id)i</stateIDRef>\n%(indent+1)s<short1>%(short1)i</short1>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent+1)s<int2>%(int2)i</int2>\n%(indent)s</transition>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "type": self.type, "id": self.id, "short1": self.short1, "int1": self.int1, "int2": self.int2})
 
     def constructFromNode(self, node):
         """
@@ -917,10 +939,11 @@ def convertUIToXML(uiFilename, textFilename):
         print("Not a UI layout file or unknown file version: "+uiFilename)
         return
     
+    versionNumber = int(versionString[7:10])
     outFile = open(textFilename, "w")
-    outFile.write("<ui>\n\t<version>033</version>\n")
+    outFile.write("<ui>\n\t<version>%03d</version>\n" % versionNumber)
     
-    uiE = uiEntry(1)
+    uiE = uiEntry(versionNumber, 1)
     uiE.readFrom(uiFile)
     uiE.writeToXML(outFile)
     
@@ -936,7 +959,7 @@ def convertXMLToUI(xmlFilename, uiFilename):
     version = versionNode.firstChild.nodeValue
     
     rootNode = versionNode.nextSibling.nextSibling
-    root = uiEntry(0)
+    root = uiEntry(int(version), 0)
     root.constructFromNode(rootNode)
     
     outFile = TypeCastWriter(open(uiFilename, "wb"))
