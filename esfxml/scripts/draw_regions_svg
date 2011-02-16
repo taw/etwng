@@ -57,6 +57,7 @@ end
 
 class DragRegionsSVG < EsfScript
   def run!
+    FileUtils.mkdir_p target_dir
     i=0
     update_each_xml("region_data*", "rec[@type='region_data']") do |rd|
       i+=1
@@ -69,7 +70,7 @@ class DragRegionsSVG < EsfScript
           false
         end
       end
-      @world.save("regions_svgs/world-#{i}.svg")
+      @world.save("#{target_dir}/world-#{i}.svg")
       false
     end
   end
@@ -92,7 +93,6 @@ class DragRegionsSVG < EsfScript
     f = 1-f if i&1 == 0
     m = v * (1-s)
     n = v * (1-s*f)
-    # raise "FAIL #{v}/#{n}/#{m} / hsv(#{h},#{s},#{v})" if v > 1 or n > 1 or m > 1
     case i
     when 0 then rgb(v,n,m)
     when 1 then rgb(n,v,m)
@@ -144,9 +144,8 @@ class DragRegionsSVG < EsfScript
       }
     }
     svg.set_view(xs.min, ys.min, xs.max, ys.max)
-    svg.save("regions_svgs/#{name}.svg")
+    svg.save("#{target_dir}/#{name}.svg")
   end
-  
   def parse_area(area_node, vertices)
     {
       :faces => area_node.xpath("rec[@type='faces']/u4_ary").map{|face| u4_ary_to_path(face.content, vertices)},
@@ -157,7 +156,10 @@ class DragRegionsSVG < EsfScript
   def u4_ary_to_path(u4_ary, vertices)
     u4_ary.strip.split(/\s+/).map{|x| vertices[x.to_i]}
   end
+  
+  def target_dir
+    "regions_svg"
+  end
 end
 
-FileUtils.mkdir_p "regions_svgs"
 DragRegionsSVG.new
