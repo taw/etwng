@@ -282,7 +282,7 @@ class uiEntry:
 %(indent+1)s<flag4>%(flag4)i</flag4>
 %(indent+1)s<script>%(script)s</script>
 %(indent+1)s<tgas num="%(numTGAs)i">
-"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "script": self.script.replace("<", "&lt;"), "numTGAs": self.numTGAs})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "script": self.script, "numTGAs": self.numTGAs})
         for tga in self.TGAs:
             tga.writeToXML(handle)
         
@@ -366,7 +366,7 @@ class uiEntry:
                 self.int4 = int(child.firstChild.data)
             elif child.nodeName == "script":
                 if len(child.childNodes) > 0:
-                    self.script = child.firstChild.data.replace("&lt;", "<")
+                    self.script = child.firstChild.data
             elif child.nodeName == "tgas":
                 self.numTGAs = int(child.attributes.getNamedItem("num").firstChild.data)
                 for tgaNode in child.childNodes:
