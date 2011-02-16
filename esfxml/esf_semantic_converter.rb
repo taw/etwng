@@ -285,6 +285,33 @@ module EsfSemanticConverter
     File.write_pgm(path, xsz*2, ysz, data)
     out!("<wind_map unknown=\"#{unknown}\" pgm=\"#{rel_path.xml_escape}\"/>")
   end
+  
+  def convert_rec_areas
+    each_rec_member("areas") do |ofs_end, i|
+      case [i, @data[@ofs, 1]]
+      when [0, "\x01"]
+        tag = get_value![1] ? "<yes/>" : "<no/>"
+        out!("#{tag}<!-- is land bridge -->")
+      when [1, "\x01"]
+        tag = get_value![1] ? "<yes/>" : "<no/>"
+        out!("#{tag}<!-- English Channel coast ? -->")
+      when [2, "\x01"]
+        tag = get_value![1] ? "<yes/>" : "<no/>"
+        out!("#{tag}<!-- passable -->")
+      when [5, "\x07"]
+        v = get_value![1]
+        out!("<u2>#{v}</u2><!-- unknown1 id -->")
+      when [8, "\x07"]
+        v = get_value![1]
+        out!("<u2>#{v}</u2><!-- unknown2 id -->")
+      when [9, "\x07"]
+        v = get_value![1]
+        labels = {104 => "mainland"}
+        label = labels[v] ? " (#{v}=#{labels[v]})" : ""
+        out!("<u2>#{v}</u2><!-- island id#{label} -->")
+      end
+    end
+  end
 
 ## startpos.esf records
   def convert_rec_CAMPAIGN_VICTORY_CONDITIONS
@@ -298,7 +325,7 @@ module EsfSemanticConverter
     out_ary!("victory_conditions",
       %Q[ year="#{year}" region_count="#{region_count}" prestige_victory="#{prestige_victory}" campaign_type="#{campaign_type}"],
       regions.map{|name| " #{name.xml_escape}"})
-    end
+  end
   
   
   def convert_rec_CAMPAIGN_BONUS_VALUE_BLOCK
