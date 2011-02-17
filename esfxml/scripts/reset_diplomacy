@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class ResetDiplomacy < EsfScript
+  def get_faction_ids
+    factions = {}
+    each_faction do |faction, faction_name|
+      id = faction.xpath("i")[0].content
+      factions[id] = faction_name
+      false
+    end
+    factions    
+  end
+  
+  def run!
+    faction_ids = get_faction_ids
+    factions = []
+    each_faction do |faction, faction_name|
+      diplomacy_include = faction.xpath("xml_include").map{|xi| xi["path"]}.grep(/\Adiplomacy/)[0]
+      next unless diplomacy_include
+      path = "#{@xmldir}/#{diplomacy_include}"
+      update_xml(path, "//rec[@type='DIPLOMACY_RELATIONSHIP']") do |dr|
+        second_faction_id = dr.xpath("i")[0].content
+        second_faction_name = faction_ids[second_faction_id]
+        reset_diplomacy(faction_name, second_faction_name, dr)
+        true
+      end
+      # Last step to remove protectorate status
+      faction.xpath("i")[5].content = "0"
+      true
+    end
+  end
+  
+  def reset_diplomacy(faction1, faction2, dr)
+    return if faction1 == "pirates" or faction2 == "pirates"
+    dr.xpath("*/draa").each_with_index do |draa, i|
+      next if i == 15 or i == 16 # religion, gov type
+      draa.attributes.each do |name, attr|
+        attr.remove
+      end
+    end
+    dr.xpath("*")[2..-1].each do |node|
+      if node.name == 'yes' or node.name == 'no'
+        node.name = 'no'
+      elsif node.name == 'i' or node.name == 'u'
+        node.content = '0'
+      elsif node.name == 's'
+        node.content = 'neutral'
+      elsif node.name == 'ary'
+        node.content = ""
+      elsif node.name == "u4_ary"
+        node.content = "0 0 0 0 0 0 0 0 0 0 0"
+      else
+        raise "Unexpected node: #{node.name}"
+      end
+    end
+  end
+end
+
+ResetDiplomacy.new
