@@ -69,9 +69,14 @@ module EsfBasicBinaryOps
   def lookahead_str
     end_ofs = @data[@ofs, 4].unpack("V")[0]
     la_ofs = @ofs + 4
-    # puts "Lookahead until #{end_ofs}"
+    # Only single <rec> inside <rec>
+    # Just ignore existence of container, and see what's inside
+    if la_ofs < end_ofs and @data[la_ofs] == 0x80 and @data[la_ofs+4, 4].unpack("V")[0] == end_ofs
+      la_ofs += 8
+    end
+    
     while la_ofs < end_ofs
-      tag = @data[la_ofs, 1].unpack("C")[0]
+      tag = @data[la_ofs]
       # puts "At #{la_ofs}, tag #{"%02x" % tag}"
       if tag == 0x0e
         sz, = @data[la_ofs+1, 2].unpack("v")
@@ -88,9 +93,7 @@ module EsfBasicBinaryOps
         la_ofs += sz
       elsif tag >= 0x40 and tag <= 0x4f
         la_ofs = @data[la_ofs+1, 4].unpack("V")[0]
-      elsif tag == 0x80
-        la_ofs = @data[la_ofs+4, 4].unpack("V")[0]
-      elsif tag == 0x81
+      elsif tag == 0x80 or tag == 0x81
         la_ofs = @data[la_ofs+4, 4].unpack("V")[0]
       else
         return nil

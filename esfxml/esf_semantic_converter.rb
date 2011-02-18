@@ -327,6 +327,16 @@ module EsfSemanticConverter
       regions.map{|name| " #{name.xml_escape}"})
   end
   
+  # def convert_rec_BUILDING_CONSTRUCTION_ITEM
+  #   pp :bci
+  #   types, data = get_rec_contents_dynamic
+  #   raise "Die in fire" unless types.shift(5) == [:u4, :bool, :u4, :u4, :u4]
+  #   code, flag, turns_done, turns, cost = data.shift(5)
+  #   pp [:bci, code, flag, "#{turns_done}/#{turns}", cost, types, data] 
+  #   puts ""
+  #   raise SemanticFail.new
+  # end
+
   
   def convert_rec_CAMPAIGN_BONUS_VALUE_BLOCK
     (types, data), = get_rec_contents([:rec, :CAMPAIGN_BONUS_VALUE, nil])
@@ -420,8 +430,12 @@ module EsfSemanticConverter
     out!(%Q[<cai_border_patrol_point x="#{x}" y="#{y}" a="#{a}"/>])
   end
   
+  # def convert_rec_QUAD_TREE_BIT_ARRAY_NODE
+  #   a, b = get_rec_contents(:u4, :u4)
+  #   a = "%08x" % a
+  #   b = "%08x" % b
+  #   out!(%Q[<quad_tree_leaf a="#{a}" b="#{b}"/>])
   # end
-  
   
   def lookahead_v2x?(ofs_end)
     @ofs+10 <= ofs_end and @data[@ofs, 1] == "\x04" and @data[@ofs+5, 1] == "\x04"
@@ -492,6 +506,19 @@ module EsfSemanticConverter
     each_rec_member("CAI_BDI_RECRUITMENT_NEW_FORCE_OF_OR_REINFORCE_TO_STRENGTH") do |ofs_end, i|
       convert_v2x! if i == 4 and lookahead_v2x?(ofs_end)
     end
+  end
+  
+    
+  def convert_rec_FACTION
+    faction_name = lookahead_str
+    @dir_builder.faction_name = faction_name
+    rel_path = @dir_builder.open_nested_xml(XmlSplit[:FACTION], faction_name) do
+      tag!("rec", :type=>"FACTION") do
+        convert_until_ofs!(get_u4)
+      end
+    end
+    out!("<xml_include path=\"#{rel_path.xml_escape}\"/>")
+    @dir_builder.faction_name = nil
   end
   
   # This is somewhat dubious

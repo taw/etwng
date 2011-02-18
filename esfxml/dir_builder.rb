@@ -1,6 +1,8 @@
 # Allocate file names for the entire directory
 class DirBuilder
   attr_reader :xml_printer
+  # Semanitc names extras
+  attr_accessor :faction_name
   
   def initialize(out_dir)
     @out_dir = out_dir
@@ -41,10 +43,25 @@ class DirBuilder
 
   def alloc_new_path(base_name, semantic_name, ext)
     semantic_name = semantic_name.gsub(/[:\/\/]/, "-") if semantic_name
-    alloc_key = [base_name, semantic_name, ext]
+    alloc_key = [base_name, semantic_name, @faction_name, ext]
     name = base_name
+    if name =~ /%f/
+      fn = @faction_name || "" 
+      if fn == ""
+        # Delete - after %f if %f is empty
+        name = name.sub(/%f-?/, "")
+      else
+        name = name.sub("%f", fn)
+      end
+    end
     if name =~ /%s/
-      name = name.sub("%s", semantic_name || "")
+      sn = semantic_name || ""
+      if sn == ""
+        # Delete - after %s if %s is empty
+        name = name.sub(/%s-?/, "")
+      else
+        name = name.sub("%s", sn)
+      end
     elsif semantic_name
       name += "-" unless name =~ /[-\/]\z/
       name += "#{semantic_name}"
