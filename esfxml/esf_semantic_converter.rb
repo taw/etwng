@@ -942,6 +942,29 @@ module EsfSemanticConverter
     end
   end
 
+## farm_tile_templates
+  def convert_rec_WALL_POST_LIST
+    data, = get_rec_contents([:rec, :WALL_POST, nil])
+    (x, y), (dx, dy) = ensure_types(data, :v2, :v2)
+    out!(%Q[<wall_post x="#{x}" y="#{y}" dx="#{dx}" dy="#{dy}"/>])
+  end
+  
+  def convert_rec_FARM_TREE_LIST
+    data, = get_rec_contents([:rec, :FARM_TREE, nil])
+    type, (x, y) = ensure_types(data, :s, :v2)
+    out!(%Q[<farm_tree type="#{type.xml_escape}" x="#{x}" y="#{y}"/>])
+  end
+  
+  def convert_rec_ID_LIST
+    data, = get_rec_contents(:bin8)
+    data = data.unpack("V*")
+    if data.empty?
+      out!("<id_list/>")
+    else
+      out!("<id_list>#{data.join(" ")}</id_list>")
+    end
+  end
+  
 ## autoconfigure everything
 
   self.instance_methods.each do |m|

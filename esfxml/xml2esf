@@ -766,6 +766,31 @@ module XmlTagHandlers
     @stack[-1][3][:regions2] << attributes
   end
 
+  ## farm_tile_templates
+  def on_empty_node_wall_post(attributes, buf, ctx)
+    put_rec "WALL_POST_LIST" do
+      put_rec "WALL_POST" do
+        @esf.put_v2 attributes[:x].to_f, attributes[:y].to_f
+        @esf.put_v2 attributes[:dx].to_f, attributes[:dy].to_f
+      end
+    end
+  end
+  
+  def on_empty_node_farm_tree(attributes, buf, ctx)
+    put_rec "FARM_TREE_LIST" do
+      put_rec "FARM_TREE" do
+        @esf.put_s attributes[:type]
+        @esf.put_v2 attributes[:x].to_f, attributes[:y].to_f
+      end
+    end
+  end
+  
+  def on_text_node_id_list(attributes, buf, ctx)
+    put_rec "ID_LIST" do
+      @esf.put_4x "\x48", buf.strip.split(/\s+/).map(&:to_i).pack("V*")
+    end
+  end
+  
   ## Basic data types
 
   def on_start_node_esf(attributes)

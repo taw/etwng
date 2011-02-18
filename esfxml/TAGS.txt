@@ -1,9 +1,20 @@
-Right now about 86 xml tags corresponding to 60 esf node types are supported.
+Right now about 89 xml tags corresponding to 60 esf node types are supported.
 There are about 1000 esf node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
 
 Examples of each semantic tag below:
+
+== farm tiles templates ==
+
+<farm_tree type="tree" x="317.31229" y="159.03934"/>
+<farm_tree type="edge" x="-364.83987" y="317.80673"/>
+<farm_tree type="field" x="-586.39594" y="-82.69088"/>
+
+<id_list/>
+<id_list>105 106</id_list>
+
+<wall_post x="-174.55565" y="461.82886" dx="-0.215864971280098" dy="0.976423263549805"/>
 
 == poi.esf ==
 
