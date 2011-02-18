@@ -60,4 +60,9 @@ XmlSplit = {
   :region_data                   => "region_data-%d",
   :regions                       => "regions/%s",
   :theatres                      => "theatre-%d",
+  :FARM_LIST                     => "farms/%d",
+  :WALL_LIST                     => "walls/%d",
+  :ROAD_LIST                     => "roads",
+  :EF_LINE_LIST                  => "eflines",
+  :WALL_POST_LIST                => "wall_posts/%d",
 }
