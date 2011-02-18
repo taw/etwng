@@ -779,13 +779,37 @@ module EsfSemanticConverter
     out_ary!("region_ownerships_by_theatre", " theatre=\"#{theatre.xml_escape}\"", ownerships.map{|region, owner| " #{region.xml_escape}=#{owner.xml_escape}" })
   end
   
+  def convert_rec_ALLIED_IN_WAR_AGAINST
+    each_rec_member("ALLIED_IN_WAR_AGAINST") do |ofs_end, i|
+      if i == 0 and @data[@ofs] == 0x08
+        id = get_value![1]
+        tag = "<u>#{id}</u>"        
+        tag += "<!-- #{@faction_ids[id].xml_escape} -->" if @faction_ids and @faction_ids[id]
+        out!(tag)
+      end
+    end
+  end
+  
   def convert_rec_DIPLOMACY_RELATIONSHIP
     each_rec_member("DIPLOMACY_RELATIONSHIP") do |ofs_end, i|
-      if i == 0 and ofs_end >= @ofs+5 and @data[@ofs, 1] == "\x04"
+      case [i, @data[@ofs]]
+      when [0, 0x04]
         id = get_value![1]
         tag = "<i>#{id}</i>"        
         tag += "<!-- #{@faction_ids[id].xml_escape} -->" if @faction_ids and @faction_ids[id]
         out!(tag)
+      when [2, 0x01]
+        tag = get_value![1] ? "<yes/>" : "<no/>"
+        out!("#{tag}<!-- trade agreement -->")
+      when [3, 0x04]
+        val = get_value![1]
+        out!("<i>#{val}</i><!-- military access turns (-1 = unlimited) -->")
+      when [4, 0x0e]
+        val = get_value![1]
+        out!("<s>#{val.xml_escape}</s><!-- relationship -->")
+      when [20, 0x0e]
+        val = get_value![1]
+        out!("<s>#{val.xml_escape}</s><!-- this is NOT relationship -->")
       end
     end
   end
