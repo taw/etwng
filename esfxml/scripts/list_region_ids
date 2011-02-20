@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class ListRegionIds < EsfScript
+  def run!
+    region_ids     = {}
+
+    update_each_xml("region/*", "rec[@type='REGION']") do |region|
+      name = region.xpath("s")[0].content
+      id = region.xpath("i")[0].content.to_i
+      raise "REGION record duplicated: #{name}" if region_ids[name]
+      region_ids[name] = [id]
+      false
+    end
+    
+    update_each_xml("cai_regions/*", "//rec[@type='CAI_REGION']") do |cai_region|
+      cai_id = cai_region.xpath("u")[0].content.to_i
+      name = cai_region.xpath("s")[0].content
+      id = cai_region.xpath("u")[1].content.to_i
+      next if cai_id == 0 and id == 0
+      raise "CAI REGION but no REGION record: #{name}" unless region_ids[name]
+      raise "CAI region already known: #{name}" if region_ids[name].size > 1
+      raise "Inconsistent information for #{name}" unless region_ids[name] == [id]
+      region_ids[name] = [id, cai_id]
+      false
+    end
+    
+    region_ids.to_a.sort.each do |name, id, cai_id|
+      puts [name, id, cai_id].join("\t")
+    end
+  end
+end
+
+ListRegionIds.new
