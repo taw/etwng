@@ -68,7 +68,7 @@ class DirBuilder
     end
     while true
       rel_path = name
-      i = (@path_allocator[alloc_key] ||= (name =~ /%d/ ? 1 : 0))
+      i = (@path_allocator[alloc_key] ||= (name =~ /%d|\/\z/ ? 1 : 0))
       @path_allocator[alloc_key] += 1
       ix = "%04d" % i
       if name =~ /%d/
