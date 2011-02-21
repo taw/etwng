@@ -131,6 +131,76 @@ class SoundEvents
     }
   end
   
+  def uu_ffffff_ary?
+    # Such a pile of fail ...
+    @data[@ofs, 12].unpack("VVV") == [590, 14, 46]
+  end
+
+  def us?
+    a, = @data[@ofs, 4].unpack("V")
+    a <= 512 and str?(@ofs+4)
+  end
+  
+  def us_usa?
+    a, = @data[@ofs, 4].unpack("V")
+    return nil unless a <= 512
+    xofs = str?(@ofs+4)
+    return nil unless xofs
+    b, = @data[xofs, 4].unpack("V")
+    return nil unless b <= 512
+    xofs = str_ary?(xofs+4)    
+    return nil unless xofs
+    true
+  end
+  
+  def get_us_usa
+    [get_u4, get_str, get_u4, get_str_ary]
+  end
+  
+  def get_us
+    [get_u4, get_str]
+  end
+
+  def uus?
+    a,b=@data[@ofs, 8].unpack("VV")
+    a <= 512 and b <= 512 and str?(@ofs+8)
+  end
+
+  def uusa?
+    a,b=@data[@ofs, 8].unpack("VV")
+    a <= 512 and b <= 512 and str_ary?(@ofs+8)
+  end
+
+  def usa?
+    a,=@data[@ofs, 4].unpack("VV")
+    a <= 512 and str_ary?(@ofs+4)
+  end
+
+
+  def get_uus
+    [get_u4, get_u4, get_str]
+  end
+  
+  def get_uusa
+    [get_u4, get_u4, get_str_ary]
+  end
+
+  def get_usa
+    [get_u4, get_str_ary]
+  end
+  
+  def u_sa_sa?
+    a, = @data[@ofs, 4].unpack("V")
+    return nil unless a <= 512
+    xofs = str_ary?(@ofs+4)
+    return nil unless xofs
+    str_ary?(xofs)
+  end
+  
+  def get_u_sa_sa
+    [get_u4, get_str_ary, get_str_ary]
+  end
+  
   def parse
     b = 0
     until eof?
@@ -146,6 +216,19 @@ class SoundEvents
         p [:data, b, @data[@ofs-b, b].unpack("V*")] if b > 0
         b = 0
         p [:str, get_str]
+      elsif us_usa?
+        p [:us_usa, get_us_usa]
+
+      elsif u_sa_sa?
+        p [:u_sa_sa, get_u_sa_sa]
+      elsif uusa?
+        p [:uusa, get_uusa]
+      elsif usa?
+        p [:usa, get_usa]
+      elsif uus?
+        p [:uus, get_uus]
+      elsif us?
+        p [:us, get_us]
       elsif uu_ffffff_ary?
         p [:data, b, @data[@ofs-b, b].unpack("V*")] if b > 0
         b = 0
