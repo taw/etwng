@@ -378,6 +378,48 @@ module XmlTagHandlers
     end
   end
 
+  def on_empty_node_gov_republic(attributes, buf, ctx)
+    @esf.start_ary "GOV_IMP", nil
+    @esf.start_elem
+    put_rec "GOVERNMENT::REPUBLIC" do
+      @esf.put_u attributes[:minister_changes].to_i
+      @esf.put_bool(attributes[:had_elections] == 'yes')
+      @esf.put_i attributes[:elections_due].to_i
+      @esf.put_u attributes[:term].to_i
+    end
+    @esf.end_rec
+    @esf.end_ary
+  end
+
+  def on_empty_node_gov_constitutional_monarchy(attributes, buf, ctx)
+    @esf.start_ary "GOV_IMP", nil
+    @esf.start_elem
+    put_rec "GOVERNMENT::CONSTITUTIONAL_MONARCHY" do
+      @esf.put_u attributes[:minister_changes].to_i
+      @esf.put_bool(attributes[:had_elections] == 'yes')
+      @esf.put_i attributes[:elections_due].to_i
+    end
+    @esf.end_rec
+    @esf.end_ary
+  end
+  
+  def on_empty_node_gov_absolute_monarchy(attributes, buf, ctx)
+    @esf.start_ary "GOV_IMP", nil
+    @esf.start_elem
+    put_rec "GOVERNMENT::ABSOLUTE_MONARCHY" do
+    end
+    @esf.end_rec
+    @esf.end_ary
+  end
+
+  def on_empty_node_gov_taxes(attributes, buf, ctx)
+    put_rec "GOVERNORSHIP_TAXES" do
+      @esf.put_u attributes[:level_lower].to_i
+      @esf.put_u attributes[:level_upper].to_i
+      @esf.put_byte attributes[:rate_lower].to_i
+      @esf.put_byte attributes[:rate_upper].to_i
+    end
+  end  
 
   def on_empty_node_ordinal_pair(attributes, buf, ctx)
     put_rec "ORDINAL_PAIR" do

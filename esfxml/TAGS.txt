@@ -1,4 +1,4 @@
-Right now about 91 xml tags corresponding to 60 esf node types are supported.
+Right now about 93 xml tags corresponding to about 62 esf node types are supported.
 There are about 1000 esf node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -162,6 +162,14 @@ Examples of each semantic tag below:
 <wind_map unknown="0.00729600992053747" pgm="wind_map-0001.pgm"/>
 
 == startpos.esf ==
+
+<gov_absolute_monarchy/>
+<gov_republic minister_changes="0" had_elections="no" elections_due="5" term="0"/>
+<gov_constitutional_monarchy minister_changes="0" had_elections="no" elections_due="6"/>
+
+<gov_taxes level_lower="4" level_upper="2" rate_lower="25" rate_upper="15"/>
+<gov_taxes level_lower="2" level_upper="2" rate_lower="15" rate_upper="15"/>
+
 
 <portrait_details card="ui/portraits/indian/Cards/queen/young/070.tga" info="ui/portraits/indian/Info/queen/young/070.jpg" number="70"/>
 <portrait_details card="ui/portraits/european/cards/king/young/049.tga" template="european/%S/king/%S/049.tga" info="ui/portraits/european/Info/king/young/049.tga" number="-1"/>

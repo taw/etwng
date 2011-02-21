@@ -644,7 +644,37 @@ module EsfSemanticConverter
       out!(%Q[<portrait_details card="#{card.xml_escape}" template="#{template.xml_escape}" info="#{info.xml_escape}" number="#{number}"/>])
     end
   end
+  
+  def convert_rec_GOVERNORSHIP_TAXES
+    level_lower, level_upper, rate_lower, rate_upper = get_rec_contents(:u, :u, :byte, :byte)
+    out!(%Q[<gov_taxes level_lower="#{level_lower}" level_upper="#{level_upper}" rate_lower="#{rate_lower}" rate_upper="#{rate_upper}"/>])
+  end
 
+  def convert_ary_GOV_IMP
+    data = get_ary_contents_dynamic
+    raise SemanticFail.new unless data.size == 1
+    type, data = *data[0]
+    case type
+    when [[:rec, :"GOVERNMENT::CONSTITUTIONAL_MONARCHY", nil]]
+      raise SemanticFail.new unless data.size == 1
+      type, data = *data[0]
+      raise SemanticFail.new unless type == [:u, :bool, :i]
+      minister_changes, had_elections, elections_due = *data
+      out!(%Q[<gov_constitutional_monarchy minister_changes="#{minister_changes}" had_elections="#{had_elections ? 'yes' : 'no'}" elections_due="#{elections_due}"/>])
+    when [[:rec, :"GOVERNMENT::ABSOLUTE_MONARCHY", nil]]
+      raise SemanticFail.new unless data == [[[], []]]
+      out!("<gov_absolute_monarchy/>")
+    when [[:rec, :"GOVERNMENT::REPUBLIC", nil]]
+      raise SemanticFail.new unless data.size == 1
+      type, data = *data[0]
+      raise SemanticFail.new unless type == [:u, :bool, :i, :u]
+      minister_changes, had_elections, elections_due, term = *data
+      out!(%Q[<gov_republic minister_changes="#{minister_changes}" had_elections="#{had_elections ? 'yes' : 'no'}" elections_due="#{elections_due}" term="#{term}"/>])
+    else
+      raise SemanticFail.new
+    end
+  end
+  
   # This is somewhat dubious
   # Type seems to be:
   # * u, false, v2x
