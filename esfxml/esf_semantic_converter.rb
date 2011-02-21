@@ -519,46 +519,142 @@ module EsfSemanticConverter
     out!("<xml_include path=\"#{rel_path.xml_escape}\"/>")
     @dir_builder.faction_name = nil
   end
+
+  def annotate_rec(type, annotations)
+    symbolic_names = [:i2, :bool, nil, nil, :i, nil, :byte, :u2, :u, nil, :flt, nil, :v2, :v3, :s, :asc]
+    each_rec_member(type) do |ofs_end, i|
+      field_type = symbolic_names[@data[ofs]]
+      next unless field_type
+      annotation = annotations[[field_type, i]]
+      next unless annotation
+      annotation = "<!-- #{annotation} -->"
+      case field_type
+      when :s, :asc
+        v = get_value![1]
+        if v.empty?
+          out!("<#{field_type}/>" + annotation)
+        else
+          out!("<#{field_type}>#{v.xml_escape}</#{field_type}>" + annotation)
+        end
+      when :i, :u, :u2, :i2, :byte, :flt
+        v = get_value![1]
+        out!("<#{field_type}>#{v}</#{field_type}>" + annotation)
+      when :bool
+        tag = get_value![1] ? "<yes/>" : "<no/>"
+        out!(tag + annotation)
+      when :v2, :v3
+        raise "Implement me: annotations for v2/v3"
+      end
+    end
+  end
   
+  def autoconvert_v2x(type, *positions)
+    each_rec_member(type) do |ofs_end, i|
+      convert_v2x! if positions.include?(i) and lookahead_v2x?(ofs_end)
+    end
+  end
+  
+  # def convert_rec_REGION
+  #   annotate_rec("REGION",
+  #     [:s, 0] => "name",
+  #     [:i, 4] => "region id"
+  #   )
+  # end
+  
+  def convert_rec_MILITARY_FORCE
+    annotate_rec("MILITARY_FORCE", 
+      [:u, 0] => "general character id [?]",
+      [:u, 1] => "commander id"
+    )
+  end
+
+  def convert_rec_ARMY
+    annotate_rec("ARMY", 
+      [:i, 4] => "general character id [?]"
+    )
+  end
+
+  def convert_rec_CAI_UNIT
+    annotate_rec("CAI_UNIT", 
+      [:u, 1] => "unit id"
+    )
+  end
+  
+  def convert_rec_CAI_REGION
+    annotate_rec("CAI_REGION",
+      [:u, 2] => "cai region id",
+      [:s, 10] => "name",
+      [:u, 11] => "region id",
+      [:u, 12] => "cai faction-related-something id [wild guess ???]"
+    )
+  end
+  
+  def convert_rec_CAI_REGION_SLOT
+    annotate_rec("CAI_REGION_SLOT",
+      [:u, 1] => "cai region slot id [???]"
+    )
+  end
+  
+  def convert_rec_CAI_SETTLEMENT
+    annotate_rec("CAI_SETTLEMENT",
+      [:u, 2] => "settlement id [?]"
+    )
+  end
+
+  def convert_rec_SIEGEABLE_GARRISON_RESIDENCE
+    annotate_rec("SIEGEABLE_GARRISON_RESIDENCE",
+      [:u, 1] => "slot id [?]"
+    )
+  end
+  
+  def convert_rec_CAI_BUILDING_SLOT
+    annotate_rec("CAI_BUILDING_SLOT",
+      [:u, 0] => "slot id [?]"
+    )
+  end
+  
+  def convert_rec_CAI_FACTION
+    annotate_rec("CAI_FACTION",
+      [:u, 5] => "cai faction id [???]",
+      [:u, 6] => "faction id"
+    )
+  end
+  
+  def convert_rec_CAI_GOVERNORSHIP
+    annotate_rec("CAI_GOVERNORSHIP",
+      [:u, 0] => "goverorship id [???]",
+      [:u, 1] => "governorship theatre id [???]",
+      [:u, 2] => "governorship cai id [???]"
+    )
+  end
+
   # This is somewhat dubious
   # Type seems to be:
   # * u, false, v2x
   # * u, true u, v2x
   # Revert if it causes any problems
   def convert_rec_CAI_TRADE_ROUTE_POI_RAID_ANALYSIS
-    each_rec_member("CAI_TRADE_ROUTE_POI_RAID_ANALYSIS") do |ofs_end, i|
-      convert_v2x! if (i == 2 or i == 3) and lookahead_v2x?(ofs_end)
-    end
+    autoconvert_v2x "CAI_TRADE_ROUTE_POI_RAID_ANALYSIS", 2, 3
   end
   
   def convert_rec_CAI_BDIM_SIEGE_SH
-    each_rec_member("CAI_BDIM_SIEGE_SH") do |ofs_end, i|
-      convert_v2x! if i == 5 and lookahead_v2x?(ofs_end)
-    end
+    autoconvert_v2x "CAI_BDIM_SIEGE_SH", 5
   end
   
   def convert_rec_REGION_SLOT
-    each_rec_member("REGION_SLOT") do |ofs_end, i|
-      convert_v2x! if i == 6 and lookahead_v2x?(ofs_end)
-    end
+    autoconvert_v2x "REGION_SLOT", 6
   end
   
   def convert_rec_CAI_HLPP_INFO
-    each_rec_member("CAI_HLPP_INFO") do |ofs_end, i|
-      convert_v2x! if i == 1 and lookahead_v2x?(ofs_end)
-    end
+    autoconvert_v2x "CAI_HLPP_INFO", 1
   end
   
   def convert_rec_CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC
-    each_rec_member("CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC") do |ofs_end, i|
-      convert_v2x! if i == 3 and lookahead_v2x?(ofs_end)
-    end
+    autoconvert_v2x "CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC", 3
   end
   
   def convert_rec_CAI_BDI_UNIT_RECRUITMENT_NEW
-    each_rec_member("CAI_BDI_UNIT_RECRUITMENT_NEW") do |ofs_end, i|
-      convert_v2x! if i == 0 and lookahead_v2x?(ofs_end)
-    end
+    autoconvert_v2x "CAI_BDI_UNIT_RECRUITMENT_NEW", 0
   end
   
   def convert_rec_FAMOUS_BATTLE_INFO
