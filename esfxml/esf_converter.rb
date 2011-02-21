@@ -13,7 +13,7 @@ module EsfConvertBasic
     out!(get_bool ? "<yes/>" : "<no/>")
   end
   def convert_04!
-    out!("<i>#{get_i4}</i>")
+    out!("<i>#{get_i}</i>")
   end
   def convert_06!
     out!("<byte>#{get_byte}</byte>")
@@ -22,19 +22,19 @@ module EsfConvertBasic
     out!("<u2>#{get_u2}</u2>")
   end
   def convert_08!
-    out!("<u>#{get_u4}</u>")
+    out!("<u>#{get_u}</u>")
   end
   def convert_0a!
-    out!("<flt>#{get_float}</flt>")
+    out!("<flt>#{get_flt}</flt>")
   end
   def convert_0c!
-    out!("<v2 x=\"#{get_float}\" y=\"#{get_float}\"/>")
+    out!("<v2 x=\"#{get_flt}\" y=\"#{get_flt}\"/>")
   end
   def convert_0d!
-    out!("<v3 x=\"#{get_float}\" y=\"#{get_float}\" z=\"#{get_float}\"/>")
+    out!("<v3 x=\"#{get_flt}\" y=\"#{get_flt}\" z=\"#{get_flt}\"/>")
   end
   def convert_0e!
-    str = get_str
+    str = get_s
     if str.empty?
       out!("<s/>")
     else
@@ -154,13 +154,13 @@ class EsfConverter < EsfParser
     if XmlSplit[node_type]
       rel_path = @dir_builder.open_nested_xml(XmlSplit[node_type], lookahead_str) do
         tag!("rec", :type=>node_type, :version=>version) do
-          convert_until_ofs!(get_u4)
+          convert_until_ofs!(get_u)
         end
       end
       out!("<xml_include path=\"#{rel_path.xml_escape}\"/>")
     else
       tag!("rec", :type=>node_type, :version=>version) do
-        convert_until_ofs!(get_u4)
+        convert_until_ofs!(get_u)
       end
     end
   end
@@ -181,8 +181,7 @@ class EsfConverter < EsfParser
         return send(ConvertSemanticAry[node_type]) 
       end
     end
-    ofs_end   = get_u4
-    count     = get_u4
+    ofs_end, count = get_u, get_u
     if count == 0
       tag!("ary", :type=>node_type, :version=>version)
     else

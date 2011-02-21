@@ -30,12 +30,12 @@ class String
 end
 
 module EsfBasicBinaryOps
-  def get_u4
+  def get_u
     rv = @data[@ofs,4].unpack("V")[0]
     @ofs += 4
     rv
   end
-  def get_i4
+  def get_i
     rv = @data[@ofs,4].unpack("l")[0]
     @ofs += 4
     rv
@@ -45,7 +45,7 @@ module EsfBasicBinaryOps
     @ofs += 2
     rv
   end
-  def get_float
+  def get_flt
     rv = @data[@ofs,4].unpack("f")[0]
     @ofs += 4
     rv.pretty_single
@@ -63,7 +63,7 @@ module EsfBasicBinaryOps
   def get_ascii
     get_bytes(get_u2)
   end
-  def get_str
+  def get_s
     get_bytes(get_u2*2).unpack("v*").pack("U*")
   end
   def lookahead_str
@@ -118,12 +118,12 @@ module EsfBasicBinaryOps
     end
   end    
   def get_magic
-    case magic = get_u4
+    case magic = get_u
     when 0xABCD
       [0xABCD]
     when 0xABCE
-      a = get_u4
-      b = get_u4
+      a = get_u
+      b = get_u
       raise "Incorrect ESF magic followup" unless a == 0
       [0xABCE, a, b]
     else
@@ -131,10 +131,10 @@ module EsfBasicBinaryOps
     end
   end
   def get_node_types
-    (0...get_u2()).map{ get_ascii.to_sym }
+    (0...get_u2).map{ get_ascii.to_sym }
   end
   def get_ofs_bytes
-    get_bytes(get_u4 - @ofs)
+    get_bytes(get_u - @ofs)
   end
   def get_node_type_and_version
     node_type = @node_types[get_u2]
@@ -155,7 +155,7 @@ module EsfGetData
     [:bool, get_bool]
   end
   def get_04!
-    [:i4, get_i4]
+    [:i, get_i]
   end
   def get_06!
     [:byte, get_byte]
@@ -164,19 +164,19 @@ module EsfGetData
     [:u2, get_u2]
   end
   def get_08!
-    [:u4, get_u4]
+    [:u, get_u]
   end
   def get_0a!
-    [:flt, get_float]
+    [:flt, get_flt]
   end
   def get_0c!
-    [:v2, [get_float, get_float]]
+    [:v2, [get_flt, get_flt]]
   end
   def get_0d!
-    [:v3, [get_float, get_float, get_float]]
+    [:v3, [get_flt, get_flt, get_flt]]
   end
   def get_0e!
-    [:s, get_str]
+    [:s, get_s]
   end
   def get_0f!
     [:asc, get_ascii]
@@ -226,7 +226,7 @@ module EsfParserSemantic
   def get_rec_contents_dynamic
     types   = []
     data    = []
-    end_ofs = get_u4
+    end_ofs = get_u
     while @ofs < end_ofs
       t, d = send(@esf_type_handlers_get[get_byte])
       types << t
@@ -241,7 +241,7 @@ module EsfParserSemantic
   
   def get_rec_contents(*expect_types)
     data    = []
-    end_ofs = get_u4
+    end_ofs = get_u
     while @ofs < end_ofs
       t, d = send(@esf_type_handlers_get[get_byte])
       raise SemanticFail.new unless t == expect_types.shift
@@ -252,8 +252,7 @@ module EsfParserSemantic
   
   def get_81!
     node_type, version = get_node_type_and_version
-    ofs_end   = get_u4
-    count     = get_u4
+    ofs_end, count = get_u, get_u
     [[:ary, node_type, version], (0...count).map{ get_rec_contents_dynamic }]
   end
 
@@ -264,16 +263,14 @@ module EsfParserSemantic
 
   def get_ary_contents(*expect_types)
     data = []
-    ofs_end   = get_u4
-    count     = get_u4
+    ofs_end, count = get_u, get_u
     data.push get_rec_contents(*expect_types) while @ofs < ofs_end
     data
   end
 
   def get_ary_contents_dynamic
     data = []
-    ofs_end   = get_u4
-    count     = get_u4
+    ofs_end, count = get_u, get_u
     data.push get_rec_contents_dynamic while @ofs < ofs_end
     data
   end
@@ -319,7 +316,7 @@ class EsfParser
     @data       = esf_fh.read
     @ofs        = 0
     @magic      = get_magic
-    @node_types = with_temp_ofs(get_u4) { get_node_types }
+    @node_types = with_temp_ofs(get_u) { get_node_types }
     @esf_type_handlers_get = setup_esf_type_handlers_get
   end
 

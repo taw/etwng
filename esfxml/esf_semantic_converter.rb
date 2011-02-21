@@ -31,7 +31,7 @@ module EsfSemanticConverter
   end
 
   def ensure_date(date)
-    year, season = ensure_types(date, :u4, :asc)
+    year, season = ensure_types(date, :u, :asc)
     raise SemanticFail.new if season =~ /\s/
     if year == 0 and season == "summer"
       nil
@@ -41,7 +41,7 @@ module EsfSemanticConverter
   end
   
   def ensure_unit_history(unit_history)
-    date, a, b = ensure_types(unit_history, [:rec, :DATE, nil], :u4, :u4)
+    date, a, b = ensure_types(unit_history, [:rec, :DATE, nil], :u, :u)
     date = ensure_date(date)
     raise SemanticFail.new unless a == 0 and b == 0 and date
     date
@@ -52,26 +52,26 @@ module EsfSemanticConverter
 ## startpos.esf arrays
   def lookahead_faction_ids
     save_ofs = @ofs
-    ofs_end = get_u4
-    count = get_u4
+    ofs_end = get_u
+    count = get_u
     
     rv = {}
     id = nil
     
     count.times do
-      rec_end_ofs = get_u4
+      rec_end_ofs = get_u
       return nil unless get_byte == 0x80
       return nil unless get_node_type_and_version == [:FACTION, nil]
-      return nil unless rec_end_ofs == get_u4
+      return nil unless rec_end_ofs == get_u
       while @ofs < rec_end_ofs
         t = get_byte
         if t == 0x80 or t == 0x81
           @ofs += 3
-          @ofs  = get_u4
+          @ofs  = get_u
         elsif t == 4
-          id = get_u4
+          id = get_u
         elsif t == 14
-          rv[id] = get_str
+          rv[id] = get_s
           @ofs = rec_end_ofs
         else
           warn "Unexpected field type #{t} during lookahead of faction ids"
@@ -140,24 +140,24 @@ module EsfSemanticConverter
   end
   
   def convert_ary_PORT_INDICES
-    data = get_ary_contents(:s, :u4)
+    data = get_ary_contents(:s, :u)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
     out_ary!("port_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
 
   def convert_ary_SETTLEMENT_INDICES
-    data = get_ary_contents(:s, :u4)
+    data = get_ary_contents(:s, :u)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
     out_ary!("settlement_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
   
   def convert_ary_AgentAttributes
-    data = get_ary_contents(:s, :i4)
+    data = get_ary_contents(:s, :i)
     out_ary!("agent_attributes", "", data.map{|attribute,level| " #{attribute.xml_escape}=#{level}" })
   end
   
   def convert_ary_AgentAttributeBonuses
-    data = get_ary_contents(:s, :u4)
+    data = get_ary_contents(:s, :u)
     out_ary!("agent_attribute_bonuses", "", data.map{|attribute,level| " #{attribute.xml_escape}=#{level}" })
   end
   
@@ -214,7 +214,7 @@ module EsfSemanticConverter
       "Threats of Attack",
       "Unknown (does not seem to do anything)",
     ]
-    data = get_ary_contents(:i4, :i4, :i4, :bool, :i4, :bool)
+    data = get_ary_contents(:i, :i, :i, :bool, :i, :bool)
     out!("<ary type=\"DIPLOMACY_RELATIONSHIP_ATTITUDES_ARRAY\">")
     data.each_with_index do |entry, i|
       label = draa_labels[i] || "Unknown #{i}"
@@ -245,7 +245,7 @@ module EsfSemanticConverter
 ## pathfinding.esf arrays
 
   def convert_ary_vertices
-    data = get_ary_contents(:i4, :i4)
+    data = get_ary_contents(:i, :i)
     scale = 0.5**20
     out_ary!("vertices", "", data.map{|x,y|
       " #{x*scale},#{y*scale}"
@@ -268,19 +268,19 @@ module EsfSemanticConverter
   end
 
   def convert_rec_connectivity
-    mask, cfrom, cto = get_rec_contents(:u4, :u4, :u4)
+    mask, cfrom, cto = get_rec_contents(:u, :u, :u)
     out!("<connectivity mask=\"#{"%08x" % mask}\" from=\"#{cfrom}\" to=\"#{cto}\"/>")
   end
 
   def convert_rec_climate_map
-    xsz, ysz, data = get_rec_contents(:u4, :u4, :bin6)
+    xsz, ysz, data = get_rec_contents(:u, :u, :bin6)
     path, rel_path = dir_builder.alloc_new_path("maps/climate_map-%d", nil, ".pgm")
     File.write_pgm(path, xsz, ysz, data)
     out!("<climate_map pgm=\"#{rel_path}\"/>")
   end
 
   def convert_rec_wind_map
-    xsz, ysz, unknown, data = get_rec_contents(:u4, :u4, :flt, :bin2)
+    xsz, ysz, unknown, data = get_rec_contents(:u, :u, :flt, :bin2)
     path, rel_path = dir_builder.alloc_new_path("maps/wind_map", nil, ".pgm")
     File.write_pgm(path, xsz*2, ysz, data)
     out!("<wind_map unknown=\"#{unknown}\" pgm=\"#{rel_path.xml_escape}\"/>")
@@ -316,7 +316,7 @@ module EsfSemanticConverter
 ## startpos.esf records
   def convert_rec_CAMPAIGN_VICTORY_CONDITIONS
     campaign_type_labels = [" (short)", " (long)", " (prestige)", " (global domination)", " (unplayable)"]
-    data = get_rec_contents([:ary, :REGION_KEYS, nil], :bool, :u4, :u4, :bool, :u4, :bool, :bool)
+    data = get_rec_contents([:ary, :REGION_KEYS, nil], :bool, :u, :u, :bool, :u, :bool, :bool)
     regions, flag1, year, region_count, prestige_victory, campaign_type, flag2, flag3 = *data
     regions = regions.map{|region| ensure_types(region, :s)}.flatten
     campaign_type = "#{campaign_type}#{campaign_type_labels[campaign_type]}"
@@ -330,7 +330,7 @@ module EsfSemanticConverter
   # def convert_rec_BUILDING_CONSTRUCTION_ITEM
   #   pp :bci
   #   types, data = get_rec_contents_dynamic
-  #   raise "Die in fire" unless types.shift(5) == [:u4, :bool, :u4, :u4, :u4]
+  #   raise "Die in fire" unless types.shift(5) == [:u, :bool, :u, :u, :u]
   #   code, flag, turns_done, turns, cost = data.shift(5)
   #   pp [:bci, code, flag, "#{turns_done}/#{turns}", cost, types, data] 
   #   puts ""
@@ -341,7 +341,7 @@ module EsfSemanticConverter
   def convert_rec_CAMPAIGN_BONUS_VALUE_BLOCK
     (types, data), = get_rec_contents([:rec, :CAMPAIGN_BONUS_VALUE, nil])
     # types, data = get_rec_contents_dynamic
-    raise "Die in fire" unless types.shift(3) == [:u4, :i4, :flt]
+    raise "Die in fire" unless types.shift(3) == [:u, :i, :flt]
     type, subtype, value = *data.shift(3)
     case [type, *types]
     when [0, :s]
@@ -373,7 +373,7 @@ module EsfSemanticConverter
   
   def convert_rec_POPULATION__CLASSES
     data, = get_rec_contents([:rec, :POPULATION_CLASS, nil])
-    data = ensure_types(data, :s, :bin4, :bin4, :i4,:i4,:i4,:i4,:i4, :u4,:u4,:u4, :i4,:i4)
+    data = ensure_types(data, :s, :bin4, :bin4, :i,:i,:i,:i,:i, :u,:u,:u, :i,:i)
     cls = data.shift
     a1 = data.shift.unpack("l*")
     a2 = data.shift.unpack("l*")
@@ -423,7 +423,7 @@ module EsfSemanticConverter
   
   def convert_rec_CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC_PATROL_POINTS
     data, = get_rec_contents([:rec, :CAI_BORDER_PATROL_POINT, nil])
-    x, y, a = ensure_types(data, :i4, :i4, :bin8)
+    x, y, a = ensure_types(data, :i, :i, :bin8)
     x *= 0.5**20
     y *= 0.5**20
     a = a.unpack("V*").join(" ")
@@ -431,7 +431,7 @@ module EsfSemanticConverter
   end
   
   # def convert_rec_QUAD_TREE_BIT_ARRAY_NODE
-  #   a, b = get_rec_contents(:u4, :u4)
+  #   a, b = get_rec_contents(:u, :u)
   #   a = "%08x" % a
   #   b = "%08x" % b
   #   out!(%Q[<quad_tree_leaf a="#{a}" b="#{b}"/>])
@@ -450,7 +450,7 @@ module EsfSemanticConverter
   
   def each_rec_member(type)
     tag!("rec", :type => type) do
-      ofs_end = get_u4
+      ofs_end = get_u
       i = 0
       while @ofs < ofs_end
         xofs = @ofs
@@ -463,7 +463,7 @@ module EsfSemanticConverter
   
   def convert_rec_LOCOMOTABLE
     tag!("rec", :type => "LOCOMOTABLE") do
-      ofs_end = get_u4
+      ofs_end = get_u
       convert_v2x! if lookahead_v2x?(ofs_end)
       convert_v2x! if lookahead_v2x?(ofs_end)
       send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
@@ -472,7 +472,7 @@ module EsfSemanticConverter
   
   def convert_rec_FORT
     tag!("rec", :type => "FORT") do
-      ofs_end = get_u4
+      ofs_end = get_u
       convert_v2x! if lookahead_v2x?(ofs_end)
       send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
     end
@@ -508,13 +508,12 @@ module EsfSemanticConverter
     end
   end
   
-    
   def convert_rec_FACTION
     faction_name = lookahead_str
     @dir_builder.faction_name = faction_name
     rel_path = @dir_builder.open_nested_xml(XmlSplit[:FACTION], faction_name) do
       tag!("rec", :type=>"FACTION") do
-        convert_until_ofs!(get_u4)
+        convert_until_ofs!(get_u)
       end
     end
     out!("<xml_include path=\"#{rel_path.xml_escape}\"/>")
@@ -563,7 +562,7 @@ module EsfSemanticConverter
   end
   
   def convert_rec_FAMOUS_BATTLE_INFO
-    x, y, name, a, b, c, d = get_rec_contents(:i4, :i4, :s, :i4, :i4, :i4, :bool)
+    x, y, name, a, b, c, d = get_rec_contents(:i, :i, :s, :i, :i, :i, :bool)
     x *= 0.5**20
     y *= 0.5**20
     d = d ? "yes" : "no"
@@ -571,7 +570,7 @@ module EsfSemanticConverter
   end
 
   def convert_rec_CAI_REGION_HLCI
-    a, b, c, x, y = get_rec_contents(:u4, :u4, :bin8, :i4, :i4)
+    a, b, c, x, y = get_rec_contents(:u, :u, :bin8, :i, :i)
     x *= 0.5**20
     y *= 0.5**20
     c = c.unpack("V*").join(" ")
@@ -579,14 +578,14 @@ module EsfSemanticConverter
   end
 
   def convert_rec_CAI_TRADING_POST
-    a, x, y, b = get_rec_contents(:u4, :i4, :i4, :u4)
+    a, x, y, b = get_rec_contents(:u, :i, :i, :u)
     x *= 0.5**20
     y *= 0.5**20
     out!(%Q[<cai_trading_post a="#{a}" x="#{x}" y="#{y}" b="#{b}"/>])
   end
 
   def convert_rec_CAI_SITUATED
-    x, y, a, b, c = get_rec_contents(:i4, :i4, :u4, :bin8, :u4)
+    x, y, a, b, c = get_rec_contents(:i, :i, :u, :bin8, :u)
     x *= 0.5**20
     y *= 0.5**20
     b = b.unpack("V*").join(" ")
@@ -594,8 +593,8 @@ module EsfSemanticConverter
   end
     
   def convert_rec_THEATRE_TRANSITION_INFO
-    link, a, b, c = get_rec_contents([:rec, :CAMPAIGN_MAP_TRANSITION_LINK, nil], :bool, :bool, :u4)
-    fl, time, dest, via = ensure_types(link, :flt, :u4, :u4, :u4)
+    link, a, b, c = get_rec_contents([:rec, :CAMPAIGN_MAP_TRANSITION_LINK, nil], :bool, :bool, :u)
+    fl, time, dest, via = ensure_types(link, :flt, :u, :u, :u)
     raise SemanticFail.new if fl != 0.0 or b != false or c != 0
     if [a, time, dest, via] == [false, 0, 0xFFFF_FFFF, 0xFFFF_FFFF]
       out!("<theatre_transition/>")
@@ -607,17 +606,17 @@ module EsfSemanticConverter
   end
 
   def convert_rec_CAI_TECHNOLOGY_TREE
-    data, = get_rec_contents(:u4)
+    data, = get_rec_contents(:u)
     out!("<cai_technology_tree>#{data}</cai_technology_tree>")
   end
   
   def convert_rec_RandSeed
-    data, = get_rec_contents(:u4)
+    data, = get_rec_contents(:u)
     out!("<rand_seed>#{data}</rand_seed>")
   end
 
   def convert_rec_LAND_UNIT
-    unit_type, unit_data, zero = get_rec_contents([:rec, :LAND_RECORD_KEY, nil], [:rec, :UNIT, nil], :u4)
+    unit_type, unit_data, zero = get_rec_contents([:rec, :LAND_RECORD_KEY, nil], [:rec, :UNIT, nil], :u)
     unit_type, = ensure_types(unit_type, :s)
     raise SemanticError.new unless zero == 0
     
@@ -626,15 +625,15 @@ module EsfSemanticConverter
       [:rec, :UNIT_HISTORY, nil],    
       [:rec, :COMMANDER_DETAILS, nil],
       [:rec, :TRAITS, nil],
-      :i4,
-      :u4,
-      :u4,
-      :i4,
-      :u4,
-      :u4,
-      :u4,
-      :u4,
-      :u4,
+      :i,
+      :u,
+      :u,
+      :i,
+      :u,
+      :u,
+      :u,
+      :u,
+      :u,
       :byte,
       [:rec, :CAMPAIGN_LOCALISATION, nil]
     )
@@ -681,17 +680,17 @@ module EsfSemanticConverter
   end
   
   def convert_rec_GARRISON_RESIDENCE
-    data, = get_rec_contents(:u4)
+    data, = get_rec_contents(:u)
     out!("<garrison_residence>#{data}</garrison_residence>")
   end
   
   def convert_rec_OWNED_INDIRECT
-    data, = get_rec_contents(:u4)
+    data, = get_rec_contents(:u)
     out!("<owned_indirect>#{data}</owned_indirect>")
   end
   
   def convert_rec_OWNED_DIRECT
-    data, = get_rec_contents(:u4)
+    data, = get_rec_contents(:u)
     out!("<owned_direct>#{data}</owned_direct>")
   end
   
@@ -705,7 +704,7 @@ module EsfSemanticConverter
   
   def convert_rec_techs
     status_hint = {0 => " (done)", 2 => " (researchable)", 4 => " (not researchable)"}
-    data = get_rec_contents(:s, :u4, :flt, :u4, :bin8, :u4)
+    data = get_rec_contents(:s, :u, :flt, :u, :bin8, :u)
     name, status, research_points, school_slot_id, unknown1, unknown2 = *data
     status = "#{status}#{status_hint[status]}"
     unknown1 = unknown1.unpack("V*").join(" ")
@@ -725,12 +724,12 @@ module EsfSemanticConverter
   end
 
   def convert_rec_AgentAbilities
-    ability, level, attribute = get_rec_contents(:s, :i4, :s)
+    ability, level, attribute = get_rec_contents(:s, :i, :s)
     out!("<agent_ability ability=\"#{ability.xml_escape}\" level=\"#{level}\" attribute=\"#{attribute.xml_escape}\"/>")
   end
   
   def convert_rec_BUILDING
-    health, name, faction, gov = get_rec_contents(:u4, :s, :s, :s)
+    health, name, faction, gov = get_rec_contents(:u, :s, :s, :s)
     out!("<building health=\"#{health}\" name=\"#{name.xml_escape}\" faction=\"#{faction.xml_escape}\" government=\"#{gov.xml_escape}\"/>")
   end
   
@@ -749,7 +748,7 @@ module EsfSemanticConverter
   end
   
   def convert_rec_MAPS
-    name, x, y, unknown, data = get_rec_contents(:s, :u4, :u4, :i4, :bin8)
+    name, x, y, unknown, data = get_rec_contents(:s, :u, :u, :i, :bin8)
     raise SemanticFail.new if name =~ /\s/
     path, rel_path = dir_builder.alloc_new_path("map-%d", nil, ".pgm")
     File.write_pgm(path, x*4, y, data)
@@ -787,7 +786,7 @@ module EsfSemanticConverter
 
   def convert_rec_TRAITS
     traits, = get_rec_contents([:ary, :TRAIT, nil])
-    traits = traits.map{|trait| ensure_types(trait, :s, :i4)}
+    traits = traits.map{|trait| ensure_types(trait, :s, :i)}
     raise SemanticFail.new if traits.any?{|trait, level| trait =~ /\s|=/}
     out_ary!("traits", "", traits.map{|trait, level| " #{trait.xml_escape}=#{level}" })
   end
@@ -844,14 +843,14 @@ module EsfSemanticConverter
 ## bmd.dat records
 
   def convert_rec_HEIGHT_FIELD
-    xi, yi, (xf, yf), data, unknown, hmin, hmax = get_rec_contents(:u4, :u4, :v2, :flt_ary, :i4, :flt, :flt)
+    xi, yi, (xf, yf), data, unknown, hmin, hmax = get_rec_contents(:u, :u, :v2, :flt_ary, :i, :flt, :flt)
     path, rel_path = dir_builder.alloc_new_path("height_field-%d", nil, ".pgm")
     File.write_pgm(path, 4*xi, yi, data)
     out!("<height_field xsz=\"#{xf}\" ysz=\"#{yf}\" pgm=\"#{rel_path.xml_escape}\" unknown=\"#{unknown}\" hmin=\"#{hmin}\" hmax=\"#{hmax}\"/>")
   end
   
   def convert_rec_GROUND_TYPE_FIELD
-    xi, yi, (xf, yf), data = get_rec_contents(:u4, :u4, :v2, :bin4)
+    xi, yi, (xf, yf), data = get_rec_contents(:u, :u, :v2, :bin4)
     path, rel_path = dir_builder.alloc_new_path("group_type_field", nil, ".pgm")
     File.write_pgm(path, 4*xi, yi, data)
     out!("<ground_type_field xsz=\"#{xf}\" ysz=\"#{yf}\" pgm=\"#{rel_path.xml_escape}\"/>")
@@ -861,7 +860,7 @@ module EsfSemanticConverter
     types, data = get_rec_contents_dynamic
     tag!("bmd_textures") do
       until data.empty?
-        if data.size == 3 and types == [:u4, :u4, :bin6]
+        if data.size == 3 and types == [:u, :u, :bin6]
           xsz, ysz, pxdata = data
           path, rel_path = dir_builder.alloc_new_path("bmd_textures/texture-%d", nil, ".pgm")
           File.write_pgm(path, 4*xsz, ysz, pxdata)
@@ -874,9 +873,9 @@ module EsfSemanticConverter
         case t
         when :s
           out!("<s>#{v.xml_escape}</s>")
-        when :i4
+        when :i
           out!("<i>#{v}</i>")
-        when :u4
+        when :u
           out!("<u>#{v}</u>")
         when :bool
           if v
@@ -913,7 +912,7 @@ module EsfSemanticConverter
         code2 = poi.shift
         flag2 = poi.shift
         raise SemanticFail.new unless poi == []
-        tag!("poi",
+        attrs = {
           :x => x, :y => y,
           :region_name => region_name,
           :region_id => region_id,
@@ -924,13 +923,18 @@ module EsfSemanticConverter
           :val1 => val1,
           :val2 => val2,
           :ids => ary3.join(" ")
-        ) do
-          ary1.each{|name, val|
-            out!(%Q[<poi_region1 name="#{name}" val="#{val}"/>])
-          }
-          ary2.each{|name, val|
-            out!(%Q[<poi_region2 name="#{name}" val="#{val}"/>])
-          }
+        }
+        if ary1.empty? and ary2.empty?
+          tag!("poi", attrs)
+        else
+          tag!("poi", attrs) do
+            ary1.each{|name, val|
+              out!(%Q[<poi_region1 name="#{name}" val="#{val}"/>])
+            }
+            ary2.each{|name, val|
+              out!(%Q[<poi_region2 name="#{name}" val="#{val}"/>])
+            }
+          end
         end
       end
     end

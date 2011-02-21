@@ -116,8 +116,7 @@ class EsfTransform < EsfParser
   def copy_81!
     node_type_and_version_buf = get_bytes(3)
     @esfout.data << node_type_and_version_buf
-    ofs_end   = get_u4
-    count     = get_u4
+    ofs_end, count = get_u, get_u
     @esfout.push_marker_ofs
     @esfout.push_marker_children
     count.times{
