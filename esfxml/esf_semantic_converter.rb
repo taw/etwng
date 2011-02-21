@@ -627,6 +627,23 @@ module EsfSemanticConverter
       [:u, 2] => "governorship cai id [???]"
     )
   end
+  
+  def convert_rec_ORDINAL_PAIR
+    name, number = get_rec_contents([:rec, :CAMPAIGN_LOCALISATION, nil], :i)
+    name = ensure_loc(name)
+    out!(%Q[<ordinal_pair name="#{name.xml_escape}" number="#{number}"/>])
+  end
+  
+  def convert_rec_PORTRAIT_DETAILS
+    card, template, info, number = get_rec_contents(:s, :s, :s, :i)
+    if [card, template, info, number] == ["", "", "", -1]
+      out!(%Q[<portrait_details/>])
+    elsif template.empty?
+      out!(%Q[<portrait_details card="#{card.xml_escape}" info="#{info.xml_escape}" number="#{number}"/>])
+    else
+      out!(%Q[<portrait_details card="#{card.xml_escape}" template="#{template.xml_escape}" info="#{info.xml_escape}" number="#{number}"/>])
+    end
+  end
 
   # This is somewhat dubious
   # Type seems to be:

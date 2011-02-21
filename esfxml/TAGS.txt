@@ -1,4 +1,4 @@
-Right now about 89 xml tags corresponding to 60 esf node types are supported.
+Right now about 91 xml tags corresponding to 60 esf node types are supported.
 There are about 1000 esf node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -163,6 +163,11 @@ Examples of each semantic tag below:
 
 == startpos.esf ==
 
+<portrait_details card="ui/portraits/indian/Cards/queen/young/070.tga" info="ui/portraits/indian/Info/queen/young/070.jpg" number="70"/>
+<portrait_details card="ui/portraits/european/cards/king/young/049.tga" template="european/%S/king/%S/049.tga" info="ui/portraits/european/Info/king/young/049.tga" number="-1"/>
+<portrait_details/>
+
+<ordinal_pair name="names_royalty_name_scotlandJames" number="7"/>
 
 <population_class
    social_class="upper"

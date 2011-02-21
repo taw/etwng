@@ -378,6 +378,22 @@ module XmlTagHandlers
     end
   end
 
+
+  def on_empty_node_ordinal_pair(attributes, buf, ctx)
+    put_rec "ORDINAL_PAIR" do
+      put_loc attributes[:name]
+      @esf.put_i attributes[:number].to_i
+    end
+  end
+  
+  def on_empty_node_portrait_details(attributes, buf, ctx)
+    put_rec "PORTRAIT_DETAILS" do
+      @esf.put_s(attributes[:card] || "")
+      @esf.put_s(attributes[:template] || "")
+      @esf.put_s(attributes[:info] || "")
+      @esf.put_i((attributes[:number] || "-1").to_i)
+    end
+  end
   
   def on_empty_node_famous_battle_info(attributes, buf, ctx)
     put_rec "FAMOUS_BATTLE_INFO" do
