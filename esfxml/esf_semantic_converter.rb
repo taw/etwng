@@ -506,6 +506,10 @@ module EsfSemanticConverter
     @dir_builder.faction_name = nil
   end
 
+  def convert_rec_FACTION_TECHNOLOGY_MANAGER
+    annotate_rec "FACTION_TECHNOLOGY_MANAGER",
+      [:i, 1] => "tech tree id"
+  end
   
   def convert_rec_REBEL_SETUP
     unit_list, faction, religion, gov, unknown, social_class = get_rec_contents([:ary, :"UNIT LIST", nil], :s, :s, :s, :u, :s)
@@ -548,12 +552,20 @@ module EsfSemanticConverter
     end
   end
   
-  # def convert_rec_REGION
-  #   annotate_rec("REGION",
-  #     [:s, 0] => "name",
-  #     [:i, 4] => "region id"
-  #   )
-  # end
+  def convert_rec_REGION
+    annotate_rec("REGION",
+      [:s, 0] => "name",
+      [:i, 4] => "region id"
+    )
+  end
+  
+  def convert_rec_REGION_SLOT
+    annotate_rec("REGION_SLOT",
+      [:u, 2] => "region slot id [?]",
+      [:s, 3] => "slot name",
+      [:u, 12] => "4294967295 == 0xFFFF_FFFF [?]"
+    )
+  end
   
   def convert_rec_MILITARY_FORCE
     annotate_rec("MILITARY_FORCE", 
@@ -744,7 +756,7 @@ module EsfSemanticConverter
 
   def convert_rec_CAI_TECHNOLOGY_TREE
     data, = get_rec_contents(:u)
-    out!("<cai_technology_tree>#{data}</cai_technology_tree>")
+    out!("<cai_technology_tree>#{data}</cai_technology_tree><!-- tech tree id -->")
   end
   
   def convert_rec_RandSeed
