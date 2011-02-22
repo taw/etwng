@@ -520,6 +520,14 @@ module EsfSemanticConverter
     @dir_builder.faction_name = nil
   end
 
+  
+  def convert_rec_REBEL_SETUP
+    unit_list, faction, religion, gov, unknown, social_class = get_rec_contents([:ary, :"UNIT LIST", nil], :s, :s, :s, :u, :s)
+    attrs = %Q[ faction="#{faction.xml_escape}" religion="#{religion.xml_escape}" gov="#{gov.xml_escape}" unknown="#{unknown}" social_class="#{social_class.xml_escape}"]
+    unit_list = unit_list.map{|unit| ensure_types(unit, :s)}.flatten
+    out_ary!("rebel_setup", attrs, unit_list.map{|unit| " #{unit}"})
+  end
+  
   def annotate_rec(type, annotations)
     symbolic_names = [:i2, :bool, nil, nil, :i, nil, :byte, :u2, :u, nil, :flt, nil, :v2, :v3, :s, :asc]
     each_rec_member(type) do |ofs_end, i|

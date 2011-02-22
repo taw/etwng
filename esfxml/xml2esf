@@ -276,6 +276,19 @@ module XmlTagHandlers
       @esf.put_u attributes[:b].to_i
     end
   end
+
+  def on_text_node_rebel_setup(attributes, buf, ctx)
+    put_rec "REBEL_SETUP" do
+      semantic_put_ary("UNIT LIST", buf.strip.split(/\s+/)) do |unit_type|
+        @esf.put_s unit_type
+      end
+      @esf.put_s attributes[:faction]
+      @esf.put_s attributes[:religion]
+      @esf.put_s attributes[:gov]
+      @esf.put_u attributes[:unknown].to_i
+      @esf.put_s attributes[:social_class]
+    end
+  end
   
   def on_empty_node_land_unit(attributes, buf, ctx)
     put_rec "LAND_UNIT" do
