@@ -479,33 +479,23 @@ module EsfSemanticConverter
   end
   
   def convert_rec_SIEGEABLE_GARRISON_RESIDENCE
-    each_rec_member("SIEGEABLE_GARRISON_RESIDENCE") do |ofs_end, i|
-      convert_v2x! if i == 10 and lookahead_v2x?(ofs_end)
-    end
+    autoconvert_v2x "SIEGEABLE_GARRISON_RESIDENCE", 10
   end
   
   def convert_rec_CAI_BDI_COMPONENT_PROPERTY_SET
-    each_rec_member("CAI_BDI_COMPONENT_PROPERTY_SET") do |ofs_end, i|
-      convert_v2x! if (i == 10 or i == 13) and lookahead_v2x?(ofs_end)
-    end
+    autoconvert_v2x "CAI_BDI_COMPONENT_PROPERTY_SET", 10, 13
   end
   
   def convert_rec_CAI_BDIM_WAIT_HERE
-    each_rec_member("CAI_BDIM_WAIT_HERE") do |ofs_end, i|
-      convert_v2x! if i == 0 and lookahead_v2x?(ofs_end)
-    end
+    autoconvert_v2x "CAI_BDIM_WAIT_HERE", 0
   end
   
   def convert_rec_CAI_BDIM_MOVE_TO_POSITION
-    each_rec_member("CAI_BDIM_MOVE_TO_POSITION") do |ofs_end, i|
-      convert_v2x! if (i == 1 or i == 5) and lookahead_v2x?(ofs_end)
-    end
+    autoconvert_v2x "CAI_BDIM_MOVE_TO_POSITION", 1, 5
   end
   
   def convert_rec_CAI_BDI_RECRUITMENT_NEW_FORCE_OF_OR_REINFORCE_TO_STRENGTH
-    each_rec_member("CAI_BDI_RECRUITMENT_NEW_FORCE_OF_OR_REINFORCE_TO_STRENGTH") do |ofs_end, i|
-      convert_v2x! if i == 4 and lookahead_v2x?(ofs_end)
-    end
+    autoconvert_v2x "CAI_BDI_RECRUITMENT_NEW_FORCE_OF_OR_REINFORCE_TO_STRENGTH", 4
   end
   
   def convert_rec_FACTION
