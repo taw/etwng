@@ -144,24 +144,25 @@ class EsfConverter < EsfParser
     }
     out
   end
-
-  def convert_rec!(node_type, version)
-    if version.nil? && ConvertSemanticRec[node_type]
-      try_semantic(node_type) do
-        return send(ConvertSemanticRec[node_type]) 
-      end
+  
+  def convert_rec_basic!(node_type, version)
+    csr = version ? nil : ConvertSemanticRec[node_type]
+    try_semantic(node_type){ return send(csr) } if csr
+    tag!("rec", :type=>node_type, :version=>version) do
+      ofs_end = get_u
+      send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
     end
-    if XmlSplit[node_type]
-      rel_path = @dir_builder.open_nested_xml(XmlSplit[node_type], lookahead_str) do
-        tag!("rec", :type=>node_type, :version=>version) do
-          convert_until_ofs!(get_u)
-        end
+  end
+  
+  def convert_rec!(node_type, version)
+    xmls = XmlSplit[node_type]
+    if xmls
+      rel_path = @dir_builder.open_nested_xml(xmls, lookahead_str) do
+        convert_rec_basic!(node_type, version)
       end
       out!("<xml_include path=\"#{rel_path.xml_escape}\"/>")
     else
-      tag!("rec", :type=>node_type, :version=>version) do
-        convert_until_ofs!(get_u)
-      end
+      convert_rec_basic!(node_type, version)
     end
   end
 

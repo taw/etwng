@@ -499,14 +499,10 @@ module EsfSemanticConverter
   end
   
   def convert_rec_FACTION
-    faction_name = lookahead_str
-    @dir_builder.faction_name = faction_name
-    rel_path = @dir_builder.open_nested_xml(XmlSplit[:FACTION], faction_name) do
-      tag!("rec", :type=>"FACTION") do
-        convert_until_ofs!(get_u)
-      end
+    @dir_builder.faction_name = lookahead_str
+    tag!("rec", :type=>"FACTION") do
+      convert_until_ofs!(get_u)
     end
-    out!("<xml_include path=\"#{rel_path.xml_escape}\"/>")
     @dir_builder.faction_name = nil
   end
 
