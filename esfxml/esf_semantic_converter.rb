@@ -567,6 +567,20 @@ module EsfSemanticConverter
     )
   end
   
+  def convert_rec_GOVERNMENT
+    annotate_rec "GOVERNMENT",
+      [:i, 0] => "government id"
+  end
+  
+  def convert_rec_CHARACTER_POST
+    annotate_rec "CHARACTER_POST",
+      [:i, 0] => "character id A [???]",
+      [:s, 1] => "seat",
+      [:u, 2] => "character id B [???]",
+      [:i, 4] => "government id",
+      [:i, 5] => "government id"
+  end
+  
   def convert_rec_MILITARY_FORCE
     annotate_rec("MILITARY_FORCE", 
       [:u, 0] => "general character id [?]",
