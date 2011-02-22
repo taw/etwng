@@ -253,7 +253,50 @@ module EsfSemanticConverter
   end
   
 ## regions.esf records
+  def lookahead_region_data_vertices
+    return nil unless @data[@ofs+4] == 0x80
+    return nil unless @data[@ofs+12] == 0x4c
+    end_ofs, = @data[@ofs+13, 4].unpack("V")
+    @data[@ofs+17..end_ofs].unpack("f*").map(&:pretty_single)
+  end
+  
+  def convert_rec_region_data
+    @region_data_vertices = lookahead_region_data_vertices
+    tag!("rec", :type=>"region_data") do
+      convert_until_ofs!(get_u)
+    end
+    @region_data_vertices = nil
+  end
 
+  def convert_rec_faces
+    raise SemanticFail.new unless @region_data_vertices
+    data, = get_rec_contents(:bin8)
+    tag!("rec", :type=>"faces") do
+      out!("<u4_ary>")
+      data.unpack("V*").each do |i|
+        x = @region_data_vertices[2*i]
+        y = @region_data_vertices[2*i+1]
+        out!(" #{i} <!-- #{x} #{y}-->")
+      end
+      out!("</u4_ary>")
+    end
+  end
+  
+  def convert_rec_outlines
+    raise SemanticFail.new unless @region_data_vertices
+    each_rec_member("outlines") do |ofs_end, i|
+      next unless @data[@ofs] == 0x48
+      data = get_value![1]
+      out!("<u4_ary>")
+      data.unpack("V*").each do |i|
+        x = @region_data_vertices[2*i]
+        y = @region_data_vertices[2*i+1]
+        out!(" #{i} <!-- #{x} #{y}-->")
+      end
+      out!("</u4_ary>")
+    end
+  end
+  
   def convert_rec_BOUNDS_BLOCK
     (xmin, ymin), (xmax, ymax) = get_rec_contents(:v2, :v2)
     out!("<bounds_block xmin=\"#{xmin}\" ymin=\"#{ymin}\" xmax=\"#{xmax}\" ymax=\"#{ymax}\"/>")
