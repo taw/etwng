@@ -1,0 +1,79 @@
+#!/usr/bin/env ruby
+
+require "find"
+require "pathname"
+require "pp"
+
+class PackFile
+  def initialize(pack_type)
+    @pack_type = pack_type
+    @deps      = []
+    @files     = []
+  end
+  
+  def add_file(fs_path, pack_path)
+    @files << [fs_path, pack_path, fs_path.size]
+  end
+  
+  def add(path)
+    path = Pathname(path)
+    if path.directory?
+      path.find{|fn|
+        add_file fn, fn.relative_path_from(path) if fn.file?
+      }
+    else
+      add_file path, path.basename
+    end
+  end
+
+  def pack_type_code
+    ht = {"boot" => 0, "main" => 1, "patch" => 2, "mod" => 3, "movies" => 4}
+    rv = ht[@pack_type]
+    return rv if rv
+    raise "Unknown pack type #{@pack_type}, known types are: #{ht.keys.sort.join(", ")}"
+  end  
+  
+  def build_deps_header
+    @deps.map{|dep| dep + "\x00"}.join("")
+  end
+  
+  def build_files_header
+    @files.map{|fs_path, pack_path, size|
+      [size].pack("V") + pack_path + "\x00"
+    }.join("")
+  end
+  
+  def build_header
+    deps_header  = build_deps_header
+    files_header = build_files_header
+    
+    header = "PFH0"
+    header << [pack_type_code].pack("V")
+    header << [@deps.size].pack("V")
+    header << [deps_header.size].pack("V")
+    header << [@files.size].pack("V")
+    header << [files_header.size].pack("V")
+    header << files_header
+    
+    header
+  end
+  
+  def save(fh)
+    fh.write build_header
+    @files.each do |fs_path, pack_path, size|
+      fh.write File.open(fs_path, 'rb').read(size)
+    end
+  end
+end
+
+unless ARGV.size >= 3
+  puts "Usage: #{$0} file.pack [type] dir1 dir2 file1 file2 ..."
+  exit 1
+end
+
+file_name = ARGV.shift
+pack_type = ARGV.shift
+
+pack = PackFile.new(pack_type)
+ARGV.each{|fn| pack.add(fn) }
+File.open(file_name, 'wb'){|fh| pack.save(fh)}
