@@ -127,15 +127,35 @@ class EsfBuilder
   end
   def start_esf(magic)
     @data << magic.pack("V*")
+    @abcf = (magic[0] == 0xabcf)
+    @str_lookup = {}
+    @str_table  = []
+    @asc_lookup = {}
+    @asc_table  = []
     push_marker_ofs
   end
   def end_esf
     pop_marker_ofs
     @data << [@node_types.size].pack("v")
-    @node_types.each{|nn|
+    @node_types.each do |nn|
       @data << [nn.size].pack("v")
       @data << nn
-    }
+    end
+    if @abcf
+      @data << [@str_table.size].pack("V")
+      @str_table.each do |str,i|
+        uchars = str.unpack("U*")
+        @data << [uchars.size].pack("v")
+        @data << uchars.pack("v*")
+        @data << [i].pack("V")
+      end
+      @data << [@asc_table.size].pack("V")
+      @asc_table.each do |str,i|
+        @data << [str.size].pack("v")
+        @data << str
+        @data << [i].pack("V")
+      end
+    end
   end
 
 # private
