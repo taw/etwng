@@ -43,13 +43,35 @@ class SampleTest
 end
 
 sample_tests = [
-  "trade_routes.esf",
-  "sea_grids.esf",
-  "poi.esf",
-  "pathfinding.esf",
-  "regions.esf",
-  "bmd.dat",
-  "startpos.esf",
+  # "bmd.dat",
+  # "episode_one_pathfinding.esf",
+  # "eu_north.esf",
+  # "pathfinding.esf",
+  # "poi.esf",
+  # "portugal_winter_1702_uni_1.empire_save",
+  # "regions.esf",
+  # "sea_grids.esf",
+  # "startpos.esf",
+  # "trade_routes.esf",
+  # "uk.empire_save",
+  # "van_0.empire_save",
+  # "van_1.empire_save",
+  # "van_2.empire_save",
+  # "van_3.empire_save",
+  # "van_4.empire_save",
+
+  "campaign_sho_castle_1_fort.esf",
+  "campaign_sho_castle_2_stronghold.esf",
+  "campaign_sho_castle_3_fortress.esf",
+  "campaign_sho_castle_4_castle.esf",
+  "campaign_sho_castle_5_citadel.esf",
+  "sho_sea_grids.esf",
+  "sho_poi.esf",
+  "sho_campaign.tree_list",
+  "sho_pathfinding.esf",
+  "sho_regions.esf",
+
+  # "sho_startpos.esf",
 ].map{|filename| SampleTest.new(filename)}.sort_by(&:size)
 
 FileUtils.mkdir_p "tmp"

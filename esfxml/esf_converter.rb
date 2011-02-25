@@ -43,9 +43,9 @@ module EsfConvertBasic
       str = get_s
     end
     if str.empty?
-      out!("<se/>")
+      out!("<s/>")
     else
-      out!("<se>#{str.xml_escape}</se>")
+      out!("<s>#{str.xml_escape}</s>")
     end
   end
   def convert_0f!
@@ -55,9 +55,9 @@ module EsfConvertBasic
       str = get_ascii
     end
     if str.empty?
-      out!("<asce/>")
+      out!("<asc/>")
     else
-      out!("<asce>#{str.xml_escape}</asce>")
+      out!("<asc>#{str.xml_escape}</asc>")
     end
   end
   def convert_10!
@@ -136,9 +136,9 @@ module EsfConvertBasic
         out!("<str_ary>")
         data.each do |str|
           if str.empty?
-            out!(" <s/>")
+            out!(" <se/>")
           else
-            out!(" <s>#{str}</s>")
+            out!(" <se>#{str}</se>")
           end
         end
         out!("</str_ary>")
