@@ -136,9 +136,9 @@ module EsfConvertBasic
         out!("<str_ary>")
         data.each do |str|
           if str.empty?
-            out!(" <se/>")
+            out!(" <s/>")
           else
-            out!(" <se>#{str}</se>")
+            out!(" <s>#{str}</s>")
           end
         end
         out!("</str_ary>")
@@ -148,7 +148,24 @@ module EsfConvertBasic
     end
   end
   def convert_4f!
-    convert_4x!("binF", &:to_hex_dump)
+    if @abcf
+      data = get_ofs_bytes.unpack("V*").map{|i| @asc_lookup[i]}
+      if data.empty?
+        out!("<asc_ary/>")
+      else
+        out!("<asc_ary>")
+        data.each do |str|
+          if str.empty?
+            out!(" <asc/>")
+          else
+            out!(" <asc>#{str}</asc>")
+          end
+        end
+        out!("</asc_ary>")
+      end
+    else
+      convert_4x!("binF", &:to_hex_dump)
+    end
   end
 end
 

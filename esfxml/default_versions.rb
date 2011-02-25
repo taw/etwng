@@ -262,4 +262,5 @@ DefaultVersions = Hash.new(0).merge({
   :REBEL_DATA => 4,
   :POSSIBLE_SELECTION_BOUNDS => 1,
   :CAMPAIGN_VIEW_SELECTION_VOLUME => 1,
+  :FORTIFICATION_DAMAGE_INFO => 4,
 })

@@ -76,15 +76,26 @@ class EsfBuilder
     @data << "\x08"
     @data << [val].pack("V")
   end
+  def asc_lookup(str)
+    unless @asc_lookup[str]
+      @asc_max += 1
+      @asc_lookup[str] = @asc_max
+      @asc_table << [str, @asc_max]
+    end
+    return @asc_lookup[str]
+  end
+  def str_lookup(str)
+    unless @str_lookup[str]
+      @str_max += 1
+      @str_lookup[str] = @str_max
+      @str_table << [str, @str_max]
+    end
+    return @str_lookup[str]
+  end
   def put_s(str)
     if @abcf
       @data << "\x0e"
-      unless @str_lookup[str]
-        @str_max += 1
-        @str_lookup[str] = @str_max
-        @str_table << [str, @str_max]
-      end
-      @data << [@str_lookup[str]].pack("V")
+      @data << [str_lookup(str)].pack("V")
     else
       @data << "\x0e"
       uchars = str.unpack("U*")
@@ -94,17 +105,24 @@ class EsfBuilder
   def put_asc(str)
     if @abcf
       @data << "\x0f"
-      unless @str_lookup[str]
-        @asc_max += 1
-        @asc_lookup[str] = @asc_max
-        @asc_table << [str, @asc_max]
-      end
-      @data << [@asc_lookup[str]].pack("V")
+      @data << [asc_lookup(str)].pack("V")
     else
       @data << "\x0f"
       @data << [str.size].pack("v")
       @data << str
     end
+  end
+  def put_str_ary(strs)
+    raise "Tag type <str_ary> requires ESF version ABCF (S2TW) or newer" unless @abcf
+    @data << "\x4e"
+    @data << [@data.size + 4 + strs.size*4].pack("V")
+    @data << strs.map{|str| str_lookup(str)}.pack("V*")
+  end
+  def put_asc_ary(strs)
+    raise "Tag type <asc_ary> requires ESF version ABCF (S2TW) or newer" unless @abcf
+    @data << "\x4f"
+    @data << [@data.size + 4 + strs.size*4].pack("V")
+    @data << strs.map{|str| asc_lookup(str)}.pack("V*")
   end
   def put_4x(code, ary_data)
     @data << code

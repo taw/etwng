@@ -930,11 +930,33 @@ module XmlTagHandlers
     @esf.put_no
   end
   def on_text_node_asc(attributes, buf, ctx)
-    @esf.put_asc buf
+    if @stack[-1][3][:asc_ary]
+      @stack[-1][3][:asc_ary] << buf
+    else
+      @esf.put_asc buf
+    end
   end
   def on_text_node_s(attributes, buf, ctx)
-    @esf.put_s buf
+    if @stack[-1][3][:str_ary]
+      @stack[-1][3][:str_ary] << buf
+    else
+      @esf.put_s buf
+    end
   end
+  def on_start_node_str_ary(attributes)
+    [true, nil, {:str_ary => []}]
+  end
+  def on_end_node_str_ary(attributes, buf, ctx)
+    @esf.put_str_ary ctx[:str_ary]
+  end
+  def on_start_node_asc_ary(attributes)
+    [true, nil, {:asc_ary => []}]
+  end
+  def on_end_node_asc_ary(attributes, buf, ctx)
+    @esf.put_asc_ary ctx[:asc_ary]
+  end
+
+  
   def on_text_node_u(attributes, buf, ctx)
     @esf.put_u buf.to_i
   end
@@ -1031,7 +1053,7 @@ module XmlTagHandlers
   def on_text_node_binF(attributes, buf, ctx)
     put_bin_hex(0x4F, buf)
   end
-
+  
   ## Common node types  
   def on_start_text_node(attributes)
     [false, "", {}]
