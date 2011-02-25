@@ -64,6 +64,10 @@ class EsfBuilder
     @data << "\x10"
     @data << [val].pack("v")
   end
+  def put_u2z(val)
+    @data << "\x03"
+    @data << [val].pack("v")
+  end
   def put_i(val)
     @data << "\x04"
     @data << [val].pack("V")

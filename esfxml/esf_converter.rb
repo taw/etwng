@@ -43,9 +43,9 @@ module EsfConvertBasic
       str = get_s
     end
     if str.empty?
-      out!("<s/>")
+      out!("<se/>")
     else
-      out!("<s>#{str.xml_escape}</s>")
+      out!("<se>#{str.xml_escape}</se>")
     end
   end
   def convert_0f!
@@ -55,9 +55,9 @@ module EsfConvertBasic
       str = get_ascii
     end
     if str.empty?
-      out!("<asc/>")
+      out!("<asce/>")
     else
-      out!("<asc>#{str.xml_escape}</asc>")
+      out!("<asce>#{str.xml_escape}</asce>")
     end
   end
   def convert_10!
@@ -226,6 +226,14 @@ class EsfConverter < EsfParser
     tag!("node_types") do
       node_types.each do |n|
         out!("<node_type name=\"#{n.to_s.xml_escape}\"/>")
+      end
+      if @abcf
+        @str_table.each do |str, idx|
+          out!(%Q[<str_index idx="#{idx}">#{str.xml_escape}</str_index>])
+        end
+        @asc_table.each do |str, idx|
+          out!(%Q[<asc_index idx="#{idx}">#{str.xml_escape}</asc_index>])
+        end
       end
     end
   end
