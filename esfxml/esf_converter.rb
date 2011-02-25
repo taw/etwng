@@ -12,6 +12,9 @@ module EsfConvertBasic
   def convert_01!
     out!(get_bool ? "<yes/>" : "<no/>")
   end
+  def convert_03!
+    out!("<u2z>#{get_u2}</u2z>")
+  end  
   def convert_04!
     out!("<i>#{get_i}</i>")
   end
@@ -34,7 +37,11 @@ module EsfConvertBasic
     out!("<v3 x=\"#{get_flt}\" y=\"#{get_flt}\" z=\"#{get_flt}\"/>")
   end
   def convert_0e!
-    str = get_s
+    if @abcf
+      str = @str_lookup[get_u]
+    else
+      str = get_s
+    end
     if str.empty?
       out!("<s/>")
     else
@@ -42,7 +49,11 @@ module EsfConvertBasic
     end
   end
   def convert_0f!
-    str = get_ascii
+    if @abcf
+      str = @asc_lookup[get_u]
+    else
+      str = get_ascii
+    end
     if str.empty?
       out!("<asc/>")
     else
@@ -117,7 +128,24 @@ module EsfConvertBasic
     end
   end
   def convert_4e!
-    convert_4x!("binE", &:to_hex_dump)
+    if @abcf
+      data = get_ofs_bytes.unpack("V*").map{|i| @str_lookup[i]}
+      if data.empty?
+        out!("<str_ary/>")
+      else
+        out!("<str_ary>")
+        data.each do |str|
+          if str.empty?
+            out!(" <s/>")
+          else
+            out!(" <s>#{str}</s>")
+          end
+        end
+        out!("</str_ary>")
+      end
+    else
+      convert_4x!("binE", &:to_hex_dump)
+    end
   end
   def convert_4f!
     convert_4x!("binF", &:to_hex_dump)

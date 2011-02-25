@@ -79,14 +79,21 @@ module EsfBasicBinaryOps
       tag = @data[la_ofs]
       # puts "At #{la_ofs}, tag #{"%02x" % tag}"
       if tag == 0x0e
-        sz, = @data[la_ofs+1, 2].unpack("v")
-        rv = @data[la_ofs+3, sz*2].unpack("v*").pack("U*")
-        return nil if rv == ""
-        if rv.size > 128
-          puts "Warning: Too long name suggested for file name at #{@ofs}/#{la_ofs}: #{rv.inspect}"
-          return nil
+        if @abcf
+          i, = @data[la_ofs+1, 4].unpack("V")
+          rv = @str_lookup[i]
+          p [:lookahead, i, rv]
+          return rv
+        else
+          sz, = @data[la_ofs+1, 2].unpack("v")
+          rv = @data[la_ofs+3, sz*2].unpack("v*").pack("U*")
+          return nil if rv == ""
+          if rv.size > 128
+            puts "Warning: Too long name suggested for file name at #{@ofs}/#{la_ofs}: #{rv.inspect}"
+            return nil
+          end
+          return rv
         end
-        return rv
       elsif tag <= 0x10
         sz = [3, 2, nil, nil, 5, nil, 2, 3, 5, nil, 5, nil, 9, 13, nil, nil, 3][tag]
         return nil unless sz
@@ -117,21 +124,51 @@ module EsfBasicBinaryOps
       true
     end
   end    
-  def get_magic
+  def parse_magic
     case magic = get_u
     when 0xABCD
-      [0xABCD]
+      @abcf = false
+      @magic = [0xABCD]
     when 0xABCE
+      @abcf = false
       a = get_u
       b = get_u
       raise "Incorrect ESF magic followup" unless a == 0
-      [0xABCE, a, b]
+      @magic = [0xABCE, a, b]
+    when 0xABCF
+      @abcf = true
+      a = get_u
+      b = get_u
+      raise "Incorrect ESF magic followup" unless a == 0
+      @magic = [0xABCF, a, b]
     else
       raise "Incorrect ESF magic: %X" % magic
     end
   end
-  def get_node_types
-    (0...get_u2).map{ get_ascii.to_sym }
+  def parse_node_types
+    @node_types = (0...get_u2).map{ get_ascii.to_sym }
+    if @abcf
+      @str_table  = []
+      @str_lookup = {}
+      get_u.times do
+        s = get_s
+        i = get_u
+        @str_lookup[i] = s
+        @str_table << [s,i]
+      end
+      @asc_table  = []
+      @asc_lookup = {}
+      get_u.times do
+        s = get_ascii
+        i = get_u
+        @asc_lookup[i] = s
+        @asc_table << [s,i]
+      end
+    else
+      @str_table = nil
+      @asc_table = nil
+    end
+    raise "Extra data past end of file" if @ofs != @data.size
   end
   def get_ofs_bytes
     get_bytes(get_u - @ofs)
@@ -153,6 +190,9 @@ module EsfGetData
   end
   def get_01!
     [:bool, get_bool]
+  end
+  def get_03!
+    [:u2z, get_u2]
   end
   def get_04!
     [:i, get_i]
@@ -176,10 +216,18 @@ module EsfGetData
     [:v3, [get_flt, get_flt, get_flt]]
   end
   def get_0e!
-    [:s, get_s]
+    if @abcf
+      [:s, @str_lookup[get_u]]
+    else
+      [:s, get_s]
+    end
   end
   def get_0f!
-    [:asc, get_ascii]
+    if @abcf
+      [:asc, @asc_lookup[get_u]]
+    else
+      [:asc, get_ascii]
+    end
   end
   def get_10!
     [:u2x, get_u2]
@@ -219,6 +267,12 @@ module EsfGetData
   end
   def get_4d!
     [:v3_ary, get_ofs_bytes]
+  end
+  def get_4e!
+    [:str_ary, get_ofs_bytes]
+  end
+  def get_4f!
+    [:asc_ary, get_ofs_bytes]
   end
 end
 
@@ -315,8 +369,8 @@ class EsfParser
   def initialize(esf_fh)
     @data       = esf_fh.read
     @ofs        = 0
-    @magic      = get_magic
-    @node_types = with_temp_ofs(get_u) { get_node_types }
+    parse_magic
+    with_temp_ofs(get_u) { parse_node_types }
     @esf_type_handlers_get = setup_esf_type_handlers_get
   end
 

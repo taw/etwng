@@ -51,6 +51,8 @@ module EsfSemanticConverter
 
 ## startpos.esf arrays
   def lookahead_faction_ids
+    return if @abcf
+    
     save_ofs = @ofs
     ofs_end = get_u
     count = get_u
