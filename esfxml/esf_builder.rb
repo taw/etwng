@@ -11,6 +11,16 @@ class EsfBuilder
     @type_codes       = Hash.new{|ht,k| raise "Unknown node name #{k.inspect}"}
     @node_types       = []
   end
+  def add_str_index(str, idx)
+    @str_table << [str, idx]
+    @str_lookup[str] = idx
+    @str_max = [@str_max, idx].max
+  end
+  def add_asc_index(str, idx)
+    @asc_table << [str, idx]
+    @asc_lookup[str] = idx
+    @asc_max = [@asc_max, idx].max
+  end
   def add_type_code(name)
     raise "Name already set: #{name}" if @type_codes.has_key?(name)
     @type_codes[name] = @type_codes.size
@@ -63,14 +73,34 @@ class EsfBuilder
     @data << [val].pack("V")
   end
   def put_s(str)
-    @data << "\x0e"
-    uchars = str.unpack("U*")
-    @data << [uchars.size, *uchars].pack("v*")
+    if @abcf
+      @data << "\x0e"
+      unless @str_lookup[str]
+        @str_max += 1
+        @str_lookup[str] = @str_max
+        @str_table << [str, @str_max]
+      end
+      @data << [@str_lookup[str]].pack("V")
+    else
+      @data << "\x0e"
+      uchars = str.unpack("U*")
+      @data << [uchars.size, *uchars].pack("v*")
+    end
   end
   def put_asc(str)
-    @data << "\x0f"
-    @data << [str.size].pack("v")
-    @data << str
+    if @abcf
+      @data << "\x0f"
+      unless @str_lookup[str]
+        @asc_max += 1
+        @asc_lookup[str] = @asc_max
+        @asc_table << [str, @asc_max]
+      end
+      @data << [@asc_lookup[str]].pack("V")
+    else
+      @data << "\x0f"
+      @data << [str.size].pack("v")
+      @data << str
+    end
   end
   def put_4x(code, ary_data)
     @data << code
@@ -128,10 +158,12 @@ class EsfBuilder
   def start_esf(magic)
     @data << magic.pack("V*")
     @abcf = (magic[0] == 0xabcf)
-    @str_lookup = {}
     @str_table  = []
-    @asc_lookup = {}
+    @str_lookup = {}
+    @str_max    = -1
     @asc_table  = []
+    @asc_lookup = {}
+    @asc_max    = -1
     push_marker_ofs
   end
   def end_esf

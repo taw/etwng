@@ -903,9 +903,14 @@ module XmlTagHandlers
   end
   def on_end_node_node_types(attributes, buf, ctx)
   end
-
   def on_empty_node_node_type(attributes, buf, ctx)
     @esf.add_type_code attributes[:name]
+  end
+  def on_empty_node_str_index(attributes, buf, ctx)
+    @esf.add_str_index buf, attributes[:idx]
+  end
+  def on_empty_node_asc_index(attributes, buf, ctx)
+    @esf.add_asc_index buf, attributes[:idx]
   end
   def on_empty_node_v2(attributes, buf, ctx)
     @esf.put_v2 attributes[:x].to_f, attributes[:y].to_f
