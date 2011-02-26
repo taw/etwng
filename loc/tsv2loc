@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+require "pp"
+require "rubygems"
+require "fastercsv"
+
+unless ARGV.size == 2
+  STDERR.puts "#{$0} file.tsv file.loc"
+  exit 1
+end
+
+data = FasterCSV.read(ARGV[0], :encoding => 'U', :col_sep => "\t")
+
+File.open(ARGV[1], 'wb') do |fh|
+  fh << "\xFF\xFELOC\x00\x01\x00\x00\x00"
+  fh << [data.size].pack("V")
+  data.each do |key, val, bool|
+    key = key.unpack("U*")
+    val = val.unpack("U*")
+    bool = bool == "true"
+    fh << [key.size].pack("v")
+    fh << key.pack("v*")
+    fh << [val.size].pack("v")
+    fh << val.pack("v*")
+    fh << (bool ? "\x01" : "\x00")
+  end
+end

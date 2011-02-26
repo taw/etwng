@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+
+require "pp"
+require "rubygems"
+require "fastercsv"
+
+class LocFile
+  def initialize(path)
+    @data = File.open(path, 'rb', &:read)
+    @ofs = 0
+  end
+  def bytes_left
+    @data.size - @ofs
+  end
+  def get(size)
+    raise "Trying to read data past end of file" if @ofs + size > @data.size
+    rv = @data[@ofs, size]
+    @ofs += size
+    rv
+  end
+  def get_u
+    get(4).unpack("V")[0]
+  end
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  def get_s
+    get(get_u2*2).unpack("v*").pack("U*")
+  end
+  def get_byte
+    get(1).unpack("C")[0]
+  end
+  def get_bool
+    rv = get_byte
+    raise "Booleans must be 0 or 1, not #{rv}" if rv > 1
+    rv == 1
+  end
+  def parse!
+    raise "Not a LOC file" unless get(6) == "\xFF\xFELOC\x00"
+    raise "Bad version of LOC file" unless get_u == 1
+    rv = []
+    get_u.times do
+      yield [get_s, get_s, get_bool]
+    end
+    raise "Data after end of file: #{bytes_left} bytes" unless bytes_left == 0
+    rv
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "#{$0} file.loc file.tsv"
+  exit 1
+end
+
+FasterCSV.open(ARGV[1], "wb", :encoding => 'U', :col_sep => "\t") do |tsv|
+  LocFile.new(ARGV[0]).parse! do |line|
+    tsv << line
+  end
+end
