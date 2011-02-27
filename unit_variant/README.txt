@@ -7,5 +7,5 @@ Usage:
 It works with either Ruby or JRuby, on any operating system.
 
 
-For now only unpacking NTW files works.
-Packing and S2TW support are coming soon.
+For now only unpacking works.
+Packing is coming soon.

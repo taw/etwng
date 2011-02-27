@@ -6,7 +6,15 @@ require "pp"
 FileUtils.rm_rf "tmp/ntw"
 FileUtils.mkdir_p "tmp/ntw"
 
+FileUtils.rm_rf "tmp/s2tw"
+FileUtils.mkdir_p "tmp/s2tw"
+
 Dir["samples/ntw/*.unit_variant"].sort.each do |fn|
   txt = "tmp/ntw/" + File.basename(fn, ".unit_variant") + ".txt"
+  system "./uv_unpack", fn, txt
+end
+
+Dir["samples/s2tw/*.unit_variant"].sort.each do |fn|
+  txt = "tmp/s2tw/" + File.basename(fn, ".unit_variant") + ".txt"
   system "./uv_unpack", fn, txt
 end

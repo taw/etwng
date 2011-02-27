@@ -42,8 +42,15 @@ class UnitVariant
     equipment
   end
   def parse!
-    @header = [get_u, get_u, get_u]
+    @version = get_u
+    unless @version == 0 or @version == 2
+      raise "Version #{@version} found, but only supported versions are 0 (NTW) and 2 (S2TW)"
+    end
+
+    @header = [get_u, get_u]
     divider = get_u
+    @header << get_u if @version == 2
+    
     equipment = parse_equipment(divider)
 
     @category = []
@@ -58,7 +65,7 @@ class UnitVariant
       @category << [cat_name, *equipment.shift(eq_cnt)]
     end
     raise "Equipment left at the end of file" unless equipment.empty?
-    @category
+    [@version, @header, @category]
   end
 end
 
@@ -69,7 +76,9 @@ end
 
 uv = UnitVariant.new(ARGV[0])
 File.open(ARGV[1], "wb") do |fh|
-  uv.parse!.each do |cat|
+  version, header, categories = uv.parse!
+  fh.puts [version, *header].inspect
+  categories.each do |cat|
     fh.puts cat.inspect
   end
 end
