@@ -47,25 +47,30 @@ class UnitVariant
       raise "Version #{@version} found, but only supported versions are 0 (NTW) and 2 (S2TW)"
     end
 
-    @header = [get_u, get_u]
-    divider = get_u
-    @header << get_u if @version == 2
+    cat_count = get_u
+    raise "Parse Error" unless get_u == (@version == 0 ? 20 : 24)
     
+    divider = get_u
+    raise "Parse error" unless get_u == 1 if @version == 2
+
     equipment = parse_equipment(divider)
 
     @category = []
+
     eq_cnt_total = 0
     while @ofs < divider
       cat_name = get_s256
-      raise "Parse Error: expected serial category number" unless get_u == @category.size
+      cat_num = get_u # This is not serial id always, 9 S2TW have (0..15, 18)
+      # raise "Parse Error: expected serial category number" unless get_u == @category.size
       raise "Parse Error: expected 0" unless get_u == 0
       eq_cnt = get_u
       raise "Parse Error: expected equipment total count" unless get_u == eq_cnt_total
       eq_cnt_total += eq_cnt
-      @category << [cat_name, *equipment.shift(eq_cnt)]
+      @category << [cat_name, cat_num, *equipment.shift(eq_cnt)]
     end
+    raise "Category count incorrect" unless cat_count == @category.size
     raise "Equipment left at the end of file" unless equipment.empty?
-    [@version, @header, @category]
+    [@version, @category]
   end
 end
 
@@ -76,8 +81,8 @@ end
 
 uv = UnitVariant.new(ARGV[0])
 File.open(ARGV[1], "wb") do |fh|
-  version, header, categories = uv.parse!
-  fh.puts [version, *header].inspect
+  version, categories = uv.parse!
+  fh.puts version
   categories.each do |cat|
     fh.puts cat.inspect
   end
