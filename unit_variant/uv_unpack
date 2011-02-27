@@ -1,0 +1,75 @@
+#!/usr/bin/env ruby
+
+require "pp"
+
+class UnitVariant
+  def initialize(file_path)
+    @data = File.open(file_path, 'rb', &:read)
+    @ofs = 0
+    raise "Not a unit_variant file" unless get(4) == "VRNT"
+  end
+  def get(size)
+    raise "Trying to read past end of file" if size+@ofs > @data.size
+    rv = @data[@ofs, size]
+    @ofs += size
+    rv
+  end
+  def get_u
+    get(4).unpack("V")[0]
+  end
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  def get_s
+    get(get_u2*2).unpack("v*").pack("U*")
+  end
+  def get_s256
+    get(256*2).unpack("v*").pack("U*").sub(/\x00*\z/, "")
+  end
+  def parse_equipment(divider)
+    save_ofs, @ofs = @ofs, divider
+    equipment = []
+    while @ofs < @data.size
+      eq = [get_s256, get_s256, get_u2]
+      if eq[1] == "" and eq[2] == 1
+        equipment << eq[0]
+      else
+        equipment << [eq[0], eq[1]]
+      end
+    end
+    raise "Data left at the end of file" unless @data.size == @ofs
+    @ofs = save_ofs
+    equipment
+  end
+  def parse!
+    @header = [get_u, get_u, get_u]
+    divider = get_u
+    equipment = parse_equipment(divider)
+
+    @category = []
+    eq_cnt_total = 0
+    while @ofs < divider
+      cat_name = get_s256
+      raise "Parse Error: expected serial category number" unless get_u == @category.size
+      raise "Parse Error: expected 0" unless get_u == 0
+      eq_cnt = get_u
+      raise "Parse Error: expected equipment total count" unless get_u == eq_cnt_total
+      eq_cnt_total += eq_cnt
+      @category << [cat_name, *equipment.shift(eq_cnt)]
+    end
+    raise "Equipment left at the end of file" unless equipment.empty?
+    @category
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} file.unit_variant file.txt"
+  exit 1
+end
+
+uv = UnitVariant.new(ARGV[0])
+File.open(ARGV[1], "wb") do |fh|
+  uv.parse!.each do |cat|
+    fh.puts cat.inspect
+  end
+end

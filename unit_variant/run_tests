@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+require "pp"
+
+FileUtils.rm_rf "tmp/ntw"
+FileUtils.mkdir_p "tmp/ntw"
+
+Dir["samples/ntw/*.unit_variant"].sort.each do |fn|
+  txt = "tmp/ntw/" + File.basename(fn, ".unit_variant") + ".txt"
+  system "./uv_unpack", fn, txt
+end
