@@ -994,6 +994,9 @@ module XmlTagHandlers
   def on_text_node_u2_ary(attributes, buf, ctx)
     @esf.put_u2_ary buf.strip.split(/\s+/).map(&:to_i)
   end
+  def on_text_node_u2z_ary(attributes, buf, ctx)
+    @esf.put_u2z_ary buf.strip.split(/\s+/).map(&:to_i)
+  end
   def on_text_node_flt_ary(attributes, buf, ctx)
     @esf.put_flt_ary buf.strip.split(/\s+/).map(&:to_f)
   end

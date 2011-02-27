@@ -85,7 +85,7 @@ module EsfConvertBasic
     convert_4x!("bin2", &:to_hex_dump)
   end
   def convert_43!
-    convert_4x!("bin3", &:to_hex_dump)
+    convert_4x!("u2z_ary"){|data| data.unpack("v*").join(" ")}
   end
   def convert_44!
     convert_4x!("i4_ary"){|data| data.unpack("l*").join(" ")}

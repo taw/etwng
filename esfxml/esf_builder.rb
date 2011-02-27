@@ -141,6 +141,9 @@ class EsfBuilder
   def put_u2_ary(elems)
     put_4x("\x47", elems.pack("v*"))
   end
+  def put_u2z_ary(elems)
+    put_4x("\x43", elems.pack("v*"))
+  end
   def put_flt_ary(elems)
     put_4x("\x4a", elems.pack("f*"))
   end
