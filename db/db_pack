@@ -9,20 +9,28 @@ class DbTsvFile
     @data = File.open(file_name, 'rb', &:readlines).map{|line|
       line.sub(/\r?\n?\z/, "").split(/\t/)
     }
-    metadata_line = @data.shift
-    case metadata_line[0].sub(/\A"(.*)"\z/){$1}
-    when /\Aversion\s+(\d+)\s*\z/
-      @version = $1.to_i
-    when /\Aversion\s+(\d+), empty, no schema\s*\z/
-      @version = $1.to_i
+    metadata_line = @data.shift[0]
+    @guid = nil
+    metadata = metadata_line.strip.split(/\s*,\s*/)
+
+    raise "Metadata line unrecognized: #{metadata_line.inspect}" unless metadata.shift =~ /\Aversion\s+(\d+)/
+    @version = $1.to_i
+    
+    if metadata[0] =~ /\Aguid\s+(\S+)/
+      @guid = $1
+      metadata.shift
+    else
+      @guid = nil
+    end
+    if metadata == ["empty", "no schema"]
       @schema = nil
       @data = []
-    else
+      return
+    elsif metadata != []
       raise "Metadata line unrecognized: #{metadata_line.inspect}"
     end
     labels = @data.shift
-    
-    @schema = DbSchemata.instance.get_schema(@table_name, @version)
+    @schema = DbSchemata.instance.get_schema(@table_name, @version, @guid)
   end
   
   def field_to_binary(field_type, field_value)
@@ -73,6 +81,15 @@ class DbTsvFile
     out
   end
   
+  def guid_to_binary
+    if @guid
+      guid_str = @guid.unpack("U*")
+      "\375\376\374\377" + [guid_str.size].pack("v") + guid_str.pack("v*")
+    else
+      ""
+    end
+  end
+  
   def version_to_binary
     if @version == 1
       "\x01"
@@ -82,7 +99,7 @@ class DbTsvFile
   end
   
   def to_binary
-    out = version_to_binary
+    out = guid_to_binary + version_to_binary
     out << [@data.size].pack("V")
     @data.each{|row|
       out << row_to_binary(row)

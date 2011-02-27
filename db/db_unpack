@@ -21,6 +21,13 @@ class DbFile
     @table_name = table_name
     
     @data = File.open(file_name, 'rb', &:read)
+    @guid = nil
+    if @data[0, 4] == "\375\376\374\377"
+      gsz, = @data[4, 2].unpack("v")
+      @guid = @data[6, gsz*2].unpack("v*").pack("U*")
+      @data = @data[(6+gsz*2)..-1]
+    end
+    
     if @data[0, 1] == "\x01"
       @version = 1
       @data = @data[1..-1]
@@ -28,12 +35,12 @@ class DbFile
       @version = @data[4, 1].unpack("C")[0] + 1
       @data = @data[9..-1]
     else
-      raise "Unknown file: #{@data[0, 9].inspect}"
+      raise "Unknown file, magic number: #{@data[0, 9].inspect}"
     end
     @rows = @data[0, 4].unpack("V")[0]
     @data = @data[4..-1]
     
-    @schema = DbSchemata.instance.get_schema(@table_name, @version)
+    @schema = DbSchemata.instance.get_schema(@table_name, @version, @guid)
   end
   
   def can_convert?
@@ -125,16 +132,18 @@ class DbFile
   end
   
   def to_tsv
+    header = "version #{@version}"
+    header << ", guid #{@guid}" if @guid
     if !schema
       if empty?
-        return "version #{@version}, empty, no schema\n"
+        return "#{header}, empty, no schema\n"
       else
-        raise "version #{@version}, no schema, cannot convert\n"
+        raise "#{header}, no schema, cannot convert\n"
       end
     end
     data = parse_data
     return [
-      "version #{@version}",
+      header,
       schema.map{|name, field_type| "#{name}(#{field_type})"}.join("\t"),
       *data.map{|row| row.map{|f|
         if f.is_a?(Float)
