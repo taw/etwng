@@ -5,7 +5,3 @@ Usage:
   jruby uv_pack file.txt file.unit_variant
 
 It works with either Ruby or JRuby, on any operating system.
-
-
-For now only unpacking works.
-Packing is coming soon.

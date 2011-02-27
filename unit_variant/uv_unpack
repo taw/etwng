@@ -66,7 +66,7 @@ class UnitVariant
       eq_cnt = get_u
       raise "Parse Error: expected equipment total count" unless get_u == eq_cnt_total
       eq_cnt_total += eq_cnt
-      @category << [cat_name, cat_num, *equipment.shift(eq_cnt)]
+      @category << [cat_num, cat_name, *equipment.shift(eq_cnt)]
     end
     raise "Category count incorrect" unless cat_count == @category.size
     raise "Equipment left at the end of file" unless equipment.empty?
@@ -82,8 +82,11 @@ end
 uv = UnitVariant.new(ARGV[0])
 File.open(ARGV[1], "wb") do |fh|
   version, categories = uv.parse!
-  fh.puts version
-  categories.each do |cat|
-    fh.puts cat.inspect
+  fh.puts "[\n  #{version},"
+  categories.each do |cat_num, cat_name, *equipment|
+    out = ["  [#{cat_num}, #{cat_name.inspect}"]
+    out += equipment.map{|eq| "    #{eq.inspect}" }
+    fh.puts out.join(",\n") + "],"
   end
+  fh.puts "]"
 end

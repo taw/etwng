@@ -3,18 +3,36 @@
 require "fileutils"
 require "pp"
 
-FileUtils.rm_rf "tmp/ntw"
-FileUtils.mkdir_p "tmp/ntw"
+def cleanup_dir(dir)
+  FileUtils.rm_rf dir
+  FileUtils.mkdir_p dir
+end
 
-FileUtils.rm_rf "tmp/s2tw"
-FileUtils.mkdir_p "tmp/s2tw"
+def run_test(fn, tmp_path)
+  # puts "Converting #{fn}"
+  txt = tmp_path + "/" + File.basename(fn, ".unit_variant") + ".txt"
+  out = tmp_path + "/" + File.basename(fn)
+  unless system "./uv_unpack", fn, txt
+    puts "Conversion of #{txt} failed"
+    return 1
+  end
+  unless system "./uv_pack", txt, out
+    puts "Conversion of #{txt} failed"
+    return 1
+  end
+  unless system "diff", fn, out
+    return 1
+  end
+end
+
+cleanup_dir "tmp/ntw"
+cleanup_dir "tmp/s2tw"
 
 Dir["samples/ntw/*.unit_variant"].sort.each do |fn|
-  txt = "tmp/ntw/" + File.basename(fn, ".unit_variant") + ".txt"
-  system "./uv_unpack", fn, txt
+  run_test(fn, "tmp/ntw")
 end
 
 Dir["samples/s2tw/*.unit_variant"].sort.each do |fn|
-  txt = "tmp/s2tw/" + File.basename(fn, ".unit_variant") + ".txt"
-  system "./uv_unpack", fn, txt
+  run_test(fn, "tmp/s2tw")
 end
+

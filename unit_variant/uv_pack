@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+
+class UnitVariant
+  def initialize(file_path)
+    txt = File.open(file_path, 'rb', &:read)
+    @data = eval(txt)
+  end
+  def version
+    @data[0]
+  end
+  def header_size
+    version == 0 ? 20 : 24
+  end
+  def categories
+    @categories ||= @data[1..-1]
+  end
+  def divider
+    header_size + categories.size * (512 + 4*4)
+  end
+  def header
+    out = "VRNT"
+    out << [version, categories.size, header_size, divider].pack("V*")
+    out << [1].pack("V") if version == 2
+    out
+  end
+  def s256(str)
+    out = str.unpack("U*").pack("v*")
+    raise "String longer than 256 characters" if out.size > 512
+    out + "\x00" * (512 - out.size)
+  end
+  def rebuild_categories
+    out = ""
+    eq_total_cnt = 0
+    categories.each{|cat_num, cat_name, *equipment|
+      out << s256(cat_name)
+      out << [cat_num, 0, equipment.size, eq_total_cnt].pack("VVVV")
+      eq_total_cnt += equipment.size
+    }
+    out
+  end
+  def rebuild_equipment_item(eq)
+    if eq.is_a?(String)
+      s256(eq) + s256("") + "\x01\x00"
+    else
+      s256(eq[0]) + s256(eq[1]) + "\x00\x00"
+    end
+  end
+  def rebuild_equipment
+    out = ""
+    categories.each{|cat_num, cat_name, *equipment|
+      equipment.each{|eq|
+        out << rebuild_equipment_item(eq)
+      }
+    }
+    out
+  end
+  def rebuild
+    header + rebuild_categories + rebuild_equipment
+  end
+  def save(file_path)
+    File.open(file_path, 'wb'){|fh|
+      fh.write(rebuild)
+    }
+  end
+end
+  
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} file.txt file.unit_variant"
+  exit 1
+end
+
+UnitVariant.new(ARGV[0]).save(ARGV[1])
