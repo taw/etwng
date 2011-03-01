@@ -195,7 +195,7 @@ class EsfConverter < EsfParser
   end
   
   def convert_rec_basic!(node_type, version)
-    csr = version ? nil : ConvertSemanticRec[node_type]
+    csr = ConvertSemanticRec[version][node_type]
     try_semantic(node_type){ return send(csr) } if csr
     tag!("rec", :type=>node_type, :version=>version) do
       ofs_end = get_u
@@ -220,17 +220,13 @@ class EsfConverter < EsfParser
   end
 
   def convert_80!
-    node_type, version = get_node_type_and_version
-    convert_rec!(node_type, version)
+    convert_rec!(*get_node_type_and_version)
   end
 
   def convert_81!
     node_type, version = get_node_type_and_version
-    if version.nil? && ConvertSemanticAry[node_type]
-      try_semantic(node_type) do
-        return send(ConvertSemanticAry[node_type]) 
-      end
-    end
+    csa = ConvertSemanticAry[version][node_type]
+    try_semantic(node_type){ return send(csa) } if csa
     ofs_end, count = get_u, get_u
     if count == 0
       tag!("ary", :type=>node_type, :version=>version)

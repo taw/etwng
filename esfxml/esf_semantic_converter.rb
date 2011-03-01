@@ -3,8 +3,8 @@ require "poi"
 require "commander_details"
 
 module EsfSemanticConverter
-  ConvertSemanticAry = {}
-  ConvertSemanticRec = {}
+  ConvertSemanticAry = Hash.new{|ht,k| ht[k]={}}
+  ConvertSemanticRec = Hash.new{|ht,k| ht[k]={}}
 
 ## Utility functions  
   def convert_ary_contents_str(tag)
@@ -51,8 +51,6 @@ module EsfSemanticConverter
 
 ## startpos.esf arrays
   def lookahead_faction_ids
-    return if @abcf
-    
     save_ofs = @ofs
     ofs_end = get_u
     count = get_u
@@ -63,7 +61,7 @@ module EsfSemanticConverter
     count.times do
       rec_end_ofs = get_u
       return nil unless get_byte == 0x80
-      return nil unless get_node_type_and_version == [:FACTION, nil]
+      return nil unless get_node_type_and_version[0] == :FACTION # Version number doesn't really matter
       return nil unless rec_end_ofs == get_u
       while @ofs < rec_end_ofs
         t = get_byte
@@ -72,8 +70,14 @@ module EsfSemanticConverter
           @ofs  = get_u
         elsif t == 4
           id = get_u
+        elsif t == 8
+          @ofs += 4
         elsif t == 14
-          rv[id] = get_s
+          if @abcf
+            rv[id] = @str_lookup[get_u]
+          else
+            rv[id] = get_s
+          end
           @ofs = rec_end_ofs
         else
           warn "Unexpected field type #{t} during lookahead of faction ids"
@@ -551,6 +555,14 @@ module EsfSemanticConverter
     @dir_builder.faction_name = nil
   end
 
+  def covert_v39_rec_FACTION
+    @dir_builder.faction_name = lookahead_str
+    tag!("rec", :type=>"FACTION", :version => 39) do
+      convert_until_ofs!(get_u)
+    end
+    @dir_builder.faction_name = nil
+  end
+  
   def convert_rec_FACTION_TECHNOLOGY_MANAGER
     annotate_rec "FACTION_TECHNOLOGY_MANAGER",
       [:i, 1] => "tech tree id"
@@ -1208,9 +1220,10 @@ module EsfSemanticConverter
 
   self.instance_methods.each do |m|
     if m.to_s =~ /\Aconvert_ary_(.*)\z/
-      ConvertSemanticAry[$1.gsub("__", " ").to_sym] = m
+      ConvertSemanticAry[nil][$1.gsub("__", " ").to_sym] = m
     elsif m.to_s =~ /\Aconvert_rec_(.*)\z/
-      ConvertSemanticRec[$1.gsub("__", " ").to_sym] = m
+      ConvertSemanticRec[nil][$1.gsub("__", " ").to_sym] = m
     end
   end
+  ConvertSemanticRec[39][:FACTION] = :covert_v39_rec_FACTION
 end
