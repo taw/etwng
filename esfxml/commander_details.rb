@@ -3,6 +3,7 @@ module CommanderDetails
   # They don't quite agree with each other
   # In the worst case, /XXX fallback is always supported
   NamesByFaction = {
+    # ETW
     "afghanistan" => "persian",
     "american_rebels" => "english",
     "amerind_rebels" => "native_american",
@@ -98,6 +99,17 @@ module CommanderDetails
     "virginia_colonists" => "english",
     "westphalia" => "german_catholic",
     "wurttemberg" => "german_catholic",
+    # S2TW
+    "tut_bessho" => "japanese",
+    "tut_chosokabe" => "japanese",
+    "tut_hatakeyama" => "japanese",
+    "tut_kikkawa" => "japanese",
+    "tut_kono" => "japanese",
+    "tut_matsuda" => "japanese",
+    "tut_miyoshi" => "japanese",
+    "tut_sogo" => "japanese",
+    "tut_tsutsui" => "japanese",
+    "tut_urakami" => "japanese",
   }
 
   def self.parse(fnam, lnam, faction)
