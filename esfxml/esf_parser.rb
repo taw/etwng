@@ -336,7 +336,7 @@ module EsfParserSemantic
       @ofs = save_ofs
     rescue SemanticFail
       # This is debug only, it's normally perfectly safe
-      pp [:semantic_rollback, @ofs, save_ofs, node_type]
+      puts "Semantic conversion of #{node_type}(#{save_ofs}..#{@ofs}) failed, falling back to low-level conversion"
       @ofs = save_ofs
     end
   end
