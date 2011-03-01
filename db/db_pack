@@ -3,6 +3,7 @@
 require "db_schemata"
 
 class DbTsvFile
+  attr_reader :schema
   def initialize(file_name, table_name)
     @file_name = file_name
     @table_name = table_name
@@ -133,7 +134,10 @@ source.find do |file_name|
   current_target = Pathname((target+file_name.relative_path_from(source)).to_s.sub(/\.tsv\z/, ""))
   
   file = DbTsvFile.new(file_name, table_name)
-
+  unless file.schema
+    STDERR.puts "No schema known for #{file_name}, skipping"
+    next
+  end
   file_bin = file.to_binary
   FileUtils.mkdir_p current_target.dirname
   File.open(current_target, 'wb'){|fh|
