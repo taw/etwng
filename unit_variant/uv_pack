@@ -1,5 +1,16 @@
 #!/usr/bin/env ruby
 
+require "pp"
+require "find"
+require "fileutils"
+require "pathname"
+
+class File
+  def self.write(path, cnt)
+    File.open(path, 'wb'){|fh| fh.write cnt}
+  end
+end
+
 class UnitVariant
   def initialize(file_path)
     txt = File.open(file_path, 'rb', &:read)
@@ -58,15 +69,28 @@ class UnitVariant
     header + rebuild_categories + rebuild_equipment
   end
   def save(file_path)
-    File.open(file_path, 'wb'){|fh|
-      fh.write(rebuild)
-    }
+    File.write(file_path, rebuild)
   end
 end
   
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} file.txt file.unit_variant"
+  STDERR.puts "   or: #{$0} directory_in directory_out"
   exit 1
 end
 
-UnitVariant.new(ARGV[0]).save(ARGV[1])
+source = Pathname(ARGV[0])
+target = Pathname(ARGV[1])
+
+if source.directory?
+  source.find do |source_file|
+    next unless source_file.file?
+    target_subdir   = target + source_file.dirname.relative_path_from(source)
+    target_basename = source_file.basename(".txt").to_s + ".unit_variant"
+    target_file = target_subdir + target_basename
+    FileUtils.mkdir_p target_subdir
+    UnitVariant.new(source_file).save(target_file)
+  end
+else
+  UnitVariant.new(source).save(target)
+end

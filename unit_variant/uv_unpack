@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 
 require "pp"
+require "find"
+require "fileutils"
+require "pathname"
 
 class File
   def self.write(path, cnt)
@@ -12,7 +15,7 @@ class UnitVariant
   def initialize(file_path)
     @data = File.open(file_path, 'rb', &:read)
     @ofs = 0
-    raise "Not a unit_variant file" unless get(4) == "VRNT"
+    raise "Not a unit_variant file #{file_path}" unless get(4) == "VRNT"
   end
   def get(size)
     raise "Trying to read past end of file" if size+@ofs > @data.size
@@ -90,12 +93,29 @@ class UnitVariant
     end
     out << "]\n"
   end
+  def save(target)
+    File.write(target, to_tsv)
+  end
 end
 
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} file.unit_variant file.txt"
+  STDERR.puts "   or: #{$0} directory_in directory_out"
   exit 1
 end
 
-uv = UnitVariant.new(ARGV[0])
-File.write(ARGV[1], uv.to_tsv)
+source = Pathname(ARGV[0])
+target = Pathname(ARGV[1])
+
+if source.directory?
+  source.find do |source_file|
+    next unless source_file.file?
+    target_subdir   = target + source_file.dirname.relative_path_from(source)
+    target_basename = source_file.basename(".unit_variant").to_s + ".txt"
+    target_file = target_subdir + target_basename
+    FileUtils.mkdir_p target_subdir
+    UnitVariant.new(source_file).save(target_file)
+  end
+else
+  UnitVariant.new(source).save(target)
+end
