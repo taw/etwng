@@ -2,6 +2,12 @@
 
 require "pp"
 
+class File
+  def self.write(path, cnt)
+    File.open(path, 'wb'){|fh| fh.write cnt}
+  end
+end
+
 class UnitVariant
   def initialize(file_path)
     @data = File.open(file_path, 'rb', &:read)
@@ -41,7 +47,7 @@ class UnitVariant
     @ofs = save_ofs
     equipment
   end
-  def parse!
+  def parse
     @version = get_u
     unless @version == 0 or @version == 2
       raise "Version #{@version} found, but only supported versions are 0 (NTW) and 2 (S2TW)"
@@ -72,6 +78,18 @@ class UnitVariant
     raise "Equipment left at the end of file" unless equipment.empty?
     [@version, @category]
   end
+  def to_tsv
+    version, categories = parse
+    out  = "[\n"
+    out << "  #{version},\n"
+    categories.each do |cat_num, cat_name, *equipment|
+      line     = "  [#{cat_num}, #{cat_name.inspect}"
+      lines_eq = equipment.map{|eq| "    #{eq.inspect}" }
+      out << [line, *lines_eq].join(",\n")
+      out << "],\n"
+    end
+    out << "]\n"
+  end
 end
 
 unless ARGV.size == 2
@@ -80,13 +98,4 @@ unless ARGV.size == 2
 end
 
 uv = UnitVariant.new(ARGV[0])
-File.open(ARGV[1], "wb") do |fh|
-  version, categories = uv.parse!
-  fh.puts "[\n  #{version},"
-  categories.each do |cat_num, cat_name, *equipment|
-    out = ["  [#{cat_num}, #{cat_name.inspect}"]
-    out += equipment.map{|eq| "    #{eq.inspect}" }
-    fh.puts out.join(",\n") + "],"
-  end
-  fh.puts "]"
-end
+File.write(ARGV[1], uv.to_tsv)
