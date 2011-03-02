@@ -2,6 +2,12 @@
 
 require "db_schemata"
 
+class File
+  def self.write(path, content)
+    File.open(path, "wb"){|fh| fh.write content}
+  end
+end
+
 class Float
   def pretty_single
     begin
@@ -133,6 +139,7 @@ class DbFile
   
   def to_tsv
     header = "version #{@version}"
+    header << ", schema #{@table_name}" if @schema
     header << ", guid #{@guid}" if @guid
     if !schema
       if empty?
@@ -193,10 +200,7 @@ source.find do |file_name|
     warn "File #{file_name} cannot be converted, skipping"
     next
   end
-  
   file_tsv = file.to_tsv
   FileUtils.mkdir_p current_target.dirname
-  File.open(current_target, 'wb'){|fh|
-    fh.puts file_tsv
-  }
+  File.write(current_target, file_tsv)
 end

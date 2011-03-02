@@ -2,29 +2,43 @@
 
 require "db_schemata"
 
+class File
+  def self.write(path, content)
+    File.open(path, "wb"){|fh| fh.write content}
+  end
+end
+
 class DbTsvFile
   attr_reader :schema
-  def initialize(file_name, table_name)
+  def initialize(file_name, table_name_from_dir)
     @file_name = file_name
-    @table_name = table_name
     @data = File.open(file_name, 'rb', &:readlines).map{|line|
       line.sub(/\r?\n?\z/, "").split(/\t/)
     }
     metadata_line = @data.shift[0]
     @guid = nil
     metadata = metadata_line.strip.split(/\s*,\s*/)
-
+    
     raise "Metadata line unrecognized: #{metadata_line.inspect}" unless metadata.shift =~ /\Aversion\s+(\d+)/
     @version = $1.to_i
-    
+
+    if metadata[0] =~ /\Aschema\s+(\S+)/
+      @table_name = $1
+      metadata.shift
+    else
+      @table_name = table_name_from_dir
+    end
+
     if metadata[0] =~ /\Aguid\s+(\S+)/
       @guid = $1
       metadata.shift
     else
       @guid = nil
     end
+    
     if metadata == ["empty", "no schema"]
       @schema = nil
+      @empty = true
       @data = []
       return
     elsif metadata != []
@@ -32,6 +46,10 @@ class DbTsvFile
     end
     labels = @data.shift
     @schema = DbSchemata.instance.get_schema(@table_name, @version, @guid)
+  end
+  
+  def empty?
+    @empty
   end
   
   def field_to_binary(field_type, field_value)
@@ -134,13 +152,11 @@ source.find do |file_name|
   current_target = Pathname((target+file_name.relative_path_from(source)).to_s.sub(/\.tsv\z/, ""))
   
   file = DbTsvFile.new(file_name, table_name)
-  unless file.schema
+  unless file.schema or file.empty?
     STDERR.puts "No schema known for #{file_name}, skipping"
     next
   end
   file_bin = file.to_binary
   FileUtils.mkdir_p current_target.dirname
-  File.open(current_target, 'wb'){|fh|
-    fh.write file_bin
-  }
+  File.write(current_target, file_bin)
 end
