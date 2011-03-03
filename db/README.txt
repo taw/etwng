@@ -27,3 +27,12 @@ which is known to work, or pass --comma option to db_unpack/db_pack:
 db_pack actually always accepts TSVs with either decimal format,
 so there's no way to make a mistake while converting back.
 It only takes --comma option for compatibility.
+
+=== Statistics ===
+
+From my collection of db files (various versions from main.pack, patch*.pack, mods, etc.)
+number converted is:
+
+ETW  869/975
+NTW  299/334
+S2TW 464/904

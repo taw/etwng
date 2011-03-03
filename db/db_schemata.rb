@@ -19,12 +19,23 @@ class DbSchemata
   def get_schema(table_name, version, guid)
     return nil unless @schema[table_name]
     
-    # Work-around because S2TW db tables have problems with these
-    return nil if guid and %Q[
-      warscape_equipment_items_tables campaign_map_settlements_tables
+    # Broken for ETW
+    return nil if %W[
+      warscape_equipment_items_tables
+      unit_stats_naval_crew_to_factions_tables
+      agents_tables
+      message_event_strings_tables
+    ].include?(table_name)
+    
+    # Broken for S2TW
+    return nil if guid and %W[
+      warscape_equipment_items_tables
+      campaign_map_settlements_tables
       campaign_map_towns_and_ports_tables
-      campaign_map_slots_tables missions_tables].include?(table_name)
-
+      campaign_map_slots_tables
+      missions_tables
+    ].include?(table_name)
+    
     max_version_known = @schema[table_name].map{|name, min_version, type| min_version}.max
     if version > max_version_known
       puts "#{table_name} schema known up to version #{max_version_known} but #{version} requested, please update"

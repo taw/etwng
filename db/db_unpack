@@ -58,21 +58,18 @@ class DbFile
   end
   
   def get(sz)
+    raise "Trying to read past end of file" if sz+@ofs > @data.size
     rv = @data[@ofs, sz]
     @ofs += sz
     rv
   end
   
   def get_float
-    rv = @data[@ofs, 4].unpack('f')[0]
-    @ofs += 4
-    rv.pretty_single
+    get(4).unpack("f")[0].pretty_single
   end
   
   def get_byte
-    rv = @data[@ofs, 1].unpack("C")[0]
-    @ofs += 1
-    rv
+    get(1).unpack("C")[0]
   end
   
   def get_bool
@@ -87,22 +84,15 @@ class DbFile
   end
   
   def get_u2
-    rv = @data[@ofs, 2].unpack('v')[0]
-    @ofs += 2
-    rv
+    get(2).unpack("v")[0]
   end
 
   def get_i4
-    rv = @data[@ofs, 4].unpack('l')[0]
-    @ofs += 4
-    rv
+    get(4).unpack("l")[0]
   end
   
   def get_string
-    sz = get_u2
-    rv = @data[@ofs, 2*sz].unpack('v*').pack("U*")
-    @ofs += 2*sz
-    rv
+    get(2*get_u2).unpack('v*').pack("U*")
   end
   
   def get_field(field_type)
@@ -194,12 +184,13 @@ source.find do |file_name|
   next unless file_name.file?
   table_name = file_name.dirname.basename.to_s
   current_target = Pathname((target+file_name.relative_path_from(source)).to_s + ".tsv")
-  
+
   file = DbFile.new(file_name, table_name)
   if !file.can_convert?
     warn "File #{file_name} cannot be converted, skipping"
     next
   end
+  # puts "Converting #{file_name}"
   file_tsv = file.to_tsv
   FileUtils.mkdir_p current_target.dirname
   File.write(current_target, file_tsv)
