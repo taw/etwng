@@ -449,6 +449,24 @@ module XmlTagHandlers
       @esf.put_i((attributes[:number] || "-1").to_i)
     end
   end
+
+  def on_start_node_quad_tree_node(attributes)
+    on_start_node_rec(:type => "QUAD_TREE_BIT_ARRAY_NODE")
+  end
+
+  def on_end_node_quad_tree_node(attributes, buf, ctx)
+    on_end_node_rec(attributes, buf, ctx)
+  end
+  
+  def on_text_node_quad_tree_leaf(attributes, buf, ctx)
+    put_rec "QUAD_TREE_BIT_ARRAY_NODE" do
+      ab = buf.to_i(16)
+      a = ab >> 32
+      b = ab & 0xFFFF_FFFF
+      @esf.put_u a
+      @esf.put_u b
+    end
+  end
   
   def on_empty_node_famous_battle_info(attributes, buf, ctx)
     put_rec "FAMOUS_BATTLE_INFO" do

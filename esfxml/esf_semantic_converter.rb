@@ -479,12 +479,19 @@ module EsfSemanticConverter
     out!(%Q[<cai_border_patrol_point x="#{x}" y="#{y}" a="#{a}"/>])
   end
   
-  # def convert_rec_QUAD_TREE_BIT_ARRAY_NODE
-  #   a, b = get_rec_contents(:u, :u)
-  #   a = "%08x" % a
-  #   b = "%08x" % b
-  #   out!(%Q[<quad_tree_leaf a="#{a}" b="#{b}"/>])
-  # end
+  def convert_rec_QUAD_TREE_BIT_ARRAY_NODE
+    ofs_end = get_u
+    if ofs_end - @ofs == 10 and @data[@ofs] == 0x08 and @data[@ofs+5] == 0x08
+      a, b = get_bytes(10).unpack("xVxV")
+      a = "%08x" % a
+      b = "%08x" % b
+      out!(%Q[<quad_tree_leaf>#{a}#{b}</quad_tree_leaf>])
+    else
+      tag!("quad_tree_node") do
+        send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
+      end
+    end
+  end
   
   def lookahead_v2x?(ofs_end)
     @ofs+10 <= ofs_end and @data[@ofs, 1] == "\x04" and @data[@ofs+5, 1] == "\x04"
