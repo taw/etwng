@@ -792,7 +792,7 @@
 		<xs:attribute name="unknown1" type="xs:boolean" use="required" />
 		<xs:attribute name="unknown2" type="xs:boolean" use="required" />
 		<xs:attribute name="Message_Icon" type="xs:string" use="required" />
-		<xs:attribute name="unknown3" msprop:VersionStart="1" type="xs:string" use="required" />
+		<xs:attribute name="unknown3" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="ministerial_positions_by_gov_types_tables">
 		<xs:attribute name="Faction" type="xs:string" use="required" />

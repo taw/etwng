@@ -20,6 +20,9 @@ class Float
   end
 end
 
+class ConversionError < Exception
+end
+
 class DbFile
   attr_reader :version, :rows, :data, :file_name, :table_name, :schema
   def initialize(file_name, table_name)
@@ -45,7 +48,6 @@ class DbFile
     end
     @rows = @data[0, 4].unpack("V")[0]
     @data = @data[4..-1]
-    
     @schema = DbSchemata.instance.get_schema(@table_name, @version, @guid)
   end
   
@@ -58,7 +60,7 @@ class DbFile
   end
   
   def get(sz)
-    raise "Trying to read past end of file" if sz+@ofs > @data.size
+    raise ConversionError.new("Trying to read past end of file") if sz+@ofs > @data.size
     rv = @data[@ofs, sz]
     @ofs += sz
     rv
@@ -79,7 +81,7 @@ class DbFile
     when 1
       true
     else
-      raise "Expected 0 or 1, got #{b}"
+      raise ConversionError.new("Expected 0 or 1, got #{b}")
     end
   end
   
@@ -123,7 +125,7 @@ class DbFile
   def parse_data
     @ofs = 0
     rv = (0...@rows).map{ @schema.map{|name, field_type| get_field(field_type) } }
-    raise "Not all data parsed" unless @ofs == @data.size
+    raise ConversionError.new("Not all data parsed") unless @ofs == @data.size
     rv
   end
   
@@ -191,7 +193,12 @@ source.find do |file_name|
     next
   end
   # puts "Converting #{file_name}"
-  file_tsv = file.to_tsv
+  begin
+    file_tsv = file.to_tsv
+  rescue ConversionError => exn
+    warn "Conversion of #{file_name}(version #{file.version}) failed"
+    next
+  end
   FileUtils.mkdir_p current_target.dirname
   File.write(current_target, file_tsv)
 end

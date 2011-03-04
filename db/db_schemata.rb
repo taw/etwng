@@ -19,28 +19,11 @@ class DbSchemata
   def get_schema(table_name, version, guid)
     return nil unless @schema[table_name]
     
-    # Broken for ETW
-    return nil if %W[
-      warscape_equipment_items_tables
-      unit_stats_naval_crew_to_factions_tables
-      agents_tables
-      message_event_strings_tables
-    ].include?(table_name)
-    
-    # Broken for S2TW
-    return nil if guid and %W[
-      warscape_equipment_items_tables
-      campaign_map_settlements_tables
-      campaign_map_towns_and_ports_tables
-      campaign_map_slots_tables
-      missions_tables
-    ].include?(table_name)
-    
     max_version_known = @schema[table_name].map{|name, min_version, type| min_version}.max
-    if version > max_version_known
-      puts "#{table_name} schema known up to version #{max_version_known} but #{version} requested, please update"
-      return nil
-    end
+    # if version > max_version_known
+    #   puts "#{table_name} schema known up to version #{max_version_known} but #{version} requested, please update"
+    #   return nil
+    # end
     @schema[table_name].map{|name, min_version, type|
       version >= min_version ? [name, type] : nil
     }.compact
@@ -71,7 +54,7 @@ private
 
     name     = field.delete("name")
     version  = field.delete("VersionStart")
-    version  = version.to_i if version
+    version  = version ? version.to_i : 1
     optional = field_extract_optional(field)
     type     = field.delete("type").sub(/\Axs:/, "")
     bloblen  = field.delete("BlobLength")
@@ -88,6 +71,6 @@ private
       raise "Only strings can have blob length, not #{type}" if bloblen
     end
 
-    [name, version||1, type]
+    [name, version, type]
   end
 end
