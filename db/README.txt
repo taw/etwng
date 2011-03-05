@@ -35,5 +35,5 @@ number converted is:
 
 ETW   965/ 975
 NTW   305/ 334 <- new patches not yet checked
-S2TW  470/ 904
-all  1740/2213
+S2TW  650/ 904
+all  1920/2213
