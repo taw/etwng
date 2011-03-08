@@ -146,8 +146,10 @@ end
 schemata = DbSchemata.new
 source, target, $comma_mode = parse_argv
 
-source.find do |file_name|
-  next unless file_name.file?
+sources = []
+source.find{|file_name| sources << file_name if file_name.file?}
+
+sources.sort.each do |file_name|
   table_name = file_name.dirname.basename.to_s
   current_target = Pathname((target+file_name.relative_path_from(source)).to_s.sub(/\.tsv\z/, ""))
   
