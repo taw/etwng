@@ -4,7 +4,7 @@ require "db_schemata"
 
 class File
   def self.write(path, content)
-    File.open(path, "wb"){|fh| fh.write content}
+    File.open(path, "wb", 0777){|fh| fh.write content}
   end
 end
 
