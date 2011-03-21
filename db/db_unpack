@@ -24,10 +24,12 @@ class ConversionError < Exception
 end
 
 class DbFile
-  attr_reader :version, :rows, :data, :file_name, :table_name, :schema
-  def initialize(file_name, table_name)
-    @file_name = file_name
-    @table_name = table_name
+  attr_reader :version, :rows, :data, :file_name, :table_name, :schema, :target_path, :fail_path
+  def initialize(file_name, table_name, target_path, fail_path)
+    @file_name   = file_name
+    @table_name  = table_name
+    @target_path = target_path
+    @fail_path   = fail_path
     
     @data = File.open(file_name, 'rb', &:read)
     @guid = nil
@@ -154,6 +156,38 @@ class DbFile
     ].join("\n") + "\n"
   end
   
+  def tsv
+    @tsv ||= to_tsv
+  end
+  
+  def save_tsv!
+    FileUtils.mkdir_p target_path.dirname
+    File.write(target_path, tsv)
+  end
+  
+  def save_fail!
+    return unless fail_path
+    FileUtils.mkdir_p fail_path.dirname
+    FileUtils.cp(file_name, fail_path)
+  end
+  
+  def try_convert!
+    unless can_convert?
+      warn "File #{file_name}(version #{version}) cannot be converted, skipping"
+      save_fail!
+      return
+    end
+    # puts "Converting #{file_name}"
+    begin
+      tsv
+    rescue ConversionError => exn
+      warn "Conversion of #{file_name}(version #{version}) failed"
+      save_fail!
+      return
+    end
+    save_tsv!
+  end
+  
   def float_to_tsv(f)
     return f.to_i.to_s if f.to_i == f
     if $comma_mode
@@ -172,35 +206,28 @@ def parse_argv
     comma_mode = false
   end
   
-  unless ARGV.size == 2
-    STDERR.puts "Usage: #{$0} [--comma] input/ output/"
+  unless ARGV.size == 2 or ARGV.size == 3
+    STDERR.puts "Usage: #{$0} [--comma] input/ output/ [fail/]"
   end
   
-  [Pathname(ARGV[0]), Pathname(ARGV[1]), comma_mode]
+  [Pathname(ARGV[0]), Pathname(ARGV[1]), ARGV[2] && Pathname(ARGV[2]), comma_mode]
+end
+
+def convert_each_db_table(source_root, target_root, fail_root=nil)
+  sources = []
+  source_root.find do |file_name|
+    sources << file_name if file_name.file?
+  end
+  sources.sort.each do |source_path|
+    relative_path = source_path.relative_path_from(source_root)
+    table_name    = source_path.dirname.basename.to_s
+    target_path   = Pathname((target_root+relative_path).to_s + ".tsv")
+    fail_path     = fail_root && Pathname(fail_root + relative_path)
+    dbfile = DbFile.new(source_path, table_name, target_path, fail_path)
+    dbfile.try_convert!
+  end
 end
 
 schemata = DbSchemata.new
-source, target, $comma_mode = parse_argv
-
-sources = []
-source.find{|file_name| sources << file_name if file_name.file?}
-
-sources.sort.each do |file_name|
-  table_name = file_name.dirname.basename.to_s
-  current_target = Pathname((target+file_name.relative_path_from(source)).to_s + ".tsv")
-
-  file = DbFile.new(file_name, table_name)
-  if !file.can_convert?
-    warn "File #{file_name}(version #{file.version}) cannot be converted, skipping"
-    next
-  end
-  # puts "Converting #{file_name}"
-  begin
-    file_tsv = file.to_tsv
-  rescue ConversionError => exn
-    warn "Conversion of #{file_name}(version #{file.version}) failed"
-    next
-  end
-  FileUtils.mkdir_p current_target.dirname
-  File.write(current_target, file_tsv)
-end
+source_root, target_root, fail_root, $comma_mode = parse_argv
+convert_each_db_table(source_root, target_root, fail_root)
