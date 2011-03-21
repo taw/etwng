@@ -9,17 +9,15 @@ require "fileutils"
 class DbSchemata
   def initialize
     @doc = Nokogiri::XML.parse(File.open('DB.xsd', 'rb', &:read))
-    @doc.remove_namespaces!
     @schema = {}
-    @doc.xpath('/schema/complexType').each{|ct|
+    @doc.xpath('/xs:schema/xs:complexType').each{|ct|
       @schema[ct['name']] = parse_complex_type_node(ct)
     }
   end
   
   def get_schema(table_name, version, guid)
     return nil unless @schema[table_name]
-    
-    max_version_known = @schema[table_name].map{|name, min_version, type| min_version}.max
+    # max_version_known = @schema[table_name].map{|name, min_version, type| min_version}.max
     # if version > max_version_known
     #   puts "#{table_name} schema known up to version #{max_version_known} but #{version} requested, please update"
     #   return nil
@@ -37,7 +35,7 @@ class DbSchemata
 
 private
   def parse_complex_type_node(complex_type_node)
-    @fields = complex_type_node.xpath("attribute").map{|a| parse_field_node(a) }
+    @fields = complex_type_node.xpath("xs:attribute").map{|a| parse_field_node(a) }
   end
 
   def field_extract_optional(field_ht)
