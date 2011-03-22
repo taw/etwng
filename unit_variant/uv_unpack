@@ -13,12 +13,13 @@ end
 
 class UnitVariant
   def initialize(file_path)
+    @file_path = file_path
     @data = File.open(file_path, 'rb', &:read)
     @ofs = 0
-    raise "Not a unit_variant file #{file_path}" unless get(4) == "VRNT"
+    fail "Not a unit_variant file" unless get(4) == "VRNT"
   end
   def get(size)
-    raise "Trying to read past end of file" if size+@ofs > @data.size
+    fail "Trying to read past end of file" if size+@ofs > @data.size
     rv = @data[@ofs, size]
     @ofs += size
     rv
@@ -46,21 +47,24 @@ class UnitVariant
         equipment << [eq[0], eq[1]]
       end
     end
-    raise "Data left at the end of file" unless @data.size == @ofs
+    fail "Data left at the end of file" unless @data.size == @ofs
     @ofs = save_ofs
     equipment
+  end
+  def fail(msg)
+    raise "Failure converting #{@file_path}: #{msg}"
   end
   def parse
     @version = get_u
     unless @version == 0 or @version == 2
-      raise "Version #{@version} found, but only supported versions are 0 (NTW) and 2 (S2TW)"
+      fail "Version #{@version} found, but only supported versions are 0 (NTW) and 2 (S2TW)"
     end
 
     cat_count = get_u
-    raise "Parse Error" unless get_u == (@version == 0 ? 20 : 24)
+    fail "Wrong header size" unless get_u == (@version == 0 ? 20 : 24)
     
     divider = get_u
-    raise "Parse error" unless get_u == 1 if @version == 2
+    fail "Wrong entry count for version 2" unless get_u == 1 if @version == 2
 
     equipment = parse_equipment(divider)
 
@@ -70,15 +74,15 @@ class UnitVariant
     while @ofs < divider
       cat_name = get_s256
       cat_num = get_u # This is not serial id always, 9 S2TW have (0..15, 18)
-      # raise "Parse Error: expected serial category number" unless get_u == @category.size
-      raise "Parse Error: expected 0" unless get_u == 0
+      # raise "Expected serial category number" unless get_u == @category.size
+      fail "Expected 0" unless get_u == 0
       eq_cnt = get_u
-      raise "Parse Error: expected equipment total count" unless get_u == eq_cnt_total
+      fail "Expected total equipment count" unless get_u == eq_cnt_total
       eq_cnt_total += eq_cnt
       @category << [cat_num, cat_name, *equipment.shift(eq_cnt)]
     end
-    raise "Category count incorrect" unless cat_count == @category.size
-    raise "Equipment left at the end of file" unless equipment.empty?
+    fail "Category count incorrect" unless cat_count == @category.size
+    fail "Equipment left at the end of file" unless equipment.empty?
     [@version, @category]
   end
   def to_tsv
@@ -108,8 +112,11 @@ source = Pathname(ARGV[0])
 target = Pathname(ARGV[1])
 
 if source.directory?
+  sources = []
   source.find do |source_file|
-    next unless source_file.file?
+    sources << source_file if source_file.file?
+  end
+  sources.sort.each do |source_file|
     target_subdir   = target + source_file.dirname.relative_path_from(source)
     target_basename = source_file.basename(".unit_variant").to_s + ".txt"
     target_file = target_subdir + target_basename
