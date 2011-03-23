@@ -936,7 +936,8 @@
 		<xs:attribute name="Particle_effects" msprop:Optional="true" type="xs:string" />
 		<xs:attribute name="unknown10" type="xs:float" use="required" />
 		<xs:attribute name="unknown11" type="xs:float" use="required" />
-	</xs:complexType>
+    <xs:attribute msprop:Optional='true' name='unknown13' type='xs:string' msprop:VersionStart='2'/>
+  </xs:complexType>
 	<xs:complexType name="projectiles_missile_type_enum_tables">
 		<xs:attribute name="Projectile_Missile" type="xs:string" use="required" />
 	</xs:complexType>
@@ -3233,6 +3234,49 @@
   <xs:attribute name='unknown4' type='xs:string' use='required'/>
 </xs:complexType>
 
+<xs:complexType name='avatar_ancillaries_to_effects_junctions_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:float' use='required'/>
+  <xs:attribute name='unknown4' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown5' type='xs:boolean' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown6' type='xs:string'/>
+</xs:complexType>
+<xs:complexType name='avatar_dojos_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:int' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown5' type='xs:string'/>
+  <xs:attribute msprop:Optional='true' name='unknown6' type='xs:string'/>
+</xs:complexType>
+<xs:complexType name='avatar_skills_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown5' type='xs:string'/>
+  <xs:attribute name='unknown6' type='xs:boolean' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown7' type='xs:string'/>
+  <xs:attribute name='unknown8' type='xs:int' use='required'/>
+  <xs:attribute name='unknown9' type='xs:string' use='required'/>
+  <xs:attribute name='unknown10' type='xs:int' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown11' type='xs:string'/>
+  <xs:attribute name='unknown12' type='xs:int' use='required'/>
+</xs:complexType>
+<xs:complexType name='stats_clans_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown2' type='xs:string'/>
+  <xs:attribute name='unknown3' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown4' type='xs:boolean' use='required'/>
+</xs:complexType>
+<xs:complexType name='stats_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown2' type='xs:string'/>
+  <xs:attribute name='unknown3' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown4' type='xs:boolean' use='required'/>
+</xs:complexType>
+
   
 	<xs:element name="DBDataSet">
 		<xs:complexType>
@@ -3664,6 +3708,11 @@
 <xs:element form='unqualified' name='cdir_events_dilemma_payloads_tables' type='mstns:cdir_events_dilemma_payloads_tables'/>
 <xs:element form='unqualified' name='incidents_tables' type='mstns:incidents_tables'/>
 <xs:element form='unqualified' name='videos_subtitles_junctions_tables' type='mstns:videos_subtitles_junctions_tables'/>
+<xs:element form='unqualified' name='avatar_ancillaries_to_effects_junctions_tables' type='mstns:avatar_ancillaries_to_effects_junctions_tables'/>
+<xs:element form='unqualified' name='avatar_dojos_tables' type='mstns:avatar_dojos_tables'/>
+<xs:element form='unqualified' name='avatar_skills_tables' type='mstns:avatar_skills_tables'/>
+<xs:element form='unqualified' name='stats_clans_tables' type='mstns:stats_clans_tables'/>
+<xs:element form='unqualified' name='stats_tables' type='mstns:stats_tables'/>
 
   
 			</xs:choice>
@@ -5141,6 +5190,23 @@
     </xs:unique>
     <xs:unique msdata:PrimaryKey='true' name='faction_banners_tables_tables_Constraint1'>
       <xs:selector xpath='.//faction_banners_tables'/>
+      <xs:field xpath='@unknown1'/>
+    </xs:unique>
+    <xs:unique msdata:PrimaryKey='true' name='avatar_ancillaries_to_effects_junctions_tables_tables_Constraint1'>
+      <xs:selector xpath='.//avatar_ancillaries_to_effects_junctions_tables'/>
+      <xs:field xpath='@unknown1'/>
+      <xs:field xpath='@unknown2'/>
+    </xs:unique>
+    <xs:unique msdata:PrimaryKey='true' name='avatar_skills_tables_tables_Constraint1'>
+      <xs:selector xpath='.//avatar_skills_tables'/>
+      <xs:field xpath='@unknown1'/>
+    </xs:unique>
+    <xs:unique msdata:PrimaryKey='true' name='stats_clans_tables_tables_Constraint1'>
+      <xs:selector xpath='.//stats_clans_tables'/>
+      <xs:field xpath='@unknown1'/>
+    </xs:unique>
+    <xs:unique msdata:PrimaryKey='true' name='stats_tables_tables_Constraint1'>
+      <xs:selector xpath='.//stats_tables'/>
       <xs:field xpath='@unknown1'/>
     </xs:unique>
 

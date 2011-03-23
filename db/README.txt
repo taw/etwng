@@ -34,6 +34,6 @@ From my collection of db files (various versions from main.pack, patch*.pack, mo
 number converted is:
 
 ETW   965/ 975
-NTW   440/ 482
-S2TW  734/ 904
-all  2139/2361
+NTW   443/ 482
+S2TW  746/ 904
+all  2154/2361
