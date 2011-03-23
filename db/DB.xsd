@@ -528,7 +528,10 @@
 		<xs:attribute name="Ground_ID" type="xs:string" use="required" />
 		<xs:attribute name="unknown1" type="xs:float" use="required" />
 		<xs:attribute name="unknown2" type="xs:boolean" use="required" />
-	</xs:complexType>
+    <xs:attribute name='unknown4' type='xs:boolean' use='required' msprop:VersionStart='3'/>
+    <xs:attribute name='unknown5' type='xs:boolean' use='required' msprop:VersionStart='3'/>
+    <xs:attribute name='unknown6' type='xs:boolean' use='required' msprop:VersionStart='3'/>
+  </xs:complexType>
 	<xs:complexType name="campaign_map_famous_battles_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
 		<xs:attribute name="Description" type="xs:string" use="required" />
@@ -3276,6 +3279,41 @@
   <xs:attribute name='unknown3' type='xs:boolean' use='required'/>
   <xs:attribute name='unknown4' type='xs:boolean' use='required'/>
 </xs:complexType>
+<xs:complexType name='cai_personalities_budget_allocations_tables'>
+  <xs:attribute name='unknown1' type='xs:int' use='required'/>
+  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+  <xs:attribute name='unknown4' type='xs:int' use='required'/>
+  <xs:attribute name='unknown5' type='xs:int' use='required'/>
+  <xs:attribute name='unknown6' type='xs:int' use='required'/>
+  <xs:attribute name='unknown7' type='xs:int' use='required'/>
+  <xs:attribute name='unknown8' type='xs:int' use='required'/>
+  <xs:attribute name='unknown9' type='xs:int' use='required'/>
+  <xs:attribute name='unknown10' type='xs:int' use='required'/>
+  <xs:attribute name='unknown11' type='xs:int' use='required'/>
+  <xs:attribute name='unknown12' type='xs:int' use='required'/>
+  <xs:attribute name='unknown13' type='xs:int' use='required'/>
+  <xs:attribute name='unknown14' type='xs:int' use='required'/>
+  <xs:attribute name='unknown15' type='xs:int' use='required'/>
+  <xs:attribute name='unknown16' type='xs:int' use='required'/>
+  <xs:attribute name='unknown17' type='xs:string' use='required'/>
+  <xs:attribute name='unknown18' type='xs:int' use='required'/>
+  <xs:attribute name='unknown19' type='xs:int' use='required'/>
+  <xs:attribute name='unknown20' type='xs:int' use='required'/>
+  <xs:attribute name='unknown21' type='xs:int' use='required'/>
+</xs:complexType>
+
+<xs:complexType name='cdir_events_payloads_tables'>
+  <xs:attribute msprop:Optional='true' name='unknown1' type='xs:string'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+</xs:complexType>
+<xs:complexType name='pre_battle_speeches_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown4' type='xs:string'/>
+</xs:complexType>
+
 
   
 	<xs:element name="DBDataSet">
@@ -3713,6 +3751,9 @@
 <xs:element form='unqualified' name='avatar_skills_tables' type='mstns:avatar_skills_tables'/>
 <xs:element form='unqualified' name='stats_clans_tables' type='mstns:stats_clans_tables'/>
 <xs:element form='unqualified' name='stats_tables' type='mstns:stats_tables'/>
+<xs:element form='unqualified' name='cai_personalities_budget_allocations_tables' type='mstns:cai_personalities_budget_allocations_tables'/>
+<xs:element form='unqualified' name='cdir_events_payloads_tables' type='mstns:cdir_events_payloads_tables'/>
+<xs:element form='unqualified' name='pre_battle_speeches_tables' type='mstns:pre_battle_speeches_tables'/>
 
   
 			</xs:choice>
@@ -5209,6 +5250,11 @@
       <xs:selector xpath='.//stats_tables'/>
       <xs:field xpath='@unknown1'/>
     </xs:unique>
+    <xs:unique msdata:PrimaryKey='true' name='pre_battle_speeches_tables_tables_Constraint1'>
+      <xs:selector xpath='.//pre_battle_speeches_tables'/>
+      <xs:field xpath='@unknown1'/>
+    </xs:unique>
+
 
 
     <xs:keyref name="warscape_trees_tables_unknown1__TO__trees_PrimaryKey" refer="trees_tables_Constraint1">
