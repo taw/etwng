@@ -972,7 +972,8 @@
 		<xs:attribute name="R" type="xs:int" use="required" />
 		<xs:attribute name="G" type="xs:int" use="required" />
 		<xs:attribute name="B" type="xs:int" use="required" />
-	</xs:complexType>
+    <xs:attribute name='unknown6' type='xs:string' use='required' msprop:VersionStart='2'/>
+  </xs:complexType>
 	<xs:complexType name="regions_continents_tables">
 		<xs:attribute name="Continent_ID" type="xs:string" use="required" />
 	</xs:complexType>
@@ -998,7 +999,8 @@
 		<xs:attribute name="Industrial_town_x0020__x0028__x003F__x0029_" type="xs:boolean" use="required" />
 		<xs:attribute name="Port_x0020__x0028__x003F__x0029_" type="xs:boolean" use="required" />
 		<xs:attribute name="unknown4" type="xs:boolean" use="required" />
-	</xs:complexType>
+    <xs:attribute name='unknown5' type='xs:boolean' use='required' msprop:VersionStart='2'/>
+  </xs:complexType>
 	<xs:complexType name="state_gift_values_tables">
 		<xs:attribute name="State_Gift" type="xs:string" use="required" />
 		<xs:attribute name="Value" type="xs:int" use="required" />
@@ -3070,7 +3072,7 @@
   <xs:attribute name='unknown3' type='xs:boolean' use='required'/>
   <xs:attribute name='unknown4' type='xs:float' use='required'/>
   <xs:attribute name='unknown5' type='xs:float' use='required'/>
-  <xs:attribute name='unknown6' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown6' type='xs:boolean' use='required' msprop:VersionStart='3'/>
 </xs:complexType>
 <xs:complexType name='avatar_aesthetic_sets_tables'>
   <xs:attribute msprop:Optional='true' name='unknown1' type='xs:string'/>
@@ -3200,6 +3202,13 @@
   <xs:attribute name='unknown3' type='xs:string' use='required'/>
   <xs:attribute name='unknown4' type='xs:string' use='required'/>
   <xs:attribute name='unknown5' type='xs:string' use='required'/>
+</xs:complexType>
+<xs:complexType name='mp_budgets_tables'>
+  <xs:attribute name='unknown1' type='xs:int' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown5' type='xs:boolean' use='required'/>
 </xs:complexType>
 
   
@@ -3629,6 +3638,7 @@
 <xs:element form='unqualified' name='character_skill_node_sets_tables' type='mstns:character_skill_node_sets_tables'/>
 <xs:element form='unqualified' name='faction_banners_tables' type='mstns:faction_banners_tables'/>
 <xs:element form='unqualified' name='mp_force_gen_upgrade_probabilities_tables' type='mstns:mp_force_gen_upgrade_probabilities_tables'/>
+<xs:element form='unqualified' name='mp_budgets_tables' type='mstns:mp_budgets_tables'/>
 
 			</xs:choice>
 		</xs:complexType>
