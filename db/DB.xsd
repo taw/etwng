@@ -301,10 +301,11 @@
 		<xs:attribute name="unknown1" type="xs:int" use="required" />
 		<xs:attribute name="unknown2" type="xs:int" use="required" />
 		<xs:attribute name="unknown3" type="xs:int" use="required" />
-		<xs:attribute name="unknown4" type="xs:int" use="required" />
-		<xs:attribute name="unknown5" type="xs:int" use="required" />
-		<xs:attribute name="unknown6" type="xs:int" use="required" />
+		<xs:attribute name="unknown4" type="xs:float" use="required" />
+		<xs:attribute name="unknown5" type="xs:float" use="required" />
+		<xs:attribute name="unknown6" type="xs:float" use="required" />
 		<xs:attribute name="unknown7" type="xs:int" use="required" />
+  	<xs:attribute name="unknown8" type="xs:float" use="required" msprop:VersionStart='2'/>
 	</xs:complexType>
 	<xs:complexType name="battle_type_unit_to_faction_presets_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
@@ -629,7 +630,8 @@
 	<xs:complexType name="cultures_tables">
 		<xs:attribute name="Culture_ID" type="xs:string" use="required" />
 		<xs:attribute name="Unknown1" type="xs:int" use="required" />
-		<xs:attribute name="Culture_IDRef" msprop:Optional="true" type="xs:string" />
+    <xs:attribute name='unknown2' type='xs:int' use='required' msprop:VersionStart="2"/>
+    <xs:attribute name="Culture_IDRef" msprop:Optional="true" type="xs:string" />
 	</xs:complexType>
 	<xs:complexType name="effect_bonus_value_agent_junction_tables">
 		<xs:attribute name="Effect" type="xs:string" use="required" />
@@ -3133,7 +3135,74 @@
   <xs:attribute name='unknown3' type='xs:string' use='required'/>
   <xs:attribute name='unknown4' type='xs:int' use='required'/>
 </xs:complexType>
+<xs:complexType name='cdir_events_incident_option_junctions_tables'>
+  <xs:attribute name='unknown1' type='xs:int' use='required'/>
+  <xs:attribute name='unknown2' type='xs:float' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown5' type='xs:string'/>
+</xs:complexType>
+<xs:complexType name='cdir_events_incident_payloads_tables'>
+  <xs:attribute name='unknown1' type='xs:int' use='required'/>
+  <xs:attribute name='unknown2' type='xs:float' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute name='unknown5' type='xs:string' use='required'/>
+</xs:complexType>
+<xs:complexType name='cdir_events_mission_option_junctions_tables'>
+  <xs:attribute name='unknown1' type='xs:int' use='required'/>
+  <xs:attribute name='unknown2' type='xs:float' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown5' type='xs:string'/>
+</xs:complexType>
+<xs:complexType name='cdir_events_mission_payloads_tables'>
+  <xs:attribute name='unknown1' type='xs:int' use='required'/>
+  <xs:attribute name='unknown2' type='xs:float' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute name='unknown5' type='xs:string' use='required'/>
+  <xs:attribute name='unknown6' type='xs:string' use='required'/>
+</xs:complexType>
+<xs:complexType name='cdir_unit_balances_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute name='unknown5' type='xs:float' use='required'/>
+  <xs:attribute name='unknown6' type='xs:float' use='required'/>
+  <xs:attribute name='unknown7' type='xs:float' use='required'/>
+</xs:complexType>
+<xs:complexType name='character_skill_node_sets_tables'>
+  <xs:attribute name='unknown1' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown4' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown5' type='xs:string' use='required'/>
+</xs:complexType>
+<xs:complexType name='faction_banners_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+  <xs:attribute name='unknown4' type='xs:int' use='required'/>
+  <xs:attribute name='unknown5' type='xs:int' use='required'/>
+  <xs:attribute name='unknown6' type='xs:int' use='required'/>
+  <xs:attribute name='unknown7' type='xs:int' use='required'/>
+  <xs:attribute name='unknown8' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown9' type='xs:string' use='required'/>
+  <xs:attribute name='unknown10' type='xs:int' use='required'/>
+  <xs:attribute name='unknown11' type='xs:int' use='required'/>
+  <xs:attribute name='unknown12' type='xs:int' use='required'/>
+</xs:complexType>
+<xs:complexType name='mp_force_gen_upgrade_probabilities_tables'>
+  <xs:attribute name='unknown1' type='xs:float' use='required'/>
+  <xs:attribute name='unknown2' type='xs:float' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute name='unknown5' type='xs:string' use='required'/>
+</xs:complexType>
 
+  
 	<xs:element name="DBDataSet">
 		<xs:complexType>
 			<xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -3552,6 +3621,14 @@
 <xs:element form='unqualified' name='general_command_star_level_effects_tables' type='mstns:general_command_star_level_effects_tables'/>
 <xs:element form='unqualified' name='honour_effects_tables' type='mstns:honour_effects_tables'/>
 <xs:element form='unqualified' name='loyalty_effects_tables' type='mstns:loyalty_effects_tables'/>
+<xs:element form='unqualified' name='cdir_events_incident_option_junctions_tables' type='mstns:cdir_events_incident_option_junctions_tables'/>
+<xs:element form='unqualified' name='cdir_events_incident_payloads_tables' type='mstns:cdir_events_incident_payloads_tables'/>
+<xs:element form='unqualified' name='cdir_events_mission_option_junctions_tables' type='mstns:cdir_events_mission_option_junctions_tables'/>
+<xs:element form='unqualified' name='cdir_events_mission_payloads_tables' type='mstns:cdir_events_mission_payloads_tables'/>
+<xs:element form='unqualified' name='cdir_unit_balances_tables' type='mstns:cdir_unit_balances_tables'/>
+<xs:element form='unqualified' name='character_skill_node_sets_tables' type='mstns:character_skill_node_sets_tables'/>
+<xs:element form='unqualified' name='faction_banners_tables' type='mstns:faction_banners_tables'/>
+<xs:element form='unqualified' name='mp_force_gen_upgrade_probabilities_tables' type='mstns:mp_force_gen_upgrade_probabilities_tables'/>
 
 			</xs:choice>
 		</xs:complexType>
@@ -5026,6 +5103,11 @@
       <xs:selector xpath='.//aide_de_camp_speeches_tables'/>
       <xs:field xpath='@unknown1'/>
     </xs:unique>
+    <xs:unique msdata:PrimaryKey='true' name='faction_banners_tables_tables_Constraint1'>
+      <xs:selector xpath='.//faction_banners_tables'/>
+      <xs:field xpath='@unknown1'/>
+    </xs:unique>
+
 
     <xs:keyref name="warscape_trees_tables_unknown1__TO__trees_PrimaryKey" refer="trees_tables_Constraint1">
 			<xs:selector xpath=".//warscape_trees_tables" />
