@@ -237,6 +237,8 @@
 	<xs:complexType name="battle_script_strings_tables">
 		<xs:attribute name="Battle_Script_String_ID" type="xs:string" use="required" />
 		<xs:attribute name="Text" type="xs:string" use="required" />
+    <xs:attribute name='unknown3' type='xs:string' use='required'  msprop:VersionStart='3'/>
+    <xs:attribute name='unknown4' type='xs:string' use='required'  msprop:VersionStart='3'/>
 	</xs:complexType>
 	<xs:complexType name="battle_sky_types_tables">
 		<xs:attribute name="Sky_Type_ID" type="xs:string" use="required" />
@@ -289,7 +291,8 @@
 		<xs:attribute name="Faction_IDRef" type="xs:string" use="required" />
 		<xs:attribute name="unknown1" type="xs:int" use="required" />
 		<xs:attribute name="unknown2" type="xs:int" use="required" />
-	</xs:complexType>
+    <xs:attribute name='unknown4' type='xs:float' use='required' msprop:VersionStart='2'/>
+  </xs:complexType>
 	<xs:complexType name="battle_type_setup_limits_tables">
 		<xs:attribute name="Battle_Type_IDRef" type="xs:string" use="required" />
 		<xs:attribute name="Unit_Type" type="xs:string" use="required" />
@@ -311,7 +314,8 @@
 	</xs:complexType>
 	<xs:complexType name="battle_types_tables">
 		<xs:attribute name="Battle_Type_ID" type="xs:string" use="required" />
-	</xs:complexType>
+    <xs:attribute name='unknown2' type='xs:int' use='required' msprop:VersionStart='2'/>
+  </xs:complexType>
 	<xs:complexType name="battle_weather_types_tables">
 		<xs:attribute name="Weather_ID" type="xs:string" use="required" />
 		<xs:attribute name="unknown1" type="xs:int" use="required" />
@@ -3032,6 +3036,32 @@
   <xs:attribute name='unknown2' type='xs:float' use='required'/>
   <xs:attribute name='unknown3' type='xs:string' use='required'/>
 </xs:complexType>  
+<xs:complexType name='encyclopedia_page_linkages_tables'>
+  <xs:attribute msprop:Optional='true' name='unknown1' type='xs:string'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown3' type='xs:string'/>
+</xs:complexType>
+<xs:complexType name='faction_resource_consumptions_tables'>
+  <xs:attribute name='unknown1' type='xs:int' use='required'/>
+  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+</xs:complexType>
+<xs:complexType name='technology_nodes_tables'>
+  <xs:attribute name='unknown1' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown2' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute name='unknown5' type='xs:string' use='required'/>
+  <xs:attribute name='unknown6' type='xs:string' use='required'/>
+  <xs:attribute name='unknown7' type='xs:float' use='required'/>
+</xs:complexType>
+<xs:complexType name='trade_nodes_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+  <xs:attribute name='unknown4' type='xs:float' use='required'/>
+  <xs:attribute name='unknown5' type='xs:float' use='required'/>
+  <xs:attribute name='unknown6' type='xs:string' use='required'/>
+</xs:complexType>
 
 
 	<xs:element name="DBDataSet">
@@ -3436,6 +3466,10 @@
 <xs:element form='unqualified' name='battle_autoresolver_balances_tables' type='mstns:battle_autoresolver_balances_tables'/>
 <xs:element form='unqualified' name='experience_triggers_tables' type='mstns:experience_triggers_tables'/>
 <xs:element form='unqualified' name='start_pos_family_relationships_tables' type='mstns:start_pos_family_relationships_tables'/>
+<xs:element form='unqualified' name='encyclopedia_page_linkages_tables' type='mstns:encyclopedia_page_linkages_tables'/>
+<xs:element form='unqualified' name='faction_resource_consumptions_tables' type='mstns:faction_resource_consumptions_tables'/>
+<xs:element form='unqualified' name='models_building_tables' type='mstns:models_building_tables'/>
+<xs:element form='unqualified' name='technology_nodes_tables' type='mstns:technology_nodes_tables'/>
   
   
 			</xs:choice>
@@ -4901,6 +4935,10 @@
     </xs:unique>
     <xs:unique msdata:PrimaryKey='true' name='_kv_experience_bonuses_tables_tables_Constraint1'>
       <xs:selector xpath='.//_kv_experience_bonuses_tables'/>
+      <xs:field xpath='@unknown1'/>
+    </xs:unique>
+    <xs:unique msdata:PrimaryKey='true' name='trade_nodes_tables_tables_Constraint1'>
+      <xs:selector xpath='.//trade_nodes_tables'/>
       <xs:field xpath='@unknown1'/>
     </xs:unique>
 
