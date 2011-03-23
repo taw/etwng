@@ -3210,6 +3210,28 @@
   <xs:attribute name='unknown4' type='xs:boolean' use='required'/>
   <xs:attribute name='unknown5' type='xs:boolean' use='required'/>
 </xs:complexType>
+<xs:complexType name='cdir_events_dilemma_payloads_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+  <xs:attribute name='unknown4' type='xs:float' use='required'/>
+  <xs:attribute name='unknown5' type='xs:string' use='required'/>
+  <xs:attribute name='unknown6' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown7' type='xs:string' use='required'/>
+</xs:complexType>
+<xs:complexType name='incidents_tables'>
+  <xs:attribute name='unknown1' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute name='unknown5' type='xs:boolean' use='required'/>
+</xs:complexType>
+<xs:complexType name='videos_subtitles_junctions_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+  <xs:attribute name='unknown3' type='xs:int' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+</xs:complexType>
 
   
 	<xs:element name="DBDataSet">
@@ -3639,7 +3661,11 @@
 <xs:element form='unqualified' name='faction_banners_tables' type='mstns:faction_banners_tables'/>
 <xs:element form='unqualified' name='mp_force_gen_upgrade_probabilities_tables' type='mstns:mp_force_gen_upgrade_probabilities_tables'/>
 <xs:element form='unqualified' name='mp_budgets_tables' type='mstns:mp_budgets_tables'/>
+<xs:element form='unqualified' name='cdir_events_dilemma_payloads_tables' type='mstns:cdir_events_dilemma_payloads_tables'/>
+<xs:element form='unqualified' name='incidents_tables' type='mstns:incidents_tables'/>
+<xs:element form='unqualified' name='videos_subtitles_junctions_tables' type='mstns:videos_subtitles_junctions_tables'/>
 
+  
 			</xs:choice>
 		</xs:complexType>
 		<xs:unique name="Constraint1" msdata:PrimaryKey="true">
