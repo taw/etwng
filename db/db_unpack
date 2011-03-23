@@ -69,7 +69,9 @@ class DbFile
   end
   
   def get_float
-    get(4).unpack("f")[0].pretty_single
+    rv = get(4).unpack("f")[0]
+    raise ConversionError.new("Floating point number not finite") unless rv.finite?
+    rv.pretty_single
   end
   
   def get_byte
