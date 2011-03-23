@@ -35,5 +35,5 @@ number converted is:
 
 ETW   965/ 975
 NTW   430/ 482
-S2TW  694/ 904
-all  2091/2361
+S2TW  702/ 904
+all  2100/2361
