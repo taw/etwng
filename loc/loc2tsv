@@ -3,6 +3,8 @@
 require "pp"
 require "rubygems"
 require "fastercsv"
+require "pathname"
+require "fileutils"
 
 class LocFile
   def initialize(path)
@@ -47,13 +49,30 @@ class LocFile
   end
 end
 
+def loc2tsv(source, target)
+  FasterCSV.open(target, "wb", :encoding => 'U', :col_sep => "\t") do |tsv|
+    LocFile.new(source).parse! do |line|
+      tsv << line
+    end
+  end
+end
+
 unless ARGV.size == 2
   STDERR.puts "#{$0} file.loc file.tsv"
+  STDERR.puts "#{$0} loc_dir/ tsv_dir/"
   exit 1
 end
 
-FasterCSV.open(ARGV[1], "wb", :encoding => 'U', :col_sep => "\t") do |tsv|
-  LocFile.new(ARGV[0]).parse! do |line|
-    tsv << line
+if File.file?(ARGV[0])
+  loc2tsv(ARGV[0], ARGV[1])
+else
+  source_root, target_root = Pathname(ARGV[0]), Pathname(ARGV[1])
+  sources = []
+  source_root.find{|file_name| sources << file_name if file_name.file?}
+  sources.sort.each do |source_path|
+    relative_path = source_path.relative_path_from(source_root)
+    target_path   = Pathname((target_root+relative_path).to_s.sub(/\.loc\z/, ".tsv"))
+    FileUtils.mkdir_p target_path.dirname
+    loc2tsv(source_path, target_path)
   end
 end

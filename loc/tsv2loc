@@ -3,25 +3,43 @@
 require "pp"
 require "rubygems"
 require "fastercsv"
+require "pathname"
+require "fileutils"
+
+def tsv2loc(source, target)
+  data = FasterCSV.read(source, :encoding => 'U', :col_sep => "\t")
+  File.open(target, 'wb') do |fh|
+    fh << "\xFF\xFELOC\x00\x01\x00\x00\x00"
+    fh << [data.size].pack("V")
+    data.each do |key, val, bool|
+      key = key.unpack("U*")
+      val = val.unpack("U*")
+      bool = bool == "true"
+      fh << [key.size].pack("v")
+      fh << key.pack("v*")
+      fh << [val.size].pack("v")
+      fh << val.pack("v*")
+      fh << (bool ? "\x01" : "\x00")
+    end
+  end
+end
 
 unless ARGV.size == 2
   STDERR.puts "#{$0} file.tsv file.loc"
+  STDERR.puts "#{$0} tsv_dir loc_dir"
   exit 1
 end
 
-data = FasterCSV.read(ARGV[0], :encoding => 'U', :col_sep => "\t")
-
-File.open(ARGV[1], 'wb') do |fh|
-  fh << "\xFF\xFELOC\x00\x01\x00\x00\x00"
-  fh << [data.size].pack("V")
-  data.each do |key, val, bool|
-    key = key.unpack("U*")
-    val = val.unpack("U*")
-    bool = bool == "true"
-    fh << [key.size].pack("v")
-    fh << key.pack("v*")
-    fh << [val.size].pack("v")
-    fh << val.pack("v*")
-    fh << (bool ? "\x01" : "\x00")
+if File.file?(ARGV[0])
+  tsv2loc(ARGV[0], ARGV[1])
+else
+  source_root, target_root = Pathname(ARGV[0]), Pathname(ARGV[1])
+  sources = []
+  source_root.find{|file_name| sources << file_name if file_name.file?}
+  sources.sort.each do |source_path|
+    relative_path = source_path.relative_path_from(source_root)
+    target_path   = Pathname((target_root+relative_path).to_s.sub(/\.tsv\z/, ".loc"))
+    FileUtils.mkdir_p target_path.dirname
+    tsv2loc(source_path, target_path)
   end
 end
