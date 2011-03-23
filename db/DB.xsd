@@ -3062,6 +3062,50 @@
   <xs:attribute name='unknown5' type='xs:float' use='required'/>
   <xs:attribute name='unknown6' type='xs:string' use='required'/>
 </xs:complexType>
+<xs:complexType name='aide_de_camp_speeches_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown4' type='xs:float' use='required'/>
+  <xs:attribute name='unknown5' type='xs:float' use='required'/>
+  <xs:attribute name='unknown6' type='xs:boolean' use='required'/>
+</xs:complexType>
+<xs:complexType name='avatar_aesthetic_sets_tables'>
+  <xs:attribute msprop:Optional='true' name='unknown1' type='xs:string'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+</xs:complexType>
+<xs:complexType name='avatar_faction_flags_tables'>
+  <xs:attribute name='unknown1' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+</xs:complexType>
+<xs:complexType name='avatar_skill_effects_juncs_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:float' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:boolean' use='required'/>
+</xs:complexType>
+<xs:complexType name='dilemmas_tables'>
+  <xs:attribute name='unknown1' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute name='unknown5' type='xs:string' use='required'/>
+  <xs:attribute name='unknown6' type='xs:string' use='required'/>
+  <xs:attribute name='unknown7' type='xs:string' use='required'/>
+  <xs:attribute name='unknown8' type='xs:string' use='required'/>
+  <xs:attribute name='unknown9' type='xs:string' use='required'/>
+  <xs:attribute name='unknown10' type='xs:string' use='required'/>
+  <xs:attribute name='unknown11' type='xs:boolean' use='required'/>
+</xs:complexType>
+<xs:complexType name='frontend_faction_leaders_tables'>
+  <xs:attribute msprop:Optional='true' name='unknown1' type='xs:string'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:string' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+</xs:complexType>
 
 
 	<xs:element name="DBDataSet">
@@ -3470,6 +3514,12 @@
 <xs:element form='unqualified' name='faction_resource_consumptions_tables' type='mstns:faction_resource_consumptions_tables'/>
 <xs:element form='unqualified' name='models_building_tables' type='mstns:models_building_tables'/>
 <xs:element form='unqualified' name='technology_nodes_tables' type='mstns:technology_nodes_tables'/>
+<xs:element form='unqualified' name='aide_de_camp_speeches_tables' type='mstns:aide_de_camp_speeches_tables'/>
+<xs:element form='unqualified' name='avatar_aesthetic_sets_tables' type='mstns:avatar_aesthetic_sets_tables'/>
+<xs:element form='unqualified' name='avatar_faction_flags_tables' type='mstns:avatar_faction_flags_tables'/>
+<xs:element form='unqualified' name='avatar_skill_effects_juncs_tables' type='mstns:avatar_skill_effects_juncs_tables'/>
+<xs:element form='unqualified' name='dilemmas_tables' type='mstns:dilemmas_tables'/>
+<xs:element form='unqualified' name='frontend_faction_leaders_tables' type='mstns:frontend_faction_leaders_tables'/>
   
   
 			</xs:choice>
@@ -4939,6 +4989,10 @@
     </xs:unique>
     <xs:unique msdata:PrimaryKey='true' name='trade_nodes_tables_tables_Constraint1'>
       <xs:selector xpath='.//trade_nodes_tables'/>
+      <xs:field xpath='@unknown1'/>
+    </xs:unique>
+    <xs:unique msdata:PrimaryKey='true' name='aide_de_camp_speeches_tables_tables_Constraint1'>
+      <xs:selector xpath='.//aide_de_camp_speeches_tables'/>
       <xs:field xpath='@unknown1'/>
     </xs:unique>
 
