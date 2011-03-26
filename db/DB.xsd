@@ -1426,6 +1426,7 @@
 		<xs:attribute name="unknown5" type="xs:int" use="required" />
 		<xs:attribute name="unknown6" type="xs:int" use="required" />
 		<xs:attribute name="unknown7" type="xs:int" use="required" />
+    <xs:attribute name='unknown7b' type='xs:int' use='required' msprop:VersionStart='2'/>
 		<xs:attribute name="unknown8" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="unit_to_unit_abilities_junctions_tables">
