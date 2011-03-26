@@ -8,6 +8,7 @@ require "fileutils"
 
 class LocFile
   def initialize(path)
+    @path = path
     @data = File.open(path, 'rb', &:read)
     @ofs = 0
   end
@@ -15,7 +16,7 @@ class LocFile
     @data.size - @ofs
   end
   def get(size)
-    raise "Trying to read data past end of file" if @ofs + size > @data.size
+    raise "Trying to read data past end of file in #{@path}" if @ofs + size > @data.size
     rv = @data[@ofs, size]
     @ofs += size
     rv
@@ -34,17 +35,17 @@ class LocFile
   end
   def get_bool
     rv = get_byte
-    raise "Booleans must be 0 or 1, not #{rv}" if rv > 1
+    raise "Booleans must be 0 or 1, not #{rv} in #{@path}" if rv > 1
     rv == 1
   end
   def parse!
-    raise "Not a LOC file" unless get(6) == "\xFF\xFELOC\x00"
-    raise "Bad version of LOC file" unless get_u == 1
+    raise "Not a LOC file: #{@path}" unless get(6) == "\xFF\xFELOC\x00"
+    raise "Bad version of LOC file: #{@path}" unless get_u == 1
     rv = []
     get_u.times do
       yield [get_s, get_s, get_bool]
     end
-    raise "Data after end of file: #{bytes_left} bytes" unless bytes_left == 0
+    raise "Data after end of file: #{bytes_left} bytes in #{@path}" unless bytes_left == 0
     rv
   end
 end
