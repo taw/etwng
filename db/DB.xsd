@@ -449,7 +449,14 @@
 		<xs:attribute name="Unit" type="xs:string" use="required" />
 		<xs:attribute name="Experience" type="xs:int" use="required" />
 		<xs:attribute name="Unknown" type="xs:boolean" use="required" />
-	</xs:complexType>
+    <xs:attribute name='unknown5' type='xs:int' use='required' msprop:VersionStart='3'/>
+    <xs:attribute name='unknown6' type='xs:boolean' use='required' msprop:VersionStart='3'/>
+    <xs:attribute name='unknown7' type='xs:boolean' use='required' msprop:VersionStart='3'/>
+    <xs:attribute name='unknown8' type='xs:boolean' use='required' msprop:VersionStart='3'/>
+    <xs:attribute name='unknown9' type='xs:boolean' use='required' msprop:VersionStart='3'/>
+    <xs:attribute msprop:Optional='true' name='unknown10' type='xs:string' msprop:VersionStart='3'/>
+    <xs:attribute name='unknown11' type='xs:boolean' use='required' msprop:VersionStart='3'/>
+  </xs:complexType>
 	<xs:complexType name="building_upgrades_junction_tables">
 		<xs:attribute name="Building_IDRef" type="xs:string" use="required" />
 		<xs:attribute name="Upgrade" type="xs:string" use="required" />
@@ -1503,7 +1510,8 @@
 		<xs:attribute name="Shield" msprop:Optional="true" type="xs:string" />
 		<xs:attribute name="Equipment" msprop:Optional="true" type="xs:string" />
 		<xs:attribute name="Instrument" msprop:Optional="true" type="xs:string" />
-	</xs:complexType>
+    <xs:attribute msprop:Optional='true' name='unknown7' type='xs:string' msprop:VersionStart='2'/>
+  </xs:complexType>
 	<xs:complexType name="warscape_rigid_tables">
 		<xs:attribute name="Filename_x0020_WR_ID" type="xs:string" use="required" />
 		<xs:attribute name="Texture_path" type="xs:string" use="required" />
@@ -3313,8 +3321,38 @@
   <xs:attribute name='unknown3' type='xs:int' use='required'/>
   <xs:attribute msprop:Optional='true' name='unknown4' type='xs:string'/>
 </xs:complexType>
+<xs:complexType name='avatar_ranks_tables'>
+  <xs:attribute name='unknown1' type='xs:int' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute name='unknown3' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute name='unknown5' type='xs:int' use='required'/>
+  <xs:attribute name='unknown6' type='xs:int' use='required'/>
+  <xs:attribute name='unknown7' type='xs:int' use='required'/>
+  <xs:attribute name='unknown8' type='xs:int' use='required'/>
+  <xs:attribute name='unknown9' type='xs:int' use='required'/>
+</xs:complexType>
+<xs:complexType name='cdir_events_dilemma_option_junctions_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:int' use='required'/>
+  <xs:attribute name='unknown3' type='xs:float' use='required'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown5' type='xs:string'/>
+</xs:complexType>
+<xs:complexType name='encyclopedia_blocks_tables'>
+  <xs:attribute name='unknown1' type='xs:string' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+  <xs:attribute msprop:Optional='true' name='unknown3' type='xs:string'/>
+  <xs:attribute name='unknown4' type='xs:string' use='required'/>
+  <xs:attribute name='unknown5' type='xs:int' use='required'/>
+  <xs:attribute name='unknown6' type='xs:string' use='required'/>
+</xs:complexType>
+<xs:complexType name='sound_events_tables'>
+  <xs:attribute name='unknown1' type='xs:boolean' use='required'/>
+  <xs:attribute name='unknown2' type='xs:string' use='required'/>
+</xs:complexType>
 
-
+  
   
 	<xs:element name="DBDataSet">
 		<xs:complexType>
@@ -3754,6 +3792,11 @@
 <xs:element form='unqualified' name='cai_personalities_budget_allocations_tables' type='mstns:cai_personalities_budget_allocations_tables'/>
 <xs:element form='unqualified' name='cdir_events_payloads_tables' type='mstns:cdir_events_payloads_tables'/>
 <xs:element form='unqualified' name='pre_battle_speeches_tables' type='mstns:pre_battle_speeches_tables'/>
+
+<xs:element form='unqualified' name='avatar_ranks_tables' type='mstns:avatar_ranks_tables'/>
+<xs:element form='unqualified' name='cdir_events_dilemma_option_junctions_tables' type='mstns:cdir_events_dilemma_option_junctions_tables'/>
+<xs:element form='unqualified' name='encyclopedia_blocks_tables' type='mstns:encyclopedia_blocks_tables'/>
+<xs:element form='unqualified' name='sound_events_tables' type='mstns:sound_events_tables'/>
 
   
 			</xs:choice>
@@ -5254,6 +5297,11 @@
       <xs:selector xpath='.//pre_battle_speeches_tables'/>
       <xs:field xpath='@unknown1'/>
     </xs:unique>
+    <xs:unique msdata:PrimaryKey='true' name='encyclopedia_blocks_tables_tables_Constraint1'>
+      <xs:selector xpath='.//encyclopedia_blocks_tables'/>
+      <xs:field xpath='@unknown1'/>
+    </xs:unique>
+
 
 
 
