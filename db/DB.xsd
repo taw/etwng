@@ -1420,8 +1420,7 @@
 		<xs:attribute name="Crew_IDRef7" type="xs:string" use="required" />
 	</xs:complexType>
 	<xs:complexType name="unit_stats_naval_experience_bonuses_tables">
-		<xs:attribute name="unknown1" type="xs:short" use="required" />
-		<xs:attribute name="unknown2" type="xs:short" use="required" />
+    <xs:attribute name="experience" type="xs:string" use="required" />
 		<xs:attribute name="unknown3" type="xs:int" use="required" />
 		<xs:attribute name="unknown4" type="xs:int" use="required" />
 		<xs:attribute name="unknown5" type="xs:int" use="required" />
