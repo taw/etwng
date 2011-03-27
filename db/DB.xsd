@@ -1421,12 +1421,12 @@
 	</xs:complexType>
 	<xs:complexType name="unit_stats_naval_experience_bonuses_tables">
     <xs:attribute name="experience" type="xs:string" use="required" />
+    <xs:attribute name='unknown0' type='xs:int' use='required' msprop:VersionStart='2'/>
 		<xs:attribute name="unknown3" type="xs:int" use="required" />
 		<xs:attribute name="unknown4" type="xs:int" use="required" />
 		<xs:attribute name="unknown5" type="xs:int" use="required" />
 		<xs:attribute name="unknown6" type="xs:int" use="required" />
 		<xs:attribute name="unknown7" type="xs:int" use="required" />
-    <xs:attribute name='unknown7b' type='xs:int' use='required' msprop:VersionStart='2'/>
 		<xs:attribute name="unknown8" type="xs:float" use="required" />
 	</xs:complexType>
 	<xs:complexType name="unit_to_unit_abilities_junctions_tables">
@@ -1449,15 +1449,24 @@
 		<xs:attribute name="Unit_Icon_Path" type="xs:string" use="required" />
 		<xs:attribute name="Unit_Info_Pic_Path" type="xs:string" use="required" />
 		<xs:attribute name="Localisation_Key" type="xs:string" use="required" />
-		<xs:attribute name="Region_IDRef" msprop:Optional="true" type="xs:string" />
+    <xs:attribute name="Region_IDRef" msprop:Optional="true" type="xs:string" />
 		<xs:attribute name="Unit_Limit" type="xs:int" use="required" />
 		<xs:attribute name="MP_Category" type="xs:string" use="required" />
-		<xs:attribute name="Early_Availability" type="xs:boolean" use="required" />
+    <xs:attribute name="Early_Availability" type="xs:boolean" use="required" />
 		<xs:attribute name="Related_with_x0020_Early_x0020_availability" type="xs:boolean" use="required" />
-		<xs:attribute name="Late_Availability" type="xs:boolean" use="required" />
+    <xs:attribute name="Late_Availability" type="xs:boolean" use="required" />
 		<xs:attribute name="unknown9" type="xs:int" use="required" />
-		<xs:attribute name="Garrison_Availability" type="xs:boolean" use="required" />
+    <xs:attribute name="Garrison_Availability" type="xs:boolean" use="required" />
 		<xs:attribute name="MP_Unit_Limit" msprop:VersionStart="3" type="xs:int" use="required" />
+    <xs:attribute msprop:Optional='true' name='unknown25' type='xs:string' msprop:VersionStart="10"/>
+    <xs:attribute msprop:Optional='true' name='unknown26' type='xs:string' msprop:VersionStart="10"/>
+    <xs:attribute name='unknown27' type='xs:string' use='required' msprop:VersionStart="10"/>
+    <xs:attribute msprop:Optional='true' name='unknown28' type='xs:string' msprop:VersionStart="10"/>
+    <xs:attribute msprop:Optional='true' name='unknown29' type='xs:string' msprop:VersionStart="10"/>
+    <xs:attribute msprop:Optional='true' name='unknown30' type='xs:string' msprop:VersionStart="10"/>
+    <xs:attribute name='unknown31' type='xs:boolean' use='required' msprop:VersionStart="10"/>
+    <xs:attribute msprop:Optional='true' name='unknown32' type='xs:string' msprop:VersionStart="10"/>
+  <xs:attribute name='unknown33' type='xs:int' use='required' msprop:VersionStart="10"/>
 	</xs:complexType>
 	<xs:complexType name="units_to_exclusive_faction_permissions_tables">
 		<xs:attribute name="Unit_IDRef" type="xs:string" use="required" />
