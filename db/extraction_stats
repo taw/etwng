@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+
+path = ARGV[0]
+
+subs = Dir["#{path}/*"].sort
+subs.each{|sub|
+  sz = Dir["#{sub}/**/*"].select{|x| File.file?(x)}.size
+  p [sub, sz]
+}
+
+total = Dir["#{path}/**/*"].select{|x| File.file?(x)}.size
+p ['all', total]
