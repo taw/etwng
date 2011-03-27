@@ -3075,8 +3075,8 @@
   <xs:attribute name='unknown2' type='xs:string' use='required'/>
 </xs:complexType>
 <xs:complexType name='start_pos_family_relationships_tables'>
-  <xs:attribute name='unknown1' type='xs:float' use='required'/>
-  <xs:attribute name='unknown2' type='xs:float' use='required'/>
+  <xs:attribute name='unknown1' type='xs:int' use='required'/>
+  <xs:attribute name='unknown2' type='xs:int' use='required'/>
   <xs:attribute name='unknown3' type='xs:string' use='required'/>
 </xs:complexType>  
 <xs:complexType name='encyclopedia_page_linkages_tables'>
