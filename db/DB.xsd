@@ -60,7 +60,12 @@
 		<xs:attribute name="Culture" type="xs:string" use="required" />
 		<xs:attribute name="Model_x0020_Path" type="xs:string" use="required" />
 		<xs:attribute name="Bodyguard_Unit" msprop:Optional="true" type="xs:string" />
-	</xs:complexType>
+    <xs:attribute name='unknown5' type='xs:int' use='required' msprop:VersionStart='4'/>
+    <xs:attribute msprop:Optional='true' name='unknown6' type='xs:string' msprop:VersionStart='4'/>
+    <xs:attribute name='unknown7' type='xs:int' use='required' msprop:VersionStart='4'/>
+    <xs:attribute msprop:Optional='true' name='unknown8' type='xs:string' msprop:VersionStart='4'/>
+    <xs:attribute msprop:Optional='true' name='unknown9' type='xs:string' msprop:VersionStart='4'/>
+  </xs:complexType>
 	<xs:complexType name="agent_spawning_to_building_chains_tables">
 		<xs:attribute name="Agent_IDRef" type="xs:string" use="required" />
 		<xs:attribute name="Building_Chain_IDRef" type="xs:string" use="required" />
@@ -1127,7 +1132,10 @@
 		<xs:attribute name="Defensive_Ability" type="xs:boolean" use="required" />
 		<xs:attribute name="Obsoletes" msprop:Optional="true" type="xs:string" />
 		<xs:attribute name="Researchable_Technology_x0020__x0028__x003F__x0029_" type="xs:boolean" use="required" />
-	</xs:complexType>
+    <xs:attribute msprop:Optional='true' name='unknown5' type='xs:string' msprop:VersionStart='2'/>
+    <xs:attribute msprop:Optional='true' name='unknown6' type='xs:string' msprop:VersionStart='2'/>
+    <xs:attribute msprop:Optional='true' name='unknown7' type='xs:string' msprop:VersionStart='2'/>
+  </xs:complexType>
 	<xs:complexType name="unit_category_tables">
 		<xs:attribute name="Unit_Category_ID" type="xs:string" use="required" />
     <xs:attribute msprop:Optional='true' name='unknown2' type='xs:string' msprop:VersionStart='2'/>
@@ -1393,7 +1401,7 @@
 	</xs:complexType>
 	<xs:complexType name="unit_stats_naval_crew_tables">
 		<xs:attribute name="Crew_ID" type="xs:string" use="required" />
-		<xs:attribute name="unknown1" type="xs:int" use="required" />
+		<xs:attribute name="unknown1" type="xs:float" use="required" />
 		<xs:attribute name="Accuracy" type="xs:int" use="required" />
 		<xs:attribute name="Melee_Skill" type="xs:int" use="required" />
 		<xs:attribute name="Melee_defence" type="xs:int" use="required" />
@@ -1408,7 +1416,8 @@
 		<xs:attribute name="unknown11" type="xs:int" use="required" />
 		<xs:attribute name="unknown12" type="xs:float" use="required" />
 		<xs:attribute name="unknown13" type="xs:int" use="required" />
-	</xs:complexType>
+    <xs:attribute msprop:Optional='true' name='unknown17' type='xs:string' msprop:VersionStart='3'/>
+  </xs:complexType>
 	<xs:complexType name="unit_stats_naval_crew_to_factions_tables">
 		<xs:attribute name="Faction_IDRef" type="xs:string" use="required" />
 		<xs:attribute name="Crew_IDRef" type="xs:string" use="required" />
@@ -2315,7 +2324,8 @@
 		<xs:attribute name="Slot_ID" type="xs:string" use="required" />
 		<xs:attribute name="Effect_for_non_trade_goods_x0020__x0028__x003F__x0029_" type="xs:int" use="required" />
 		<xs:attribute name="Graphic_path" type="xs:string" use="required" />
-	</xs:complexType>
+    <xs:attribute name='unknown6' type='xs:int' use='required' msprop:VersionStart='2'/>
+  </xs:complexType>
 	<xs:complexType name="sea_climate_details_tables">
 		<xs:attribute name="unknown1" type="xs:string" use="required" />
 		<xs:attribute name="unknown2" type="xs:float" use="required" />
@@ -2564,7 +2574,15 @@
 	  <xs:attribute name='unknown2' type='xs:float' use='required'/>
 	  <xs:attribute name='unknown3' type='xs:float' use='required'/>
 	  <xs:attribute name='unknown4' type='xs:int' use='required'/>
-	</xs:complexType>
+    <xs:attribute name='unknown5' type='xs:float' use='required' msprop:VersionStart='6'/>
+    <xs:attribute name='unknown6' type='xs:boolean' use='required' msprop:VersionStart='6'/>
+    <xs:attribute name='unknown7' type='xs:int' use='required' msprop:VersionStart='6'/>
+    <xs:attribute name='unknown8' type='xs:int' use='required' msprop:VersionStart='6'/>
+    <xs:attribute msprop:Optional='true' name='unknown9' type='xs:string' msprop:VersionStart='6'/>
+    <xs:attribute name='unknown10' type='xs:boolean' use='required' msprop:VersionStart='6'/>
+    <xs:attribute name='unknown11' type='xs:float' use='required' msprop:VersionStart='6'/>
+    <xs:attribute msprop:Optional='true' name='unknown12' type='xs:string' msprop:VersionStart='6'/>
+  </xs:complexType>
 	<xs:complexType name='videos_tables'>
 	  <xs:attribute name='unknown1' type='xs:string' use='required'/>
 	  <xs:attribute name='unknown2' type='xs:string' use='required'/>
