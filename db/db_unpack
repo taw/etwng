@@ -46,7 +46,7 @@ class DbFile
       @version = @data[4, 1].unpack("C")[0] + 1
       @data = @data[9..-1]
     else
-      raise "Unknown file, magic number: #{@data[0, 9].inspect}"
+      raise "Unknown file, magic number: #{@data[0, 9].inspect}: #{file_name}"
     end
     @rows = @data[0, 4].unpack("V")[0]
     @data = @data[4..-1]
