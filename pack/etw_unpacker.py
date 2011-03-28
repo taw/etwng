@@ -61,8 +61,12 @@ def unpackPackArchive(pack_path, outputdir):
   files_count = read_long(handle)
   files_len   = read_long(handle)
 
-  header_len  = 24 + deps_len + files_len
-  handle.seek(24 + deps_len)
+  if magic == 843597392:
+    header_len = 32 + deps_len + files_len
+    handle.seek(32 + deps_len)
+  else:
+    header_len = 24 + deps_len + files_len
+    handle.seek(24 + deps_len)
 
   offset = header_len
   files = []
