@@ -70,12 +70,19 @@ private:
 
   uint32_t deps_size, deps_count;
   uint32_t files_size, files_count;
+  int version;
 
   void load_header() {
     uint32_t header[6];
+    uint32_t header_extra[2];
     force_read((char*)header, 24);
    
-    if(header[0] != *(uint32_t*)("PFH0")) {
+    if(header[0] == *(uint32_t*)("PFH0")) {
+      version = 0;
+    } else if(header[0] == *(uint32_t*)("PFH2")) {
+      version = 2;
+      force_read((char*)header_extra, 8);
+    } else {
       fprintf(stderr, "Pack header error for %s\n", path);
       exit(1);
     }
@@ -101,7 +108,7 @@ private:
     char *files_header_data = new char[files_size];
     force_read(files_header_data, files_size);
 
-    off_t ofs = 24 + deps_size + files_size;
+    off_t ofs = (version == 0 ? 24 : 32) + deps_size + files_size;
     for(uint i=0, j=0; i<files_count; i++) {
       int f_sz       = *(uint32_t*)(files_header_data+j);
       int f_path_len = strlen(files_header_data+j+4);
