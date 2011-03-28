@@ -3,7 +3,7 @@ import struct, os, sys
 
 # For easy file reading and writing interactions
 def read_long(fhandle):
-  return struct.unpack('l', fhandle.read(4))[0]
+  return struct.unpack('<l', fhandle.read(4))[0]
 
 def read_cstr(handle):
   char = ''
