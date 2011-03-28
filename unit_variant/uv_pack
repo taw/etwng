@@ -17,13 +17,24 @@ class UnitVariant
     @data = eval(txt)
   end
   def version
-    @data[0]
+    @version ||= @data[0]
+  end
+  def extra
+    if version == 2
+      @data[1]
+    else
+      @data
+    end
   end
   def header_size
     version == 0 ? 20 : 24
   end
   def categories
-    @categories ||= @data[1..-1]
+    @categories ||= if version == 2
+      @data[2..-1]
+    else
+      @data[1..-1]
+    end
   end
   def divider
     header_size + categories.size * (512 + 4*4)
@@ -31,7 +42,7 @@ class UnitVariant
   def header
     out = "VRNT"
     out << [version, categories.size, header_size, divider].pack("V*")
-    out << [1].pack("V") if version == 2
+    out << [extra].pack("V") if version == 2
     out
   end
   def s256(str)

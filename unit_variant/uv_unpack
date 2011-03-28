@@ -64,7 +64,11 @@ class UnitVariant
     fail "Wrong header size" unless get_u == (@version == 0 ? 20 : 24)
     
     divider = get_u
-    fail "Wrong entry count for version 2" unless get_u == 1 if @version == 2
+    if @version == 2
+      @extra = get_u
+    else
+      @extra = nil
+    end
 
     equipment = parse_equipment(divider)
 
@@ -89,6 +93,7 @@ class UnitVariant
     version, categories = parse
     out  = "[\n"
     out << "  #{version},\n"
+    out << "  #{@extra},\n" if @extra
     categories.each do |cat_num, cat_name, *equipment|
       line     = "  [#{cat_num}, #{cat_name.inspect}"
       lines_eq = equipment.map{|eq| "    #{eq.inspect}" }
