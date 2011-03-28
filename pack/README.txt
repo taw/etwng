@@ -14,13 +14,22 @@ Check README.txt in fuse/ directory for compilation instructions.
 
 .pack format consists of:
 
-Header:
+Header, old format (ETW/NTW/some S2TW files):
 * uint32 magic "PFH0"
 * uint32 pack type (boot 0, main 1, patch 2, mod 3, movie 4)
 * uint32 dependencies count
 * uint32 dependencies header size
 * uint32 files count
 * uint32 files header size
+
+Or for new format (some S2TW files):
+* uint32 magic "PFH2"
+* uint32 pack type (boot 0, main 1, patch 2, mod 3, movie 4)
+* uint32 dependencies count
+* uint32 dependencies header size
+* uint32 files count
+* uint32 files header size
+* uint64 unknown (some kind of timestamp suspected)
 
 Dependencies section has size and entries count as specified above,
 each entry is:
