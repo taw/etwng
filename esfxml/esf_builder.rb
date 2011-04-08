@@ -8,7 +8,10 @@ class EsfBuilder
     @adjust_ofs       = []
     @adjust_children  = []
     @children         = []
-    @type_codes       = Hash.new{|ht,k| raise "Unknown node name #{k.inspect}"}
+    @type_codes       = Hash.new{|ht,k|
+      # warn "Unknown node name #{k.inspect}"
+      add_type_code(k)
+    }
     @node_types       = []
   end
   def add_str_index(str, idx)
@@ -23,8 +26,9 @@ class EsfBuilder
   end
   def add_type_code(name)
     raise "Name already set: #{name}" if @type_codes.has_key?(name)
-    @type_codes[name] = @type_codes.size
+    rv = @type_codes[name] = @type_codes.size
     @node_types << name
+    rv
   end
   def put_yes
     @data << "\x01\x01"
