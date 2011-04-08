@@ -22,9 +22,8 @@ class SVG
   def <<(cnt)
     @contents << cnt
   end
-  def add_path(vertices, style)
-    path = "M" + vertices.map{|x,y| "#{x} #{y}"}.join(" L") + " Z"
-    @contents << %Q[<path d="#{path}" style="#{style}"/>]
+  def add_path(vertices_path, style)
+    @contents << %Q[<path d="#{vertices_path}" style="#{style}"/>]
   end
   def set_view(x0, y0, x1, y1)
     dx, dy = x1-x0, y1-y0
@@ -58,6 +57,12 @@ end
 class DragRegionsSVG < EsfScript
   def run!
     FileUtils.mkdir_p target_dir
+    @color_cache = {
+      [true, true] => 'red',
+      [false, true] => 'green',
+      [true, false] => 'magenta',
+      [false, false] => 'blue',
+    }
     i=0
     update_each_xml("region_data*", "rec[@type='region_data']") do |rd|
       i+=1
@@ -115,41 +120,45 @@ class DragRegionsSVG < EsfScript
   def draw_region(region, vertices)
     name = region.xpath("s")[0].content
     type = region.xpath("asc")[0].content
-    areas = region.xpath("//rec[@type='areas']")
-    areas = areas.map{|area_node| parse_area(area_node, vertices)}
     svg = SVG.new
     xs=[]
     ys=[]
     
-    if type == 'land'
-      region_color = random_land_color
-    else
-      region_color = random_sea_color
-    end
+    is_land = type == 'land'
+    # region_color = is_land ? random_land_color : random_sea_color
     
-    areas.each{|area|
-      # area[:faces].each{|face|
-      #   svg << %Q[<path d="#{face}" />\n]
-      # }
-      area[:outlines].each_with_index{|outline, i|
+    area_nodes = region.xpath("//rec[@type='areas']")
+    area_nodes.each do |area_node|
+      area  = parse_area(area_node, vertices)
+      flags = area_node.xpath("yes|no").map{|x| x.name == 'yes'}
+      ints  = area_node.xpath("u2").map{|x| x.content.to_i}
+
+      area[:outlines].each do |outline|
+        outline_path = vertices_to_path(outline)
         xs = xs + outline.map{|x,y| x}
         xs = [xs.min, xs.max]
         ys = ys + outline.map{|x,y| y}
         ys = [ys.min, ys.max]
-        color = random_land_color
-        style="fill:#{color};fill-opacity:0.2;stroke:#{color};stroke-width:0.2px;"
-        svg.add_path(outline, style)
-        style2="stroke-width:0.5px;stroke:black;fill-opacity:0.2;fill:#{region_color}"
-        @world.add_path(outline, style2)
-      }
-    }
+        key = [ints[2], is_land]
+        color = (@color_cache[key] ||= (is_land ? random_land_color : random_sea_color))
+        style = "fill:#{color};fill-opacity:1;stroke:#{color};stroke-width:0.2px;"
+        svg.add_path(outline_path, style)
+        style2 = "stroke-width:0.5px;stroke:black;fill-opacity:1;fill:#{color}"
+        @world.add_path(outline_path, style2)
+      end
+    end
     svg.set_view(xs.min, ys.min, xs.max, ys.max)
     svg.save("#{target_dir}/#{name}.svg")
   end
+
+  def vertices_to_path(vertices)
+    "M" + vertices.map{|x,y| "#{x} #{y}"}.join(" L") + " Z"
+  end
+
   def parse_area(area_node, vertices)
     {
       :faces => area_node.xpath("rec[@type='faces']/u4_ary").map{|face| u4_ary_to_path(face.content, vertices)},
-      :outlines => area_node.xpath("//rec[@type='outlines']/u4_ary").map{|face| u4_ary_to_path(face.content, vertices)},
+      :outlines => area_node.xpath("ary/rec[@type='outlines']/u4_ary").map{|face| u4_ary_to_path(face.content, vertices)},
     }
   end
   
