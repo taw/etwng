@@ -77,26 +77,43 @@ class XSD2SX
     }
   end
 
+  def schema
+    unless @schema
+      @schema = {}
+      types.each{|name, *fields|
+        @schema[name] = fields
+      }
+      uqs = {}
+      uniques.each{|name, table, *fields|
+        uqs[name] = [table, *fields]
+        fields.each{|f|
+          @schema[table].find{|field| field[:name] == f}[:pk] = true
+        }
+      }
+      keyrefs.each{|ref, table, field|
+        foreign_pk = uqs[ref]
+        raise "Reference #{ref} leads to multicolumn primary key" unless foreign_pk.size == 2
+        ftable, ffield = *foreign_pk
+        @schema[table].find{|f| f[:name] == field}[:fkey] = "#{ftable}.#{ffield}"
+      }
+    end
+    @schema
+  end
+  
   # Gather schema info
   def run!
-    schema = {}
-    types.each{|name, *fields|
-      schema[name] = fields
-    }
-    uqs = {}
-    uniques.each{|name, table, *fields|
-      uqs[name] = [table, *fields]
-      fields.each{|f|
-        schema[table].find{|field| field[:name] == f}[:pk] = true
+    File.open(path_out, "wb"){|fh|
+      fh.puts "<schema>"
+      schema.to_a.sort.each{|name, fields|
+        fh.puts "  <table name='#{name}'>"
+        fields.each{|field|
+          attrs = field.to_a.map{|k,v| v.nil? ? "" : " #{k}='#{v}'"}.sort
+          fh.puts "    <field#{attrs}/>"
+        }
+        fh.puts "  </table>"
       }
+      fh.puts "</schema>"
     }
-    keyrefs.each{|ref, table, field|
-      foreign_pk = uqs[ref]
-      raise "Reference #{ref} leads to multicolumn primary key" unless foreign_pk.size == 2
-      ftable, ffield = *foreign_pk
-      schema[table].find{|f| f[:name] == field}[:fkey] = "#{ftable}.#{ffield}"
-    }
-    pp schema
   end
 end
 
