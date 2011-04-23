@@ -3785,7 +3785,6 @@
 <xs:element form='unqualified' name='start_pos_family_relationships_tables' type='mstns:start_pos_family_relationships_tables'/>
 <xs:element form='unqualified' name='encyclopedia_page_linkages_tables' type='mstns:encyclopedia_page_linkages_tables'/>
 <xs:element form='unqualified' name='faction_resource_consumptions_tables' type='mstns:faction_resource_consumptions_tables'/>
-<xs:element form='unqualified' name='models_building_tables' type='mstns:models_building_tables'/>
 <xs:element form='unqualified' name='technology_nodes_tables' type='mstns:technology_nodes_tables'/>
 <xs:element form='unqualified' name='aide_de_camp_speeches_tables' type='mstns:aide_de_camp_speeches_tables'/>
 <xs:element form='unqualified' name='avatar_aesthetic_sets_tables' type='mstns:avatar_aesthetic_sets_tables'/>
@@ -3824,6 +3823,8 @@
 <xs:element form='unqualified' name='cdir_events_dilemma_option_junctions_tables' type='mstns:cdir_events_dilemma_option_junctions_tables'/>
 <xs:element form='unqualified' name='encyclopedia_blocks_tables' type='mstns:encyclopedia_blocks_tables'/>
 <xs:element form='unqualified' name='sound_events_tables' type='mstns:sound_events_tables'/>
+
+<xs:element form='unqualified' name='trade_nodes_tables' type='mstns:trade_nodes_tables'/>
 
   
 			</xs:choice>
@@ -4954,11 +4955,11 @@
 
     <xs:unique msdata:PrimaryKey='true' name='warscape_animated_tables_tables_Constraint1'>
       <xs:selector xpath='.//warscape_animated_tables'/>
-      <xs:field xpath='@unknown1'/>
+      <xs:field xpath='@Filename_x0020_WA_ID'/>
     </xs:unique>
     <xs:unique msdata:PrimaryKey='true' name='warscape_animated_lod_tables_tables_Constraint1'>
       <xs:selector xpath='.//warscape_animated_lod_tables'/>
-      <xs:field xpath='@unknown1'/>
+      <xs:field xpath='@Random_Index'/>
     </xs:unique>
     <xs:unique msdata:PrimaryKey='true' name='voice_types_tables_tables_Constraint1'>
       <xs:selector xpath='.//voice_types_tables'/>
