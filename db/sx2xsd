@@ -1,1 +1,138 @@
 #!/usr/bin/env ruby
+
+require "rubygems"
+require "nokogiri"
+
+class SX2XSD
+  attr_reader :path_in, :path_out
+
+  def initialize(path_in, path_out)
+    @path_in = path_in
+    @path_out = path_out
+  end
+
+  def schema_doc
+    @schema_doc ||= Nokogiri::XML.parse(File.open(path_in, 'rb', &:read))
+  end
+
+  def parse_table(table_node)
+    rv = {:name => table_node["name"], :fields => [], :pk => [], :fkeys => []}
+    table_node.xpath("field").each{|field|
+      field = Hash[field.map{|k,v| [k, v]}]
+      name = field.delete("name")
+      type = field.delete("type")
+      version_start = field.delete("version_start")
+      rv[:fkeys] << [name, field.delete("fkey")] if field["fkey"]
+
+      rv[:pk] << name if field.delete("pk")
+
+      rvx = {:name => name}
+      case type
+      when "boolean", "int", "float", "string", "short"
+        rvx[:type] = {:use => "required", :type => type}
+      when "optstring"
+        rvx[:type] = {:Optional => "true", :type => "string"}
+      when /\Ablob(\d+)\z/
+        rvx[:type] = {:BlobLength => $1.to_i, :type => "string"}
+      else
+        raise "Unknown type: #{type}"
+      end
+      rvx[:type][:name] = name
+      rvx[:type][:VersionStart] = version_start if version_start
+      
+      raise "Should be empty: #{field.inspect}" unless field == {}
+
+      rv[:fields] << rvx
+    }
+    rv
+  end
+
+  def tables
+    @tables ||= schema_doc.xpath("/schema/table").map{|table|
+      parse_table(table)
+    }
+  end
+
+  def run!
+    File.open(path_out, "wb"){|fh|
+      fh.puts %Q[<xs:schema id="DBDataSet" targetNamespace="http://etw-mod-tools.sourceforge.net/" xmlns:mstns="http://etw-mod-tools.sourceforge.net/" xmlns="http://etw-mod-tools.sourceforge.net/"  xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"  xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="unqualified" elementFormDefault="qualified" msdata:schemafragmentcount="2">]
+      tables.each{|table|
+        fh.puts %Q[  <xs:complexType name="#{table[:name]}">]
+        table[:fields].each{|field|
+          attrs = field[:type].map{|k,v| " #{k}='#{v}'"}.sort
+          fh.puts %Q[    <xs:attribute#{attrs} />]
+          # <xs:attribute name="Key" type="xs:string" use="required" />
+          # <xs:attribute msprop:Optional='true' name='unknown2' type='xs:string' msprop:VersionStart='2'/>
+        }
+        fh.puts %Q[  </xs:complexType>]
+      }
+      fh.puts %Q[  <xs:element name="DBDataSet">]
+      fh.puts %Q[    <xs:complexType>]
+      fh.puts %Q[      <xs:choice minOccurs="0" maxOccurs="unbounded">]
+      tables.each{|table|
+        fh.puts %Q[        <xs:element name="#{table[:name]}" form="unqualified" type="mstns:#{table[:name]}" />]
+      }
+      fh.puts %Q[      </xs:choice>]
+      fh.puts %Q[    </xs:complexType>]
+      # uniques
+      # keyrefs
+      fh.puts %Q[  </xs:element>]
+      fh.puts %Q[</xs:schema>]
+    }
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} DB.xsd schema.xml"
+  exit 1
+end
+
+path_in, path_out = *ARGV
+SX2XSD.new(path_in, path_out).run!
+
+
+
+
+
+
+
+
+
+
+__END__
+
+
+
+
+        <xs:complexType name="_kv_fatigue_tables">
+                <xs:attribute name="Key" type="xs:string" use="required" />
+                <xs:attribute name="Value" type="xs:float" use="required" />
+        </xs:complexType>
+
+        
+        
+        
+        
+          
+        <xs:element name="DBDataSet">
+                <xs:complexType>
+                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                <xs:element name="_kv_fatigue_tables" form="unqualified" type="mstns:_kv_fatigue_tables" />
+                                <xs:element name="_kv_morale_tables" form="unqualified" type="mstns:_kv_morale_tables" />
+                                <xs:element name="_kv_naval_morale_tables" form="unqualified" type="mstns:_kv_naval_morale_tables" />
+                                <xs:element name="_kv_rules_tables" form="unqualified" type="mstns:_kv_rules_tables" />
+                                <xs:element name="abilities_tables" form="unqualified" type="mstns:abilities_tables" />
+
+                                
+                                
+                                
+    <xs:unique name="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//_kv_fatigue_tables" />
+      <xs:field xpath="@Key" />
+    </xs:unique>
+
+    <xs:keyref name='cai_personalities_tables_unknown4__TO__campaign_ai_personalities_PrimaryKey' refer='campaign_ai_personalities_tables_Constraint1'>
+      <xs:selector xpath='.//cai_personalities_tables'/>
+      <xs:field xpath='@unknown4'/>
+    </xs:keyref>
+  </xs:element>
