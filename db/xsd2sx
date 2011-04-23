@@ -2,7 +2,6 @@
 
 require "rubygems"
 require "nokogiri"
-require "pp"
 
 class XSD2SX
   attr_reader :path_in, :path_out
@@ -117,8 +116,6 @@ class XSD2SX
   end
 end
 
-
-
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} DB.xsd schema.xml"
   exit 1
@@ -126,45 +123,3 @@ end
 
 path_in, path_out = *ARGV
 XSD2SX.new(path_in, path_out).run!
-
-
-__END__
-
-
-<xs:schema id="DBDataSet" targetNamespace="http://etw-mod-tools.sourceforge.net/"
-  xmlns:mstns="http://etw-mod-tools.sourceforge.net/" xmlns="http://etw-mod-tools.sourceforge.net/"
-  xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
-  xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="unqualified" elementFormDefault="qualified" msdata:schemafragmentcount="2">
-
-        <xs:complexType name="_kv_fatigue_tables">
-                <xs:attribute name="Key" type="xs:string" use="required" />
-                <xs:attribute name="Value" type="xs:float" use="required" />
-        </xs:complexType>
-
-        
-        
-        
-        
-          
-        <xs:element name="DBDataSet">
-                <xs:complexType>
-                        <xs:choice minOccurs="0" maxOccurs="unbounded">
-                                <xs:element name="_kv_fatigue_tables" form="unqualified" type="mstns:_kv_fatigue_tables" />
-                                <xs:element name="_kv_morale_tables" form="unqualified" type="mstns:_kv_morale_tables" />
-                                <xs:element name="_kv_naval_morale_tables" form="unqualified" type="mstns:_kv_naval_morale_tables" />
-                                <xs:element name="_kv_rules_tables" form="unqualified" type="mstns:_kv_rules_tables" />
-                                <xs:element name="abilities_tables" form="unqualified" type="mstns:abilities_tables" />
-
-                                
-                                
-                                
-    <xs:unique name="Constraint1" msdata:PrimaryKey="true">
-      <xs:selector xpath=".//_kv_fatigue_tables" />
-      <xs:field xpath="@Key" />
-    </xs:unique>
-
-    <xs:keyref name='cai_personalities_tables_unknown4__TO__campaign_ai_personalities_PrimaryKey' refer='campaign_ai_personalities_tables_Constraint1'>
-      <xs:selector xpath='.//cai_personalities_tables'/>
-      <xs:field xpath='@unknown4'/>
-    </xs:keyref>
-  </xs:element>
