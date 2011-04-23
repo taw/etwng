@@ -1,0 +1,130 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "nokogiri"
+
+class XSD2SX
+  attr_reader :path_in, :path_out
+
+  def initialize(path_in, path_out)
+    @path_in = path_in
+    @path_out = path_out
+  end
+
+  def xsd_doc
+    @xsd_doc ||= Nokogiri::XML.parse(File.open(path_in, 'rb', &:read))
+  end
+
+  def uniques
+    xsd_doc.xpath("/xs:schema/xs:element/xs:unique").map{|uq|
+      uq
+    }
+  end
+
+  def keyrefs
+    xsd_doc.xpath("/xs:schema/xs:element/xs:keyref").map{|kr|
+      kr
+    }
+  end
+
+  def parse_field(field)
+    ht = {}
+    field.each{|k,v|
+      ht[k] = v.value
+    }
+    ht0 = ht.dup
+    name = ht.delete("name")
+    version_start = ht.delete("VersionStart")
+    type = ht.delete("type").sub(/\Axs:/, "")
+    if ht == {"use" => "required"}
+      # DONE
+    elsif type == "string" and ht == {"Optional" => "true"}
+      type = "optstring"
+    elsif type == "string" and ht.keys.sort == ["BlobLength", "use"] and ht["use"] == "required"
+      type = "blob#{ht["BlobLength"]}"
+    else
+      raise "Unrecognized field type: #{ht0.inspect}"
+    end
+    [name, type, version_start]
+  end
+  
+  def types
+    xsd_doc.xpath("/xs:schema/xs:complexType").map{|ct|
+      name = ct["name"]
+      fields = ct.xpath("xs:attribute").map{|f|
+        parse_field(f.attributes)
+      }
+      [name, *fields]
+    }
+  end
+
+  def run!
+    types.each{|ct|
+      # puts "CT:"
+      # puts ct
+      # puts ""
+    }
+    uniques.each{|uq|
+      # puts "UQ"
+      # puts uq
+      # puts ""
+    }
+    keyrefs.each{|kr|
+      # puts "KR"
+      # puts kr
+      # puts ""
+    }
+  end
+end
+
+
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} DB.xsd schema.xml"
+  exit 1
+end
+
+path_in, path_out = *ARGV
+XSD2SX.new(path_in, path_out).run!
+
+
+__END__
+
+
+<xs:schema id="DBDataSet" targetNamespace="http://etw-mod-tools.sourceforge.net/"
+  xmlns:mstns="http://etw-mod-tools.sourceforge.net/" xmlns="http://etw-mod-tools.sourceforge.net/"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+  xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="unqualified" elementFormDefault="qualified" msdata:schemafragmentcount="2">
+
+        <xs:complexType name="_kv_fatigue_tables">
+                <xs:attribute name="Key" type="xs:string" use="required" />
+                <xs:attribute name="Value" type="xs:float" use="required" />
+        </xs:complexType>
+
+        
+        
+        
+        
+          
+        <xs:element name="DBDataSet">
+                <xs:complexType>
+                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                <xs:element name="_kv_fatigue_tables" form="unqualified" type="mstns:_kv_fatigue_tables" />
+                                <xs:element name="_kv_morale_tables" form="unqualified" type="mstns:_kv_morale_tables" />
+                                <xs:element name="_kv_naval_morale_tables" form="unqualified" type="mstns:_kv_naval_morale_tables" />
+                                <xs:element name="_kv_rules_tables" form="unqualified" type="mstns:_kv_rules_tables" />
+                                <xs:element name="abilities_tables" form="unqualified" type="mstns:abilities_tables" />
+
+                                
+                                
+                                
+    <xs:unique name="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//_kv_fatigue_tables" />
+      <xs:field xpath="@Key" />
+    </xs:unique>
+
+    <xs:keyref name='cai_personalities_tables_unknown4__TO__campaign_ai_personalities_PrimaryKey' refer='campaign_ai_personalities_tables_Constraint1'>
+      <xs:selector xpath='.//cai_personalities_tables'/>
+      <xs:field xpath='@unknown4'/>
+    </xs:keyref>
+  </xs:element>
