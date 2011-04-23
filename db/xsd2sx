@@ -2,6 +2,7 @@
 
 require "rubygems"
 require "nokogiri"
+require "pp"
 
 class XSD2SX
   attr_reader :path_in, :path_out
@@ -63,7 +64,7 @@ class XSD2SX
     else
       raise "Unrecognized field type: #{ht0.inspect}"
     end
-    [name, type, version_start]
+    {:name => name, :type => type, :version_start => version_start}
   end
   
   def types
@@ -76,22 +77,26 @@ class XSD2SX
     }
   end
 
+  # Gather schema info
   def run!
-    types.each{|ct|
-      # puts "CT:"
-      # puts ct
-      # puts ""
+    schema = {}
+    types.each{|name, *fields|
+      schema[name] = fields
     }
-    uniques.each{|uq|
-      # puts "UQ"
-      # puts uq
-      # puts ""
+    uqs = {}
+    uniques.each{|name, table, *fields|
+      uqs[name] = [table, *fields]
+      fields.each{|f|
+        schema[table].find{|field| field[:name] == f}[:pk] = true
+      }
     }
-    keyrefs.each{|kr|
-      # puts "KR"
-      # puts kr
-      # puts ""
+    keyrefs.each{|ref, table, field|
+      foreign_pk = uqs[ref]
+      raise "Reference #{ref} leads to multicolumn primary key" unless foreign_pk.size == 2
+      ftable, ffield = *foreign_pk
+      schema[table].find{|f| f[:name] == field}[:fkey] = "#{ftable}.#{ffield}"
     }
+    pp schema
   end
 end
 
