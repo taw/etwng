@@ -15,15 +15,33 @@ class XSD2SX
     @xsd_doc ||= Nokogiri::XML.parse(File.open(path_in, 'rb', &:read))
   end
 
+  def parse_selector(sel)
+    x = sel["xpath"]
+    x =~ /\A\.\/\/(.*)/ ? $1 : raise("Wrong table reference #{x}")
+  end
+  
+  def parse_fieldref(fieldref)
+    x = fieldref["xpath"]
+    x =~ /\A@(.*)/ ? $1 : raise("Wrong field reference #{x}")
+  end
+  
   def uniques
-    xsd_doc.xpath("/xs:schema/xs:element/xs:unique").map{|uq|
-      uq
+    @uniques ||= xsd_doc.xpath("/xs:schema/xs:element/xs:unique").map{|uq|
+      raise "Only primary key unique keys supported" unless uq["PrimaryKey"] == "true"
+      selector = uq.xpath("xs:selector").map{|f| parse_selector(f)}
+      fields = uq.xpath("xs:field").map{|f| parse_fieldref(f)}
+      raise "Exactly one selector required in unique key: #{uq}" unless selector.size == 1
+      [uq["name"], selector[0], *fields]
     }
   end
 
   def keyrefs
-    xsd_doc.xpath("/xs:schema/xs:element/xs:keyref").map{|kr|
-      kr
+    @keyrefs ||= xsd_doc.xpath("/xs:schema/xs:element/xs:keyref").map{|kr|
+      selector = kr.xpath("xs:selector").map{|f| parse_selector(f)}
+      fields = kr.xpath("xs:field").map{|f| parse_fieldref(f)}
+      raise "Exactly one selector required in keyref: #{kr}" unless selector.size == 1
+      raise "Exactly one field required in keyref: #{kr}" unless fields.size == 1
+      [kr["refer"], selector[0], fields[0]]
     }
   end
 
@@ -49,7 +67,7 @@ class XSD2SX
   end
   
   def types
-    xsd_doc.xpath("/xs:schema/xs:complexType").map{|ct|
+    @types ||= xsd_doc.xpath("/xs:schema/xs:complexType").map{|ct|
       name = ct["name"]
       fields = ct.xpath("xs:attribute").map{|f|
         parse_field(f.attributes)
