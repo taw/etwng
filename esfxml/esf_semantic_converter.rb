@@ -250,6 +250,12 @@ module EsfSemanticConverter
 
 ## pathfinding.esf arrays
 
+  def convert_rec_grid_data
+    each_rec_member("grid_data") do |ofs_end, i|
+      convert_v2x! if i == 0 and lookahead_v2x?(ofs_end)
+    end
+  end
+
   def convert_ary_vertices
     data = get_ary_contents(:i, :i)
     @pathfinding_vertices_ary = data
