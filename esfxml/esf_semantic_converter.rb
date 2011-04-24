@@ -252,10 +252,39 @@ module EsfSemanticConverter
 
   def convert_ary_vertices
     data = get_ary_contents(:i, :i)
+    @pathfinding_vertices_ary = data
     scale = 0.5**20
     out_ary!("vertices", "", data.map{|x,y|
       " #{x*scale},#{y*scale}"
     })
+  end
+  
+  def convert_rec_pathfinding_areas
+    each_rec_member("pathfinding_areas") do |ofs_end, i|
+      next unless i == 1 and @data[@ofs] == 0x48
+      data = get_value![1].unpack("V*")
+      out!("<u4_ary>")
+      cnt = 0
+      scale = 0.5**20
+      data.each do |i|
+        if cnt == 0
+          cnt = i
+          out!("")
+          out!(" #{i} <!-- vertices count -->")
+        else
+          x, y = @pathfinding_vertices_ary[i]
+          x = x*scale
+          y = y*scale
+          # x = @region_data_vertices[2*i]
+          # y = @region_data_vertices[2*i+1]
+          # out!(" #{i} <!-- #{x} #{y}-->")
+          out!(" #{i} <!-- #{x},#{y} -->")
+          cnt -= 1
+        end
+      end
+      out!("</u4_ary>")
+    end
+    @pathfinding_vertices_ary = nil
   end
   
 ## regions.esf records
