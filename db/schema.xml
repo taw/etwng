@@ -2496,6 +2496,7 @@
     <field name='unknown21' type='optstring'/>
     <field name='unknown22' type='optstring'/>
     <field fkey='projectile_impacts_tables.Projectile_IDRef' name='Impact' type='optstring'/>
+    <field name='unknown24' type='optstring' version_start='2'/>
   </table>
   <table name='public_order_factors_tables'>
     <field name='Factor_ID' pk='true' type='string'/>

@@ -2496,6 +2496,7 @@
     <xs:attribute Optional='true' name='unknown21' type='string' />
     <xs:attribute Optional='true' name='unknown22' type='string' />
     <xs:attribute Optional='true' name='Impact' type='string' />
+    <xs:attribute Optional='true' VersionStart='2' name='unknown24' type='string' />
   </xs:complexType>
   <xs:complexType name="public_order_factors_tables">
     <xs:attribute name='Factor_ID' type='string' use='required' />
