@@ -374,11 +374,17 @@
     <xs:attribute name='unknown1' type='string' use='required' />
     <xs:attribute name='unknown2' type='string' use='required' />
   </xs:complexType>
+  <xs:complexType name="avatar_special_abilities_tables">
+    <xs:attribute Optional='true' name='unknown1' type='string' />
+    <xs:attribute Optional='true' name='unknown2' type='string' />
+    <xs:attribute name='unknown3' type='string' use='required' />
+  </xs:complexType>
   <xs:complexType name="avatar_startpos_units_tables">
     <xs:attribute name='unknown1' type='string' use='required' />
   </xs:complexType>
   <xs:complexType name="avatar_traits_tables">
     <xs:attribute name='unknown1' type='string' use='required' />
+    <xs:attribute VersionStart='3' name='unknown2' type='int' use='required' />
   </xs:complexType>
   <xs:complexType name="avatar_unit_group_ids_tables">
     <xs:attribute name='unknown1' type='string' use='required' />
@@ -640,6 +646,8 @@
     <xs:attribute name='Building_2' type='string' use='required' />
     <xs:attribute name='Material' type='string' use='required' />
     <xs:attribute name='Hit_points' type='int' use='required' />
+    <xs:attribute VersionStart='3' name='unknown6' type='int' use='required' />
+    <xs:attribute VersionStart='3' name='unknown7' type='int' use='required' />
     <xs:attribute Optional='true' name='Fort_type' type='string' />
     <xs:attribute Optional='true' name='Terrain' type='string' />
   </xs:complexType>
@@ -1709,6 +1717,8 @@
     <xs:attribute name='unknown2' type='string' use='required' />
     <xs:attribute name='unknown3' type='string' use='required' />
     <xs:attribute name='unknown4' type='string' use='required' />
+    <xs:attribute VersionStart='2' name='unknown5' type='float' use='required' />
+    <xs:attribute VersionStart='2' name='unknown6' type='float' use='required' />
   </xs:complexType>
   <xs:complexType name="general_command_star_level_effects_tables">
     <xs:attribute name='unknown1' type='int' use='required' />
@@ -3495,6 +3505,7 @@
         <xs:element name="avatar_skills_descriptions_tables" form="unqualified" type="mstns:avatar_skills_descriptions_tables" />
         <xs:element name="avatar_skills_tables" form="unqualified" type="mstns:avatar_skills_tables" />
         <xs:element name="avatar_skills_to_units_juncs_tables" form="unqualified" type="mstns:avatar_skills_to_units_juncs_tables" />
+        <xs:element name="avatar_special_abilities_tables" form="unqualified" type="mstns:avatar_special_abilities_tables" />
         <xs:element name="avatar_startpos_units_tables" form="unqualified" type="mstns:avatar_startpos_units_tables" />
         <xs:element name="avatar_traits_tables" form="unqualified" type="mstns:avatar_traits_tables" />
         <xs:element name="avatar_unit_group_ids_tables" form="unqualified" type="mstns:avatar_unit_group_ids_tables" />

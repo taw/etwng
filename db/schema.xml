@@ -374,11 +374,17 @@
     <field name='unknown1' pk='true' type='string'/>
     <field name='unknown2' pk='true' type='string'/>
   </table>
+  <table name='avatar_special_abilities_tables'>
+    <field name='unknown1' type='optstring'/>
+    <field name='unknown2' type='optstring'/>
+    <field name='unknown3' type='string'/>
+  </table>
   <table name='avatar_startpos_units_tables'>
     <field name='unknown1' pk='true' type='string'/>
   </table>
   <table name='avatar_traits_tables'>
     <field name='unknown1' pk='true' type='string'/>
+    <field name='unknown2' type='int' version_start='3'/>
   </table>
   <table name='avatar_unit_group_ids_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -640,6 +646,8 @@
     <field fkey='battlefield_buildings_tables.Battlefield_Building_ID' name='Building_2' type='string'/>
     <field name='Material' type='string'/>
     <field name='Hit_points' type='int'/>
+    <field name='unknown6' type='int' version_start='3'/>
+    <field name='unknown7' type='int' version_start='3'/>
     <field name='Fort_type' type='optstring'/>
     <field name='Terrain' type='optstring'/>
   </table>
@@ -1709,6 +1717,8 @@
     <field name='unknown2' type='string'/>
     <field name='unknown3' type='string'/>
     <field name='unknown4' type='string'/>
+    <field name='unknown5' type='float' version_start='2'/>
+    <field name='unknown6' type='float' version_start='2'/>
   </table>
   <table name='general_command_star_level_effects_tables'>
     <field name='unknown1' type='int'/>
