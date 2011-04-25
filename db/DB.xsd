@@ -314,6 +314,10 @@
     <xs:attribute name='unknown2' type='string' use='required' />
     <xs:attribute name='unknown3' type='string' use='required' />
   </xs:complexType>
+  <xs:complexType name="avatar_flags_tables">
+    <xs:attribute name='unknown1' type='float' use='required' />
+    <xs:attribute name='unknown2' type='string' use='required' />
+  </xs:complexType>
   <xs:complexType name="avatar_ranks_tables">
     <xs:attribute name='unknown1' type='int' use='required' />
     <xs:attribute name='unknown2' type='string' use='required' />
@@ -338,6 +342,11 @@
     <xs:attribute name='unknown1' type='float' use='required' />
     <xs:attribute name='unknown2' type='string' use='required' />
     <xs:attribute name='unknown3' type='string' use='required' />
+  </xs:complexType>
+  <xs:complexType name="avatar_skill_sets_tables">
+    <xs:attribute name='unknown1' type='string' use='required' />
+    <xs:attribute name='unknown2' type='string' use='required' />
+    <xs:attribute name='unknown3' type='boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="avatar_skill_tree_traits_tables">
     <xs:attribute name='unknown1' type='string' use='required' />
@@ -386,6 +395,9 @@
     <xs:attribute name='unknown1' type='string' use='required' />
     <xs:attribute name='unknown2' type='int' use='required' />
     <xs:attribute name='unknown3' type='int' use='required' />
+  </xs:complexType>
+  <xs:complexType name="avatar_unit_ui_categories_tables">
+    <xs:attribute name='unknown1' type='string' use='required' />
   </xs:complexType>
   <xs:complexType name="avatar_units_tables">
     <xs:attribute name='unknown1' type='string' use='required' />
@@ -880,6 +892,11 @@
     <xs:attribute name='unknown1' type='string' use='required' />
     <xs:attribute name='unknown2' type='string' use='required' />
     <xs:attribute name='unknown3' type='int' use='required' />
+  </xs:complexType>
+  <xs:complexType name="campaign_ai_character_skill_tree_junctions_tables">
+    <xs:attribute name='unknown1' type='string' use='required' />
+    <xs:attribute name='unknown2' type='int' use='required' />
+    <xs:attribute name='unknown3' type='string' use='required' />
   </xs:complexType>
   <xs:complexType name="campaign_ai_character_skill_tree_manager_agent_junctions_tables">
     <xs:attribute name='unknown1' type='string' use='required' />
@@ -1773,6 +1790,10 @@
     <xs:attribute name='unknown1' type='string' use='required' />
     <xs:attribute name='unknown2' type='int' use='required' />
     <xs:attribute name='unknown3' type='int' use='required' />
+  </xs:complexType>
+  <xs:complexType name="incident_heading_texts_tables">
+    <xs:attribute name='unknown1' type='string' use='required' />
+    <xs:attribute name='unknown2' type='string' use='required' />
   </xs:complexType>
   <xs:complexType name="incidents_tables">
     <xs:attribute name='unknown1' type='boolean' use='required' />
@@ -2925,6 +2946,11 @@
     <xs:attribute name='Class_IDRef' type='string' use='required' />
     <xs:attribute name='Unit_Ability_IDRef' type='string' use='required' />
   </xs:complexType>
+  <xs:complexType name="unit_experience_threshold_modifiers_tables">
+    <xs:attribute name='unknown1' type='string' use='required' />
+    <xs:attribute name='unknown2' type='string' use='required' />
+    <xs:attribute name='unknown3' type='string' use='required' />
+  </xs:complexType>
   <xs:complexType name="unit_experience_thresholds_tables">
     <xs:attribute name='Experience_Threshold' type='string' use='required' />
     <xs:attribute name='Value' type='int' use='required' />
@@ -3459,10 +3485,12 @@
         <xs:element name="avatar_drop_probabilities_tables" form="unqualified" type="mstns:avatar_drop_probabilities_tables" />
         <xs:element name="avatar_effects_tables" form="unqualified" type="mstns:avatar_effects_tables" />
         <xs:element name="avatar_faction_flags_tables" form="unqualified" type="mstns:avatar_faction_flags_tables" />
+        <xs:element name="avatar_flags_tables" form="unqualified" type="mstns:avatar_flags_tables" />
         <xs:element name="avatar_ranks_tables" form="unqualified" type="mstns:avatar_ranks_tables" />
         <xs:element name="avatar_skill_chain_lookups_tables" form="unqualified" type="mstns:avatar_skill_chain_lookups_tables" />
         <xs:element name="avatar_skill_effects_juncs_tables" form="unqualified" type="mstns:avatar_skill_effects_juncs_tables" />
         <xs:element name="avatar_skill_prerequisites_tables" form="unqualified" type="mstns:avatar_skill_prerequisites_tables" />
+        <xs:element name="avatar_skill_sets_tables" form="unqualified" type="mstns:avatar_skill_sets_tables" />
         <xs:element name="avatar_skill_tree_traits_tables" form="unqualified" type="mstns:avatar_skill_tree_traits_tables" />
         <xs:element name="avatar_skills_descriptions_tables" form="unqualified" type="mstns:avatar_skills_descriptions_tables" />
         <xs:element name="avatar_skills_tables" form="unqualified" type="mstns:avatar_skills_tables" />
@@ -3473,6 +3501,7 @@
         <xs:element name="avatar_unit_groups_tables" form="unqualified" type="mstns:avatar_unit_groups_tables" />
         <xs:element name="avatar_unit_info_card_abilites_strings_tables" form="unqualified" type="mstns:avatar_unit_info_card_abilites_strings_tables" />
         <xs:element name="avatar_unit_levels_tables" form="unqualified" type="mstns:avatar_unit_levels_tables" />
+        <xs:element name="avatar_unit_ui_categories_tables" form="unqualified" type="mstns:avatar_unit_ui_categories_tables" />
         <xs:element name="avatar_units_tables" form="unqualified" type="mstns:avatar_units_tables" />
         <xs:element name="avatar_xp_rewards_tables" form="unqualified" type="mstns:avatar_xp_rewards_tables" />
         <xs:element name="battle_autoresolver_balances_tables" form="unqualified" type="mstns:battle_autoresolver_balances_tables" />
@@ -3545,6 +3574,7 @@
         <xs:element name="cai_personalities_religious_conversion_policies_tables" form="unqualified" type="mstns:cai_personalities_religious_conversion_policies_tables" />
         <xs:element name="cai_personalities_tables" form="unqualified" type="mstns:cai_personalities_tables" />
         <xs:element name="campaign_ai_character_skill_tree_distribution_junctions_tables" form="unqualified" type="mstns:campaign_ai_character_skill_tree_distribution_junctions_tables" />
+        <xs:element name="campaign_ai_character_skill_tree_junctions_tables" form="unqualified" type="mstns:campaign_ai_character_skill_tree_junctions_tables" />
         <xs:element name="campaign_ai_character_skill_tree_manager_agent_junctions_tables" form="unqualified" type="mstns:campaign_ai_character_skill_tree_manager_agent_junctions_tables" />
         <xs:element name="campaign_ai_manager_behaviour_junctions_tables" form="unqualified" type="mstns:campaign_ai_manager_behaviour_junctions_tables" />
         <xs:element name="campaign_ai_managers_tables" form="unqualified" type="mstns:campaign_ai_managers_tables" />
@@ -3677,6 +3707,7 @@
         <xs:element name="historical_characters_tables" form="unqualified" type="mstns:historical_characters_tables" />
         <xs:element name="honour_effects_tables" form="unqualified" type="mstns:honour_effects_tables" />
         <xs:element name="honour_factors_tables" form="unqualified" type="mstns:honour_factors_tables" />
+        <xs:element name="incident_heading_texts_tables" form="unqualified" type="mstns:incident_heading_texts_tables" />
         <xs:element name="incidents_tables" form="unqualified" type="mstns:incidents_tables" />
         <xs:element name="lighting_setups_tables" form="unqualified" type="mstns:lighting_setups_tables" />
         <xs:element name="loading_screens_tables" form="unqualified" type="mstns:loading_screens_tables" />
@@ -3798,6 +3829,7 @@
         <xs:element name="unit_class_tables" form="unqualified" type="mstns:unit_class_tables" />
         <xs:element name="unit_class_to_population_class_priorities_tables" form="unqualified" type="mstns:unit_class_to_population_class_priorities_tables" />
         <xs:element name="unit_class_to_unit_ability_junctions_tables" form="unqualified" type="mstns:unit_class_to_unit_ability_junctions_tables" />
+        <xs:element name="unit_experience_threshold_modifiers_tables" form="unqualified" type="mstns:unit_experience_threshold_modifiers_tables" />
         <xs:element name="unit_experience_thresholds_tables" form="unqualified" type="mstns:unit_experience_thresholds_tables" />
         <xs:element name="unit_info_card_abilities_strings_tables" form="unqualified" type="mstns:unit_info_card_abilities_strings_tables" />
         <xs:element name="unit_movement_modifiers_tables" form="unqualified" type="mstns:unit_movement_modifiers_tables" />
@@ -4040,6 +4072,10 @@
       <xs:selector xpath=".//avatar_skill_chain_lookups_tables"/>
       <xs:field xpath="@unknown1"/>
     </xs:unique>
+    <xs:unique name="avatar_skill_sets_tables_Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//avatar_skill_sets_tables"/>
+      <xs:field xpath="@unknown1"/>
+    </xs:unique>
     <xs:unique name="avatar_skill_tree_traits_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//avatar_skill_tree_traits_tables"/>
       <xs:field xpath="@unknown1"/>
@@ -4080,6 +4116,10 @@
     </xs:unique>
     <xs:unique name="avatar_unit_levels_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//avatar_unit_levels_tables"/>
+      <xs:field xpath="@unknown1"/>
+    </xs:unique>
+    <xs:unique name="avatar_unit_ui_categories_tables_Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//avatar_unit_ui_categories_tables"/>
       <xs:field xpath="@unknown1"/>
     </xs:unique>
     <xs:unique name="avatar_units_tables_Constraint1" msdata:PrimaryKey="true">
@@ -4797,6 +4837,10 @@
       <xs:selector xpath=".//honour_factors_tables"/>
       <xs:field xpath="@unknown1"/>
     </xs:unique>
+    <xs:unique name="incident_heading_texts_tables_Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//incident_heading_texts_tables"/>
+      <xs:field xpath="@unknown1"/>
+    </xs:unique>
     <xs:unique name="lighting_setups_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//lighting_setups_tables"/>
       <xs:field xpath="@unknown1"/>
@@ -5209,6 +5253,10 @@
       <xs:selector xpath=".//unit_class_to_unit_ability_junctions_tables"/>
       <xs:field xpath="@Class_IDRef"/>
       <xs:field xpath="@Unit_Ability_IDRef"/>
+    </xs:unique>
+    <xs:unique name="unit_experience_threshold_modifiers_tables_Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//unit_experience_threshold_modifiers_tables"/>
+      <xs:field xpath="@unknown1"/>
     </xs:unique>
     <xs:unique name="unit_experience_thresholds_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//unit_experience_thresholds_tables"/>

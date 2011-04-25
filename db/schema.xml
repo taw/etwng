@@ -314,6 +314,10 @@
     <field name='unknown2' type='string'/>
     <field name='unknown3' type='string'/>
   </table>
+  <table name='avatar_flags_tables'>
+    <field name='unknown1' type='float'/>
+    <field name='unknown2' type='string'/>
+  </table>
   <table name='avatar_ranks_tables'>
     <field name='unknown1' type='int'/>
     <field name='unknown2' type='string'/>
@@ -338,6 +342,11 @@
     <field name='unknown1' type='float'/>
     <field name='unknown2' type='string'/>
     <field name='unknown3' type='string'/>
+  </table>
+  <table name='avatar_skill_sets_tables'>
+    <field name='unknown1' pk='true' type='string'/>
+    <field name='unknown2' type='string'/>
+    <field name='unknown3' type='boolean'/>
   </table>
   <table name='avatar_skill_tree_traits_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -386,6 +395,9 @@
     <field name='unknown1' pk='true' type='string'/>
     <field name='unknown2' type='int'/>
     <field name='unknown3' type='int'/>
+  </table>
+  <table name='avatar_unit_ui_categories_tables'>
+    <field name='unknown1' pk='true' type='string'/>
   </table>
   <table name='avatar_units_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -880,6 +892,11 @@
     <field name='unknown1' pk='true' type='string'/>
     <field fkey='campaign_ai_personalities_tables.Campaign_Personality_ID' name='unknown2' type='string'/>
     <field name='unknown3' type='int'/>
+  </table>
+  <table name='campaign_ai_character_skill_tree_junctions_tables'>
+    <field name='unknown1' type='string'/>
+    <field name='unknown2' type='int'/>
+    <field name='unknown3' type='string'/>
   </table>
   <table name='campaign_ai_character_skill_tree_manager_agent_junctions_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -1773,6 +1790,10 @@
     <field name='unknown1' pk='true' type='string'/>
     <field name='unknown2' type='int'/>
     <field name='unknown3' type='int'/>
+  </table>
+  <table name='incident_heading_texts_tables'>
+    <field name='unknown1' pk='true' type='string'/>
+    <field name='unknown2' type='string'/>
   </table>
   <table name='incidents_tables'>
     <field name='unknown1' type='boolean'/>
@@ -2924,6 +2945,11 @@
   <table name='unit_class_to_unit_ability_junctions_tables'>
     <field fkey='unit_class_tables.Class_ID' name='Class_IDRef' pk='true' type='string'/>
     <field fkey='unit_abilities_tables.Unit_Ability_ID' name='Unit_Ability_IDRef' pk='true' type='string'/>
+  </table>
+  <table name='unit_experience_threshold_modifiers_tables'>
+    <field name='unknown1' pk='true' type='string'/>
+    <field name='unknown2' type='string'/>
+    <field name='unknown3' type='string'/>
   </table>
   <table name='unit_experience_thresholds_tables'>
     <field name='Experience_Threshold' pk='true' type='string'/>
