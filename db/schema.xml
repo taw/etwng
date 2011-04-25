@@ -180,6 +180,12 @@
     <field name='Unknown4' type='int'/>
     <field name='Start_Date' type='int'/>
     <field name='End_Date' type='int'/>
+    <field name='unknown10' type='optstring' version_start='6'/>
+    <field name='unknown11' type='optstring' version_start='6'/>
+    <field name='unknown12' type='boolean' version_start='6'/>
+    <field name='unknown13' type='string' version_start='6'/>
+    <field name='unknown14' type='boolean' version_start='6'/>
+    <field name='unknown15' type='string' version_start='6'/>
   </table>
   <table name='ancillary_included_subcultures_tables'>
     <field fkey='ancillaries_tables.Ancillary_ID' name='Ancillary_IDRef' pk='true' type='string'/>
@@ -240,6 +246,23 @@
   <table name='avatar_aesthetics_localised_source_lookups_tables'>
     <field name='unknown1' pk='true' type='string'/>
     <field name='unknown2' type='optstring'/>
+  </table>
+  <table name='avatar_aesthetics_tables'>
+    <field name='unknown1' type='optstring'/>
+    <field name='unknown2' type='optstring'/>
+    <field name='unknown3' type='string'/>
+    <field name='unknown4' type='optstring'/>
+    <field name='unknown5' type='optstring'/>
+    <field name='unknown6' type='optstring'/>
+    <field name='unknown7' type='optstring'/>
+    <field name='unknown8' type='string'/>
+    <field name='unknown9' type='string'/>
+    <field name='unknown10' type='string'/>
+    <field name='unknown11' type='string'/>
+    <field name='unknown12' type='string'/>
+    <field name='unknown13' type='boolean'/>
+    <field name='unknown14' type='int'/>
+    <field name='unknown15' type='optstring'/>
   </table>
   <table name='avatar_ancillaries_descriptions_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -1567,6 +1590,7 @@
   <table name='factions_tables'>
     <field name='Faction_ID' pk='true' type='string'/>
     <field name='ID2' type='int'/>
+    <field name='unknown3' type='int' version_start='6'/>
     <field name='Subculture' type='string'/>
     <field name='Type' type='string'/>
     <field name='Nation' type='string'/>
@@ -1610,6 +1634,10 @@
     <field name='unknown2' type='boolean'/>
     <field name='Names_1' type='string'/>
     <field name='Names_2' type='string'/>
+    <field name='unknown47' type='string' version_start='6'/>
+    <field name='unknown48' type='string' version_start='6'/>
+    <field name='unknown49' type='boolean' version_start='6'/>
+    <field name='unknown50' type='string' version_start='6'/>
   </table>
   <table name='family_relationship_types_tables'>
     <field name='unknown1' pk='true' type='string'/>

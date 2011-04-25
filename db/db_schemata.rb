@@ -35,25 +35,25 @@ class DbSchemata
 
 private
   def parse_complex_type_node(complex_type_node)
-    @fields = complex_type_node.xpath("xs:attribute").map{|a| parse_field_node(a) }
+    @fields = complex_type_node.xpath("xs:attribute").map{|a| parse_field_node(a, complex_type_node['name']) }
   end
 
-  def field_extract_optional(field_ht)
+  def field_extract_optional(field_ht, debug=nil)
     required = field_ht.delete("use") == "required"
     optional = field_ht.delete("Optional") == "true"
-    raise "Field must be either required or optional" unless required or optional
-    raise "Field cannot be both required and optional" if required and optional
+    raise "Field must be either required or optional: #{debug}" unless required or optional
+    raise "Field cannot be both required and optional: #{debug}" if required and optional
     optional
   end
 
-  def parse_field_node(field_node)
+  def parse_field_node(field_node, table)
     field = {}
     field_node.attributes.each{|k,v| field[k] = v.value }
 
     name     = field.delete("name")
     version  = field.delete("VersionStart")
     version  = version ? version.to_i : 1
-    optional = field_extract_optional(field)
+    optional = field_extract_optional(field, "#{table}.#{name}")
     type     = field.delete("type").sub(/\Axs:/, "")
     bloblen  = field.delete("BlobLength")
 

@@ -180,6 +180,12 @@
     <xs:attribute name='Unknown4' type='int' use='required' />
     <xs:attribute name='Start_Date' type='int' use='required' />
     <xs:attribute name='End_Date' type='int' use='required' />
+    <xs:attribute Optional='true' VersionStart='6' name='unknown10' type='string' />
+    <xs:attribute Optional='true' VersionStart='6' name='unknown11' type='string' />
+    <xs:attribute VersionStart='6' name='unknown12' type='boolean' use='required' />
+    <xs:attribute VersionStart='6' name='unknown13' type='string' use='required' />
+    <xs:attribute VersionStart='6' name='unknown14' type='boolean' use='required' />
+    <xs:attribute VersionStart='6' name='unknown15' type='string' use='required' />
   </xs:complexType>
   <xs:complexType name="ancillary_included_subcultures_tables">
     <xs:attribute name='Ancillary_IDRef' type='string' use='required' />
@@ -240,6 +246,23 @@
   <xs:complexType name="avatar_aesthetics_localised_source_lookups_tables">
     <xs:attribute name='unknown1' type='string' use='required' />
     <xs:attribute Optional='true' name='unknown2' type='string' />
+  </xs:complexType>
+  <xs:complexType name="avatar_aesthetics_tables">
+    <xs:attribute Optional='true' name='unknown1' type='string' />
+    <xs:attribute Optional='true' name='unknown2' type='string' />
+    <xs:attribute name='unknown3' type='string' use='required' />
+    <xs:attribute Optional='true' name='unknown4' type='string' />
+    <xs:attribute Optional='true' name='unknown5' type='string' />
+    <xs:attribute Optional='true' name='unknown6' type='string' />
+    <xs:attribute Optional='true' name='unknown7' type='string' />
+    <xs:attribute name='unknown8' type='string' use='required' />
+    <xs:attribute name='unknown9' type='string' use='required' />
+    <xs:attribute name='unknown10' type='string' use='required' />
+    <xs:attribute name='unknown11' type='string' use='required' />
+    <xs:attribute name='unknown12' type='string' use='required' />
+    <xs:attribute name='unknown13' type='boolean' use='required' />
+    <xs:attribute name='unknown14' type='int' use='required' />
+    <xs:attribute Optional='true' name='unknown15' type='string' />
   </xs:complexType>
   <xs:complexType name="avatar_ancillaries_descriptions_tables">
     <xs:attribute name='unknown1' type='string' use='required' />
@@ -1567,6 +1590,7 @@
   <xs:complexType name="factions_tables">
     <xs:attribute name='Faction_ID' type='string' use='required' />
     <xs:attribute name='ID2' type='int' use='required' />
+    <xs:attribute VersionStart='6' name='unknown3' type='int' use='required' />
     <xs:attribute name='Subculture' type='string' use='required' />
     <xs:attribute name='Type' type='string' use='required' />
     <xs:attribute name='Nation' type='string' use='required' />
@@ -1610,6 +1634,10 @@
     <xs:attribute name='unknown2' type='boolean' use='required' />
     <xs:attribute name='Names_1' type='string' use='required' />
     <xs:attribute name='Names_2' type='string' use='required' />
+    <xs:attribute VersionStart='6' name='unknown47' type='string' use='required' />
+    <xs:attribute VersionStart='6' name='unknown48' type='string' use='required' />
+    <xs:attribute VersionStart='6' name='unknown49' type='boolean' use='required' />
+    <xs:attribute VersionStart='6' name='unknown50' type='string' use='required' />
   </xs:complexType>
   <xs:complexType name="family_relationship_types_tables">
     <xs:attribute name='unknown1' type='string' use='required' />
@@ -3419,6 +3447,7 @@
         <xs:element name="avatar_aesthetic_sets_tables" form="unqualified" type="mstns:avatar_aesthetic_sets_tables" />
         <xs:element name="avatar_aesthetic_sources_tables" form="unqualified" type="mstns:avatar_aesthetic_sources_tables" />
         <xs:element name="avatar_aesthetics_localised_source_lookups_tables" form="unqualified" type="mstns:avatar_aesthetics_localised_source_lookups_tables" />
+        <xs:element name="avatar_aesthetics_tables" form="unqualified" type="mstns:avatar_aesthetics_tables" />
         <xs:element name="avatar_ancillaries_descriptions_tables" form="unqualified" type="mstns:avatar_ancillaries_descriptions_tables" />
         <xs:element name="avatar_ancillaries_localised_source_lookups_tables" form="unqualified" type="mstns:avatar_ancillaries_localised_source_lookups_tables" />
         <xs:element name="avatar_ancillaries_to_effects_junctions_tables" form="unqualified" type="mstns:avatar_ancillaries_to_effects_junctions_tables" />
