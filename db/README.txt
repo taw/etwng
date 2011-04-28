@@ -33,8 +33,8 @@ It only takes --comma option for compatibility.
 From my collection of db files (various versions from main.pack, patch*.pack, mods, etc.)
 number converted is:
 
-ETW       965/ 975
-NTW       448/ 482
-S2TW demo 792/ 904
+ETW       966/ 975
+NTW       450/ 482
+S2TW demo 794/ 904
 S2TW      812/ 936
-all      3015/3297
+all      3022/3297

@@ -3387,6 +3387,7 @@
   </table>
   <table name='warscape_equipment_items_tables'>
     <field name='Item_ID' type='string'/>
+    <field name='Category_ID' type='string'/>
   </table>
   <table name='warscape_equipment_themes_tables'>
     <field name='Warscape_Equipment_Theme_ID' type='string'/>
