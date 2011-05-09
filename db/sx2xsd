@@ -29,19 +29,17 @@ class SX2XSD
       rvx = {:name => name}
       case type
       when "boolean", "int", "float", "string", "short"
-        rvx[:type] = {:use => "required", :type => type}
+        rvx[:type] = {:use => "required", :type => "xs:#{type}"}
       when "optstring"
-        rvx[:type] = {:Optional => "true", :type => "string"}
+        rvx[:type] = {:"msprop:Optional" => "true", :type => "xs:string"}
       when /\Ablob(\d+)\z/
-        rvx[:type] = {:BlobLength => $1.to_i, :type => "string", :use => "required"}
+        rvx[:type] = {:"msprop:BlobLength" => $1.to_i, :type => "xs:string", :use => "required"}
       else
         raise "Unknown type: #{type}"
       end
       rvx[:type][:name] = name
-      rvx[:type][:VersionStart] = version_start if version_start
-      
+      rvx[:type][:"msprop:VersionStart"] = version_start if version_start
       raise "Should be empty: #{field.inspect}" unless field == {}
-
       rv[:fields] << rvx
     }
     rv

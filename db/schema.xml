@@ -693,6 +693,7 @@
     <field name='String1' type='optstring'/>
     <field name='String2' type='optstring'/>
     <field name='Type' type='optstring'/>
+    <field name='unknown5' type='boolean' version_start='2'/>
   </table>
   <table name='building_culture_gov_type_variants_tables'>
     <field fkey='building_levels_tables.Building_ID' name='Building_IDRef' pk='true' type='string'/>
@@ -985,6 +986,26 @@
     <field name='unknown5' type='optstring'/>
     <field name='unknown6' type='float'/>
   </table>
+  <table name='campaign_character_art_sets_tables'>
+    <field name='unknown1' type='optstring'/>
+    <field name='unknown2' type='string'/>
+    <field name='unknown3' type='optstring'/>
+    <field name='unknown4' type='optstring'/>
+    <field name='unknown5' type='boolean'/>
+    <field name='unknown6' type='boolean'/>
+    <field name='unknown7' type='boolean'/>
+  </table>
+  <table name='campaign_character_arts_tables'>
+    <field name='unknown1' type='string'/>
+    <field name='unknown2' type='optstring'/>
+    <field name='unknown3' type='int'/>
+    <field name='unknown4' type='int'/>
+    <field name='unknown5' type='optstring'/>
+    <field name='unknown6' type='string'/>
+    <field name='unknown7' type='optstring'/>
+    <field name='unknown8' type='optstring'/>
+    <field name='unknown9' type='optstring'/>
+  </table>
   <table name='campaign_difficulty_handicap_effects_tables'>
     <field name='Difficulty' type='int'/>
     <field name='True__x0023__Player_x0020_False__x0023__AI' type='boolean'/>
@@ -1206,6 +1227,15 @@
     <field name='unknown3' type='boolean'/>
     <field name='unknown4' type='boolean'/>
     <field name='unknown5' type='string'/>
+  </table>
+  <table name='character_skill_nodes_tables'>
+    <field name='unknown1' type='boolean'/>
+    <field name='unknown2' type='string'/>
+    <field name='unknown3' type='string'/>
+    <field name='unknown4' type='boolean'/>
+    <field name='unknown5' type='int'/>
+    <field name='unknown6' type='string'/>
+    <field name='unknown7' type='int'/>
   </table>
   <table name='character_skills_tables'>
     <field name='unknown1' pk='true' type='string'/>

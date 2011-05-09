@@ -693,6 +693,7 @@
     <xs:attribute msprop:Optional='true' name='String1' type='xs:string' />
     <xs:attribute msprop:Optional='true' name='String2' type='xs:string' />
     <xs:attribute msprop:Optional='true' name='Type' type='xs:string' />
+    <xs:attribute msprop:VersionStart='2' name='unknown5' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="building_culture_gov_type_variants_tables">
     <xs:attribute name='Building_IDRef' type='xs:string' use='required' />
@@ -985,6 +986,26 @@
     <xs:attribute msprop:Optional='true' name='unknown5' type='xs:string' />
     <xs:attribute name='unknown6' type='xs:float' use='required' />
   </xs:complexType>
+  <xs:complexType name="campaign_character_art_sets_tables">
+    <xs:attribute msprop:Optional='true' name='unknown1' type='xs:string' />
+    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown3' type='xs:string' />
+    <xs:attribute msprop:Optional='true' name='unknown4' type='xs:string' />
+    <xs:attribute name='unknown5' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown6' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown7' type='xs:boolean' use='required' />
+  </xs:complexType>
+  <xs:complexType name="campaign_character_arts_tables">
+    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown2' type='xs:string' />
+    <xs:attribute name='unknown3' type='xs:int' use='required' />
+    <xs:attribute name='unknown4' type='xs:int' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown5' type='xs:string' />
+    <xs:attribute name='unknown6' type='xs:string' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown7' type='xs:string' />
+    <xs:attribute msprop:Optional='true' name='unknown8' type='xs:string' />
+    <xs:attribute msprop:Optional='true' name='unknown9' type='xs:string' />
+  </xs:complexType>
   <xs:complexType name="campaign_difficulty_handicap_effects_tables">
     <xs:attribute name='Difficulty' type='xs:int' use='required' />
     <xs:attribute name='True__x0023__Player_x0020_False__x0023__AI' type='xs:boolean' use='required' />
@@ -1206,6 +1227,15 @@
     <xs:attribute name='unknown3' type='xs:boolean' use='required' />
     <xs:attribute name='unknown4' type='xs:boolean' use='required' />
     <xs:attribute name='unknown5' type='xs:string' use='required' />
+  </xs:complexType>
+  <xs:complexType name="character_skill_nodes_tables">
+    <xs:attribute name='unknown1' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute name='unknown3' type='xs:string' use='required' />
+    <xs:attribute name='unknown4' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown5' type='xs:int' use='required' />
+    <xs:attribute name='unknown6' type='xs:string' use='required' />
+    <xs:attribute name='unknown7' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="character_skills_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
@@ -3602,6 +3632,8 @@
         <xs:element name="campaign_character_anim_sets_tables" form="unqualified" type="mstns:campaign_character_anim_sets_tables" />
         <xs:element name="campaign_character_anim_walk_anim_junctions_tables" form="unqualified" type="mstns:campaign_character_anim_walk_anim_junctions_tables" />
         <xs:element name="campaign_character_anims_junctions_tables" form="unqualified" type="mstns:campaign_character_anims_junctions_tables" />
+        <xs:element name="campaign_character_art_sets_tables" form="unqualified" type="mstns:campaign_character_art_sets_tables" />
+        <xs:element name="campaign_character_arts_tables" form="unqualified" type="mstns:campaign_character_arts_tables" />
         <xs:element name="campaign_difficulty_handicap_effects_tables" form="unqualified" type="mstns:campaign_difficulty_handicap_effects_tables" />
         <xs:element name="campaign_ground_types_tables" form="unqualified" type="mstns:campaign_ground_types_tables" />
         <xs:element name="campaign_map_famous_battles_tables" form="unqualified" type="mstns:campaign_map_famous_battles_tables" />
@@ -3636,6 +3668,7 @@
         <xs:element name="character_skill_level_to_effects_junctions_tables" form="unqualified" type="mstns:character_skill_level_to_effects_junctions_tables" />
         <xs:element name="character_skill_node_links_tables" form="unqualified" type="mstns:character_skill_node_links_tables" />
         <xs:element name="character_skill_node_sets_tables" form="unqualified" type="mstns:character_skill_node_sets_tables" />
+        <xs:element name="character_skill_nodes_tables" form="unqualified" type="mstns:character_skill_nodes_tables" />
         <xs:element name="character_skills_tables" form="unqualified" type="mstns:character_skills_tables" />
         <xs:element name="character_trait_levels_tables" form="unqualified" type="mstns:character_trait_levels_tables" />
         <xs:element name="character_traits_tables" form="unqualified" type="mstns:character_traits_tables" />
