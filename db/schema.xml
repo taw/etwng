@@ -2435,6 +2435,17 @@
     <field name='Unknown4' type='boolean'/>
     <field name='Unknown5' type='string'/>
   </table>
+  <table name='naval_uniforms_tables'>
+    <field name='unknown1' type='optstring'/>
+    <field name='unknown2' type='string'/>
+    <field name='unknown3' type='boolean'/>
+    <field name='unknown4' type='boolean'/>
+    <field name='unknown5' type='optstring'/>
+    <field name='unknown6' type='boolean'/>
+    <field name='unknown7' type='string'/>
+    <field name='unknown8' type='string'/>
+    <field name='unknown9' type='optstring'/>
+  </table>
   <table name='particle_effects_tables'>
     <field name='Effect' pk='true' type='string'/>
   </table>

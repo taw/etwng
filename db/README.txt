@@ -35,6 +35,6 @@ number converted is:
 
 ETW       966/ 975
 NTW       450/ 482
-S2TW demo 800/ 904
-S2TW     2094/2407
-all      4310/4768
+S2TW demo 802/ 904
+S2TW     2099/2407
+all      4317/4768

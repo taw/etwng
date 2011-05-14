@@ -2435,6 +2435,17 @@
     <xs:attribute name='Unknown4' type='xs:boolean' use='required' />
     <xs:attribute name='Unknown5' type='xs:string' use='required' />
   </xs:complexType>
+  <xs:complexType name="naval_uniforms_tables">
+    <xs:attribute msprop:Optional='true' name='unknown1' type='xs:string' />
+    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute name='unknown3' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown4' type='xs:boolean' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown5' type='xs:string' />
+    <xs:attribute name='unknown6' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown7' type='xs:string' use='required' />
+    <xs:attribute name='unknown8' type='xs:string' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown9' type='xs:string' />
+  </xs:complexType>
   <xs:complexType name="particle_effects_tables">
     <xs:attribute name='Effect' type='xs:string' use='required' />
   </xs:complexType>
@@ -3793,6 +3804,7 @@
         <xs:element name="names_groups_tables" form="unqualified" type="mstns:names_groups_tables" />
         <xs:element name="names_royalty_tables" form="unqualified" type="mstns:names_royalty_tables" />
         <xs:element name="names_tables" form="unqualified" type="mstns:names_tables" />
+        <xs:element name="naval_uniforms_tables" form="unqualified" type="mstns:naval_uniforms_tables" />
         <xs:element name="particle_effects_tables" form="unqualified" type="mstns:particle_effects_tables" />
         <xs:element name="pdlc_tables" form="unqualified" type="mstns:pdlc_tables" />
         <xs:element name="policies_tables" form="unqualified" type="mstns:policies_tables" />
