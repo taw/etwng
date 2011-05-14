@@ -2733,6 +2733,12 @@
     <field name='Diplomatic_stance' pk='true' type='string'/>
     <field name='Diplomatic_stance_behaviour_x0020__x0028__x003F__x0029_' type='string'/>
   </table>
+  <table name='start_pos_faction_effect_bundles_tables'>
+    <field name='unknown1' type='string'/>
+    <field name='unknown2' type='string'/>
+    <field name='unknown3' type='string'/>
+    <field name='unknown4' type='int'/>
+  </table>
   <table name='start_pos_family_relationships_tables'>
     <field name='unknown1' type='int'/>
     <field name='unknown2' type='int'/>
@@ -2988,8 +2994,7 @@
   </table>
   <table name='unit_experience_threshold_modifiers_tables'>
     <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' type='string'/>
-    <field name='unknown3' type='string'/>
+    <field name='unknown2' type='float'/>
   </table>
   <table name='unit_experience_thresholds_tables'>
     <field name='Experience_Threshold' pk='true' type='string'/>

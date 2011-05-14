@@ -2733,6 +2733,12 @@
     <xs:attribute name='Diplomatic_stance' type='xs:string' use='required' />
     <xs:attribute name='Diplomatic_stance_behaviour_x0020__x0028__x003F__x0029_' type='xs:string' use='required' />
   </xs:complexType>
+  <xs:complexType name="start_pos_faction_effect_bundles_tables">
+    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute name='unknown3' type='xs:string' use='required' />
+    <xs:attribute name='unknown4' type='xs:int' use='required' />
+  </xs:complexType>
   <xs:complexType name="start_pos_family_relationships_tables">
     <xs:attribute name='unknown1' type='xs:int' use='required' />
     <xs:attribute name='unknown2' type='xs:int' use='required' />
@@ -2988,8 +2994,7 @@
   </xs:complexType>
   <xs:complexType name="unit_experience_threshold_modifiers_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:string' use='required' />
-    <xs:attribute name='unknown3' type='xs:string' use='required' />
+    <xs:attribute name='unknown2' type='xs:float' use='required' />
   </xs:complexType>
   <xs:complexType name="unit_experience_thresholds_tables">
     <xs:attribute name='Experience_Threshold' type='xs:string' use='required' />
@@ -3825,6 +3830,7 @@
         <xs:element name="sound_events_tables" form="unqualified" type="mstns:sound_events_tables" />
         <xs:element name="special_edition_enums_tables" form="unqualified" type="mstns:special_edition_enums_tables" />
         <xs:element name="stances_tables" form="unqualified" type="mstns:stances_tables" />
+        <xs:element name="start_pos_faction_effect_bundles_tables" form="unqualified" type="mstns:start_pos_faction_effect_bundles_tables" />
         <xs:element name="start_pos_family_relationships_tables" form="unqualified" type="mstns:start_pos_family_relationships_tables" />
         <xs:element name="state_gift_values_tables" form="unqualified" type="mstns:state_gift_values_tables" />
         <xs:element name="stats_clans_tables" form="unqualified" type="mstns:stats_clans_tables" />
