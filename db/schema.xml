@@ -675,6 +675,11 @@
     <field name='Unknown4' type='boolean'/>
     <field name='Unknown5' type='boolean'/>
     <field name='Unknown6' type='boolean'/>
+    <field name='unknown12' type='boolean' version_start='3'/>
+    <field name='unknown13' type='int' version_start='3'/>
+    <field name='unknown14' type='float' version_start='3'/>
+    <field name='unknown15' type='boolean' version_start='5'/>
+    <field name='unknown16' type='boolean' version_start='5'/>
   </table>
   <table name='battles_to_battle_sky_types_junctions_tables'>
     <field name='unknown1' pk='true' type='string'/>
