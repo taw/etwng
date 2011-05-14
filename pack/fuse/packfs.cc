@@ -82,6 +82,9 @@ private:
     } else if(header[0] == *(uint32_t*)("PFH2")) {
       version = 2;
       force_read((char*)header_extra, 8);
+    } else if(header[0] == *(uint32_t*)("PFH3")) {
+      version = 3;
+      force_read((char*)header_extra, 8);
     } else {
       fprintf(stderr, "Pack header error for %s\n", path);
       exit(1);

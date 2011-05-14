@@ -61,7 +61,7 @@ def unpackPackArchive(pack_path, outputdir):
   files_count = read_long(handle)
   files_len   = read_long(handle)
 
-  if magic == 843597392:
+  if magic == 843597392 or magic == 860374608:
     header_len = 32 + deps_len + files_len
     handle.seek(32 + deps_len)
   else:
