@@ -2602,7 +2602,7 @@
     <xs:attribute name='unknown7' type='xs:string' use='required' />
     <xs:attribute name='unknown8' type='xs:string' use='required' />
     <xs:attribute name='unknown9' type='xs:string' use='required' />
-    <xs:attribute name='unknown10' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='2' name='unknown10' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="region_unit_resources_tables">
     <xs:attribute name='Region_IDRef' type='xs:string' use='required' />

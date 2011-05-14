@@ -2602,7 +2602,7 @@
     <field name='unknown7' type='string'/>
     <field name='unknown8' type='string'/>
     <field name='unknown9' type='string'/>
-    <field name='unknown10' type='int'/>
+    <field name='unknown10' type='int' version_start='2'/>
   </table>
   <table name='region_unit_resources_tables'>
     <field name='Region_IDRef' pk='true' type='string'/>
