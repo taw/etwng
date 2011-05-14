@@ -678,7 +678,7 @@
     <xs:attribute msprop:VersionStart='3' name='unknown12' type='xs:boolean' use='required' />
     <xs:attribute msprop:VersionStart='3' name='unknown13' type='xs:int' use='required' />
     <xs:attribute msprop:VersionStart='3' name='unknown14' type='xs:float' use='required' />
-    <xs:attribute msprop:VersionStart='5' name='unknown15' type='xs:boolean' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown15' type='xs:boolean' use='required' />
     <xs:attribute msprop:VersionStart='5' name='unknown16' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="battles_to_battle_sky_types_junctions_tables">
