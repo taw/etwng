@@ -1232,7 +1232,7 @@
     <xs:attribute name='unknown1' type='xs:boolean' use='required' />
     <xs:attribute name='unknown2' type='xs:string' use='required' />
     <xs:attribute name='unknown3' type='xs:string' use='required' />
-    <xs:attribute name='unknown4' type='xs:boolean' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown4' type='xs:string' />
     <xs:attribute name='unknown5' type='xs:int' use='required' />
     <xs:attribute name='unknown6' type='xs:string' use='required' />
     <xs:attribute name='unknown7' type='xs:int' use='required' />
@@ -2828,9 +2828,10 @@
     <xs:attribute name='unknown5' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="technology_node_sets_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute name='unknown1' type='xs:boolean' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown2' type='xs:string' />
     <xs:attribute name='unknown3' type='xs:string' use='required' />
+    <xs:attribute name='unknown4' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="technology_nodes_tables">
     <xs:attribute name='unknown1' type='xs:boolean' use='required' />
@@ -5198,11 +5199,6 @@
       <xs:selector xpath=".//technology_faction_junctions_tables"/>
       <xs:field xpath="@Tech_IDRef"/>
       <xs:field xpath="@Faction_IDRef"/>
-    </xs:unique>
-    <xs:unique name="technology_node_sets_tables_Constraint1" msdata:PrimaryKey="true">
-      <xs:selector xpath=".//technology_node_sets_tables"/>
-      <xs:field xpath="@unknown1"/>
-      <xs:field xpath="@unknown2"/>
     </xs:unique>
     <xs:unique name="technology_required_technology_junctions_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//technology_required_technology_junctions_tables"/>

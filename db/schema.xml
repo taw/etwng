@@ -1232,7 +1232,7 @@
     <field name='unknown1' type='boolean'/>
     <field name='unknown2' type='string'/>
     <field name='unknown3' type='string'/>
-    <field name='unknown4' type='boolean'/>
+    <field name='unknown4' type='optstring'/>
     <field name='unknown5' type='int'/>
     <field name='unknown6' type='string'/>
     <field name='unknown7' type='int'/>
@@ -2828,9 +2828,10 @@
     <field name='unknown5' type='int'/>
   </table>
   <table name='technology_node_sets_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' pk='true' type='string'/>
+    <field name='unknown1' type='boolean'/>
+    <field name='unknown2' type='optstring'/>
     <field name='unknown3' type='string'/>
+    <field name='unknown4' type='string'/>
   </table>
   <table name='technology_nodes_tables'>
     <field name='unknown1' type='boolean'/>
