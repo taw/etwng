@@ -1225,7 +1225,7 @@
     <field name='unknown1' type='boolean'/>
     <field name='unknown2' type='string'/>
     <field name='unknown3' type='boolean'/>
-    <field name='unknown4' type='boolean'/>
+    <field name='unknown4' type='optstring'/>
     <field name='unknown5' type='string'/>
   </table>
   <table name='character_skill_nodes_tables'>

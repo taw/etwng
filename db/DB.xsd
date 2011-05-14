@@ -1225,7 +1225,7 @@
     <xs:attribute name='unknown1' type='xs:boolean' use='required' />
     <xs:attribute name='unknown2' type='xs:string' use='required' />
     <xs:attribute name='unknown3' type='xs:boolean' use='required' />
-    <xs:attribute name='unknown4' type='xs:boolean' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown4' type='xs:string' />
     <xs:attribute name='unknown5' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="character_skill_nodes_tables">
