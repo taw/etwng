@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class RescalePopulations < EsfScript
+  def each_population(&blk)
+    update_each_xml("population/*", "//rec[@type='POPULATION']", &blk)
+  end
+  
+  def update_population(&blk)
+    each_population do |pop|
+      rf = pop.xpath("rec[@type='REGION_FACTORS']/u")
+      populations = [rf[0], rf[2], *pop.xpath("u")]
+      pop = populations.map(&:inner_text).map(&:to_i)
+      raise "Wrong population" if pop[1] != pop[3]
+      raise "Wrong population" if pop[2] != pop[4]
+      raise "Current population #{pop[0]} not within [#{pop[2]}, #{pop[1]}]" unless pop[0] >= pop[2] and pop[1] >= pop[0]
+      cur_pop = [pop[0], pop[2], pop[1]]
+      new_pop = yield(cur_pop)
+      if new_pop.nil? or cur_pop == new_pop
+        false
+      else
+        populations[0].content = new_pop[0]
+        populations[2].content = new_pop[1]
+        populations[4].content = new_pop[1]
+        populations[1].content = new_pop[2]
+        populations[3].content = new_pop[2]
+        true
+      end
+    end
+  end
+  
+  def run!(low, high)
+    low = low.gsub('_', '').to_i
+    high = high.gsub('_', '').to_i
+    population_limits = []
+    
+    update_population do |cur, min, max|
+      population_limits << max
+      nil
+    end
+    
+    smallest_region = population_limits.min
+    largest_region  = population_limits.max
+    range_full = Math.log(largest_region.to_f/smallest_region)
+
+    update_population do |cur, min, max|
+      fact = Math.log(max.to_f/smallest_region) / range_full
+      new_max = low * (high.to_f/low)**fact
+      new_min = new_max / max * min
+      new_cur = new_max / max * cur
+      
+      [new_cur.round.to_i, new_min.round.to_i, new_max.round.to_i]
+    end
+  end
+  
+  def args
+    %W[smallest_region_population biggest_region_population]
+  end
+  
+  def check_args(low, high)
+    low = low.gsub('_', '')
+    high = high.gsub('_', '')
+    low =~ /\A\d+\z/ and high =~ /\A\d+\z/
+  end
+end
+
+RescalePopulations.new
+
