@@ -1657,7 +1657,7 @@
     <field name='Nationality' type='string'/>
     <field name='Names_DB' type='string'/>
     <field name='sounds_id' type='string'/>
-    <field name='unknown3' type='optstring' version_start='2'/>
+    <field name='unknown10' type='optstring' version_start='2'/>
     <field name='Rebels' type='boolean'/>
     <field name='Early_Availability' type='boolean'/>
     <field name='Late_Availability' type='boolean'/>
@@ -1690,8 +1690,8 @@
     <field name='B' type='float'/>
     <field name='ID3' type='optstring'/>
     <field name='Abreviation' type='string'/>
-    <field name='unknown1' type='boolean'/>
-    <field name='unknown2' type='boolean'/>
+    <field name='unknown43' type='boolean'/>
+    <field name='unknown44' type='boolean'/>
     <field name='Names_1' type='string'/>
     <field name='Names_2' type='string'/>
     <field name='unknown47' type='string' version_start='6'/>

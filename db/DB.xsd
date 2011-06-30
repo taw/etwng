@@ -1657,7 +1657,7 @@
     <xs:attribute name='Nationality' type='xs:string' use='required' />
     <xs:attribute name='Names_DB' type='xs:string' use='required' />
     <xs:attribute name='sounds_id' type='xs:string' use='required' />
-    <xs:attribute msprop:Optional='true' msprop:VersionStart='2' name='unknown3' type='xs:string' />
+    <xs:attribute msprop:Optional='true' msprop:VersionStart='2' name='unknown10' type='xs:string' />
     <xs:attribute name='Rebels' type='xs:boolean' use='required' />
     <xs:attribute name='Early_Availability' type='xs:boolean' use='required' />
     <xs:attribute name='Late_Availability' type='xs:boolean' use='required' />
@@ -1690,8 +1690,8 @@
     <xs:attribute name='B' type='xs:float' use='required' />
     <xs:attribute msprop:Optional='true' name='ID3' type='xs:string' />
     <xs:attribute name='Abreviation' type='xs:string' use='required' />
-    <xs:attribute name='unknown1' type='xs:boolean' use='required' />
-    <xs:attribute name='unknown2' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown43' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown44' type='xs:boolean' use='required' />
     <xs:attribute name='Names_1' type='xs:string' use='required' />
     <xs:attribute name='Names_2' type='xs:string' use='required' />
     <xs:attribute msprop:VersionStart='6' name='unknown47' type='xs:string' use='required' />
