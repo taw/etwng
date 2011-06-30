@@ -34,14 +34,16 @@ class ResetDiplomacy < EsfScript
   end
   
   def reset_diplomacy(faction1, faction2, dr)
-    return if faction1 == "pirates" or faction2 == "pirates"
+    # Do not reset trade, as it leaves half-working trade routes
+    return if !([faction1, faction2] & ["pirates"]).empty?
     dr.xpath("*/draa").each_with_index do |draa, i|
-      next if i == 15 or i == 16 # religion, gov type
+      next if [5, 6, 15, 16].include?(i) # trade, trade broken, religion, gov type
       draa.attributes.each do |name, attr|
         attr.remove
       end
     end
-    dr.xpath("*")[2..-1].each do |node|
+    # dr[2] is trade agreement
+    dr.xpath("*")[3..-1].each do |node|
       if node.name == 'yes' or node.name == 'no'
         node.name = 'no'
       elsif node.name == 'i' or node.name == 'u'

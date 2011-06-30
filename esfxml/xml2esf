@@ -234,16 +234,36 @@ module XmlTagHandlers
     end
   end
 
+  def on_empty_node_campaign_bonus_8(attributes, buf, ctx)
+    put_campaign_bonus(8, attributes) do
+      @esf.put_s attributes[:weapon]
+    end
+  end
+
+  def on_empty_node_campaign_bonus_9(attributes, buf, ctx)
+    put_campaign_bonus(9, attributes) do
+      @esf.put_s attributes[:ammunition]
+    end
+  end
+
   def on_empty_node_campaign_bonus_10(attributes, buf, ctx)
     put_campaign_bonus(10, attributes) do
       @esf.put_s attributes[:religion]
     end
   end
+
   def on_empty_node_campaign_bonus_11(attributes, buf, ctx)
     put_campaign_bonus(11, attributes) do
       @esf.put_s attributes[:resource]
     end
   end
+
+  def on_empty_node_campaign_bonus_12(attributes, buf, ctx)
+    put_campaign_bonus(12, attributes) do
+      @esf.put_s attributes[:unit_ability]
+    end
+  end
+
   def on_empty_node_campaign_bonus_14(attributes, buf, ctx)
     put_campaign_bonus(14, attributes) do
       @esf.put_s attributes[:unit_type]
