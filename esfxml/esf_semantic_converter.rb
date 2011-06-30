@@ -433,19 +433,23 @@ module EsfSemanticConverter
     when [1]
       out!(%Q[<campaign_bonus_1 subtype="#{subtype}" value="#{value}"/>])
     when [2, :s]
-      raise "Die in fire" unless types == [:s]
       out!(%Q[<campaign_bonus_2 subtype="#{subtype}" value="#{value}" slot_type="#{data[0].xml_escape}"/>])
     when [3, :s]
       out!(%Q[<campaign_bonus_3 subtype="#{subtype}" value="#{value}" resource="#{data[0].xml_escape}"/>])
     when [6, :s]
-      raise "Die in fire" unless types == [:s]
       out!(%Q[<campaign_bonus_6 subtype="#{subtype}" value="#{value}" social_class="#{data[0].xml_escape}"/>])
     when [7, :s, :s]
       out!(%Q[<campaign_bonus_7 subtype="#{subtype}" value="#{value}" social_class="#{data[0].xml_escape}" religion="#{data[1].xml_escape}"/>])
+    when [8, :s]
+      out!(%Q[<campaign_bonus_8 subtype="#{subtype}" value="#{value}" weapon="#{data[0].xml_escape}"/>])
+    when [9, :s]
+      out!(%Q[<campaign_bonus_9 subtype="#{subtype}" value="#{value}" ammunition="#{data[0].xml_escape}"/>])
     when [10, :s]
       out!(%Q[<campaign_bonus_10 subtype="#{subtype}" value="#{value}" religion="#{data[0].xml_escape}"/>])
     when [11, :s]
       out!(%Q[<campaign_bonus_11 subtype="#{subtype}" value="#{value}" resource="#{data[0].xml_escape}"/>])
+    when [12, :s]
+      out!(%Q[<campaign_bonus_12 subtype="#{subtype}" value="#{value}" unit_ability="#{data[0].xml_escape}"/>])
     when [14, :s]
       out!(%Q[<campaign_bonus_14 subtype="#{subtype}" value="#{value}" unit_type="#{data[0].xml_escape}"/>])
     else

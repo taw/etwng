@@ -1,4 +1,4 @@
-Right now about 95 xml tags corresponding to about 63 esf node types are supported.
+Right now about 98 xml tags corresponding to about 63 esf node types are supported.
 There are about 1000 esf node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -243,9 +243,15 @@ Examples of each semantic tag below:
 
 <campaign_bonus_7 subtype="0" value="1.0" social_class="middle" religion="rel_catholic"/>
 
+<campaign_bonus_8 subtype="1" value="-5.0" weapon="musket_carbine"/>
+
+<campaign_bonus_9 subtype="0" value="1.0" ammunition="carcass"/>
+
 <campaign_bonus_10 subtype="1" value="1.0" religion="rel_catholic"/>
 
 <campaign_bonus_11 subtype="0" value="1.0" resource="res_gold"/>
+
+<campaign_bonus_12 subtype="0" value="1.0" unit_ability="platoon_fire_grouped"/>
 
 <campaign_bonus_14 subtype="3" value="0.0" unit_type="naval_line_of_battle"/>
 
