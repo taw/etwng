@@ -557,11 +557,17 @@ module EsfSemanticConverter
   end
   
   def convert_rec_LOCOMOTABLE
-    tag!("rec", :type => "LOCOMOTABLE") do
-      ofs_end = get_u
-      convert_v2x! if lookahead_v2x?(ofs_end)
-      convert_v2x! if lookahead_v2x?(ofs_end)
-      send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
+    each_rec_member("LOCOMOTABLE") do |ofs_end, i|
+      # Steps 0/1 take two elements, so steps 6/7 really mean elements 8/9
+      if i == 0 or i == 1
+	convert_v2x!
+      elsif i == 6 and @data[ofs] == 4
+	v = get_value![1]
+	out!("<i>#{v}</i><!-- Movement Points total -->")
+      elsif i == 7 and @data[ofs] == 4
+	v = get_value![1]
+	out!("<i>#{v}</i><!-- Movement Points left -->")
+      end
     end
   end
   
