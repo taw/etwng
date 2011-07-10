@@ -1,0 +1,78 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class TurnsPerYear < EsfScript
+  def run!(type, speed)
+    type = type.downcase
+    update_each_xml("character/*.xml", "//rec[@type='CHARACTER']") do |chara|
+      chara_type = chara.xpath("s")[0].text
+      if type == 'missionary'
+        next unless chara_type =~ /missionary/i
+      else
+        next unless chara_type == type
+      end
+
+      is = chara.xpath("rec[@type='LOCOMOTABLE']/i")
+      mp_total, mp_avail = is[0], is[1]
+
+      diff_mp = speed.to_i - mp_total.text.to_i
+      new_mp_avail = mp_avail.text.to_i + diff_mp
+
+      name = chara.xpath("rec[@type='CHARACTER_DETAILS']/loc").map(&:text)[0,2].map{|x| x.sub("names_name_names_", "")}.join(" ")
+
+
+      puts "Updating #{type} #{name}: #{mp_avail.text}/#{mp_total.text} to #{new_mp_avail}/#{speed}"
+
+      mp_total.content = speed
+      mp_avail.content = new_mp_avail
+
+      true
+    end
+  end
+  
+  def args
+    %W[type speed]
+  end
+  
+  def check_args(type, speed)
+    type = type.downcase
+    known_types = [
+      # No effect AFAIK 
+      "admiral",
+      "captain",
+      "assassin",
+      "colonel",
+      "General",
+      # Cannot move, not even on the map
+      "minister",
+      
+      # Should work
+      "catholic_missionary",
+      "Eastern_Scholar",
+      "gentleman",
+      "indian_missionary",
+      "middle_east_missionary",
+      "orthodox_missionary",
+      "Protestant_Missionary",
+      "rake",
+      "Missionary", # Bogus supertype for all missionaries
+    ]
+    unless known_types.map(&:downcase).include?(type)
+      STDERR.puts "Unknown type #{type}"
+    end
+    if type == 'minister'
+      STDERR.puts "Ministers cannot move anyway"
+    end
+    if %W[admiral captain general colonel].include?(type)
+      STDERR.puts "Admirals/Captains/Generals/Colonel follow their units, and are not affected by this (AFAIK)"
+    end
+
+
+
+    speed =~ /\A\d+\z/
+  end
+end
+
+TurnsPerYear.new
