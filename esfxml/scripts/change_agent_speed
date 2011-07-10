@@ -19,11 +19,12 @@ class TurnsPerYear < EsfScript
 
       diff_mp = speed.to_i - mp_total.text.to_i
       new_mp_avail = mp_avail.text.to_i + diff_mp
+      new_mp_avail = 0 if new_mp_avail < 0
 
       name = chara.xpath("rec[@type='CHARACTER_DETAILS']/loc").map(&:text)[0,2].map{|x| x.sub("names_name_names_", "")}.join(" ")
 
 
-      puts "Updating #{type} #{name}: #{mp_avail.text}/#{mp_total.text} to #{new_mp_avail}/#{speed}"
+      puts "Updating #{chara_type} #{name}: #{mp_avail.text}/#{mp_total.text} to #{new_mp_avail}/#{speed}"
 
       mp_total.content = speed
       mp_avail.content = new_mp_avail
