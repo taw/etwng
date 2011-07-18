@@ -18,7 +18,7 @@ class SX2XSD
   def parse_table(table_node)
     rv = {:name => table_node["name"], :fields => [], :pk => [], :fkeys => []}
     table_node.xpath("field").each{|field|
-      field = Hash[field.map{|k,v| [k, v]}]
+      field = Hash[field.attributes.map{|k,v| [k, v.to_s]}]
       name = field.delete("name")
       type = field.delete("type")
       version_start = field.delete("version_start")
