@@ -2813,6 +2813,7 @@
     <field name='Late_Availability' type='boolean'/>
     <field name='Researched_Message_Picture' type='string'/>
     <field name='unknown3' type='int' version_start='2'/>
+    <field name='unknown4' type='int' version_start='3'/>
   </table>
   <table name='technology_categories_tables'>
     <field name='unknown1' pk='true' type='string'/>

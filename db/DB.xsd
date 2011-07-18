@@ -2813,6 +2813,7 @@
     <xs:attribute name='Late_Availability' type='xs:boolean' use='required' />
     <xs:attribute name='Researched_Message_Picture' type='xs:string' use='required' />
     <xs:attribute msprop:VersionStart='2' name='unknown3' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='3' name='unknown4' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="technology_categories_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
