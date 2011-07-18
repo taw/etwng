@@ -408,8 +408,10 @@
   <xs:complexType name="avatar_units_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
     <xs:attribute name='unknown2' type='xs:float' use='required' />
-    <xs:attribute name='unknown3' type='xs:int' use='required' />
-    <xs:attribute name='unknown4' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown3' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown4' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown5' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown6' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="avatar_xp_rewards_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />

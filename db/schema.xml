@@ -408,8 +408,10 @@
   <table name='avatar_units_tables'>
     <field name='unknown1' pk='true' type='string'/>
     <field name='unknown2' type='float'/>
-    <field name='unknown3' type='int'/>
-    <field name='unknown4' type='boolean'/>
+    <field name='unknown3' type='boolean'/>
+    <field name='unknown4' type='int'/>
+    <field name='unknown5' type='string' version_start='4'/>
+    <field name='unknown6' type='int' version_start='4'/>
   </table>
   <table name='avatar_xp_rewards_tables'>
     <field name='unknown1' pk='true' type='string'/>
