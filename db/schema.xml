@@ -523,7 +523,7 @@
   <table name='battle_script_strings_tables'>
     <field name='Battle_Script_String_ID' pk='true' type='string'/>
     <field name='Text' type='string'/>
-    <field name='unknown3' type='string' version_start='3'/>
+    <field name='unknown3' type='string' version_start='2'/>
     <field name='unknown4' type='string' version_start='3'/>
   </table>
   <table name='battle_sequences_tables'>
@@ -1023,8 +1023,8 @@
     <field name='Ground_ID' pk='true' type='string'/>
     <field name='unknown1' type='float'/>
     <field name='unknown2' type='boolean'/>
-    <field name='unknown4' type='boolean' version_start='3'/>
-    <field name='unknown5' type='boolean' version_start='3'/>
+    <field name='unknown4' type='boolean' version_start='2'/>
+    <field name='unknown5' type='boolean' version_start='2'/>
     <field name='unknown6' type='boolean' version_start='3'/>
   </table>
   <table name='campaign_map_famous_battles_tables'>
