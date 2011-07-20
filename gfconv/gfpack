@@ -50,7 +50,7 @@ class GroupFormationsPacker
     @out << str
   end
   def pack_header(header)
-    @out << header.pack("fVVVV")
+    @out << header.pack("VVVV")
   end
   def pack_factions(factions)
     pack_u4(factions.size)
@@ -58,6 +58,7 @@ class GroupFormationsPacker
   end
   def pack_formation(formation)
     pack_str(formation[:name])
+    pack_flt(formation[:priority])
     pack_header(formation[:header])
     pack_factions(formation[:factions])
     pack_lines(formation[:lines])

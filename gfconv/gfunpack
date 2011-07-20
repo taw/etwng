@@ -168,11 +168,12 @@ class GroupFormationsUnpacker
     out
   end
   def get_header
-    [get_flt, get_u4, get_u4, get_u4, get_u4]
+    [get_u4, get_u4, get_u4, get_u4]
   end
   def get_formation
     {
       :name     => get_str,
+      :priority => get_flt,
       :header   => get_header,
       :factions => get_factions,
       :lines    => get_lines,
