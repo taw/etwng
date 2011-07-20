@@ -18,6 +18,7 @@ To pack:
 * run gfpack from command line
 * groupformations*.bin will be created
 
+If you're converting S2TW use gfpack_s2tw/gfunpack_s2tw files instead.
 
 = File names =
 Converters don't overwrite data, if file exists, a new one with extra suffix will be created.

@@ -1,0 +1,231 @@
+#!/usr/bin/env ruby
+
+require "pp"
+
+class File
+  def self.save_as_new(base, ext, content)
+    extra = 0
+    fn    = "#{base}#{ext}"
+    while true
+      begin
+        File.open(fn, (IO::BINARY rescue 0)|IO::CREAT|IO::EXCL|IO::WRONLY){|fh| fh.write content}
+        return
+      rescue Errno::EEXIST
+        extra += 1
+        fn    = "#{base}-#{extra}#{ext}"
+      end
+    end
+  end
+end
+
+class Float
+  def pretty_single
+    rv = (((100_000.0 * self).round / 100_000.0) rescue self)
+    return rv if [self].pack("f") == [rv].pack("f")
+    self
+  end
+end
+
+class String
+  def utf16_to_utf8
+    unpack("v*").pack("U*")
+  end
+  def utf8_to_utf16
+    unpack("U*").pack("v*")
+  end
+end
+
+class GroupFormationsUnpacker
+  def initialize(data)
+    @data = data
+    @ofs = 0
+  end
+  def get(sz)
+    ofs0, @ofs = @ofs, @ofs+sz
+    @data[ofs0...@ofs]
+  end
+    def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  def get_i4
+    get(4).unpack("i")[0]
+  end
+  def get_v2
+    {:x => get_flt, :y => get_flt}
+  end
+  def get_ary(&blk)
+    (1..get_u4).map(&blk)
+  end
+  def get_str
+    get(get_u2*2).utf16_to_utf8
+  end
+  def get_factions
+    get_ary{ get_str }
+  end
+  def get_unit_class
+    v = get_i4
+    # Based on unit_class.xml
+    unit_classes = [
+      # "artillery_fixed",
+      # "artillery_foot",
+      # "artillery_horse",
+      # "cavalry_camels",
+      # "cavalry_heavy",
+      # "cavalry_irregular",
+      # "cavalry_lancers",
+      # "cavalry_light",
+      # "cavalry_missile",
+      # "cavalry_standard",
+      # "dragoons",
+      # "elephants",
+      # "general",
+      # "infantry_berserker",
+      # "infantry_elite",
+      # "infantry_grenadiers",
+      # "infantry_irregulars",
+      # "infantry_light",
+      # "infantry_line",
+      # "infantry_melee",
+      # "infantry_militia",
+      # "infantry_mob",
+      # "infantry_skirmishers",
+      # "naval_admiral",
+      # "naval_bomb_ketch",
+      # "naval_brig",
+      # "naval_dhow",
+      # "naval_fifth_rate",
+      # "naval_first_rate",
+      # "naval_fourth_rate",
+      # "naval_galleon",
+      # "naval_heavy_galley",
+      # "naval_indiaman",
+      # "naval_light_galley",
+      # "naval_lugger",
+      # "naval_medium_galley",
+      # "naval_over_first_rate",
+      # "naval_razee",
+      # "naval_rocket_ship",
+      # "naval_second_rate",
+      # "naval_sixth_rate",
+      # "naval_sloop",
+      # "naval_steam_ship",
+      # "naval_third_rate",
+      # "naval_xebec",
+    ]
+    # unit_classes[46] = "any"
+    name = unit_classes[v] || "unknown"
+    "#{v} (#{name})"
+  end
+  def get_priority_class_pairs
+    out = get_ary{ {:priority => get_flt, :unit_class => get_unit_class} }
+    raise "Line cannot contain 0 pairs" if out.empty?
+    out
+  end
+  def get_shape
+    v = get_u4
+    shapes = {
+      0 => "line",
+      1 => "column",
+      2 => "crescent front",
+      3 => "crescent back",
+    }
+    name = shapes[v] || "unknown"
+    "#{v} (#{name})"
+  end
+  def get_line
+    line_id   = get_u4
+    line_type = get_u4
+    out = case line_type
+    when 0
+      raise "0.0 expected here" unless get_flt == 0.0
+      {
+        :type => :absolute,
+        :priority => get_flt,
+        :shape => get_shape,
+        :spacing => get_flt,
+        :crescent_yoffset => get_flt,
+        :x => get_flt,
+        :y => get_flt,
+        :min_threshold => get_i4,
+        :max_threshold => get_i4,
+        :pairs => get_priority_class_pairs,
+      }
+    when 1
+      {
+        :type => :relative,
+        :priority => get_flt,
+        :relative_to => get_u4,
+        :shape => get_shape,
+        :spacing => get_flt,
+        :crescent_yoffset => get_flt,
+        :x => get_flt,
+        :y => get_flt,
+        :min_threshold => get_i4,
+        :max_threshold => get_i4,
+        :pairs => get_priority_class_pairs,
+      }
+    when 3
+      {
+        :type => :spanning,
+        :blocks => (1..get_u4).map{ get_u4 },
+      }
+    else
+      raise "Unknown line type #{line_type}"
+    end
+    return [line_id, out]
+  end
+  def get_lines
+    out = []
+    sz, line = get_line
+    out << line
+    (1...sz).each{|i|
+      j, line = get_line
+      raise "Expected line id #{i} got #{j}" unless i == j
+      out << line
+    }
+    out
+  end
+  def get_purpose
+    purposes = {
+      1 => "attack",
+      2 => "defend",
+      3 => "attack/defend",
+      4 => "river",
+      96 => "naval",
+    }
+    v = get_u4
+    name = purposes[v] || "unknown"
+    "#{v} (#{name})"
+  end
+  def get_formation
+    {
+      :name     => get_str,
+      :priority => get_flt,
+      :purpose  => get_purpose,
+      :minimum => get_ary{ {:unit_class => get_unit_class, :percent => get_u4} },
+      :factions => get_factions,
+      :lines => get_lines,
+    }
+  end
+  def unpack
+    out = get_ary{ get_formation }
+    raise "EOF expected at #{@ofs}" unless @ofs == @data.size
+    out
+  end
+  def unpack_to_string
+    out = ""
+    PP.pp(unpack, out, 100)
+    out
+  end
+end
+
+Dir["groupformations*.bin"].each{|fn|
+  out = GroupFormationsUnpacker.new(File.open(fn, "rb").read).unpack_to_string
+  File.save_as_new(fn.sub(/\.bin\z/i, ""), ".txt", out)
+}
