@@ -143,10 +143,10 @@ class GroupFormationsUnpacker
     line_type = get_u4
     out = case line_type
     when 0
+      raise "0.0 expected here" unless get_flt == 0.0
       [
         :absolute,
         {
-          :unknown => get_flt,
           :priority => get_flt,
           :shape => get_shape,
           :spacing => get_flt,

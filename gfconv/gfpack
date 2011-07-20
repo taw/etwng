@@ -84,7 +84,7 @@ class GroupFormationsPacker
     when :absolute
       attrs, extra, pairs = *line_data
       pack_u4 0
-      pack_flt attrs[:unknown]
+      pack_flt 0.0
       pack_flt attrs[:priority]
       pack_u4  attrs[:shape].to_i
       pack_flt attrs[:spacing]
