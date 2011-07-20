@@ -127,6 +127,17 @@ class GroupFormationsUnpacker
     raise "Line cannot contain 0 pairs" if out.empty?
     out
   end
+  def get_shape
+    v = get_u4
+    shapes = {
+      0 => "line",
+      1 => "column",
+      2 => "crescent front",
+      3 => "crescent back",
+    }
+    name = shapes[v] || "unknown"
+    "#{v} (#{name})"
+  end
   def get_line
     line_id   = get_u4
     line_type = get_u4
@@ -134,8 +145,11 @@ class GroupFormationsUnpacker
     when 0
       [
         :absolute,
-        {:priority => get_flt},
-        [get_flt, get_u4],
+        {
+          :unknown => get_flt,
+          :priority => get_flt,
+          :shape => get_shape,
+        },
         get_v2,
         get_v2,
         [get_u4, get_i4],
@@ -144,8 +158,11 @@ class GroupFormationsUnpacker
     when 1
       [
         :relative,
-        {:priority => get_flt},
-        [get_u4, get_u4],
+        {
+          :priority => get_flt,
+          :relative_to => get_u4,
+          :shape => get_shape,
+        },
         get_v2,
         get_v2,
         [get_u4, get_i4],

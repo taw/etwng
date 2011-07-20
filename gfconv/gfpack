@@ -83,20 +83,22 @@ class GroupFormationsPacker
     case line_type
     when :absolute
       pack_u4 0
+      pack_flt line_data[0][:unknown]
       pack_flt line_data[0][:priority]
-      @out << line_data[1].pack("fV")
+      pack_u4 line_data[0][:shape].to_i
+      pack_v2 line_data[1]
       pack_v2 line_data[2]
-      pack_v2 line_data[3]
-      @out << line_data[4].pack("Vi")
-      pack_pairs(line_data[5])
+      @out << line_data[3].pack("Vi")
+      pack_pairs(line_data[4])
     when :relative
       pack_u4 1
       pack_flt line_data[0][:priority]
-      @out << line_data[1].pack("VV")
+      pack_u4 line_data[0][:relative_to]
+      pack_u4 line_data[0][:shape].to_i
+      pack_v2 line_data[1]
       pack_v2 line_data[2]
-      pack_v2 line_data[3]
-      @out << line_data[4].pack("Vi")
-      pack_pairs(line_data[5])
+      @out << line_data[3].pack("Vi")
+      pack_pairs(line_data[4])
     when :spanning
       pack_u4 3
       pack_u4(line_data.size)
