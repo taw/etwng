@@ -133,8 +133,9 @@ class GroupFormationsUnpacker
     out = case line_type
     when 0
       [
-        :type0,
-        [get_flt, get_flt, get_u4],
+        :absolute,
+        {:priority => get_flt},
+        [get_flt, get_u4],
         get_v2,
         get_v2,
         [get_u4, get_i4],
@@ -142,15 +143,16 @@ class GroupFormationsUnpacker
       ]
     when 1
       [
-        :type1,
-        [get_flt, get_u4, get_u4],
+        :relative,
+        {:priority => get_flt},
+        [get_u4, get_u4],
         get_v2,
         get_v2,
         [get_u4, get_i4],
         get_priority_class_pairs,
       ]
     when 3
-      [:type3, *(1..get_u4).map{ get_u4 }]
+      [:spanning, *(1..get_u4).map{ get_u4 }]
     else
       raise "Unknown line type #{line_type}"
     end
