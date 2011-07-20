@@ -41,6 +41,9 @@ class GroupFormationsPacker
   def pack_u4(val)
     @out << [val].pack("V")
   end
+  def pack_i4(val)
+    @out << [val].pack("i")
+  end
   def pack_flt(val)
     @out << [val].pack("f")
   end
@@ -66,7 +69,7 @@ class GroupFormationsPacker
   def pack_lines(lines)
     lines.each_with_index{|line, i|
       pack_u4(i == 0 ? lines.size : i)
-      pack_line(*line)
+      pack_line(line)
     }
   end
   def pack_v2(v2)
@@ -79,10 +82,9 @@ class GroupFormationsPacker
       @out << [pair[:priority], pair[:unit_class].to_i].pack("fi")
     }
   end
-  def pack_line(line_type, *line_data)
-    case line_type
+  def pack_line(attrs)
+    case attrs[:type]
     when :absolute
-      attrs, extra, pairs = *line_data
       pack_u4 0
       pack_flt 0.0
       pack_flt attrs[:priority]
@@ -91,10 +93,10 @@ class GroupFormationsPacker
       pack_flt attrs[:crescent_yoffset]
       pack_flt attrs[:x]
       pack_flt attrs[:y]
-      @out << extra.pack("Vi")
-      pack_pairs(pairs)
+      pack_i4 attrs[:min_threshold]
+      pack_i4 attrs[:max_threshold]
+      pack_pairs attrs[:pairs]
     when :relative
-      attrs, extra, pairs = *line_data
       pack_u4 1
       pack_flt attrs[:priority]
       pack_u4  attrs[:relative_to]
@@ -103,12 +105,14 @@ class GroupFormationsPacker
       pack_flt attrs[:crescent_yoffset]
       pack_flt attrs[:x]
       pack_flt attrs[:y]
-      @out << extra.pack("Vi")
-      pack_pairs(pairs)
+      pack_i4 attrs[:min_threshold]
+      pack_i4 attrs[:max_threshold]
+      pack_pairs attrs[:pairs]
     when :spanning
       pack_u4 3
-      pack_u4(line_data.size)
-      line_data.each{|i| pack_u4(i)}
+      blocks = attrs[:blocks]
+      pack_u4(blocks.size)
+      blocks.each{|i| pack_u4(i)}
     else
       raise "No idea what line type is #{line_type}"
     end
