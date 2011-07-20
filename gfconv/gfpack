@@ -49,9 +49,6 @@ class GroupFormationsPacker
     @out << [str.size/2].pack("v")
     @out << str
   end
-  def pack_header(header)
-    @out << header.pack("VVVV")
-  end
   def pack_factions(factions)
     pack_u4(factions.size)
     factions.each{|faction| pack_str(faction)}
@@ -59,7 +56,10 @@ class GroupFormationsPacker
   def pack_formation(formation)
     pack_str(formation[:name])
     pack_flt(formation[:priority])
-    pack_header(formation[:header])
+    pack_u4(formation[:purpose].to_i)
+    pack_u4(formation[:min_artillery])
+    pack_u4(formation[:min_infantry])
+    pack_u4(formation[:min_cavalry])
     pack_factions(formation[:factions])
     pack_lines(formation[:lines])
   end

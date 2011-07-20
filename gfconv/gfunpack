@@ -169,16 +169,28 @@ class GroupFormationsUnpacker
     }
     out
   end
-  def get_header
-    [get_u4, get_u4, get_u4, get_u4]
+  def get_purpose
+    purposes = {
+      1 => "attack",
+      2 => "defend",
+      3 => "attack/defend",
+      4 => "river",
+      96 => "naval",
+    }
+    v = get_u4
+    name = purposes[v] || "unknown"
+    "#{v} (#{name})"
   end
   def get_formation
     {
-      :name     => get_str,
-      :priority => get_flt,
-      :header   => get_header,
-      :factions => get_factions,
-      :lines    => get_lines,
+      :name          => get_str,
+      :priority      => get_flt,
+      :purpose       => get_purpose,
+      :min_artillery => get_u4,
+      :min_infantry  => get_u4,
+      :min_cavalry   => get_u4,
+      :factions      => get_factions,
+      :lines         => get_lines,
     }
   end
   def unpack
