@@ -200,7 +200,7 @@ class GroupFormationsUnpacker
   end
   def unpack_to_string
     out = ""
-    PP.pp(unpack, out, 150)
+    PP.pp(unpack, out, 100)
     out
   end
 end
