@@ -75,7 +75,7 @@ class GroupFormationsPacker
   def pack_pairs(pairs)
     pack_u4 pairs.size
     pairs.each{|pair|
-      @out << pair.pack("fi")
+      @out << [pair[:priority], pair[:unit_class].to_i].pack("fi")
     }
   end
   def pack_line(line_type, *line_data)

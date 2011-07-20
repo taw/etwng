@@ -68,8 +68,62 @@ class GroupFormationsUnpacker
   def get_factions
     get_ary{ get_str }
   end
-  def get_pairs
-    out = get_ary{ [get_flt, get_i4] }
+  def get_unit_class
+    v = get_i4
+    # Based on unit_class.xml
+    unit_classes = [
+      "artillery_fixed",
+      "artillery_foot",
+      "artillery_horse",
+      "cavalry_camels",
+      "cavalry_heavy",
+      "cavalry_irregular",
+      "cavalry_lancers",
+      "cavalry_light",
+      "cavalry_missile",
+      "cavalry_standard",
+      "dragoons",
+      "elephants",
+      "general",
+      "infantry_berserker",
+      "infantry_elite",
+      "infantry_grenadiers",
+      "infantry_irregulars",
+      "infantry_light",
+      "infantry_line",
+      "infantry_melee",
+      "infantry_militia",
+      "infantry_mob",
+      "infantry_skirmishers",
+      "naval_admiral",
+      "naval_bomb_ketch",
+      "naval_brig",
+      "naval_dhow",
+      "naval_fifth_rate",
+      "naval_first_rate",
+      "naval_fourth_rate",
+      "naval_galleon",
+      "naval_heavy_galley",
+      "naval_indiaman",
+      "naval_light_galley",
+      "naval_lugger",
+      "naval_medium_galley",
+      "naval_over_first_rate",
+      "naval_razee",
+      "naval_rocket_ship",
+      "naval_second_rate",
+      "naval_sixth_rate",
+      "naval_sloop",
+      "naval_steam_ship",
+      "naval_third_rate",
+      "naval_xebec",
+    ]
+    unit_classes[46] = "any"
+    name = unit_classes[v] || "unknown"
+    "#{v} (#{name})"
+  end
+  def get_priority_class_pairs
+    out = get_ary{ {:priority => get_flt, :unit_class => get_unit_class} }
     raise "Line cannot contain 0 pairs" if out.empty?
     out
   end
@@ -84,7 +138,7 @@ class GroupFormationsUnpacker
         get_v2,
         get_v2,
         [get_u4, get_i4],
-        get_pairs,
+        get_priority_class_pairs,
       ]
     when 1
       [
@@ -93,7 +147,7 @@ class GroupFormationsUnpacker
         get_v2,
         get_v2,
         [get_u4, get_i4],
-        get_pairs,
+        get_priority_class_pairs,
       ]
     when 3
       [:type3, *(1..get_u4).map{ get_u4 }]
