@@ -70,7 +70,8 @@ class GroupFormationsUnpacker
   end
   def get_unit_class
     v = get_i4
-    # Based on unit_class.xml
+    # Based on reverse engineering Shogun2.dll
+    # Low values (0-44) identical with known information from ETW
     unit_classes = %W[
       artillery_fixed
       artillery_foot
@@ -135,6 +136,32 @@ class GroupFormationsUnpacker
      
     ]
     unit_classes[60] = "any"
+    name = unit_classes[v] || "unknown"
+    "#{v} (#{name})"
+  end
+  def get_unit_class2
+    v = get_i4
+    # Based on wild guessing
+    unit_classes = %W[
+      unknown
+      unknown
+      unknown
+      unknown
+      unknown
+      unknown
+      unknown
+      unknown
+      unknown
+      unknown
+      unknown
+      unknown
+      unknown
+      unknown
+      unknown
+      naval_heavy_ship
+      naval_medium_ship
+      naval_light_ship
+    ]
     name = unit_classes[v] || "unknown"
     "#{v} (#{name})"
   end
@@ -229,7 +256,7 @@ class GroupFormationsUnpacker
       :name     => get_str,
       :priority => get_flt,
       :purpose  => get_purpose,
-      :minimum => get_ary{ {:unit_class => get_unit_class, :percent => get_u4} },
+      :minimum => get_ary{ {:unit_class => get_unit_class2, :percent => get_u4} },
       :factions => get_factions,
       :lines => get_lines,
     }
