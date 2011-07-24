@@ -196,7 +196,7 @@ class GroupFormationsUnpacker
       1 => "attack",
       2 => "defend",
       3 => "attack/defend",
-      4 => "river",
+      4 => "river attack",
       96 => "naval",
     }
     v = get_u4

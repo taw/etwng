@@ -71,54 +71,70 @@ class GroupFormationsUnpacker
   def get_unit_class
     v = get_i4
     # Based on unit_class.xml
-    unit_classes = [
-      # "artillery_fixed",
-      # "artillery_foot",
-      # "artillery_horse",
-      # "cavalry_camels",
-      # "cavalry_heavy",
-      # "cavalry_irregular",
-      # "cavalry_lancers",
-      # "cavalry_light",
-      # "cavalry_missile",
-      # "cavalry_standard",
-      # "dragoons",
-      # "elephants",
-      # "general",
-      # "infantry_berserker",
-      # "infantry_elite",
-      # "infantry_grenadiers",
-      # "infantry_irregulars",
-      # "infantry_light",
-      # "infantry_line",
-      # "infantry_melee",
-      # "infantry_militia",
-      # "infantry_mob",
-      # "infantry_skirmishers",
-      # "naval_admiral",
-      # "naval_bomb_ketch",
-      # "naval_brig",
-      # "naval_dhow",
-      # "naval_fifth_rate",
-      # "naval_first_rate",
-      # "naval_fourth_rate",
-      # "naval_galleon",
-      # "naval_heavy_galley",
-      # "naval_indiaman",
-      # "naval_light_galley",
-      # "naval_lugger",
-      # "naval_medium_galley",
-      # "naval_over_first_rate",
-      # "naval_razee",
-      # "naval_rocket_ship",
-      # "naval_second_rate",
-      # "naval_sixth_rate",
-      # "naval_sloop",
-      # "naval_steam_ship",
-      # "naval_third_rate",
-      # "naval_xebec",
+    unit_classes = %W[
+      artillery_fixed
+      artillery_foot
+      artillery_horse
+      cavalry_camels
+      cavalry_heavy
+      cavalry_irregular
+      cavalry_lancers
+      cavalry_light
+      cavalry_missile
+      cavalry_standard
+      dragoons
+      elephants
+      general
+      infantry_berserker
+      infantry_elite
+      infantry_grenadiers
+      infantry_irregulars
+      infantry_light
+      infantry_line
+      infantry_melee
+      infantry_militia
+      infantry_mob
+      infantry_skirmishers
+      naval_admiral
+      naval_bomb_ketch
+      naval_brig
+      naval_dhow
+      naval_fifth_rate
+      naval_first_rate
+      naval_fourth_rate
+      naval_heavy_galley
+      naval_indiaman
+      naval_light_galley
+      naval_lugger
+      naval_medium_galley
+      naval_over_first_rate
+      naval_razee
+      naval_rocket_ship
+      naval_second_rate
+      naval_sixth_rate
+      naval_sloop
+      naval_steam_ship
+      naval_third_rate
+      naval_xebec
+      naval_transport
+      infantry_spearman
+      infantry_heavy
+      infantry_special
+      infantry_bow
+      infantry_matchlock
+      infantry_sword
+      siege
+      cavalry_sword
+      cavalry_lancer
+      naval_heavy_ship
+      naval_medium_ship
+      naval_light_ship
+      naval_cannon_ship
+      naval_galleon
+      naval_trade_ship 
+     
     ]
-    # unit_classes[46] = "any"
+    unit_classes[60] = "any"
     name = unit_classes[v] || "unknown"
     "#{v} (#{name})"
   end
@@ -196,8 +212,13 @@ class GroupFormationsUnpacker
       1 => "attack",
       2 => "defend",
       3 => "attack/defend",
-      4 => "river",
+      4 => "river attack",
       96 => "naval",
+      129 => "attack/?",
+      130 => "defend/?",
+      131 => "attack/defend/?",
+      132 => "ambush?",
+      352 => "naval/?",
     }
     v = get_u4
     name = purposes[v] || "unknown"
