@@ -1010,8 +1010,8 @@ module XmlTagHandlers
   def on_text_node_i2(attributes, buf, ctx)
     @esf.put_i2 buf.to_i
   end
-  def on_text_node_u2angle(attributes, buf, ctx)
-    @esf.put_u2angle buf.to_i
+  def on_text_node_angle(attributes, buf, ctx)
+    @esf.put_angle buf.to_f
   end
   def on_text_node_byte(attributes, buf, ctx)
     @esf.put_byte buf.to_i

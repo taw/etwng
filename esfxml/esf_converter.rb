@@ -62,7 +62,7 @@ module EsfConvertBasic
     end
   end
   def convert_10!
-    out!("<u2angle>#{get_u2}</u2angle>")
+    out!("<angle>#{get_angle}</angle>")
   end
   def convert_4x!(tag)
     data = get_ofs_bytes

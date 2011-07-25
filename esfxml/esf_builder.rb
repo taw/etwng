@@ -68,6 +68,9 @@ class EsfBuilder
     @data << "\x10"
     @data << [val].pack("v")
   end
+  def put_angle(val)
+    put_u2angle((val * 0x10000 / 360.0).round.to_i)
+  end
   def put_i(val)
     @data << "\x04"
     @data << [val].pack("V")

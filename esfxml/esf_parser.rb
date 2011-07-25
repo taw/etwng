@@ -55,6 +55,18 @@ module EsfBasicBinaryOps
     @ofs += 2
     rv
   end
+  def get_angle
+    raw = get_u2
+    val = raw * 360.0 / 0x10000
+    rounded = (val * 1000.0).round * 0.001
+    reconv = (rounded * 0x10000 / 360.0).round.to_i
+    if reconv == raw
+      rounded
+    else
+      warn "BUG: Angle reconversion failure #{raw} #{val} #{rounded} #{reconv}"
+      val
+    end
+  end
   def get_bytes(sz)
     rv = @data[@ofs, sz]
     @ofs += sz
@@ -225,7 +237,7 @@ module EsfGetData
     end
   end
   def get_10!
-    [:u2angle, get_u2]
+    [:angle, get_angle]
   end
   def get_40!
     [:bin0, get_ofs_bytes]
