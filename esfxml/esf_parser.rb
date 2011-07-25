@@ -183,14 +183,11 @@ module EsfBasicBinaryOps
 end
 
 module EsfGetData
-  def get_00!
-    [:i2, get_i2]
-  end
   def get_01!
     [:bool, get_bool]
   end
   def get_03!
-    [:u2z, get_u2]
+    [:i2, get_i2]
   end
   def get_04!
     [:i, get_i]
@@ -228,7 +225,7 @@ module EsfGetData
     end
   end
   def get_10!
-    [:u2x, get_u2]
+    [:u2angle, get_u2]
   end
   def get_40!
     [:bin0, get_ofs_bytes]

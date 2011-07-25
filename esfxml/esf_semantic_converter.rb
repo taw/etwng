@@ -628,7 +628,7 @@ module EsfSemanticConverter
   end
   
   def annotate_rec(type, annotations)
-    symbolic_names = [:i2, :bool, nil, nil, :i, nil, :byte, :u2, :u, nil, :flt, nil, :v2, :v3, :s, :asc]
+    symbolic_names = [nil, :bool, nil, :i2, :i, nil, :byte, :u2, :u, nil, :flt, nil, :v2, :v3, :s, :asc]
     each_rec_member(type) do |ofs_end, i|
       field_type = symbolic_names[@data[ofs]]
       next unless field_type

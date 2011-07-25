@@ -6,14 +6,11 @@ require "dir_builder"
 require "esf_semantic_converter"
 
 module EsfConvertBasic
-  def convert_00!
-    out!("<i2>#{get_i2}</i2>")
-  end
   def convert_01!
     out!(get_bool ? "<yes/>" : "<no/>")
   end
   def convert_03!
-    out!("<u2z>#{get_u2}</u2z>")
+    out!("<i2>#{get_u2}</i2>")
   end  
   def convert_04!
     out!("<i>#{get_i}</i>")
@@ -65,7 +62,7 @@ module EsfConvertBasic
     end
   end
   def convert_10!
-    out!("<u2x>#{get_u2}</u2x>")
+    out!("<u2angle>#{get_u2}</u2angle>")
   end
   def convert_4x!(tag)
     data = get_ofs_bytes
@@ -85,7 +82,7 @@ module EsfConvertBasic
     convert_4x!("bin2", &:to_hex_dump)
   end
   def convert_43!
-    convert_4x!("u2z_ary"){|data| data.unpack("v*").join(" ")}
+    convert_4x!("i2_ary"){|data| data.unpack("v*").join(" ")}
   end
   def convert_44!
     convert_4x!("i4_ary"){|data| data.unpack("l*").join(" ")}

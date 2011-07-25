@@ -57,19 +57,15 @@ class EsfBuilder
     put_i((1048576.0 * val).round.to_i)
   end
   def put_i2(val)
-    @data << "\x00"
+    @data << "\x03"
     @data << [val].pack("v")
   end
   def put_u2(val)
     @data << "\x07"
     @data << [val].pack("v")
   end
-  def put_u2x(val)
+  def put_u2angle(val)
     @data << "\x10"
-    @data << [val].pack("v")
-  end
-  def put_u2z(val)
-    @data << "\x03"
     @data << [val].pack("v")
   end
   def put_i(val)
@@ -140,13 +136,10 @@ class EsfBuilder
     put_4x("\x44", elems.pack("V*"))
   end
   def put_i2_ary(elems)
-    put_4x("\x40", elems.pack("v*"))
+    put_4x("\x43", elems.pack("v*"))
   end
   def put_u2_ary(elems)
     put_4x("\x47", elems.pack("v*"))
-  end
-  def put_u2z_ary(elems)
-    put_4x("\x43", elems.pack("v*"))
   end
   def put_flt_ary(elems)
     put_4x("\x4a", elems.pack("f*"))

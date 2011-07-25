@@ -1010,8 +1010,8 @@ module XmlTagHandlers
   def on_text_node_i2(attributes, buf, ctx)
     @esf.put_i2 buf.to_i
   end
-  def on_text_node_u2x(attributes, buf, ctx)
-    @esf.put_u2x buf.to_i
+  def on_text_node_u2angle(attributes, buf, ctx)
+    @esf.put_u2angle buf.to_i
   end
   def on_text_node_byte(attributes, buf, ctx)
     @esf.put_byte buf.to_i
@@ -1032,8 +1032,8 @@ module XmlTagHandlers
   def on_text_node_u2_ary(attributes, buf, ctx)
     @esf.put_u2_ary buf.strip.split(/\s+/).map(&:to_i)
   end
-  def on_text_node_u2z_ary(attributes, buf, ctx)
-    @esf.put_u2z_ary buf.strip.split(/\s+/).map(&:to_i)
+  def on_text_node_i2_ary(attributes, buf, ctx)
+    @esf.put_i2_ary buf.strip.split(/\s+/).map(&:to_i)
   end
   def on_text_node_flt_ary(attributes, buf, ctx)
     @esf.put_flt_ary buf.strip.split(/\s+/).map(&:to_f)
