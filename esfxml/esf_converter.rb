@@ -252,6 +252,21 @@ class EsfConverter < EsfParser
     end
   end
   
+  def report_semantic_failures!
+    failures = @semantic_stats.to_a.map{|key, (all,quiet,fails)|
+      if fails == 0
+        nil
+      else
+        [key.to_s, all, quiet, fails]
+      end
+    }.compact.sort
+    return if failures.empty?
+    STDERR.puts "Semantic conversion failures (low level conversion performed instead): "
+    failures.each do |key, all, quiet, fails|
+       puts "* #{key}: (#{all} records, #{fails} failures, #{quiet} quiet failures)"
+    end
+  end
+  
   def convert!
     @done = false
     @dir_builder.open_main_xml do
@@ -260,6 +275,7 @@ class EsfConverter < EsfParser
         send(@esf_type_handlers[get_byte])
       end
     end
+    report_semantic_failures!
     @done = true
   end
 

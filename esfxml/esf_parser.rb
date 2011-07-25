@@ -337,15 +337,18 @@ module EsfParserSemantic
   end
   
   def try_semantic(node_type)
+    @semantic_stats[node_type][0] += 1
     begin
       save_ofs = @ofs
       yield
     rescue QuietSemanticFail
       # Simple fall-through, used for some lookahead
+      @semantic_stats[node_type][1] += 1
       @ofs = save_ofs
     rescue SemanticFail
       # This is debug only, it's normally perfectly safe
-      puts "Semantic conversion of #{node_type}(#{save_ofs}..#{@ofs}) failed, falling back to low-level conversion"
+      # puts "Semantic conversion of #{node_type}(#{save_ofs}..#{@ofs}) failed, falling back to low-level conversion"
+      @semantic_stats[node_type][2] += 1
       @ofs = save_ofs
     end
   end
@@ -376,6 +379,7 @@ class EsfParser
   def initialize(esf_fh)
     @data       = esf_fh.read
     @ofs        = 0
+    @semantic_stats = Hash.new{|ht,k| ht[k] = [0,0,0]}
     parse_magic
     with_temp_ofs(get_u) { parse_node_types }
     @esf_type_handlers_get = setup_esf_type_handlers_get
