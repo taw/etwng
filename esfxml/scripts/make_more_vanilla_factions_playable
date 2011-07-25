@@ -5,8 +5,10 @@ require "esf_scripts"
 
 class MakeMoreVanillaFactionsPlayable < EsfScript
   def run!
-    # Make default vanilla states playable except protectorates
+    # Make default vanilla states playable *including* protectorates
     # Not every one of them has sensible gameplay options
+    # If you want to play protectorates you'll need to fix diplomacy options
+    # reset_diplomacy script will work here
 
     factions = %W[
       bavaria                                                                
@@ -32,6 +34,15 @@ class MakeMoreVanillaFactionsPlayable < EsfScript
       venice
       westphalia
       wurttemberg
+      
+      barbary_states
+      courland
+      crimean_khanate
+      louisiana
+      new_spain
+      saxony
+      thirteen_colonies
+      
     ]
 
     factions.each do |faction_to_change|
