@@ -65,7 +65,12 @@
     <field name='unknown11' type='boolean'/>
     <field name='unknown12' type='string'/>
     <field name='unknown13' type='optstring'/>
-    <field name='unknown14' type='blob7'/>
+    <field name='unknown14' type='boolean'/>
+    <field name='unknown15' type='boolean'/>
+    <field name='unknown16' type='boolean'/>
+    <field name='unknown17' type='string'/>
+    <field name='unknown18' type='string' version_start='3'/>
+    <field name='unknown19' type='boolean' version_start='3'/>
   </table>
   <table name='advice_threads_tables'>
     <field name='Key' pk='true' type='string'/>

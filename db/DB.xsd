@@ -65,7 +65,12 @@
     <xs:attribute name='unknown11' type='xs:boolean' use='required' />
     <xs:attribute name='unknown12' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' name='unknown13' type='xs:string' />
-    <xs:attribute msprop:BlobLength='7' name='unknown14' type='xs:string' use='required' />
+    <xs:attribute name='unknown14' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown15' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown16' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown17' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='3' name='unknown18' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='3' name='unknown19' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="advice_threads_tables">
     <xs:attribute name='Key' type='xs:string' use='required' />
