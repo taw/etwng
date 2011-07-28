@@ -12,7 +12,7 @@
     <field name='unknown2' type='float'/>
   </table>
   <table name='_kv_morale_ext_tables'>
-    <field name='unknown1' pk='true' type='string'/>
+    <field name='key' pk='true' type='string'/>
     <field name='unknown2' type='int'/>
     <field name='unknown3' type='int'/>
     <field name='unknown4' type='int'/>
@@ -27,7 +27,7 @@
     <field name='Value' type='float'/>
   </table>
   <table name='_kv_rules_ext_tables'>
-    <field name='unknown1' pk='true' type='string'/>
+    <field name='key' pk='true' type='string'/>
     <field name='unknown2' type='int'/>
     <field name='unknown3' type='int'/>
   </table>
@@ -36,8 +36,8 @@
     <field name='Value' type='float'/>
   </table>
   <table name='_kv_special_ability_effects_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' type='float'/>
+    <field name='key' pk='true' type='string'/>
+    <field name='value' type='float'/>
   </table>
   <table name='abilities_tables'>
     <field name='Agent_Ability_ID' pk='true' type='string'/>
@@ -76,8 +76,8 @@
     <field name='Key' pk='true' type='string'/>
   </table>
   <table name='advisors_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' type='string'/>
+    <field name='advisor_idref' pk='true' type='string'/>
+    <field name='advisor_modell' type='string'/>
   </table>
   <table name='agent_attribute_situations_tables'>
     <field name='Situation' pk='true' type='string'/>
@@ -134,25 +134,25 @@
     <field name='Value' type='int'/>
   </table>
   <table name='agent_uniform_colours_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' type='float'/>
-    <field name='unknown3' type='float'/>
-    <field name='unknown4' type='float'/>
-    <field name='unknown5' type='float'/>
-    <field name='unknown6' type='float'/>
-    <field name='unknown7' type='float'/>
-    <field name='unknown8' type='float'/>
-    <field name='unknown9' type='float'/>
-    <field name='unknown10' type='float'/>
+    <field name='agent_idref' pk='true' type='string'/>
+    <field name='color_r1' type='float'/>
+    <field name='color_g1' type='float'/>
+    <field name='color_b1' type='float'/>
+    <field name='color_r2' type='float'/>
+    <field name='color_g2' type='float'/>
+    <field name='color_b2' type='float'/>
+    <field name='color_r3' type='float'/>
+    <field name='color_g3' type='float'/>
+    <field name='color_b3' type='float'/>
   </table>
   <table name='agent_uniforms_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' pk='true' type='string'/>
+    <field name='agent_id' pk='true' type='string'/>
+    <field name='uniform' pk='true' type='string'/>
   </table>
   <table name='agent_voice_events_junctions_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' pk='true' type='string'/>
-    <field name='unknown3' pk='true' type='string'/>
+    <field name='agent_id' pk='true' type='string'/>
+    <field name='voice' pk='true' type='string'/>
+    <field name='event' pk='true' type='string'/>
   </table>
   <table name='agents_tables'>
     <field name='Agent_ID' pk='true' type='string'/>
@@ -168,8 +168,8 @@
     <field name='Unknown8' type='int'/>
   </table>
   <table name='aide_de_camp_speeches_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' type='string'/>
+    <field name='adc_idref' pk='true' type='string'/>
+    <field name='speech_text' type='string'/>
     <field name='unknown3' type='boolean'/>
     <field name='unknown4' type='float'/>
     <field name='unknown5' type='float'/>
@@ -235,9 +235,9 @@
     <field name='Bone' type='string'/>
   </table>
   <table name='avatar_advanced_skills_requirements_tables'>
-    <field name='unknown1' type='string'/>
-    <field name='unknown2' type='int'/>
-    <field name='unknown3' type='string'/>
+    <field name='base_skill' type='string'/>
+    <field name='skill_level' type='int'/>
+    <field name='bonus_skill' type='string'/>
   </table>
   <table name='avatar_aesthetic_sets_tables'>
     <field name='unknown1' type='optstring'/>
@@ -505,12 +505,12 @@
     <field name='hit_points' type='int'/>
   </table>
   <table name='battle_groundcover_density_maps_tables'>
-    <field fkey='climates_tables.Climate_ID' name='unknown1' pk='true' type='string'/>
+    <field fkey='climates_tables.Climate_ID' name='key' pk='true' type='string'/>
     <field fkey='campaign_ground_types_tables.Ground_ID' name='unknown2' pk='true' type='string'/>
     <field name='unknown3' type='string'/>
   </table>
   <table name='battle_groundcover_distribution_maps_tables'>
-    <field fkey='climates_tables.Climate_ID' name='unknown1' pk='true' type='string'/>
+    <field fkey='climates_tables.Climate_ID' name='key' pk='true' type='string'/>
     <field name='unknown2' pk='true' type='string'/>
     <field name='unknown3' type='int'/>
   </table>
@@ -532,7 +532,7 @@
     <field name='unknown4' type='string' version_start='3'/>
   </table>
   <table name='battle_sequences_tables'>
-    <field name='unknown1' pk='true' type='string'/>
+    <field name='string_id' pk='true' type='string'/>
     <field name='unknown2' type='int'/>
   </table>
   <table name='battle_sky_types_tables'>
@@ -640,9 +640,9 @@
     <field name='naval_appropriate' type='boolean'/>
   </table>
   <table name='battlefield_building_categories_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' type='string'/>
-    <field fkey='particle_effects_tables.Effect' name='unknown3' type='string'/>
+    <field name='building_id' pk='true' type='string'/>
+    <field name='type' type='string'/>
+    <field fkey='particle_effects_tables.Effect' name='destroyed_effect' type='string'/>
   </table>
   <table name='battlefield_building_transformations_tables'>
     <field name='Transformation' pk='true' type='string'/>
@@ -798,10 +798,10 @@
     <field fkey='building_levels_tables.Building_ID' name='Upgrade' pk='true' type='string'/>
   </table>
   <table name='cai_agent_distribution_profiles_tables'>
-    <field name='unknown1' pk='true' type='string'/>
+    <field name='profile' pk='true' type='string'/>
   </table>
   <table name='cai_agent_distribution_types_tables'>
-    <field name='unknown1' pk='true' type='string'/>
+    <field name='type' pk='true' type='string'/>
   </table>
   <table name='cai_agent_record_to_cai_agent_type_junctions_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -947,9 +947,9 @@
     <field name='unknown3' type='int'/>
   </table>
   <table name='campaign_ai_technology_path_junctions_tables'>
-    <field name='unknown1' type='string'/>
-    <field name='unknown2' type='int'/>
-    <field name='unknown3' type='string'/>
+    <field name='class' type='string'/>
+    <field name='value' type='int'/>
+    <field name='tech' type='string'/>
   </table>
   <table name='campaign_anim_action_to_sets_tables'>
     <field name='Action' pk='true' type='string'/>
@@ -961,7 +961,7 @@
   </table>
   <table name='campaign_anim_transitions_tables'>
     <field name='Animation_IDRef1' type='string'/>
-    <field name='unknown' type='string'/>
+    <field name='id' type='string'/>
     <field name='Animation_IDRef2' type='string'/>
     <field name='Animation_filepath' type='string'/>
   </table>
@@ -983,7 +983,7 @@
     <field name='Animation_Set_IDRef' type='string'/>
   </table>
   <table name='campaign_character_anim_walk_anim_junctions_tables'>
-    <field name='unknown' type='string'/>
+    <field name='id' type='string'/>
     <field name='Character1' type='string'/>
     <field name='Character2' type='string'/>
     <field name='Animation_IDRef' type='string'/>
@@ -1033,7 +1033,7 @@
     <field name='unknown6' type='boolean' version_start='3'/>
   </table>
   <table name='campaign_map_famous_battles_tables'>
-    <field name='unknown1' pk='true' type='string'/>
+    <field name='id' pk='true' type='string'/>
     <field name='Description' type='string'/>
     <field name='Date' type='string'/>
     <field name='unknown2' type='string'/>
@@ -1195,9 +1195,9 @@
     <field name='unknown2' type='boolean'/>
   </table>
   <table name='cdir_unit_balance_template_junctions_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' pk='true' type='string'/>
-    <field name='unknown3' type='int'/>
+    <field name='faction' pk='true' type='string'/>
+    <field name='template' pk='true' type='string'/>
+    <field name='value' type='int'/>
   </table>
   <table name='cdir_unit_balances_tables'>
     <field name='unknown1' type='string'/>
@@ -1389,8 +1389,8 @@
     <field name='UnrestPenalty' type='float'/>
   </table>
   <table name='disaster_to_ground_types_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field fkey='campaign_ground_types_tables.Ground_ID' name='unknown2' type='string'/>
+    <field name='disaster_type' pk='true' type='string'/>
+    <field fkey='campaign_ground_types_tables.Ground_ID' name='ground_type' type='string'/>
   </table>
   <table name='disasters_tables'>
     <field name='Disaster_ID' pk='true' type='string'/>
@@ -1404,7 +1404,7 @@
   </table>
   <table name='diseases_tables'>
     <field name='Disease_ID' pk='true' type='string'/>
-    <field name='unknown2' type='string'/>
+    <field name='name' type='string'/>
     <field name='unknown3' type='float'/>
     <field name='unknown4' type='float'/>
     <field name='unknown5' type='float'/>
@@ -1424,12 +1424,12 @@
     <field fkey='building_chains_tables.Building_Chain_ID' name='Building_x0020_Chain' pk='true' type='string'/>
   </table>
   <table name='effect_bonus_value_commodity_junction_tables'>
-    <field name='unknown1' pk='true' type='string'/>
+    <field name='effect_id' pk='true' type='string'/>
     <field name='affect_this_bonus' type='string'/>
     <field fkey='resources_tables.Resource_ID' name='Resource_category' type='string'/>
   </table>
   <table name='effect_bonus_value_population_class_and_religion_junction_tables'>
-    <field fkey='effects_tables.Effect_ID' name='unknown1' pk='true' type='string'/>
+    <field fkey='effects_tables.Effect_ID' name='effect_id' pk='true' type='string'/>
     <field fkey='building_chains_tables.Building_Chain_ID' name='affect_this_value' pk='true' type='string'/>
     <field name='Class' pk='true' type='string'/>
     <field fkey='religions_tables.Religion_ID' name='Religion_category' type='string'/>
@@ -1450,7 +1450,7 @@
     <field fkey='religions_tables.Religion_ID' name='Religion_ID' type='string'/>
   </table>
   <table name='effect_bonus_value_resource_junction_tables'>
-    <field name='unknown1' pk='true' type='string'/>
+    <field name='effect_id' pk='true' type='string'/>
     <field name='Bonus_effect_ID' type='string'/>
     <field fkey='resources_tables.Resource_ID' name='Resource_category' type='string'/>
   </table>
@@ -1562,18 +1562,18 @@
     <field name='unknown2' type='string'/>
   </table>
   <table name='faction_banners_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' type='int'/>
-    <field name='unknown3' type='int'/>
-    <field name='unknown4' type='int'/>
-    <field name='unknown5' type='int'/>
-    <field name='unknown6' type='int'/>
-    <field name='unknown7' type='int'/>
+    <field name='faction_idref' pk='true' type='string'/>
+    <field name='color_b1' type='int'/>
+    <field name='color_g1' type='int'/>
+    <field name='color_r1' type='int'/>
+    <field name='color_b2' type='int'/>
+    <field name='color_g2' type='int'/>
+    <field name='color_r2' type='int'/>
     <field name='unknown8' type='boolean'/>
     <field name='unknown9' type='string'/>
-    <field name='unknown10' type='int'/>
-    <field name='unknown11' type='int'/>
-    <field name='unknown12' type='int'/>
+    <field name='color_b3' type='int'/>
+    <field name='color_g3' type='int'/>
+    <field name='color_r3' type='int'/>
   </table>
   <table name='faction_groups_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -1635,24 +1635,24 @@
     <field name='unknown57' type='boolean'/>
   </table>
   <table name='faction_rebellion_units_junctions_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' pk='true' type='string'/>
+    <field name='faction_id' pk='true' type='string'/>
+    <field name='unit_id' pk='true' type='string'/>
   </table>
   <table name='faction_resource_consumptions_tables'>
     <field name='unknown1' type='int'/>
     <field name='unknown2' type='int'/>
   </table>
   <table name='faction_uniform_colours_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' type='int'/>
-    <field name='unknown3' type='int'/>
-    <field name='unknown4' type='int'/>
-    <field name='unknown5' type='int'/>
-    <field name='unknown6' type='int'/>
-    <field name='unknown7' type='int'/>
-    <field name='unknown8' type='int'/>
-    <field name='unknown9' type='int'/>
-    <field name='unknown10' type='int'/>
+    <field name='faction_id' pk='true' type='string'/>
+    <field name='color_r1' type='int'/>
+    <field name='color_g1' type='int'/>
+    <field name='color_b1' type='int'/>
+    <field name='color_r2' type='int'/>
+    <field name='color_g2' type='int'/>
+    <field name='color_b2' type='int'/>
+    <field name='color_r3' type='int'/>
+    <field name='color_g3' type='int'/>
+    <field name='color_b3' type='int'/>
   </table>
   <table name='factions_tables'>
     <field name='Faction_ID' pk='true' type='string'/>
@@ -1734,11 +1734,11 @@
     <field name='unknown22' type='string'/>
   </table>
   <table name='famous_battle_pools_tables'>
-    <field name='unknown1' pk='true' type='string'/>
+    <field name='battle_id' pk='true' type='string'/>
     <field name='unknown2' type='float'/>
     <field name='unknown3' type='float'/>
     <field name='unknown4' type='int'/>
-    <field name='unknown5' type='string'/>
+    <field name='uknown' type='string'/>
   </table>
   <table name='fatigue_effects_tables'>
     <field fkey='_kv_fatigue_tables.Key' name='Threshold_IDRef' pk='true' type='string'/>
@@ -2408,8 +2408,8 @@
     <field name='unknown5' type='string'/>
   </table>
   <table name='mp_general_command_ratings_tables'>
-    <field name='unknown1' pk='true' type='string'/>
-    <field name='unknown2' type='int'/>
+    <field name='general_id' pk='true' type='string'/>
+    <field name='rating' type='int'/>
   </table>
   <table name='multiplayer_faction_descriptions_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -2818,7 +2818,7 @@
     <field name='Late_Availability' type='boolean'/>
     <field name='Researched_Message_Picture' type='string'/>
     <field name='unknown3' type='int' version_start='2'/>
-    <field name='unknown4' type='int' version_start='3'/>
+    <field name='index' type='int' version_start='3'/>
   </table>
   <table name='technology_categories_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -3206,11 +3206,11 @@
   </table>
   <table name='unit_stats_naval_experience_bonuses_tables'>
     <field name='experience' type='string'/>
-    <field name='unknown0' type='int' version_start='2'/>
-    <field name='unknown3' type='int'/>
+    <field name='melee_attack_bonus' type='int' version_start='2'/>
+    <field name='melee_defense_bonus' type='int'/>
     <field name='unknown4' type='int'/>
     <field name='unknown5' type='int'/>
-    <field name='unknown6' type='int'/>
+    <field name='morale_bonus' type='int'/>
     <field name='unknown7' type='int'/>
     <field name='unknown8' type='float'/>
   </table>

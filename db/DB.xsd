@@ -12,7 +12,7 @@
     <xs:attribute name='unknown2' type='xs:float' use='required' />
   </xs:complexType>
   <xs:complexType name="_kv_morale_ext_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='key' type='xs:string' use='required' />
     <xs:attribute name='unknown2' type='xs:int' use='required' />
     <xs:attribute name='unknown3' type='xs:int' use='required' />
     <xs:attribute name='unknown4' type='xs:int' use='required' />
@@ -27,7 +27,7 @@
     <xs:attribute name='Value' type='xs:float' use='required' />
   </xs:complexType>
   <xs:complexType name="_kv_rules_ext_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='key' type='xs:string' use='required' />
     <xs:attribute name='unknown2' type='xs:int' use='required' />
     <xs:attribute name='unknown3' type='xs:int' use='required' />
   </xs:complexType>
@@ -36,8 +36,8 @@
     <xs:attribute name='Value' type='xs:float' use='required' />
   </xs:complexType>
   <xs:complexType name="_kv_special_ability_effects_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:float' use='required' />
+    <xs:attribute name='key' type='xs:string' use='required' />
+    <xs:attribute name='value' type='xs:float' use='required' />
   </xs:complexType>
   <xs:complexType name="abilities_tables">
     <xs:attribute name='Agent_Ability_ID' type='xs:string' use='required' />
@@ -76,8 +76,8 @@
     <xs:attribute name='Key' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="advisors_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute name='advisor_idref' type='xs:string' use='required' />
+    <xs:attribute name='advisor_modell' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="agent_attribute_situations_tables">
     <xs:attribute name='Situation' type='xs:string' use='required' />
@@ -134,25 +134,25 @@
     <xs:attribute name='Value' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="agent_uniform_colours_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:float' use='required' />
-    <xs:attribute name='unknown3' type='xs:float' use='required' />
-    <xs:attribute name='unknown4' type='xs:float' use='required' />
-    <xs:attribute name='unknown5' type='xs:float' use='required' />
-    <xs:attribute name='unknown6' type='xs:float' use='required' />
-    <xs:attribute name='unknown7' type='xs:float' use='required' />
-    <xs:attribute name='unknown8' type='xs:float' use='required' />
-    <xs:attribute name='unknown9' type='xs:float' use='required' />
-    <xs:attribute name='unknown10' type='xs:float' use='required' />
+    <xs:attribute name='agent_idref' type='xs:string' use='required' />
+    <xs:attribute name='color_r1' type='xs:float' use='required' />
+    <xs:attribute name='color_g1' type='xs:float' use='required' />
+    <xs:attribute name='color_b1' type='xs:float' use='required' />
+    <xs:attribute name='color_r2' type='xs:float' use='required' />
+    <xs:attribute name='color_g2' type='xs:float' use='required' />
+    <xs:attribute name='color_b2' type='xs:float' use='required' />
+    <xs:attribute name='color_r3' type='xs:float' use='required' />
+    <xs:attribute name='color_g3' type='xs:float' use='required' />
+    <xs:attribute name='color_b3' type='xs:float' use='required' />
   </xs:complexType>
   <xs:complexType name="agent_uniforms_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute name='agent_id' type='xs:string' use='required' />
+    <xs:attribute name='uniform' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="agent_voice_events_junctions_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:string' use='required' />
-    <xs:attribute name='unknown3' type='xs:string' use='required' />
+    <xs:attribute name='agent_id' type='xs:string' use='required' />
+    <xs:attribute name='voice' type='xs:string' use='required' />
+    <xs:attribute name='event' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="agents_tables">
     <xs:attribute name='Agent_ID' type='xs:string' use='required' />
@@ -168,8 +168,8 @@
     <xs:attribute name='Unknown8' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="aide_de_camp_speeches_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute name='adc_idref' type='xs:string' use='required' />
+    <xs:attribute name='speech_text' type='xs:string' use='required' />
     <xs:attribute name='unknown3' type='xs:boolean' use='required' />
     <xs:attribute name='unknown4' type='xs:float' use='required' />
     <xs:attribute name='unknown5' type='xs:float' use='required' />
@@ -235,9 +235,9 @@
     <xs:attribute name='Bone' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="avatar_advanced_skills_requirements_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:int' use='required' />
-    <xs:attribute name='unknown3' type='xs:string' use='required' />
+    <xs:attribute name='base_skill' type='xs:string' use='required' />
+    <xs:attribute name='skill_level' type='xs:int' use='required' />
+    <xs:attribute name='bonus_skill' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="avatar_aesthetic_sets_tables">
     <xs:attribute msprop:Optional='true' name='unknown1' type='xs:string' />
@@ -505,12 +505,12 @@
     <xs:attribute name='hit_points' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="battle_groundcover_density_maps_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='key' type='xs:string' use='required' />
     <xs:attribute name='unknown2' type='xs:string' use='required' />
     <xs:attribute name='unknown3' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="battle_groundcover_distribution_maps_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='key' type='xs:string' use='required' />
     <xs:attribute name='unknown2' type='xs:string' use='required' />
     <xs:attribute name='unknown3' type='xs:int' use='required' />
   </xs:complexType>
@@ -532,7 +532,7 @@
     <xs:attribute msprop:VersionStart='3' name='unknown4' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="battle_sequences_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='string_id' type='xs:string' use='required' />
     <xs:attribute name='unknown2' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="battle_sky_types_tables">
@@ -640,9 +640,9 @@
     <xs:attribute name='naval_appropriate' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="battlefield_building_categories_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:string' use='required' />
-    <xs:attribute name='unknown3' type='xs:string' use='required' />
+    <xs:attribute name='building_id' type='xs:string' use='required' />
+    <xs:attribute name='type' type='xs:string' use='required' />
+    <xs:attribute name='destroyed_effect' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="battlefield_building_transformations_tables">
     <xs:attribute name='Transformation' type='xs:string' use='required' />
@@ -798,10 +798,10 @@
     <xs:attribute name='Upgrade' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="cai_agent_distribution_profiles_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='profile' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="cai_agent_distribution_types_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='type' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="cai_agent_record_to_cai_agent_type_junctions_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
@@ -947,9 +947,9 @@
     <xs:attribute name='unknown3' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="campaign_ai_technology_path_junctions_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:int' use='required' />
-    <xs:attribute name='unknown3' type='xs:string' use='required' />
+    <xs:attribute name='class' type='xs:string' use='required' />
+    <xs:attribute name='value' type='xs:int' use='required' />
+    <xs:attribute name='tech' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="campaign_anim_action_to_sets_tables">
     <xs:attribute name='Action' type='xs:string' use='required' />
@@ -961,7 +961,7 @@
   </xs:complexType>
   <xs:complexType name="campaign_anim_transitions_tables">
     <xs:attribute name='Animation_IDRef1' type='xs:string' use='required' />
-    <xs:attribute name='unknown' type='xs:string' use='required' />
+    <xs:attribute name='id' type='xs:string' use='required' />
     <xs:attribute name='Animation_IDRef2' type='xs:string' use='required' />
     <xs:attribute name='Animation_filepath' type='xs:string' use='required' />
   </xs:complexType>
@@ -983,7 +983,7 @@
     <xs:attribute name='Animation_Set_IDRef' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="campaign_character_anim_walk_anim_junctions_tables">
-    <xs:attribute name='unknown' type='xs:string' use='required' />
+    <xs:attribute name='id' type='xs:string' use='required' />
     <xs:attribute name='Character1' type='xs:string' use='required' />
     <xs:attribute name='Character2' type='xs:string' use='required' />
     <xs:attribute name='Animation_IDRef' type='xs:string' use='required' />
@@ -1033,7 +1033,7 @@
     <xs:attribute msprop:VersionStart='3' name='unknown6' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="campaign_map_famous_battles_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='id' type='xs:string' use='required' />
     <xs:attribute name='Description' type='xs:string' use='required' />
     <xs:attribute name='Date' type='xs:string' use='required' />
     <xs:attribute name='unknown2' type='xs:string' use='required' />
@@ -1195,9 +1195,9 @@
     <xs:attribute name='unknown2' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="cdir_unit_balance_template_junctions_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:string' use='required' />
-    <xs:attribute name='unknown3' type='xs:int' use='required' />
+    <xs:attribute name='faction' type='xs:string' use='required' />
+    <xs:attribute name='template' type='xs:string' use='required' />
+    <xs:attribute name='value' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="cdir_unit_balances_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
@@ -1389,8 +1389,8 @@
     <xs:attribute name='UnrestPenalty' type='xs:float' use='required' />
   </xs:complexType>
   <xs:complexType name="disaster_to_ground_types_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute name='disaster_type' type='xs:string' use='required' />
+    <xs:attribute name='ground_type' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="disasters_tables">
     <xs:attribute name='Disaster_ID' type='xs:string' use='required' />
@@ -1404,7 +1404,7 @@
   </xs:complexType>
   <xs:complexType name="diseases_tables">
     <xs:attribute name='Disease_ID' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute name='name' type='xs:string' use='required' />
     <xs:attribute name='unknown3' type='xs:float' use='required' />
     <xs:attribute name='unknown4' type='xs:float' use='required' />
     <xs:attribute name='unknown5' type='xs:float' use='required' />
@@ -1424,12 +1424,12 @@
     <xs:attribute name='Building_x0020_Chain' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="effect_bonus_value_commodity_junction_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='effect_id' type='xs:string' use='required' />
     <xs:attribute name='affect_this_bonus' type='xs:string' use='required' />
     <xs:attribute name='Resource_category' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="effect_bonus_value_population_class_and_religion_junction_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='effect_id' type='xs:string' use='required' />
     <xs:attribute name='affect_this_value' type='xs:string' use='required' />
     <xs:attribute name='Class' type='xs:string' use='required' />
     <xs:attribute name='Religion_category' type='xs:string' use='required' />
@@ -1450,7 +1450,7 @@
     <xs:attribute name='Religion_ID' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="effect_bonus_value_resource_junction_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='effect_id' type='xs:string' use='required' />
     <xs:attribute name='Bonus_effect_ID' type='xs:string' use='required' />
     <xs:attribute name='Resource_category' type='xs:string' use='required' />
   </xs:complexType>
@@ -1562,18 +1562,18 @@
     <xs:attribute name='unknown2' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="faction_banners_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:int' use='required' />
-    <xs:attribute name='unknown3' type='xs:int' use='required' />
-    <xs:attribute name='unknown4' type='xs:int' use='required' />
-    <xs:attribute name='unknown5' type='xs:int' use='required' />
-    <xs:attribute name='unknown6' type='xs:int' use='required' />
-    <xs:attribute name='unknown7' type='xs:int' use='required' />
+    <xs:attribute name='faction_idref' type='xs:string' use='required' />
+    <xs:attribute name='color_b1' type='xs:int' use='required' />
+    <xs:attribute name='color_g1' type='xs:int' use='required' />
+    <xs:attribute name='color_r1' type='xs:int' use='required' />
+    <xs:attribute name='color_b2' type='xs:int' use='required' />
+    <xs:attribute name='color_g2' type='xs:int' use='required' />
+    <xs:attribute name='color_r2' type='xs:int' use='required' />
     <xs:attribute name='unknown8' type='xs:boolean' use='required' />
     <xs:attribute name='unknown9' type='xs:string' use='required' />
-    <xs:attribute name='unknown10' type='xs:int' use='required' />
-    <xs:attribute name='unknown11' type='xs:int' use='required' />
-    <xs:attribute name='unknown12' type='xs:int' use='required' />
+    <xs:attribute name='color_b3' type='xs:int' use='required' />
+    <xs:attribute name='color_g3' type='xs:int' use='required' />
+    <xs:attribute name='color_r3' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="faction_groups_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
@@ -1635,24 +1635,24 @@
     <xs:attribute name='unknown57' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="faction_rebellion_units_junctions_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute name='faction_id' type='xs:string' use='required' />
+    <xs:attribute name='unit_id' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="faction_resource_consumptions_tables">
     <xs:attribute name='unknown1' type='xs:int' use='required' />
     <xs:attribute name='unknown2' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="faction_uniform_colours_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:int' use='required' />
-    <xs:attribute name='unknown3' type='xs:int' use='required' />
-    <xs:attribute name='unknown4' type='xs:int' use='required' />
-    <xs:attribute name='unknown5' type='xs:int' use='required' />
-    <xs:attribute name='unknown6' type='xs:int' use='required' />
-    <xs:attribute name='unknown7' type='xs:int' use='required' />
-    <xs:attribute name='unknown8' type='xs:int' use='required' />
-    <xs:attribute name='unknown9' type='xs:int' use='required' />
-    <xs:attribute name='unknown10' type='xs:int' use='required' />
+    <xs:attribute name='faction_id' type='xs:string' use='required' />
+    <xs:attribute name='color_r1' type='xs:int' use='required' />
+    <xs:attribute name='color_g1' type='xs:int' use='required' />
+    <xs:attribute name='color_b1' type='xs:int' use='required' />
+    <xs:attribute name='color_r2' type='xs:int' use='required' />
+    <xs:attribute name='color_g2' type='xs:int' use='required' />
+    <xs:attribute name='color_b2' type='xs:int' use='required' />
+    <xs:attribute name='color_r3' type='xs:int' use='required' />
+    <xs:attribute name='color_g3' type='xs:int' use='required' />
+    <xs:attribute name='color_b3' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="factions_tables">
     <xs:attribute name='Faction_ID' type='xs:string' use='required' />
@@ -1734,11 +1734,11 @@
     <xs:attribute name='unknown22' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="famous_battle_pools_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='battle_id' type='xs:string' use='required' />
     <xs:attribute name='unknown2' type='xs:float' use='required' />
     <xs:attribute name='unknown3' type='xs:float' use='required' />
     <xs:attribute name='unknown4' type='xs:int' use='required' />
-    <xs:attribute name='unknown5' type='xs:string' use='required' />
+    <xs:attribute name='uknown' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="fatigue_effects_tables">
     <xs:attribute name='Threshold_IDRef' type='xs:string' use='required' />
@@ -2408,8 +2408,8 @@
     <xs:attribute name='unknown5' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="mp_general_command_ratings_tables">
-    <xs:attribute name='unknown1' type='xs:string' use='required' />
-    <xs:attribute name='unknown2' type='xs:int' use='required' />
+    <xs:attribute name='general_id' type='xs:string' use='required' />
+    <xs:attribute name='rating' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="multiplayer_faction_descriptions_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
@@ -2818,7 +2818,7 @@
     <xs:attribute name='Late_Availability' type='xs:boolean' use='required' />
     <xs:attribute name='Researched_Message_Picture' type='xs:string' use='required' />
     <xs:attribute msprop:VersionStart='2' name='unknown3' type='xs:int' use='required' />
-    <xs:attribute msprop:VersionStart='3' name='unknown4' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='3' name='index' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="technology_categories_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
@@ -3206,11 +3206,11 @@
   </xs:complexType>
   <xs:complexType name="unit_stats_naval_experience_bonuses_tables">
     <xs:attribute name='experience' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='2' name='unknown0' type='xs:int' use='required' />
-    <xs:attribute name='unknown3' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='2' name='melee_attack_bonus' type='xs:int' use='required' />
+    <xs:attribute name='melee_defense_bonus' type='xs:int' use='required' />
     <xs:attribute name='unknown4' type='xs:int' use='required' />
     <xs:attribute name='unknown5' type='xs:int' use='required' />
-    <xs:attribute name='unknown6' type='xs:int' use='required' />
+    <xs:attribute name='morale_bonus' type='xs:int' use='required' />
     <xs:attribute name='unknown7' type='xs:int' use='required' />
     <xs:attribute name='unknown8' type='xs:float' use='required' />
   </xs:complexType>
@@ -3962,7 +3962,7 @@
     </xs:unique>
     <xs:unique name="_kv_morale_ext_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//_kv_morale_ext_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@key"/>
     </xs:unique>
     <xs:unique name="_kv_morale_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//_kv_morale_tables"/>
@@ -3974,7 +3974,7 @@
     </xs:unique>
     <xs:unique name="_kv_rules_ext_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//_kv_rules_ext_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@key"/>
     </xs:unique>
     <xs:unique name="_kv_rules_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//_kv_rules_tables"/>
@@ -3982,7 +3982,7 @@
     </xs:unique>
     <xs:unique name="_kv_special_ability_effects_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//_kv_special_ability_effects_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@key"/>
     </xs:unique>
     <xs:unique name="abilities_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//abilities_tables"/>
@@ -3998,7 +3998,7 @@
     </xs:unique>
     <xs:unique name="advisors_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//advisors_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@advisor_idref"/>
     </xs:unique>
     <xs:unique name="agent_attribute_situations_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//agent_attribute_situations_tables"/>
@@ -4049,18 +4049,18 @@
     </xs:unique>
     <xs:unique name="agent_uniform_colours_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//agent_uniform_colours_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@agent_idref"/>
     </xs:unique>
     <xs:unique name="agent_uniforms_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//agent_uniforms_tables"/>
-      <xs:field xpath="@unknown1"/>
-      <xs:field xpath="@unknown2"/>
+      <xs:field xpath="@agent_id"/>
+      <xs:field xpath="@uniform"/>
     </xs:unique>
     <xs:unique name="agent_voice_events_junctions_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//agent_voice_events_junctions_tables"/>
-      <xs:field xpath="@unknown1"/>
-      <xs:field xpath="@unknown2"/>
-      <xs:field xpath="@unknown3"/>
+      <xs:field xpath="@agent_id"/>
+      <xs:field xpath="@voice"/>
+      <xs:field xpath="@event"/>
     </xs:unique>
     <xs:unique name="agents_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//agents_tables"/>
@@ -4068,7 +4068,7 @@
     </xs:unique>
     <xs:unique name="aide_de_camp_speeches_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//aide_de_camp_speeches_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@adc_idref"/>
     </xs:unique>
     <xs:unique name="ancillaries_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//ancillaries_tables"/>
@@ -4241,12 +4241,12 @@
     </xs:unique>
     <xs:unique name="battle_groundcover_density_maps_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//battle_groundcover_density_maps_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@key"/>
       <xs:field xpath="@unknown2"/>
     </xs:unique>
     <xs:unique name="battle_groundcover_distribution_maps_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//battle_groundcover_distribution_maps_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@key"/>
       <xs:field xpath="@unknown2"/>
     </xs:unique>
     <xs:unique name="battle_personalities_tables_Constraint1" msdata:PrimaryKey="true">
@@ -4264,7 +4264,7 @@
     </xs:unique>
     <xs:unique name="battle_sequences_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//battle_sequences_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@string_id"/>
     </xs:unique>
     <xs:unique name="battle_sky_types_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//battle_sky_types_tables"/>
@@ -4304,7 +4304,7 @@
     </xs:unique>
     <xs:unique name="battlefield_building_categories_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//battlefield_building_categories_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@building_id"/>
     </xs:unique>
     <xs:unique name="battlefield_building_transformations_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//battlefield_building_transformations_tables"/>
@@ -4401,11 +4401,11 @@
     </xs:unique>
     <xs:unique name="cai_agent_distribution_profiles_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//cai_agent_distribution_profiles_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@profile"/>
     </xs:unique>
     <xs:unique name="cai_agent_distribution_types_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//cai_agent_distribution_types_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@type"/>
     </xs:unique>
     <xs:unique name="cai_agent_record_to_cai_agent_type_junctions_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//cai_agent_record_to_cai_agent_type_junctions_tables"/>
@@ -4524,7 +4524,7 @@
     </xs:unique>
     <xs:unique name="campaign_map_famous_battles_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//campaign_map_famous_battles_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@id"/>
     </xs:unique>
     <xs:unique name="campaign_map_settlements_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//campaign_map_settlements_tables"/>
@@ -4582,8 +4582,8 @@
     </xs:unique>
     <xs:unique name="cdir_unit_balance_template_junctions_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//cdir_unit_balance_template_junctions_tables"/>
-      <xs:field xpath="@unknown1"/>
-      <xs:field xpath="@unknown2"/>
+      <xs:field xpath="@faction"/>
+      <xs:field xpath="@template"/>
     </xs:unique>
     <xs:unique name="cdir_unit_qualities_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//cdir_unit_qualities_tables"/>
@@ -4678,7 +4678,7 @@
     </xs:unique>
     <xs:unique name="disaster_to_ground_types_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//disaster_to_ground_types_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@disaster_type"/>
     </xs:unique>
     <xs:unique name="disasters_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//disasters_tables"/>
@@ -4707,11 +4707,11 @@
     </xs:unique>
     <xs:unique name="effect_bonus_value_commodity_junction_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//effect_bonus_value_commodity_junction_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@effect_id"/>
     </xs:unique>
     <xs:unique name="effect_bonus_value_population_class_and_religion_junction_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//effect_bonus_value_population_class_and_religion_junction_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@effect_id"/>
       <xs:field xpath="@affect_this_value"/>
       <xs:field xpath="@Class"/>
     </xs:unique>
@@ -4731,7 +4731,7 @@
     </xs:unique>
     <xs:unique name="effect_bonus_value_resource_junction_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//effect_bonus_value_resource_junction_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@effect_id"/>
     </xs:unique>
     <xs:unique name="effect_bonus_value_shot_type_junctions_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//effect_bonus_value_shot_type_junctions_tables"/>
@@ -4825,7 +4825,7 @@
     </xs:unique>
     <xs:unique name="faction_banners_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//faction_banners_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@faction_idref"/>
     </xs:unique>
     <xs:unique name="faction_groups_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//faction_groups_tables"/>
@@ -4833,12 +4833,12 @@
     </xs:unique>
     <xs:unique name="faction_rebellion_units_junctions_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//faction_rebellion_units_junctions_tables"/>
-      <xs:field xpath="@unknown1"/>
-      <xs:field xpath="@unknown2"/>
+      <xs:field xpath="@faction_id"/>
+      <xs:field xpath="@unit_id"/>
     </xs:unique>
     <xs:unique name="faction_uniform_colours_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//faction_uniform_colours_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@faction_id"/>
     </xs:unique>
     <xs:unique name="factions_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//factions_tables"/>
@@ -4854,7 +4854,7 @@
     </xs:unique>
     <xs:unique name="famous_battle_pools_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//famous_battle_pools_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@battle_id"/>
     </xs:unique>
     <xs:unique name="fatigue_effects_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//fatigue_effects_tables"/>
@@ -5001,7 +5001,7 @@
     </xs:unique>
     <xs:unique name="mp_general_command_ratings_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//mp_general_command_ratings_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@general_id"/>
     </xs:unique>
     <xs:unique name="multiplayer_faction_descriptions_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//multiplayer_faction_descriptions_tables"/>
@@ -5581,17 +5581,17 @@
       <xs:selector xpath=".//battle_climate_weather_descriptions_tables"/>
       <xs:field xpath="@Weather_IDRef"/>
     </xs:keyref>
-    <xs:keyref name="battle_groundcover_density_maps_tables_unknown1__TO__climates_tables_Climate_ID" refer="climates_tables_Constraint1">
+    <xs:keyref name="battle_groundcover_density_maps_tables_key__TO__climates_tables_Climate_ID" refer="climates_tables_Constraint1">
       <xs:selector xpath=".//battle_groundcover_density_maps_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@key"/>
     </xs:keyref>
     <xs:keyref name="battle_groundcover_density_maps_tables_unknown2__TO__campaign_ground_types_tables_Ground_ID" refer="campaign_ground_types_tables_Constraint1">
       <xs:selector xpath=".//battle_groundcover_density_maps_tables"/>
       <xs:field xpath="@unknown2"/>
     </xs:keyref>
-    <xs:keyref name="battle_groundcover_distribution_maps_tables_unknown1__TO__climates_tables_Climate_ID" refer="climates_tables_Constraint1">
+    <xs:keyref name="battle_groundcover_distribution_maps_tables_key__TO__climates_tables_Climate_ID" refer="climates_tables_Constraint1">
       <xs:selector xpath=".//battle_groundcover_distribution_maps_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@key"/>
     </xs:keyref>
     <xs:keyref name="battle_sky_types_tables_Weather_IDRef__TO__battle_weather_types_tables_Weather_ID" refer="battle_weather_types_tables_Constraint1">
       <xs:selector xpath=".//battle_sky_types_tables"/>
@@ -5613,9 +5613,9 @@
       <xs:selector xpath=".//battle_type_unit_to_faction_presets_tables"/>
       <xs:field xpath="@Unit_IDRef"/>
     </xs:keyref>
-    <xs:keyref name="battlefield_building_categories_tables_unknown3__TO__particle_effects_tables_Effect" refer="particle_effects_tables_Constraint1">
+    <xs:keyref name="battlefield_building_categories_tables_destroyed_effect__TO__particle_effects_tables_Effect" refer="particle_effects_tables_Constraint1">
       <xs:selector xpath=".//battlefield_building_categories_tables"/>
-      <xs:field xpath="@unknown3"/>
+      <xs:field xpath="@destroyed_effect"/>
     </xs:keyref>
     <xs:keyref name="battlefield_buildings_tables_Building_2__TO__battlefield_buildings_tables_Battlefield_Building_ID" refer="battlefield_buildings_tables_Constraint1">
       <xs:selector xpath=".//battlefield_buildings_tables"/>
@@ -5829,9 +5829,9 @@
       <xs:selector xpath=".//diplomatic_relations_religion_tables"/>
       <xs:field xpath="@Religion_ID_x0020__x0028_2_x0029_"/>
     </xs:keyref>
-    <xs:keyref name="disaster_to_ground_types_tables_unknown2__TO__campaign_ground_types_tables_Ground_ID" refer="campaign_ground_types_tables_Constraint1">
+    <xs:keyref name="disaster_to_ground_types_tables_ground_type__TO__campaign_ground_types_tables_Ground_ID" refer="campaign_ground_types_tables_Constraint1">
       <xs:selector xpath=".//disaster_to_ground_types_tables"/>
-      <xs:field xpath="@unknown2"/>
+      <xs:field xpath="@ground_type"/>
     </xs:keyref>
     <xs:keyref name="effect_bonus_value_agent_junction_tables_Effect__TO__effects_tables_Effect_ID" refer="effects_tables_Constraint1">
       <xs:selector xpath=".//effect_bonus_value_agent_junction_tables"/>
@@ -5857,9 +5857,9 @@
       <xs:selector xpath=".//effect_bonus_value_commodity_junction_tables"/>
       <xs:field xpath="@Resource_category"/>
     </xs:keyref>
-    <xs:keyref name="effect_bonus_value_population_class_and_religion_junction_tables_unknown1__TO__effects_tables_Effect_ID" refer="effects_tables_Constraint1">
+    <xs:keyref name="effect_bonus_value_population_class_and_religion_junction_tables_effect_id__TO__effects_tables_Effect_ID" refer="effects_tables_Constraint1">
       <xs:selector xpath=".//effect_bonus_value_population_class_and_religion_junction_tables"/>
-      <xs:field xpath="@unknown1"/>
+      <xs:field xpath="@effect_id"/>
     </xs:keyref>
     <xs:keyref name="effect_bonus_value_population_class_and_religion_junction_tables_affect_this_value__TO__building_chains_tables_Building_Chain_ID" refer="building_chains_tables_Constraint1">
       <xs:selector xpath=".//effect_bonus_value_population_class_and_religion_junction_tables"/>
