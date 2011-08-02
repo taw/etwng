@@ -10,7 +10,7 @@ class File
     while true
       begin
         File.open(fn, (IO::BINARY rescue 0)|IO::CREAT|IO::EXCL|IO::WRONLY){|fh| fh.write content}
-        return
+        return fn
       rescue Errno::EEXIST
         extra += 1
         fn    = "#{base}-#{extra}#{ext}"
@@ -298,5 +298,5 @@ files.each{|fn|
   conv = GroupFormationsUnpacker.new(fn)
   puts conv if verbose
   out = conv.unpack_to_string
-  File.save_as_new(fn.sub(/\.bin\z/i, ""), ".txt", out)
+  txt = File.save_as_new(fn.sub(/\.bin\z/i, ""), ".txt", out)
 }
