@@ -71,6 +71,7 @@ private:
   uint32_t deps_size, deps_count;
   uint32_t files_size, files_count;
   int version;
+  int extra_file_header;
 
   void load_header() {
     uint32_t header[6];
@@ -89,7 +90,8 @@ private:
       fprintf(stderr, "Pack header error for %s\n", path);
       exit(1);
     }
-    pack_type   = header[1];
+    pack_type   = header[1] & 0x3F;
+    extra_file_header = ((header[1] & 0x40) != 0x00);
     deps_count  = header[2];
     deps_size   = header[3];
     files_count = header[4];
@@ -113,18 +115,18 @@ private:
 
     off_t ofs = (version == 0 ? 24 : 32) + deps_size + files_size;
     for(uint i=0, j=0; i<files_count; i++) {
-      int f_sz       = *(uint32_t*)(files_header_data+j);
-      int f_path_len = strlen(files_header_data+j+4);
-
+      int f_sz = *(uint32_t*)(files_header_data+j);
+      j += extra_file_header ? 12 : 4;
+      int f_path_len = strlen(files_header_data+j);
       char *f_path     = (char*)malloc(f_path_len+2);
       f_path[0] = '/';
-      strcpy(f_path+1, files_header_data+j+4);
+      strcpy(f_path+1, files_header_data+j);
       adjust_slashes(f_path);
 
       files.push_back(new packfs_file(f_path, fh, ofs, f_sz));
 
       ofs += f_sz;
-      j += f_path_len + 5;
+      j += f_path_len + 1;
     }
     delete[] files_header_data;
   }
