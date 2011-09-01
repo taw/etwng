@@ -7,14 +7,14 @@ def read_long(fhandle):
 
 def read_cstr(handle):
   char = ''
-  filename = ''
+  filename = b''
   flen = 0
   while char != b'\x00':
     char = handle.read(1)
     if (char != b'\x00'):
-      filename += char.decode()
+      filename += char
     flen += 1
-  return (filename, flen)
+  return (filename.decode(), flen)
 
 
 def removeDir(path):
@@ -60,6 +60,9 @@ def unpackPackArchive(pack_path, outputdir):
   deps_len    = read_long(handle)
   files_count = read_long(handle)
   files_len   = read_long(handle)
+  
+  file_extra = (mod_type & 0x40 != 0)
+  mod_type = mod_type & 0x3F
 
   if magic == 843597392 or magic == 860374608:
     header_len = 32 + deps_len + files_len
@@ -68,11 +71,14 @@ def unpackPackArchive(pack_path, outputdir):
     header_len = 24 + deps_len + files_len
     handle.seek(24 + deps_len)
 
+
   offset = header_len
   files = []
   for i in range(files_count):
     # read length of file
     data_len = read_long(handle)
+    if file_extra:
+      handle.read(8)
     fn, fn_len = read_cstr(handle)
     files.append((fn, data_len, offset))
     offset += data_len
