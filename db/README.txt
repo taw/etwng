@@ -33,8 +33,14 @@ It only takes --comma option for compatibility.
 From my collection of db files (various versions from main.pack, patch*.pack, mods, etc.)
 number converted is:
 
-ETW       963/ 975
-NTW       458/ 482
+ETW       537/ 544
+NTW       467/ 482
 S2TW demo 808/ 904
 S2TW     3414/3898
-all      5643/6259
+all      5226/5828
+
+== Issues ==
+
+NTW unit_special_ability_types_tables seems to be corrupt via \r -> \n\r expansion
+(at least my version of it)
+

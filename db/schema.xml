@@ -682,8 +682,8 @@
     <field name='release' type='boolean'/>
     <field name='multiplayer' type='boolean'/>
     <field name='Unknown6' type='boolean'/>
-    <field name='unknown12' type='boolean' version_start='3'/>
-    <field name='unknown13' type='int' version_start='3'/>
+    <field name='unknown12' type='optstring' version_start='2'/>
+    <field name='unknown13' type='int' version_start='2'/>
     <field name='unknown14' type='float' version_start='3'/>
     <field name='unknown15' type='boolean' version_start='4'/>
     <field name='unknown16' type='boolean' version_start='5'/>
@@ -1550,8 +1550,10 @@
     <field name='unknown' type='boolean'/>
     <field name='Date' type='int'/>
     <field name='Season' type='string'/>
+    <field name='unknown1' type='boolean' version_start='2'/>
     <field name='Condition' type='string'/>
     <field name='Image2' type='string'/>
+    <field name='unknown2' type='int' version_start='2'/>
   </table>
   <table name='events_view_group_junct_tables'>
     <field fkey='events_tables.Event_ID' name='Historic_event_ID' pk='true' type='string'/>
@@ -1701,9 +1703,9 @@
     <field name='unknown44' type='boolean'/>
     <field name='Names_1' type='string'/>
     <field name='Names_2' type='string'/>
-    <field name='unknown47' type='string' version_start='6'/>
-    <field name='unknown48' type='string' version_start='6'/>
-    <field name='unknown49' type='boolean' version_start='6'/>
+    <field name='unknown47' type='string' version_start='4'/>
+    <field name='unknown48' type='string' version_start='4'/>
+    <field name='unknown49' type='boolean' version_start='4'/>
     <field name='unknown50' type='string' version_start='6'/>
   </table>
   <table name='family_relationship_types_tables'>
@@ -3335,6 +3337,7 @@
     <field name='Can_Trade' type='boolean'/>
     <field name='Manoeuverability' type='string'/>
     <field name='Hull_Strength_Shown' type='int' version_start='2'/>
+    <field name='unknown97' type='string' version_start='3'/>
   </table>
   <table name='unit_to_unit_abilities_junctions_tables'>
     <field fkey='units_tables.Unit_ID' name='Unit_IDRef' pk='true' type='string'/>

@@ -682,8 +682,8 @@
     <xs:attribute name='release' type='xs:boolean' use='required' />
     <xs:attribute name='multiplayer' type='xs:boolean' use='required' />
     <xs:attribute name='Unknown6' type='xs:boolean' use='required' />
-    <xs:attribute msprop:VersionStart='3' name='unknown12' type='xs:boolean' use='required' />
-    <xs:attribute msprop:VersionStart='3' name='unknown13' type='xs:int' use='required' />
+    <xs:attribute msprop:Optional='true' msprop:VersionStart='2' name='unknown12' type='xs:string' />
+    <xs:attribute msprop:VersionStart='2' name='unknown13' type='xs:int' use='required' />
     <xs:attribute msprop:VersionStart='3' name='unknown14' type='xs:float' use='required' />
     <xs:attribute msprop:VersionStart='4' name='unknown15' type='xs:boolean' use='required' />
     <xs:attribute msprop:VersionStart='5' name='unknown16' type='xs:boolean' use='required' />
@@ -1550,8 +1550,10 @@
     <xs:attribute name='unknown' type='xs:boolean' use='required' />
     <xs:attribute name='Date' type='xs:int' use='required' />
     <xs:attribute name='Season' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='2' name='unknown1' type='xs:boolean' use='required' />
     <xs:attribute name='Condition' type='xs:string' use='required' />
     <xs:attribute name='Image2' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='2' name='unknown2' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="events_view_group_junct_tables">
     <xs:attribute name='Historic_event_ID' type='xs:string' use='required' />
@@ -1701,9 +1703,9 @@
     <xs:attribute name='unknown44' type='xs:boolean' use='required' />
     <xs:attribute name='Names_1' type='xs:string' use='required' />
     <xs:attribute name='Names_2' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='6' name='unknown47' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='6' name='unknown48' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='6' name='unknown49' type='xs:boolean' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown47' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown48' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown49' type='xs:boolean' use='required' />
     <xs:attribute msprop:VersionStart='6' name='unknown50' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="family_relationship_types_tables">
@@ -3335,6 +3337,7 @@
     <xs:attribute name='Can_Trade' type='xs:boolean' use='required' />
     <xs:attribute name='Manoeuverability' type='xs:string' use='required' />
     <xs:attribute msprop:VersionStart='2' name='Hull_Strength_Shown' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='3' name='unknown97' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="unit_to_unit_abilities_junctions_tables">
     <xs:attribute name='Unit_IDRef' type='xs:string' use='required' />
