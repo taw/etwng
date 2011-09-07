@@ -3377,8 +3377,8 @@
     <field name='unknown9' type='int'/>
     <field name='Garrison_Availability' type='boolean'/>
     <field name='MP_Unit_Limit' type='int' version_start='3'/>
-    <field name='unknown25' type='optstring' version_start='10'/>
-    <field name='unknown26' type='optstring' version_start='10'/>
+    <field name='unknown25' type='optstring' version_start='5'/>
+    <field name='unknown26' type='boolean' version_start='5'/>
     <field name='unknown27' type='string' version_start='10'/>
     <field name='unknown28' type='optstring' version_start='10'/>
     <field name='unknown29' type='optstring' version_start='10'/>

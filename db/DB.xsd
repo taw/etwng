@@ -3377,8 +3377,8 @@
     <xs:attribute name='unknown9' type='xs:int' use='required' />
     <xs:attribute name='Garrison_Availability' type='xs:boolean' use='required' />
     <xs:attribute msprop:VersionStart='3' name='MP_Unit_Limit' type='xs:int' use='required' />
-    <xs:attribute msprop:Optional='true' msprop:VersionStart='10' name='unknown25' type='xs:string' />
-    <xs:attribute msprop:Optional='true' msprop:VersionStart='10' name='unknown26' type='xs:string' />
+    <xs:attribute msprop:Optional='true' msprop:VersionStart='5' name='unknown25' type='xs:string' />
+    <xs:attribute msprop:VersionStart='5' name='unknown26' type='xs:boolean' use='required' />
     <xs:attribute msprop:VersionStart='10' name='unknown27' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' msprop:VersionStart='10' name='unknown28' type='xs:string' />
     <xs:attribute msprop:Optional='true' msprop:VersionStart='10' name='unknown29' type='xs:string' />
