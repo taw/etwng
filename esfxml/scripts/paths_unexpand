@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class PathsUnExpand < EsfScript
+  def run!
+    update_each_file("pathfinding_areas*.xml") do |file|
+      file.gsub(%r[</u4_ary>\s*<u4_ary>]m, "")
+    end
+  end
+end
+
+PathsUnExpand.new

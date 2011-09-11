@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class PathsExpand < EsfScript
+  def run!
+    update_each_file("pathfinding_areas*.xml") do |file|
+      file.sub(%r[(<u4_ary>)(.*)(</u4_ary>)]m){
+        a, txt, b = $1, $2, $3
+        txt.gsub!(/\n\s*\n/, "\n </u4_ary>\n <u4_ary>\n")
+        a+txt+b
+      }
+    end
+  end
+end
+
+PathsExpand.new

@@ -62,7 +62,13 @@ class EsfScript
     
   def update_each_xml(glob, xpath, &blk)
     each_file(glob) do |file_name|
-      update_xml(file_name, xpath, &blk)      
+      update_xml(file_name, xpath, &blk)
+    end
+  end
+
+  def update_each_file(glob, &blk)
+    each_file(glob) do |file_name|
+      update_file(file_name, &blk)
     end
   end
 
