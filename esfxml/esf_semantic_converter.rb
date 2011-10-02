@@ -281,10 +281,11 @@ module EsfSemanticConverter
           x, y = @pathfinding_vertices_ary[i]
           x = x*scale
           y = y*scale
-          # x = @region_data_vertices[2*i]
-          # y = @region_data_vertices[2*i+1]
-          # out!(" #{i} <!-- #{x} #{y}-->")
-          out!(" #{i} <!-- #{x},#{y} -->")
+          if i <= 3
+            out!(" #{i}")
+          else
+            out!(" #{i} <!-- #{x},#{y} -->")
+          end
           cnt -= 1
         end
       end
