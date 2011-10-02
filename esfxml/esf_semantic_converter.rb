@@ -252,7 +252,21 @@ module EsfSemanticConverter
 
   def convert_rec_grid_data
     each_rec_member("grid_data") do |ofs_end, i|
-      convert_v2x! if i == 0 and lookahead_v2x?(ofs_end)
+      if i == 0 and lookahead_v2x?(ofs_end)
+        x = get_value![1] * 0.5**20
+        y = get_value![1] * 0.5**20
+        out!(%Q[<v2x x="#{x}" y="#{y}"/> <!-- starting point -->])
+      elsif i == 3 and @data[@ofs] == 0x04
+        v = get_value![1]
+        vs = v * 0.5**20
+        out!(%Q[<i>#{v}</i> <!-- dimension of cells (#{vs}) -->])
+      elsif i == 4 and @data[@ofs] == 0x08
+        v = get_value![1]
+        out!(%Q[<u>#{v}</u> <!-- columns -->])
+      elsif i == 5 and @data[@ofs] == 0x08
+        v = get_value![1]
+        out!(%Q[<u>#{v}</u> <!-- rows -->])
+      end
     end
   end
 
