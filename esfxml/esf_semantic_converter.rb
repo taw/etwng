@@ -571,17 +571,48 @@ module EsfSemanticConverter
     end
   end
   
+  def convert_rec_PATHFINDING_GRID
+    each_rec_member("PATHFINDING_GRID") do |ofs_end, i|
+      if i == 0 and @data[ofs] == 0x08
+        v = get_value![1]
+        out!("<u>#{v}</u><!-- number of cells -->")
+      elsif i == 1 and @data[ofs] == 0x48
+        v = get_value![1].unpack("V*")
+        parts = []
+        until v.empty?
+          sz = v.shift
+          parts << {
+            :points => (0...sz).map{ [v.shift, v.shift] },
+            :type => v.shift,
+          }
+        end
+        out!("<grid_paths>")
+        scale = 0.5 ** 20
+        parts.each{|part|
+          out!(" <grid_path type=\"#{part[:type]}\">")
+          part[:points].each{|x,y|
+            x *= scale
+            y *= scale
+            out!("  #{x},#{y}")
+          }
+          out!(" </grid_path>")
+        }
+        out!("</grid_paths>")
+      end
+    end
+  end
+
   def convert_rec_LOCOMOTABLE
     each_rec_member("LOCOMOTABLE") do |ofs_end, i|
       # Steps 0/1 take two elements, so steps 6/7 really mean elements 8/9
       if i == 0 or i == 1
-	convert_v2x!
+        convert_v2x!
       elsif i == 6 and @data[ofs] == 4
-	v = get_value![1]
-	out!("<i>#{v}</i><!-- Movement Points total -->")
+        v = get_value![1]
+        out!("<i>#{v}</i><!-- Movement Points total -->")
       elsif i == 7 and @data[ofs] == 4
-	v = get_value![1]
-	out!("<i>#{v}</i><!-- Movement Points left -->")
+        v = get_value![1]
+        out!("<i>#{v}</i><!-- Movement Points left -->")
       end
     end
   end

@@ -172,6 +172,20 @@ module XmlTagHandlers
     end
   end
   
+  def on_text_node_grid_path(attributes, buf, ctx)
+    type = attributes[:type].to_i
+    points = buf.strip.split(/[\s,]+/).map{|pt| (pt.to_f * 1048576.0).round.to_i}
+    @stack[-1][3][:data] << [points.size/2].pack("V") << points.pack("V*") << [type].pack("V")
+  end
+
+  def on_start_node_grid_paths(attributes)
+    [true, nil, {:data => ""}]
+  end
+
+  def on_end_node_grid_paths(attributes, buf, ctx)
+    @esf.put_4x "\x48", ctx[:data]
+  end
+
   def on_text_node_victory_conditions(attributes, buf, ctx)
     put_rec "CAMPAIGN_VICTORY_CONDITIONS" do
       semantic_put_ary("REGION_KEYS", buf.strip.split(/\s+/)) do |name|
