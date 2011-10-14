@@ -577,7 +577,7 @@ module EsfSemanticConverter
         v = get_value![1]
         out!("<u>#{v}</u><!-- number of cells -->")
       elsif i == 1 and @data[ofs] == 0x48
-        v = get_value![1].unpack("V*")
+        v = get_value![1].unpack("l*")
         parts = []
         until v.empty?
           sz = v.shift
