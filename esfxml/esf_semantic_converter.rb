@@ -598,6 +598,13 @@ module EsfSemanticConverter
           out!(" </grid_path>")
         }
         out!("</grid_paths>")
+      elsif i == 5 and @data[ofs] == 0x48
+        v = get_value![1].unpack("V*")
+        out!("<u4_ary>")
+        until v.empty?
+          out!(" #{v.shift} #{v.shift}")
+        end
+        out!("</u4_ary>")
       end
     end
   end
