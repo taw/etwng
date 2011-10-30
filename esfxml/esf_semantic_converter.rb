@@ -616,6 +616,20 @@ module EsfSemanticConverter
       end
     end
   end
+
+  def convert_rec_grid_cells
+    each_rec_member("grid_cells") do |ofs_end, i|
+      if i == 4 and @data[@ofs] == 0x46
+        v = get_value![1].unpack("C*")
+        out!("<bin6> <!-- #{v.size/12} empty cells -->")
+        until v.empty?
+          line = v.shift(12)
+          out!(" " + line.map{|x| "%02x" % x}.join(" "))
+        end
+        out!("</bin6>")
+      end
+    end
+  end
   
   def convert_rec_FORT
     tag!("rec", :type => "FORT") do
