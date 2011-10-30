@@ -8,6 +8,7 @@ gfconv/groupformations*.txt
 esfxml/esf
 esfxml/samples*
 esfxml/out
+esfxml/output
 farm_fields_tile_texture/samples
 tmp
 markers/samples
@@ -29,6 +30,11 @@ sounds/samples
 ui_converter/samples*
 loc/samples
 unit_variant/samples
-
 etw
 saves
+*~
+
+
+autodetector
+db/t?
+db/f?
