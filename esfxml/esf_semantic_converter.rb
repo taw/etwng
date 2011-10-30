@@ -575,6 +575,7 @@ module EsfSemanticConverter
     each_rec_member("OBSTACLE_BOUNDARIES") do |ofs_end, i|
       if i == 0 and @data[@ofs] == 0x48
         data = get_value![1].unpack("V*")
+        out!("<u4_ary>")
         until data.empty?
           n = data.shift
           if data.size < 2*n + 2
@@ -588,6 +589,7 @@ module EsfSemanticConverter
           out!(" #{data.shift} <!-- separator -->")
           out!("") unless data.empty?
         end
+        out!("</u4_ary>")
       end
     end
   end
