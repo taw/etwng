@@ -570,7 +570,28 @@ module EsfSemanticConverter
       end
     end
   end
-  
+
+  def convert_rec_OBSTACLE_BOUNDARIES
+    each_rec_member("OBSTACLE_BOUNDARIES") do |ofs_end, i|
+      if i == 0 and @data[@ofs] == 0x48
+        data = get_value![1].unpack("V*")
+        until data.empty?
+          n = data.shift
+          if data.size < 2*n + 2
+            raise "Malformatted OBSTACLE_BOUNDARIES"
+          end
+          out!(" #{n} <!-- number of couples -->")
+          n.times{|i|
+            out!(" #{data.shift} #{data.shift} <!-- couple ##{i} -->")
+          }
+          out!(" #{data.shift} <!-- ID -->")
+          out!(" #{data.shift} <!-- separator -->")
+          out!("") unless data.empty?
+        end
+      end
+    end
+  end
+
   def convert_rec_PATHFINDING_GRID
     each_rec_member("PATHFINDING_GRID") do |ofs_end, i|
       if i == 0 and @data[ofs] == 0x08
