@@ -304,7 +304,7 @@ module XmlTagHandlers
   end
   def on_empty_node_cai_trading_post(attributes, buf, ctx)
     put_rec "CAI_TRADING_POST" do
-      @esf.put_u attributes[:a].to_i
+      @esf.put_u attributes[:cai_theatres_id].to_i
       @esf.put_fix attributes[:x].to_f
       @esf.put_fix attributes[:y].to_f
       @esf.put_u attributes[:b].to_i

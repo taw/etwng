@@ -263,7 +263,7 @@ Examples of each semantic tag below:
 
 <cai_border_patrol_point x="667.338684082031" y="65.3495788574219" a="922"/>
 
-<cai_trading_post a="27" x="876.923095703125" y="-70.0838851928711" b="5596"/>
+<cai_trading_post cai_theatres_id="27" x="876.923095703125" y="-70.0838851928711" b="5596"/>
 
 <cai_situated x="912.075012207031" y="-43.2000007629395" a="297" b="27" c="28"/>
 

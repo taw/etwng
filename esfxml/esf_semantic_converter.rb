@@ -899,7 +899,7 @@ module EsfSemanticConverter
     a, x, y, b = get_rec_contents(:u, :i, :i, :u)
     x *= 0.5**20
     y *= 0.5**20
-    out!(%Q[<cai_trading_post a="#{a}" x="#{x}" y="#{y}" b="#{b}"/>])
+    out!(%Q[<cai_trading_post cai_theatres_id="#{a}" x="#{x}" y="#{y}" b="#{b}"/>])
   end
 
   def convert_rec_CAI_SITUATED
