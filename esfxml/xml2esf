@@ -182,6 +182,26 @@ module XmlTagHandlers
     [true, nil, {:data => ""}]
   end
 
+  def on_start_node_obstacle_boundaries(attributes)
+     [true, nil, {:data => ""}]
+  end
+  
+  def on_end_node_obstacle_boundaries(attributes, buf, ctx)
+    put_rec "OBSTACLE_BOUNDARIES" do
+      @esf.put_4x "\x48", ctx[:data]
+    end
+  end
+
+  def on_start_node_obstacle_boundaries_entry(attributes)
+    [false, "", {}]
+  end
+
+  def on_end_node_obstacle_boundaries_entry(attributes, buf, ctx)
+    id = attributes[:id].to_i
+    pairs = buf.strip.split(/[\s,]+/).map(&:to_i)
+    @stack[-1][3][:data] << [pairs.size/2].pack("V") << pairs.pack("V*") << [id, 0].pack("VV")
+  end
+
   def on_end_node_grid_paths(attributes, buf, ctx)
     @esf.put_4x "\x48", ctx[:data]
   end

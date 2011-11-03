@@ -572,26 +572,25 @@ module EsfSemanticConverter
   end
 
   def convert_rec_OBSTACLE_BOUNDARIES
-    each_rec_member("OBSTACLE_BOUNDARIES") do |ofs_end, i|
-      if i == 0 and @data[@ofs] == 0x48
-        data = get_value![1].unpack("V*")
-        out!("<u4_ary>")
-        until data.empty?
-          n = data.shift
-          if data.size < 2*n + 2
-            raise "Malformatted OBSTACLE_BOUNDARIES"
-          end
-          out!(" #{n} <!-- number of couples -->")
-          n.times{|i|
-            out!(" #{data.shift} #{data.shift} <!-- couple ##{i} -->")
-          }
-          out!(" #{data.shift} <!-- ID -->")
-          out!(" #{data.shift} <!-- separator -->")
-          out!("") unless data.empty?
-        end
-        out!("</u4_ary>")
-      end
+    data, = get_rec_contents(:bin8)
+    data = data.unpack("V*")
+    recs = []
+    until data.empty?
+      n = data.shift
+      raise "Malformatted OBSTACLE_BOUNDARIES" if data.size < 2*n + 2
+      recs << [(0...n).map{ [data.shift, data.shift] }, data.shift]
+      raise "Malformatted OBSTACLE_BOUNDARIES"  unless data.shift == 0
     end
+
+    out!("<obstacle_boundaries>")
+    recs.each do |pairs, id|
+      out!(" <obstacle_boundaries_entry id=\"#{id}\">")
+      pairs.each do |a,b|
+        out!("  #{a} #{b}")
+      end
+      out!( " </obstacle_boundaries_entry>")
+    end
+    out!("</obstacle_boundaries>")
   end
 
   def convert_rec_PATHFINDING_GRID
