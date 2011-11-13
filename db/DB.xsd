@@ -166,6 +166,7 @@
     <xs:attribute name='Attribute' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' name='Agent_related_to_religion_type' type='xs:string' />
     <xs:attribute name='Unknown8' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='2' name='Unknown9' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="aide_de_camp_speeches_tables">
     <xs:attribute name='adc_idref' type='xs:string' use='required' />
@@ -653,10 +654,10 @@
     <xs:attribute name='Building_2' type='xs:string' use='required' />
     <xs:attribute name='Material' type='xs:string' use='required' />
     <xs:attribute name='Hit_points' type='xs:int' use='required' />
-    <xs:attribute msprop:VersionStart='3' name='unknown6' type='xs:int' use='required' />
-    <xs:attribute msprop:VersionStart='3' name='unknown7' type='xs:int' use='required' />
     <xs:attribute msprop:Optional='true' name='Fort_type' type='xs:string' />
     <xs:attribute msprop:Optional='true' name='Terrain' type='xs:string' />
+    <xs:attribute msprop:VersionStart='2' name='unknown6' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='3' name='unknown7' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="battlefield_deployable_siege_items_tables">
     <xs:attribute name='Siege_item' type='xs:string' use='required' />
@@ -3159,6 +3160,11 @@
     <xs:attribute name='Can_x0020_Use_x0020_Pike_x0020_Wall' type='xs:boolean' use='required' />
     <xs:attribute name='Can_x0020_Use_x0020_Pike_x0020_Square' type='xs:boolean' use='required' />
     <xs:attribute msprop:VersionStart='2' name='Can_x0020_Shoot_x0020_While_x0020_Moving' type='xs:boolean' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Unknown_1' type='xs:boolean' use='required' />
+    <xs:attribute msprop:Optional='true' msprop:VersionStart='5' name='Flutist' type='xs:string' />
+    <xs:attribute msprop:Optional='true' msprop:VersionStart='5' name='Limber_Destructed_Model' type='xs:string' />
+    <xs:attribute msprop:Optional='true' msprop:VersionStart='5' name='Limber_Destruction_Model' type='xs:string' />
+    <xs:attribute msprop:VersionStart='6' name='Unknown_2' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="unit_stats_naval_crew_tables">
     <xs:attribute name='Crew_ID' type='xs:string' use='required' />

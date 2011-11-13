@@ -166,6 +166,7 @@
     <field fkey='agent_attributes_tables.Attribute_ID' name='Attribute' type='string'/>
     <field name='Agent_related_to_religion_type' type='optstring'/>
     <field name='Unknown8' type='int'/>
+    <field name='Unknown9' type='int' version_start='2'/>
   </table>
   <table name='aide_de_camp_speeches_tables'>
     <field name='adc_idref' pk='true' type='string'/>
@@ -653,10 +654,10 @@
     <field fkey='battlefield_buildings_tables.Battlefield_Building_ID' name='Building_2' type='string'/>
     <field name='Material' type='string'/>
     <field name='Hit_points' type='int'/>
-    <field name='unknown6' type='int' version_start='3'/>
-    <field name='unknown7' type='int' version_start='3'/>
     <field name='Fort_type' type='optstring'/>
     <field name='Terrain' type='optstring'/>
+    <field name='unknown6' type='int' version_start='2'/>
+    <field name='unknown7' type='int' version_start='3'/>
   </table>
   <table name='battlefield_deployable_siege_items_tables'>
     <field name='Siege_item' type='string'/>
@@ -3159,6 +3160,11 @@
     <field name='Can_x0020_Use_x0020_Pike_x0020_Wall' type='boolean'/>
     <field name='Can_x0020_Use_x0020_Pike_x0020_Square' type='boolean'/>
     <field name='Can_x0020_Shoot_x0020_While_x0020_Moving' type='boolean' version_start='2'/>
+    <field name='Unknown_1' type='boolean' version_start='5'/>
+    <field name='Flutist' type='optstring' version_start='5'/>
+    <field name='Limber_Destructed_Model' type='optstring' version_start='5'/>
+    <field name='Limber_Destruction_Model' type='optstring' version_start='5'/>
+    <field name='Unknown_2' type='boolean' version_start='6'/>
   </table>
   <table name='unit_stats_naval_crew_tables'>
     <field name='Crew_ID' pk='true' type='string'/>

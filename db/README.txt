@@ -34,10 +34,10 @@ From my collection of db files (various versions from main.pack, patch*.pack, mo
 number converted is:
 
 ETW       537/ 544
-NTW       472/ 482
+NTW       479/ 482
 S2TW demo 808/ 904
 S2TW     3414/3898
-all      5231/5828
+all      5238/5828
 
 == Issues ==
 

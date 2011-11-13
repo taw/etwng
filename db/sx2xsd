@@ -95,19 +95,9 @@ class SX2XSD
 end
 
 unless ARGV.size == 2
-  STDERR.puts "Usage: #{$0} DB.xsd schema.xml"
+  STDERR.puts "Usage: #{$0} schema.xml DB.xsd"
   exit 1
 end
 
 path_in, path_out = *ARGV
 SX2XSD.new(path_in, path_out).run!
-
-
-
-
-__END__
-
-    <xs:keyref name='cai_personalities_tables_unknown4__TO__campaign_ai_personalities_PrimaryKey' refer='campaign_ai_personalities_tables_Constraint1'>
-      <xs:selector xpath='.//cai_personalities_tables'/>
-      <xs:field xpath='@unknown4'/>
-    </xs:keyref>
