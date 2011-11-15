@@ -173,6 +173,14 @@ module EsfSemanticConverter
   
 ## regions.esf arrays
 
+  def convert_rec_slot_descriptions
+    annotate_rec "slot_descriptions",
+      [:v2_ary, 6] => "land area",
+      [:v2_ary, 7] => "sea area (present only for ports)",
+      [:v2_ary, 8] => "total area (different from land area only in ports)"
+  
+  end
+
   def convert_ary_region_keys
     data = get_ary_contents(:s, :v2)
     raise SemanticFali.new if data.any?{|name, xy| name =~ /\s|=|,/}
@@ -718,6 +726,8 @@ module EsfSemanticConverter
   
   def annotate_rec(type, annotations)
     symbolic_names = [nil, :bool, nil, :i2, :i, nil, :byte, :u2, :u, nil, :flt, nil, :v2, :v3, :s, :asc]
+    symbolic_names[0x4c] = :v2_ary
+    
     each_rec_member(type) do |ofs_end, i|
       field_type = symbolic_names[@data[ofs]]
       next unless field_type
@@ -738,6 +748,15 @@ module EsfSemanticConverter
       when :bool
         tag = get_value![1] ? "<yes/>" : "<no/>"
         out!(tag + annotation)
+      when :v2_ary
+        data = get_value![1].unpack("f*").map(&:pretty_single)
+        if data.empty?
+          out!("<v2_ary/>" + annotation)
+        else
+          out!("<v2_ary>" + annotation)
+          out!(" #{data.shift},#{data.shift}") until data.empty?
+          out!("</v2_ary>")
+        end
       when :v2, :v3
         raise "Implement me: annotations for v2/v3"
       end
