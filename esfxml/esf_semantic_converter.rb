@@ -682,8 +682,11 @@ module EsfSemanticConverter
         v = get_value![1].unpack("C*")
         out!("<bin6> <!-- #{v.size/12} empty cells -->")
         until v.empty?
-          line = v.shift(12)
-          out!(" " + line.map{|x| "%02x" % x}.join(" "))
+          line = v.shift(12).map{|x| "%02x" % x}
+          part0 = line[0,4].join(" ")
+          part1 = line[4,4].join(" ")
+          part2 = line[8,4].join(" ")
+          out!(" #{part0} ; #{part1} ; #{part2}")
         end
         out!("</bin6>")
       end
