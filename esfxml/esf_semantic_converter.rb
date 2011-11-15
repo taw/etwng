@@ -173,6 +173,13 @@ module EsfSemanticConverter
   
 ## regions.esf arrays
 
+  def convert_rec_transition_links
+    annotate_rec "transition_links",
+      [:u, 1] => "turns needed",
+      [:u, 2] => "destination theatre #",
+      [:u, 3] => "area # inside destination theatre"
+  end
+
   def convert_rec_slot_descriptions
     annotate_rec "slot_descriptions",
       [:v2_ary, 6] => "land area",
