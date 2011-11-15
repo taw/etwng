@@ -173,6 +173,21 @@ module EsfSemanticConverter
   
 ## regions.esf arrays
 
+  def convert_rec_cell
+    each_rec_member("cell") do |ofs_end, i|
+      if i == 2 and @data[@ofs] == 0x48
+        data = get_value![1].unpack("V*")
+        out!("<u4_ary>")
+        until data.empty?
+          out!(" #{data.shift} #{data.shift}")
+          out!(" #{data.shift} #{data.shift}")
+          out!("") unless data.empty?
+        end
+        out!("</u4_ary>")
+      end
+    end
+  end
+  
   def convert_rec_transition_links
     annotate_rec "transition_links",
       [:u, 1] => "turns needed",
