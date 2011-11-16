@@ -1,4 +1,4 @@
-Right now about 100 xml tags corresponding to about 63 esf node types are supported.
+Right now about 102 xml tags corresponding to about 64 esf node types are supported.
 There are about 1000 esf node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -86,6 +86,17 @@ Examples of each semantic tag below:
 </settlements>
 
 == regions.esf ==
+
+<cell x='-1280.0' y='-640.0' id='131072'>
+ <cell_quad id1='327688' coord1='35547' id2='131072' coord2='38450'/>
+ <cell_quad id1='327688' coord1='38450' id2='131072' coord2='569'/>
+ <cell_quad id1='327688' coord1='569' id2='131072' coord2='11240'/>
+ <cell_quad id1='327688' coord1='11240' id2='131072' coord2='2597'/>
+ <cell_quad id1='327688' coord1='2597' id2='131072' coord2='8505'/>
+ <cell_quad id1='327688' coord1='8505' id2='131072' coord2='1750'/>
+ <cell_quad id1='327688' coord1='1750' id2='131072' coord2='53282'/>
+</cell>
+
 <bounds_block xmin="-581.6795" ymin="253.953" xmax="-567.31494" ymax="266.0332"/>
 
 <climate_map pgm="climate_map-0001.pgm"/>

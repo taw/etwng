@@ -174,18 +174,16 @@ module EsfSemanticConverter
 ## regions.esf arrays
 
   def convert_rec_cell
-    each_rec_member("cell") do |ofs_end, i|
-      if i == 2 and @data[@ofs] == 0x48
-        data = get_value![1].unpack("V*")
-        out!("<u4_ary>")
-        until data.empty?
-          out!(" #{data.shift} #{data.shift}")
-          out!(" #{data.shift} #{data.shift}")
-          out!("") unless data.empty?
-        end
-        out!("</u4_ary>")
-      end
+    (x,y), id, data = get_rec_contents(:v2, :u, :bin8)
+    raise SemanticFali.new if (data.size % 16) != 0
+    data = data.unpack("l*")
+    
+    out!(%Q[<cell x='#{x}' y='#{y}' id='#{id}'>])
+    until data.empty?
+      coord1, coord2, id1, id2 = data.shift(4)
+      out!(%[ <cell_quad id1='#{id1}' coord1='#{coord1}' id2='#{id2}' coord2='#{coord2}'/>])
     end
+    out!(%Q[</cell>])
   end
   
   def convert_rec_transition_links
