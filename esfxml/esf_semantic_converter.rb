@@ -678,7 +678,14 @@ module EsfSemanticConverter
 
   def convert_rec_grid_cells
     each_rec_member("grid_cells") do |ofs_end, i|
-      if i == 4 and @data[@ofs] == 0x46
+      if i == 0 and @data[@ofs] == 0x46
+        v = get_value![1].unpack("C*")
+        str = []
+        until v.empty?
+          str << v.shift(4).map{|x| "%02x" % x}.join(" ")
+        end
+        out!("<bin6>#{str.join(' ; ')}</bin6>")
+      elsif i == 4 and @data[@ofs] == 0x46
         v = get_value![1].unpack("C*")
         out!("<bin6> <!-- #{v.size/12} empty cells -->")
         until v.empty?
