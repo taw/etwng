@@ -543,7 +543,8 @@
     <field name='Time_of_day' type='string'/>
     <field name='Area' type='optstring'/>
     <field name='Environment' type='string'/>
-    <field name='unknown1' type='blob2'/>
+    <field name='unknown1' type='boolean'/>
+    <field name='unknown2' type='boolean'/>
   </table>
   <table name='battle_terrain_farm_walls_tables'>
     <field name='farm' pk='true' type='string'/>
@@ -1330,10 +1331,10 @@
     <field name='unknown4' type='int'/>
     <field name='unknown5' type='float'/>
     <field name='unknown6' type='float'/>
-    <field name='unknown7' type='int'/>
-    <field name='unknown8' type='int'/>
-    <field name='unknown9' type='boolean'/>
-    <field name='unknown10' type='boolean'/>
+    <field name='unknown7' type='boolean'/>
+    <field name='unknown8' type='boolean'/>
+    <field name='unknown9' type='int'/>
+    <field name='unknown10' type='int'/>
   </table>
   <table name='dilemmas_tables'>
     <field name='unknown1' type='boolean'/>
@@ -2436,10 +2437,9 @@
     <field fkey='factions_tables.Faction_ID' name='Faction_IDRef' type='string'/>
     <field name='Name' type='string'/>
     <field name='unknown1' type='int'/>
-    <field name='unknown2' type='short'/>
-    <field name='unknown3' type='short'/>
-    <field name='unknown4' type='int'/>
-    <field name='unknown5' type='int'/>
+    <field name='gender' type='string'/>
+    <field name='unknown2' type='int'/>
+    <field name='unknown3' type='int'/>
   </table>
   <table name='names_tables'>
     <field name='Name_ID' pk='true' type='string'/>
@@ -2571,17 +2571,18 @@
     <field name='Damage_x0020_Range_effectiveness' type='optstring'/>
     <field name='unknown11' type='optstring'/>
     <field name='unknown12' type='optstring'/>
-    <field name='unknown13' type='short'/>
-    <field name='unknown14' type='float'/>
+    <field name='unknown13' type='boolean'/>
+    <field name='unknown14' type='boolean'/>
+    <field name='unknown15' type='float'/>
     <field name='Base_Reload__x0020_Time_x0020__x0023_Added_to_animation' type='int'/>
-    <field name='unknown15' type='int'/>
-    <field name='unknown16' type='optstring'/>
-    <field name='unknown17' type='float'/>
+    <field name='unknown16' type='int'/>
+    <field name='unknown17' type='optstring'/>
     <field name='unknown18' type='float'/>
-    <field name='unknown19' type='string'/>
+    <field name='unknown19' type='float'/>
     <field name='unknown20' type='string'/>
-    <field name='unknown21' type='optstring'/>
+    <field name='unknown21' type='string'/>
     <field name='unknown22' type='optstring'/>
+    <field name='unknown23' type='optstring'/>
     <field fkey='projectile_impacts_tables.Projectile_IDRef' name='Impact' type='optstring'/>
     <field name='unknown24' type='optstring' version_start='2'/>
   </table>
@@ -3168,7 +3169,7 @@
   </table>
   <table name='unit_stats_naval_crew_tables'>
     <field name='Crew_ID' pk='true' type='string'/>
-    <field name='unknown1' type='float'/>
+    <field name='unknown1' type='int'/>
     <field name='Accuracy' type='int'/>
     <field name='Melee_Skill' type='int'/>
     <field name='Melee_defence' type='int'/>

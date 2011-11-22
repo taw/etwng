@@ -543,7 +543,8 @@
     <xs:attribute name='Time_of_day' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' name='Area' type='xs:string' />
     <xs:attribute name='Environment' type='xs:string' use='required' />
-    <xs:attribute msprop:BlobLength='2' name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='unknown1' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown2' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="battle_terrain_farm_walls_tables">
     <xs:attribute name='farm' type='xs:string' use='required' />
@@ -1330,10 +1331,10 @@
     <xs:attribute name='unknown4' type='xs:int' use='required' />
     <xs:attribute name='unknown5' type='xs:float' use='required' />
     <xs:attribute name='unknown6' type='xs:float' use='required' />
-    <xs:attribute name='unknown7' type='xs:int' use='required' />
-    <xs:attribute name='unknown8' type='xs:int' use='required' />
-    <xs:attribute name='unknown9' type='xs:boolean' use='required' />
-    <xs:attribute name='unknown10' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown7' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown8' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown9' type='xs:int' use='required' />
+    <xs:attribute name='unknown10' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="dilemmas_tables">
     <xs:attribute name='unknown1' type='xs:boolean' use='required' />
@@ -2436,10 +2437,9 @@
     <xs:attribute name='Faction_IDRef' type='xs:string' use='required' />
     <xs:attribute name='Name' type='xs:string' use='required' />
     <xs:attribute name='unknown1' type='xs:int' use='required' />
-    <xs:attribute name='unknown2' type='xs:short' use='required' />
-    <xs:attribute name='unknown3' type='xs:short' use='required' />
-    <xs:attribute name='unknown4' type='xs:int' use='required' />
-    <xs:attribute name='unknown5' type='xs:int' use='required' />
+    <xs:attribute name='gender' type='xs:string' use='required' />
+    <xs:attribute name='unknown2' type='xs:int' use='required' />
+    <xs:attribute name='unknown3' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="names_tables">
     <xs:attribute name='Name_ID' type='xs:string' use='required' />
@@ -2571,17 +2571,18 @@
     <xs:attribute msprop:Optional='true' name='Damage_x0020_Range_effectiveness' type='xs:string' />
     <xs:attribute msprop:Optional='true' name='unknown11' type='xs:string' />
     <xs:attribute msprop:Optional='true' name='unknown12' type='xs:string' />
-    <xs:attribute name='unknown13' type='xs:short' use='required' />
-    <xs:attribute name='unknown14' type='xs:float' use='required' />
+    <xs:attribute name='unknown13' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown14' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown15' type='xs:float' use='required' />
     <xs:attribute name='Base_Reload__x0020_Time_x0020__x0023_Added_to_animation' type='xs:int' use='required' />
-    <xs:attribute name='unknown15' type='xs:int' use='required' />
-    <xs:attribute msprop:Optional='true' name='unknown16' type='xs:string' />
-    <xs:attribute name='unknown17' type='xs:float' use='required' />
+    <xs:attribute name='unknown16' type='xs:int' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown17' type='xs:string' />
     <xs:attribute name='unknown18' type='xs:float' use='required' />
-    <xs:attribute name='unknown19' type='xs:string' use='required' />
+    <xs:attribute name='unknown19' type='xs:float' use='required' />
     <xs:attribute name='unknown20' type='xs:string' use='required' />
-    <xs:attribute msprop:Optional='true' name='unknown21' type='xs:string' />
+    <xs:attribute name='unknown21' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' name='unknown22' type='xs:string' />
+    <xs:attribute msprop:Optional='true' name='unknown23' type='xs:string' />
     <xs:attribute msprop:Optional='true' name='Impact' type='xs:string' />
     <xs:attribute msprop:Optional='true' msprop:VersionStart='2' name='unknown24' type='xs:string' />
   </xs:complexType>
@@ -3168,7 +3169,7 @@
   </xs:complexType>
   <xs:complexType name="unit_stats_naval_crew_tables">
     <xs:attribute name='Crew_ID' type='xs:string' use='required' />
-    <xs:attribute name='unknown1' type='xs:float' use='required' />
+    <xs:attribute name='unknown1' type='xs:int' use='required' />
     <xs:attribute name='Accuracy' type='xs:int' use='required' />
     <xs:attribute name='Melee_Skill' type='xs:int' use='required' />
     <xs:attribute name='Melee_defence' type='xs:int' use='required' />
