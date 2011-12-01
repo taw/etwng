@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 
 require "pp"
+require "fileutils"
+require "pathname"
 
 class Float
   def pretty_single
@@ -111,36 +113,43 @@ files_all = Dir["samples/*"].sort_by{|fn| [File.size(fn), fn]}
 # This looks misparsed:
 # samples/buildings-fort_euro_wooden-fort_euro_wooden_tech.cs2.parsed
 
-files_all.each{|fn|
+files_to_process = ARGV.empty? ? files_all : ARGV
+
+FileUtils.mkdir_p "out"
+
+files_to_process.each{|fn|
+  fnout = "out/" + File.basename(fn).sub(/\.cs2\.parsed\z/, "") + ".txt"
+  txt = []
+  
   begin
     cs2 = CS2File.new(fn)
     puts fn
-    p (0..5).map{ cs2.get_flt }
-    p cs2.get_str
-    p (0..7).map{ cs2.get_flt }
-    p (0..7).map{ cs2.get_flt }
+    txt << (0..5).map{ cs2.get_flt }
+    txt << cs2.get_str
+    txt << (0..7).map{ cs2.get_flt }
+    txt << (0..7).map{ cs2.get_flt }
 
-    p [cs2.get_u4, cs2.get_str, cs2.get_str]
-    p (0..7).map{ cs2.get_flt }
-    p (0..7).map{ cs2.get_flt }
+    txt << [cs2.get_u4, cs2.get_str, cs2.get_str]
+    txt << (0..7).map{ cs2.get_flt }
+    txt << (0..7).map{ cs2.get_flt }
 
     # Levels of destruction ???
     cnt = cs2.get_u4
-    p [:cnt, cnt]
+    txt << [:cnt, cnt]
 
-    p [:nth, 0]
-    p [cs2.get_str]
-    p [cs2.get_z4]
-    p cs2.get_collision3d
-    pp cs2.get_u4_ary{ cs2.get_collision3d } # Windows
-    pp cs2.get_u4_ary{ cs2.get_collision3d } # Doors
-    pp cs2.get_u4_ary{ cs2.get_collision3d } # Gates
+    txt << [:nth, 0]
+    txt << [cs2.get_str]
+    txt << [cs2.get_z4]
+    txt << cs2.get_collision3d
+    txt << cs2.get_u4_ary{ cs2.get_collision3d } # Windows
+    txt << cs2.get_u4_ary{ cs2.get_collision3d } # Doors
+    txt << cs2.get_u4_ary{ cs2.get_collision3d } # Gates
 
 
     if cnt > 1
-      p [:nth, 1]
-      p [cs2.get_u4, cs2.get_str]
-      p cs2.get_v3a
+      txt << [:nth, 1]
+      txt << [cs2.get_u4, cs2.get_str]
+      txt << cs2.get_v3a
 
       # pp cs2.get(64).unpack("V*")
     end
@@ -168,9 +177,10 @@ files_all.each{|fn|
     # pp cs2.get_v3
     # pp cs2.get(28).unpack("V*")
   
-    puts "#{cs2.bytes_left}/#{cs2.size} bytes to go" 
-    puts "", "", ""
-    
+    txt << "#{cs2.bytes_left}/#{cs2.size} bytes to go" 
+    File.open(fnout, 'w'){|fhout|
+      fhout.puts txt.map(&:inspect)
+    }
   rescue
     puts "FAIL #{fn}: #{$!}"
   end
