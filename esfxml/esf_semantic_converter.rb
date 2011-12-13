@@ -599,6 +599,10 @@ module EsfSemanticConverter
     end
   end
 
+  def convert_rec_OBSTACLE
+    autoconvert_v2x "OBSTACLE", 7, 8
+  end
+
   def convert_rec_OBSTACLE_BOUNDARIES
     data, = get_rec_contents(:bin8)
     data = data.unpack("V*")
