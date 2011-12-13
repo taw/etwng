@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+Colors = ["\x00", "\xFF", "\xAA", "\x77"].map{|r|
+           ["\x00", "\xFF", "\xAA", "\x77"].map{|g|
+             ["\x00", "\xFF", "\xAA", "\x77"].map{|b|
+              r+g+b
+             }
+           }
+         }.flatten
+
+def parse_pgm(path_in)
+  File.open(path_in, 'rb'){|fh_in|
+    p5 = fh_in.readline
+    sz = fh_in.readline
+    l255 = fh_in.readline
+    data_in = fh_in.read
+
+    raise "Format error" unless p5 == "P5\n" and l255 == "255\n" and sz =~ /\A(\d+) (\d+)\n\z/
+    xsz, ysz = $1.to_i, $2.to_i
+    raise "Bad file size" unless data_in.size == xsz * ysz
+    return [xsz, ysz, data_in]
+  }
+end
+
+def convert!(path_in, path_out)
+  xsz, ysz, data_in = parse_pgm(path_in)
+
+  data_out = ""
+  data_in.size.times{|i|
+    c = data_in[i]
+    raise "Too many colors: #{c}" if c > Colors.size
+    data_out << Colors[c]
+  }
+
+  File.open(path_out, 'wb'){|fh_out|
+    fh_out.print "P6\n#{xsz} #{ysz}\n255\n" + data_out
+  }
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input_file.pgm output_file.ppm"
+end
+
+path_in, path_out = *ARGV
+
+convert!(path_in, path_out)
