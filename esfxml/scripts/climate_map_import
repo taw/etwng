@@ -71,7 +71,7 @@ def convert!(path_in, path_out)
   }
 
   File.open(path_out, 'wb'){|fh_out|
-    fh_out.print "P5\n#{xsz} #{ysz}\n255\n" + data_out
+    fh_out.print "P5\n#{xsz} #{ysz}\n255\n" + data_out.reverse
   }
 end
 

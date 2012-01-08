@@ -55,6 +55,7 @@ end
 
 def convert!(path_in, path_out)
   xsz, ysz, data_in = parse_pgm(path_in)
+  data_in = data_in.reverse
 
   data_out = ""
   data_in.size.times{|i|
