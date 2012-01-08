@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "nokogiri"
+require "pp"
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} grid_data_in.xml output.tsv"
+  exit 1
+end
+
+file_in, file_out = *ARGV
+
+content = File.open(file_in, 'rb', &:read)
+
+doc = Nokogiri::XML.parse(content)
+
+File.open(file_out, 'wb'){|fh_out|
+  doc.xpath("//bin6").each{|elem|
+    c = elem.content.strip.gsub(/\n\s+/, "\n")
+    next if c.empty?
+    fh_out.puts c.gsub(/\s*;\s*/, "\t")
+  }
+}
