@@ -320,11 +320,18 @@ module EsfSemanticConverter
       out!("<u4_ary>")
       cnt = 0
       scale = 0.5**20
-      data.each do |i|
+      until data.empty?
+        i = data.shift
         if cnt == 0
           cnt = i
           out!("")
           out!(" #{i} <!-- vertices count -->")
+          nx_has_0123 = !(data[0, i] & [0,1,2,3]).empty?
+          if nx_has_0123
+            # out!(" <!-- open line -->")
+          else
+            out!(" <!-- closed line -->")
+          end
         else
           x, y = @pathfinding_vertices_ary[i]
           x = x*scale
