@@ -284,6 +284,12 @@ module EsfSemanticConverter
         x = get_value![1] * 0.5**20
         y = get_value![1] * 0.5**20
         out!(%Q[<v2x x="#{x}" y="#{y}"/> <!-- starting point -->])
+      elsif i == 1 and @data[@ofs] == 0x07
+        v = get_value![1]
+        out!(%Q[<u2>#{v}</u2> <!-- starting x cell -->])
+      elsif i == 2 and @data[@ofs] == 0x07
+        v = get_value![1]
+        out!(%Q[<u2>#{v}</u2> <!-- starting y cell -->])
       elsif i == 3 and @data[@ofs] == 0x04
         v = get_value![1]
         vs = v * 0.5**20
