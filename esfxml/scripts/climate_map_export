@@ -55,14 +55,18 @@ end
 
 def convert!(path_in, path_out)
   xsz, ysz, data_in = parse_pgm(path_in)
-  data_in = data_in.reverse
 
-  data_out = ""
-  data_in.size.times{|i|
-    c = data_in[i]
-    raise "Too many colors: #{c}" if c > Colors.size
-    data_out << Colors[c]
+  data_out = []
+  ysz.times{|y|
+    row = ""
+    xsz.times{|x|
+      c = data_in[y*xsz+x]
+      raise "Too many colors: #{c}" if c > Colors.size
+      row << Colors[c]
+    }
+    data_out << row
   }
+  data_out = data_out.reverse.join
 
   File.open(path_out, 'wb'){|fh_out|
     fh_out.print "P6\n#{xsz} #{ysz}\n255\n" + data_out

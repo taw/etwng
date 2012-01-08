@@ -62,16 +62,21 @@ def convert!(path_in, path_out)
     known_colors[c] = [i].pack("C")
   }
 
-  data_out = ""
-  (data_in.size/3).times{|i|
-    c = data_in[i*3,3]
-    ci = known_colors[c]
-    raise "Unknown color #{c.unpack("C*").inspect}" unless ci
-    data_out << ci
+  data_out = []
+  ysz.times{|y|
+    row = ""
+    xsz.times{|x|
+      c = data_in[(y*xsz+x)*3,3]
+      ci = known_colors[c]
+      raise "Unknown color #{c.unpack("C*").inspect}" unless ci
+      row << ci
+    }
+    data_out << row
   }
+  data_out = data_out.reverse.join
 
   File.open(path_out, 'wb'){|fh_out|
-    fh_out.print "P5\n#{xsz} #{ysz}\n255\n" + data_out.reverse
+    fh_out.print "P5\n#{xsz} #{ysz}\n255\n" + data_out
   }
 end
 
