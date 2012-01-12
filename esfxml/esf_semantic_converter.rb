@@ -300,6 +300,12 @@ module EsfSemanticConverter
       elsif i == 5 and @data[@ofs] == 0x08
         v = get_value![1]
         out!(%Q[<u>#{v}</u> <!-- rows -->])
+      elsif i == 7 and @data[@ofs] == 0x07
+        v = get_value![1]
+        out!(%Q[<u2>#{v}</u2> <!-- number of passable regions -->])
+      elsif i == 8 and @data[@ofs] == 0x07
+        v = get_value![1]
+        out!(%Q[<u2>#{v}</u2> <!-- number of listed regions (generally equals to the previous number, but not compulsory) -->])
       end
     end
   end
