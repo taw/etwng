@@ -1,0 +1,262 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class File
+  def self.write(path, contents)
+    File.open(path, 'wb'){|fh| fh.write contents}
+  end
+end
+
+Etw_region_names = Hash[[
+ [0, "atlantic_ocean_se"],
+ [1, "indian_ocean"],
+ [2, "southern_ocean"],
+ [3, "unexplorable"],
+ [4, "kalahari"],
+ [5, "pacific_ocean"],
+ [6, "south_africa"],
+ [7, "atlantic_ocean_sw"],
+ [8, "congo_impassable"],
+ [9, "central_africa"],
+ [10, "arabian_sea"],
+ [11, "east_africa"],
+ [12, "hausa"],
+ [13, "arabia"],
+ [14, "sahara"],
+ [15, "atlantic_ocean_e"],
+ [16, "china"],
+ [17, "turkoman"],
+ [18, "hindukush"],
+ [19, "himalayas"],
+ [20, "siberia"],
+ [21, "atlantic_ocean_ne"],
+ [22, "arctic_ocean"],
+ [23, "greenland"],
+ [24, "impassable"],
+ [25, "red_sea"],
+ [26, "greenland_sea"],
+ [27, "doldrums"],
+ [28, "ivory_coast"],
+ [29, "straits_of_mozambique"],
+ [30, "rift_valley"],
+ [31, "lakes"],
+ [32, "east_indies"],
+ [33, "south_china_sea"],
+ [34, "indochina"],
+ [35, "egypt"],
+ [36, "all"],
+ [37, "morocco"],
+ [38, "persian_gulf"],
+ [39, "tripoli"],
+ [40, "palestine"],
+ [41, "wilderness_arabia"],
+ [42, "persia"],
+ [43, "baluchistan"],
+ [44, "tunis"],
+ [45, "mesopotamia"],
+ [46, "afghanistan"],
+ [47, "algiers"],
+ [48, "mediterranean_sea"],
+ [49, "syria"],
+ [50, "spain"],
+ [51, "malta"],
+ [52, "morea"],
+ [53, "greece"],
+ [54, "anatolia"],
+ [55, "azerbaijan"],
+ [56, "wilderness_khiva"],
+ [57, "portugal"],
+ [58, "sardinia"],
+ [59, "naples"],
+ [60, "armenia"],
+ [61, "caspian_sea"],
+ [62, "corsica"],
+ [63, "the_papal_states"],
+ [64, "adriatic_sea"],
+ [65, "rumelia"],
+ [66, "black_sea"],
+ [67, "georgia"],
+ [68, "chechenya-dagestan"],
+ [69, "bay_of_biscay"],
+ [70, "france"],
+ [71, "savoy"],
+ [72, "genoa"],
+ [73, "austria"],
+ [74, "central_italy"],
+ [75, "croatia"],
+ [76, "bosnia"],
+ [77, "serbia"],
+ [78, "bulgaria"],
+ [79, "crimea"],
+ [80, "don_voisko"],
+ [81, "alps"],
+ [82, "milan"],
+ [83, "venice"],
+ [84, "bavaria"],
+ [85, "wurttemberg"],
+ [86, "hungary"],
+ [87, "transylvania"],
+ [88, "moldavia"],
+ [89, "tatariya"],
+ [90, "astrakhan"],
+ [91, "england"],
+ [92, "english_channel"],
+ [93, "alsace"],
+ [94, "rhineland"],
+ [95, "flanders"],
+ [96, "bohemia"],
+ [97, "saxony"],
+ [98, "silesia"],
+ [99, "galicia"],
+ [100, "belarus"],
+ [101, "ukraine"],
+ [102, "irish_sea"],
+ [103, "ireland"],
+ [104, "north_sea"],
+ [105, "hannover"],
+ [106, "netherlands"],
+ [107, "west_pommerania"],
+ [108, "west_prussia"],
+ [109, "poland"],
+ [110, "prussia"],
+ [111, "lithuania"],
+ [112, "muscovy"],
+ [113, "bashkira"],
+ [114, "scotland"],
+ [115, "denmark"],
+ [116, "baltic_sea"],
+ [117, "sweden"],
+ [118, "courland"],
+ [119, "komi"],
+ [120, "norway"],
+ [121, "estonia_and_livonia"],
+ [122, "ingria"],
+ [123, "arkhangelsk"],
+ [124, "finland"],
+ [125, "karelia"],
+ [126, "iceland"],
+ [127, "norwegian_sea"],
+ [128, "gibraltar"],
+ [129, "carnatica"],
+ [130, "ceylon"],
+ [131, "bay_of_bengal"],
+ [132, "mysore"],
+ [133, "malabar"],
+ [134, "bijapur"],
+ [135, "hyderabad"],
+ [136, "orissa"],
+ [137, "ahmadnagar"],
+ [138, "berar"],
+ [139, "gujarat"],
+ [140, "malwa"],
+ [141, "bengal"],
+ [142, "sindh"],
+ [143, "rajpootana"],
+ [144, "hindustan"],
+ [145, "punjab"],
+ [146, "kashmir"],
+ [147, "amazonas"],
+ [148, "brazil_coast"],
+ [149, "atlantic_ocean_w"],
+ [150, "western_plain"],
+ [151, "atlantic_ocean_nw"],
+ [152, "beaver_territory"],
+ [153, "arctic_w_ocean"],
+ [154, "hudson_bay"],
+ [155, "the_caribbean_sea"],
+ [156, "new_grenada"],
+ [157, "french_guyana"],
+ [158, "dutch_guyana"],
+ [159, "new_andalusia"],
+ [160, "panama"],
+ [161, "guatemala"],
+ [162, "curacao"],
+ [163, "windward_islands"],
+ [164, "new_spain"],
+ [165, "leeward_islands"],
+ [166, "gulf_of_mexico"],
+ [167, "jamaica"],
+ [168, "hispaniola"],
+ [169, "wilderness_mexico"],
+ [170, "cuba"],
+ [171, "florida"],
+ [172, "bahamas"],
+ [173, "tejas"],
+ [174, "new_mexico"],
+ [175, "wilderness_tejas"],
+ [176, "lower_louisiana"],
+ [177, "cherokee_territory"],
+ [178, "georgia_usa"],
+ [179, "carolinas"],
+ [180, "wilderness_great_plains"],
+ [181, "upper_louisiana"],
+ [182, "kaintuck_territory"],
+ [183, "virginia"],
+ [184, "pennsylvania"],
+ [185, "maryland"],
+ [186, "michigan_territory"],
+ [187, "algonquin_territory"],
+ [188, "great_lakes"],
+ [189, "new_york"],
+ [190, "new_england"],
+ [191, "ontario"],
+ [192, "iroquois_territory"],
+ [193, "maine"],
+ [194, "acadia"],
+ [195, "great_plains"],
+ [196, "wilderness_hudsonsbay"],
+ [197, "huron_territory"],
+ [198, "new_france"],
+ [199, "wilderness_canada"],
+ [200, "newfoundland"],
+ [201, "ruperts_land"],
+ [202, "labrador"],
+ [203, "northwest_territories"],
+ [204, "trinidad_tobago"],
+]]
+
+class AnnotatePathfinding < EsfScript
+  def run!
+    update_each_xml("grid_data*", "rec[@type='grid_data']") do |gd|
+      i2a = gd.xpath("i2_ary")[0]
+      u2a = gd.xpath("u2_ary")[0]
+
+      regions = i2a.content.scan(/\d+/).map{|r| [r.to_i, Etw_region_names[r.to_i]]}
+
+      i2a.inner_html = "\n" + regions.map{|r,n| "  %3d <!-- %s -->\n" % [r, n] }.join + " "
+
+      u2a_data = u2a.content.scan(/\d+/).map{|x| x.to_i}
+
+      idx_to_names = []
+      out = []
+
+      while u2a_data[0] != 0
+        i    = u2a_data.shift
+        name = regions[i-1][1]
+        idx_to_names << name
+        out << " #{i} <!-- #{name} -->\n"
+      end
+
+      u2a_data.shift # shift 0 out
+      out << "\n 0 <!-- separator -->\n\n"
+
+      until u2a_data.empty?
+        sz = u2a_data.shift
+        elems = (0...sz).map{ u2a_data.shift }
+        elems_names = elems.map{|i| idx_to_names[i-1] }
+        out << " #{sz} #{elems.join(", ")} <!-- #{elems_names.join(", ") }-->\n"
+      end
+
+
+      u2a.inner_html = "\n" + out.join + " "
+
+      true
+    end
+  end
+end
+
+AnnotatePathfinding.new
