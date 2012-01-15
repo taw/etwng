@@ -1,0 +1,89 @@
+#!/usr/bin/env ruby
+
+Colors = [
+  [196, 215, 155], #  0 lc_tundra
+  [204, 255, 255], #  1 lc_boreal
+  [255,  80,  80], #  2 lc_eu_south_s_arid
+  [184, 204, 228], #  3 lc_eu_south_humid
+  [ 79, 129, 189], #  4 lc_mediterranean
+  [191,   0,   0], #  5 lc_as_trop_s_arid
+  [255, 255,   0], #  6 lc_desert
+  [ 83, 141, 213], #  7 lc_as_trop_humid
+  [118, 147,  60], #  8 lc_steppe
+  [220, 230, 241], #  9 lc_as_temp_humid
+  [255, 100, 100], # 10 lc_as_temp_s_arid
+  [255, 255, 153], # 11 lc_sand_desert
+  [153, 102,  51], # 12 lc_eu_north_s_arid
+  [141, 180, 266], # 13 lc_am_tropical_humid
+  [197, 217, 241], # 14 lc_eu_central_humid
+  [255, 204, 102], # 15 lc_am_desert
+  [192,  80,  77], # 16 lc_am_se_usa
+  [ 31,  73, 125], # 17 lc_am_us_east
+  [146, 208,  80], # 18 lc_am_great_plains
+  [149, 179, 215], # 19 lc_eu_north_humid
+  [  0, 128,   0], # 20 lc_am_jungle
+  [247, 150,  70], # 21 lc_am_s_arid
+  [255, 255, 255], # 22 sc_arctic
+  [125, 160, 200], # 23 sc_temperate
+  [100, 255, 100], # 24 sc_subtropic
+  [  0, 176,  80], # 25 sc_tropic
+  [ 54,  96, 146], # 26 sc_mediterranean
+  [217, 217, 217], # 27 sc_arctic_coast
+  [155, 180, 210], # 28 sc_temperate_coast
+  [155, 255, 155], # 29 sc_subtropic_coast
+  [  0, 255,  80], # 30 sc_tropic_coast
+  [ 75, 172, 198], # 31 sc_lake
+  [153, 102,   0], # 32 lc_am_us_central
+  [128, 100, 162], # 33 e3_england
+  [150,  54,  52], # 34 e3_america
+  [226, 107,  10], # 35 e3_arid
+].map{|r,g,b| [r,g,b].pack("CCC")}
+
+
+def parse_ppm(path_in)
+  File.open(path_in, 'rb'){|fh_in|
+    p5 = fh_in.readline
+    sz = fh_in.readline
+    l255 = fh_in.readline
+    data_in = fh_in.read
+
+    raise "Format error" unless p5 == "P6\n" and l255 == "255\n" and sz =~ /\A(\d+) (\d+)\n\z/
+    xsz, ysz = $1.to_i, $2.to_i
+    raise "Bad file size" unless data_in.size == xsz * ysz * 3
+    return [xsz, ysz, data_in]
+  }
+end
+
+def convert!(path_in, path_out)
+  xsz, ysz, data_in = parse_ppm(path_in)
+
+  known_colors = {}
+  Colors.each_with_index{|c,i|
+    known_colors[c] = [i].pack("C")
+  }
+
+  data_out = []
+  ysz.times{|y|
+    row = ""
+    xsz.times{|x|
+      c = data_in[(y*xsz+x)*3,3]
+      ci = known_colors[c]
+      raise "Unknown color #{c.unpack("C*").inspect}" unless ci
+      row << ci
+    }
+    data_out << row
+  }
+  data_out = data_out.reverse.join
+
+  File.open(path_out, 'wb'){|fh_out|
+    fh_out.print "P5\n#{xsz} #{ysz}\n255\n" + data_out
+  }
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input_file.ppm output_file.pgm"
+end
+
+path_in, path_out = *ARGV
+
+convert!(path_in, path_out)

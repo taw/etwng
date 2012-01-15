@@ -284,6 +284,12 @@ module EsfSemanticConverter
         x = get_value![1] * 0.5**20
         y = get_value![1] * 0.5**20
         out!(%Q[<v2x x="#{x}" y="#{y}"/> <!-- starting point -->])
+      elsif i == 1 and @data[@ofs] == 0x07
+        v = get_value![1]
+        out!(%Q[<u2>#{v}</u2> <!-- starting x cell -->])
+      elsif i == 2 and @data[@ofs] == 0x07
+        v = get_value![1]
+        out!(%Q[<u2>#{v}</u2> <!-- starting y cell -->])
       elsif i == 3 and @data[@ofs] == 0x04
         v = get_value![1]
         vs = v * 0.5**20
@@ -294,6 +300,12 @@ module EsfSemanticConverter
       elsif i == 5 and @data[@ofs] == 0x08
         v = get_value![1]
         out!(%Q[<u>#{v}</u> <!-- rows -->])
+      elsif i == 7 and @data[@ofs] == 0x07
+        v = get_value![1]
+        out!(%Q[<u2>#{v}</u2> <!-- number of passable regions -->])
+      elsif i == 8 and @data[@ofs] == 0x07
+        v = get_value![1]
+        out!(%Q[<u2>#{v}</u2> <!-- number of listed regions (generally equals to the previous number, but not compulsory) -->])
       end
     end
   end
@@ -314,11 +326,18 @@ module EsfSemanticConverter
       out!("<u4_ary>")
       cnt = 0
       scale = 0.5**20
-      data.each do |i|
+      until data.empty?
+        i = data.shift
         if cnt == 0
           cnt = i
           out!("")
           out!(" #{i} <!-- vertices count -->")
+          nx_has_0123 = !(data[0, i] & [0,1,2,3]).empty?
+          if nx_has_0123
+            # out!(" <!-- open line -->")
+          else
+            out!(" <!-- closed line -->")
+          end
         else
           x, y = @pathfinding_vertices_ary[i]
           x = x*scale
@@ -597,6 +616,10 @@ module EsfSemanticConverter
         i += 1
       end
     end
+  end
+
+  def convert_rec_OBSTACLE
+    autoconvert_v2x "OBSTACLE", 7, 8
   end
 
   def convert_rec_OBSTACLE_BOUNDARIES
