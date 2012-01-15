@@ -1,0 +1,93 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+require "pp"
+
+class CUF
+  attr_reader :data, :ofs, :path
+  
+  def initialize(path)
+    @path = path
+    @data = File.read(path)
+    @ofs  = 0
+  end
+
+  def basename
+    @basename ||= File.basename(path, ".cuf")
+  end
+  
+  def size
+    @data.size
+  end
+  
+  def get(n)
+    raise "Trying to read past end of file" unless @ofs+n <= size
+    rv = @data[@ofs, n]
+    @ofs += n
+    rv
+  end
+  
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+
+  def get_i2
+    get(2).unpack("s")[0]
+  end
+  
+  def get_header
+    raise "Header failure" unless get(4) == "CUF0"
+    rv = {
+      :a0     => get_i2,
+      :a1     => get_i2,
+      :height => get_i2,
+      :a3     => get(16).unpack("s*"),
+      :glyphs => get_u2,
+      :bytes  => get_u4,
+      :ax     => get_i2,
+    }
+    #get(30).unpack("s*")
+  end
+  
+  def get_glyph_table
+    rv = []
+    get(0x20000).unpack("s*").each_with_index{|glyph, char|
+      next if glyph == -1
+      charu = [char].pack("U")
+      rv << [charu, glyph]
+    }
+    rv
+  end
+  
+  def unpack!
+    @header      = get_header
+    @glyph_table = get_glyph_table
+    @rest        = get(size-ofs-350*350)
+    @x350        = get(350*350) # kerning class -> kerning class table? (mostly trivial)
+    FileUtils.mkdir_p "out"
+    File.open("out/#{basename}.header", "w"){|fh|
+      fh.puts @header.inspect
+      fh.puts @glyph_table.inspect
+    }
+    File.open("out/#{basename}.data", "w"){|fh|
+      fh.print @rest
+    }
+    File.open("out/#{basename}.x350", "w"){|fh|
+      fh.print @x350
+    }
+  end
+end
+
+
+cufs = ARGV
+if cufs.empty?
+  cufs = Dir["font/*.cuf"]
+end
+
+cufs.each{|cuf|
+  CUF.new(cuf).unpack!
+}
