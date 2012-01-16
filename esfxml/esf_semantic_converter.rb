@@ -1,6 +1,7 @@
 require "sea_grids"
 require "poi"
 require "commander_details"
+require "etw_region_names"
 
 module EsfSemanticConverter
   ConvertSemanticAry = Hash.new{|ht,k| ht[k]={}}
@@ -279,6 +280,8 @@ module EsfSemanticConverter
 ## pathfinding.esf arrays
 
   def convert_rec_grid_data
+    region_names = nil
+    
     each_rec_member("grid_data") do |ofs_end, i|
       if i == 0 and lookahead_v2x?(ofs_end)
         x = get_value![1] * 0.5**20
@@ -306,6 +309,43 @@ module EsfSemanticConverter
       elsif i == 8 and @data[@ofs] == 0x07
         v = get_value![1]
         out!(%Q[<u2>#{v}</u2> <!-- number of listed regions (generally equals to the previous number, but not compulsory) -->])
+      elsif i == 9 and @data[@ofs] == 0x43
+        v = get_value![1].unpack("s*")
+        region_names = {}
+
+        out!(%Q[<i2_ary>])
+        v.each_with_index{|r, i|
+          region_names[i+1] = region_name = EtwRegionNames[r]
+          out!(%Q[ #{r} <!-- #{region_name} -->])
+        }
+        out!(%Q[</i2_ary>])
+      elsif i == 10 and @data[@ofs] == 0x47 and region_names
+        v = get_value![1].unpack("v*")
+            
+        out!(%Q[<u2_ary>])
+
+        idx_to_names = []
+          
+        while v[0] != 0
+          i    = v.shift
+          name = region_names[i]
+          idx_to_names << name
+          out!(" #{i} <!-- #{name} -->")
+        end
+
+        v.shift
+        out!("")
+        out!(" 0 <!-- separator -->")
+        out!("")
+
+        until v.empty?
+          sz = v.shift
+          elems = (0...sz).map{ v.shift }
+          elems_names = elems.map{|i| idx_to_names[i-1] }
+          out!(%Q[ #{sz} #{elems.join(", ")} <!-- #{elems_names.join(", ") }-->])
+        end
+           
+        out!(%Q[</u2_ary>])
       end
     end
   end
