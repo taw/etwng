@@ -195,11 +195,26 @@ module EsfSemanticConverter
   end
 
   def convert_rec_slot_descriptions
-    annotate_rec "slot_descriptions",
-      [:v2_ary, 6] => "land area",
-      [:v2_ary, 7] => "sea area (present only for ports)",
-      [:v2_ary, 8] => "total area (different from land area only in ports)"
-  
+    v2a_annotations = [
+      "land area",
+      "sea area (present only for ports)",
+      "total area (different from land area only in ports)",
+    ]
+    each_rec_member("slot_descriptions") do |ofs_end, i|
+      next unless @data[@ofs] == 0x4c
+      annotation = v2a_annotations.shift
+      next unless annotation
+      annotation = "<!-- #{annotation} -->"
+
+      data = get_value![1].unpack("f*").map(&:pretty_single)
+      if data.empty?
+        out!("<v2_ary/>" + annotation)
+      else
+        out!("<v2_ary>" + annotation)
+        out!(" #{data.shift},#{data.shift}") until data.empty?
+        out!("</v2_ary>")
+      end
+    end
   end
 
   def convert_ary_region_keys
