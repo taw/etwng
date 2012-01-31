@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+
+def parse_pgm(path_in)
+  File.open(path_in, 'rb'){|fh_in|
+    p5 = fh_in.readline
+    sz = fh_in.readline
+    l255 = fh_in.readline
+    data_in = fh_in.read
+
+    raise "Format error" unless p5 == "P5\n" and l255 == "255\n" and sz =~ /\A(\d+) (\d+)\n\z/
+    xsz, ysz = $1.to_i, $2.to_i
+    raise "Bad file size" unless data_in.size == xsz * ysz
+    return [xsz, ysz, data_in]
+  }
+end
+
+unless ARGV.size == 5
+  STDERR.puts "Usage: #{$0} input.pgm stripe1.pgm stripe2.pgm stripe3.pgm stripe4.pgm"
+  exit 1
+end
+
+
+xsz, ysz, data = parse_pgm(ARGV[0])
+
+data = data.unpack("C*")
+
+stripes = [
+  File.open(ARGV[1], 'wb'),
+  File.open(ARGV[2], 'wb'),
+  File.open(ARGV[3], 'wb'),
+  File.open(ARGV[4], 'wb'),
+]
+
+stripes.each{|sf|
+  sf.print "P5\n#{xsz / 4} #{ysz}\n255\n"             
+}
+until data.empty?
+  stripes.each{|sf|
+    sf.print [data.shift].pack("C")              
+  }
+end
