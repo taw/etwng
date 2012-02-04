@@ -174,6 +174,12 @@ module EsfSemanticConverter
   
 ## regions.esf arrays
 
+  def convert_rec_query_info
+    annotate_rec "query_info",
+      [:u, 0] => "number of quads",
+      [:u, 1] => "number of cells (cell = quad not empty)"
+  end
+
   def convert_rec_cell
     (x,y), id, data = get_rec_contents(:v2, :u, :bin8)
     raise SemanticFali.new if (data.size % 16) != 0
