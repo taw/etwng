@@ -1082,6 +1082,9 @@ module XmlTagHandlers
   def on_text_node_u4_ary(attributes, buf, ctx)
     @esf.put_u4_ary buf.strip.split(/\s+/).map(&:to_i)
   end
+  def on_text_node_i1_ary(attributes, buf, ctx)
+    @esf.put_i1_ary buf.strip.split(/\s+/).map(&:to_i)
+  end
   def on_text_node_i4_ary(attributes, buf, ctx)
     @esf.put_i4_ary buf.strip.split(/\s+/).map(&:to_i)
   end

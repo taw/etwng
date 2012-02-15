@@ -73,13 +73,13 @@ module EsfConvertBasic
     end
   end
   def convert_40!
-    convert_4x!("bin0", &:to_hex_dump)
+    convert_4x!("bin0", &:to_hex_dump) # INVALID, no such type
   end
   def convert_41!
     convert_4x!("bool_ary"){|data| data.unpack("C*").join(" ")}
   end
   def convert_42!
-    convert_4x!("bin2", &:to_hex_dump)
+    convert_4x!("i1_ary"){|data| data.unpack("c*").join(" ")}
   end
   def convert_43!
     convert_4x!("i2_ary"){|data| data.unpack("v*").join(" ")}
@@ -88,10 +88,10 @@ module EsfConvertBasic
     convert_4x!("i4_ary"){|data| data.unpack("l*").join(" ")}
   end
   def convert_45!
-    convert_4x!("bin5", &:to_hex_dump)
+    convert_4x!("bin5", &:to_hex_dump) # 64-bit signed integer
   end
   def convert_46!
-    convert_4x!("bin6", &:to_hex_dump)
+    convert_4x!("bin6", &:to_hex_dump) # 8-bit unsigned integer
   end
   def convert_47!
     convert_4x!("u2_ary"){|data| data.unpack("v*").join(" ")}
@@ -100,7 +100,7 @@ module EsfConvertBasic
     convert_4x!("u4_ary"){|data| data.unpack("V*").join(" ")}
   end
   def convert_49!
-    convert_4x!("bin9", &:to_hex_dump)
+    convert_4x!("bin9", &:to_hex_dump) # 64-bit unsigned integer
   end
   def convert_4a!
     convert_4x!("flt_ary", &:to_flt_dump)
