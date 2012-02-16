@@ -69,6 +69,7 @@ end
 
 unless ARGV.size == 3
   STDERR.puts "Usage: #{$0} input_file.pgm output_file_1.ppm output_file_2.ppm"
+  exit
 end
 
 path_in, path_out_1, path_out_2 = *ARGV
