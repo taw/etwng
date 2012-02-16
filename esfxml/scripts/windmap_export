@@ -1,0 +1,76 @@
+#!/usr/bin/env ruby
+
+def parse_pgm(path_in)
+  File.open(path_in, 'rb'){|fh_in|
+    p5 = fh_in.readline
+    sz = fh_in.readline
+    l255 = fh_in.readline
+    data_in = fh_in.read
+
+    raise "Format error" unless p5 == "P5\n" and l255 == "255\n" and sz =~ /\A(\d+) (\d+)\n\z/
+    xsz, ysz = $1.to_i, $2.to_i
+    raise "Bad file size" unless data_in.size == xsz * ysz
+    raise "X must be even" unless xsz % 2 == 0
+    return [xsz, ysz, data_in]
+  }
+end
+
+def save_ppm!(path, xsz, ysz, data)
+  File.open(path, 'wb'){|fh_out|
+    fh_out.print "P6\n#{xsz} #{ysz}\n255\n"
+    fh_out.print data
+  }
+end
+
+def generate_color_table
+  ht = {}
+  out = []
+  (-128..-77).each{|c|
+    out << [c, (c+128)*5, 255, 0]
+  }
+  (-76..-26).each{|c|
+    out << [c, 255, 255-(c+76)*2, 255-(c+76)*5]
+  }
+  (-25..25).each{|c|
+    out << [c, 255, 255, (c+25)*5]
+  }
+  (26..76).each{|c|
+    out << [c, 255, 150-(c-26)*3, 0]
+  }
+  (77..127).each{|c|
+    out << [c, 250-(c-77)*5, 0, (c-77)*5]
+  }
+  out.each{|c,r,g,b|
+    ht[c] = [r,g,b].pack("CCC")
+  }
+  ht
+end
+
+def convert!(path_in, path_out_1, path_out_2)
+  xsz, ysz, data_in = parse_pgm(path_in)
+  
+  data_out_1 = ""
+  data_out_2 = ""
+  
+  data_in = data_in.unpack("c*")
+
+  colors = generate_color_table
+  
+  until data_in.empty?
+    c1 = data_in.shift
+    c2 = data_in.shift
+    data_out_1 << colors[c1]
+    data_out_2 << colors[c2]
+  end
+  
+  save_ppm!(path_out_1, xsz/2, ysz, data_out_1)
+  save_ppm!(path_out_2, xsz/2, ysz, data_out_2)
+end
+
+unless ARGV.size == 3
+  STDERR.puts "Usage: #{$0} input_file.pgm output_file_1.ppm output_file_2.ppm"
+end
+
+path_in, path_out_1, path_out_2 = *ARGV
+
+convert!(path_in, path_out_1, path_out_2)
