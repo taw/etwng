@@ -40,3 +40,4 @@ db/t?
 db/f?
 cuf/font
 cuf/out
+pack/*.pack
