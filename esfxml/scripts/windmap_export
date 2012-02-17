@@ -50,22 +50,25 @@ end
 def convert!(path_in, path_out_1, path_out_2)
   xsz, ysz, data_in = parse_pgm(path_in)
   
-  data_out_1 = ""
-  data_out_2 = ""
   
   data_in = data_in.unpack("c*")
-
   colors = generate_color_table
+
+  data_out_1 = []
+  data_out_2 = []
+  ysz.times{
+    row_1 = ""
+    row_2 = ""
+    (xsz/2).times{
+      row_1 << colors[data_in.shift]
+      row_2 << colors[data_in.shift]
+    }
+    data_out_1 << row_1
+    data_out_2 << row_2
+  }
   
-  until data_in.empty?
-    c1 = data_in.shift
-    c2 = data_in.shift
-    data_out_1 << colors[c1]
-    data_out_2 << colors[c2]
-  end
-  
-  save_ppm!(path_out_1, xsz/2, ysz, data_out_1)
-  save_ppm!(path_out_2, xsz/2, ysz, data_out_2)
+  save_ppm!(path_out_1, xsz/2, ysz, data_out_1.reverse.join)
+  save_ppm!(path_out_2, xsz/2, ysz, data_out_2.reverse.join)
 end
 
 unless ARGV.size == 3
