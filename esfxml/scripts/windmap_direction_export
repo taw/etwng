@@ -1,0 +1,90 @@
+#!/usr/bin/env ruby
+
+def parse_pgm(path_in)
+  File.open(path_in, 'rb'){|fh_in|
+    p5 = fh_in.readline
+    sz = fh_in.readline
+    l255 = fh_in.readline
+    data_in = fh_in.read
+
+    raise "Format error" unless p5 == "P5\n" and l255 == "255\n" and sz =~ /\A(\d+) (\d+)\n\z/
+    xsz, ysz = $1.to_i, $2.to_i
+    raise "Bad file size" unless data_in.size == xsz * ysz
+    raise "X must be even" unless xsz % 2 == 0
+    return [xsz, ysz, data_in]
+  }
+end
+
+def save_ppm!(path, xsz, ysz, data)
+  File.open(path, 'wb'){|fh_out|
+    fh_out.print "P6\n#{xsz} #{ysz}\n255\n"
+    fh_out.print data
+  }
+end
+
+def hsv_to_rgb(h,s,v)
+  return [v,v,v] if s == 0
+  
+  i = h.floor
+  f = h - i
+  p = v * (1-s)
+  q = v * (1-s*f)
+  t = v * (1-s*(1-f))
+  
+  case i
+  when 0
+    [v,t,p]
+  when 1
+    [q,v,p]
+  when 2
+    [p,v,t]
+  when 3
+    [p,q,v]
+  when 4
+    [t,p,v]
+  else # 5
+    [v,p,q]
+  end
+end
+
+def generate_color_table
+  rv = {}
+  (-128..127).each{|x|
+    (-128..127).each{|y|
+      v = Math.sqrt((x**2 + y**2) / (128.0*128.0*2.0))
+      h = 6 * (0.5 + Math.atan2(x, y) / (2 * Math::PI))
+      rgb = hsv_to_rgb(h, 0.8, v)
+      rv[[x,y]] = rgb.map{|u| u*255.0}.pack("CCC")
+    }
+  }
+  rv
+end
+
+def convert!(path_in, path_out)
+  xsz, ysz, data_in = parse_pgm(path_in)
+  
+  data_in = data_in.unpack("c*")
+  colors = generate_color_table
+
+  data_out = []
+  ysz.times{
+    row = ""
+    (xsz/2).times{
+      c1 = data_in.shift
+      c2 = data_in.shift
+      row << colors[[c1,c2]]
+    }
+    data_out << row
+  }
+  
+  save_ppm!(path_out, xsz/2, ysz, data_out.reverse.join)
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input_file.pgm output_file.ppm"
+  exit
+end
+
+path_in, path_out = *ARGV
+
+convert!(path_in, path_out)
