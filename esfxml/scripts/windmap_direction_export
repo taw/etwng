@@ -80,7 +80,7 @@ def convert!(path_in, path_out)
     data_out << row
   }
   
-  save_ppm!(path_out, xsz/2, ysz, data_out.join)
+  save_ppm!(path_out, xsz/2, ysz, data_out.reverse.join)
 end
 
 def generate_sample!(path_out)
