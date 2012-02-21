@@ -25,12 +25,15 @@ end
 def hsv_to_rgb(h,s,v)
   return [v,v,v] if s == 0
   
+  h -= 6 if h >= 6.0
+  raise "Out of bounds #{h}" unless h >= 0 and h < 6
+  
   i = h.floor
   f = h - i
   p = v * (1-s)
   q = v * (1-s*f)
   t = v * (1-s*(1-f))
-  
+
   case i
   when 0
     [v,t,p]
@@ -77,14 +80,35 @@ def convert!(path_in, path_out)
     data_out << row
   }
   
-  save_ppm!(path_out, xsz/2, ysz, data_out.reverse.join)
+  save_ppm!(path_out, xsz/2, ysz, data_out.join)
 end
 
+def generate_sample!(path_out)
+  colors = generate_color_table
+  data_out = []
+  
+  # X right, Y down
+  (-128..127).each{|y|
+    row = ""
+    (-128..127).each{|x|
+      row << colors[[x,y]]
+    }
+    data_out << row
+  }
+  save_ppm!(path_out, 256, 256, data_out.reverse.join)
+end
+  
+  
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} input_file.pgm output_file.ppm"
+  STDERR.puts "   or: #{$0} --sample output_file.ppm"
   exit
 end
 
 path_in, path_out = *ARGV
 
-convert!(path_in, path_out)
+if path_in == "--sample"
+  generate_sample!(path_out)
+else
+  convert!(path_in, path_out)
+end
