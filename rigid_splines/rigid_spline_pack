@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+
+require "pp"
+require "find"
+require "fileutils"
+require "pathname"
+
+class File
+  def self.write(path, cnt)
+    File.open(path, 'wb'){|fh| fh.write cnt}
+  end
+end
+
+class RigidSpline
+  def initialize(file_path)
+    lines = File.open(file_path, 'rb', &:readlines)
+    @header = eval(lines[0])
+    @points = lines[1..-1].map{|line| line.split(/\t/).map(&:to_f)}
+  end
+  
+  def rebuild
+    rv = "SPLN"
+    name = @header[3].unpack("U*")
+    rv << [@header[0], @header[1], name.size].pack("VVv")
+    rv << name.pack("v*") 
+    rv << [@header[2], @points.size].pack("VV")
+    @points.each{|x,y,z|
+      rv << [x,y,z].pack("fff")
+    }
+    rv
+  end
+  
+  def save(file_path)
+    File.write(file_path, rebuild)
+  end
+end
+
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} file.txt file.rigid_spline"
+  STDERR.puts "   or: #{$0} directory_in directory_out"
+  exit 1
+end
+
+source = Pathname(ARGV[0])
+target = Pathname(ARGV[1])
+
+if source.directory?
+  source.find do |source_file|
+    next unless source_file.file?
+    target_subdir   = target + source_file.dirname.relative_path_from(source)
+    target_basename = source_file.basename(".txt").to_s + ".rigid_spline"
+    target_file = target_subdir + target_basename
+    FileUtils.mkdir_p target_subdir
+    RigidSpline.new(source_file).save(target_file)
+  end
+else
+  RigidSpline.new(source).save(target)
+end

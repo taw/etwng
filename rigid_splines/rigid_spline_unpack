@@ -1,0 +1,95 @@
+#!/usr/bin/env ruby
+
+require "pp"
+require "find"
+require "fileutils"
+require "pathname"
+
+class Float
+  def pretty_single
+    begin
+      rv = (100_000.0 * self).round / 100_000.0
+      return rv if self != rv and [self].pack("f") == [rv].pack("f")
+      self
+    rescue
+      self
+    end
+  end
+end
+
+class File
+  def self.write(path, cnt)
+    File.open(path, 'wb'){|fh| fh.write cnt}
+  end
+end
+
+class RigidSpline
+  def initialize(file_path)
+    @file_path = file_path
+    @data = File.open(file_path, 'rb', &:read)
+    @ofs = 0
+    fail "Not a rigid_spline" unless get(4) == "SPLN"
+  end
+  def eof?
+    @ofs == @data.size
+  end
+
+  def get(size)
+    fail "Trying to read past end of file" if size+@ofs > @data.size
+    rv = @data[@ofs, size]
+    @ofs += size
+    rv
+  end
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  def get_s
+    get(get_u2*2).unpack("v*").pack("U*")
+  end
+  def get_f
+    get(4).unpack("f")[0] # .pretty_single
+  end  
+
+  def to_txt
+    u1 = get_u4
+    u2 = get_u4
+    name = get_s
+    u3 = get_u4
+    sz = get_u4
+    data = (0...sz).map{ [get_f, get_f, get_f] }
+    raise "Too much data" unless eof?
+    [u1, u2, u3, name].inspect + "\n" + data.map{|x,y,z| [x,y,z].join("\t") + "\n"}.join
+  end
+
+  def save(target)
+    File.write(target, to_txt)
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} file.rigid_spline file.txt"
+  STDERR.puts "   or: #{$0} directory_in directory_out"
+  exit 1
+end
+
+source = Pathname(ARGV[0])
+target = Pathname(ARGV[1])
+
+if source.directory?
+  sources = []
+  source.find do |source_file|
+    sources << source_file if source_file.file?
+  end
+  sources.sort.each do |source_file|
+    target_subdir   = target + source_file.dirname.relative_path_from(source)
+    target_basename = source_file.basename(".rigid_spline").to_s + ".txt"
+    target_file = target_subdir + target_basename
+    FileUtils.mkdir_p target_subdir
+    RigidSpline.new(source_file).save(target_file)
+  end
+else
+  RigidSpline.new(source).save(target)
+end

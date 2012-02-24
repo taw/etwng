@@ -33,11 +33,10 @@ unit_variant/samples
 etw
 saves
 *~
-
-
 autodetector
 db/t?
 db/f?
 cuf/font
 cuf/out
 pack/*.pack
+rigid_splines/samples
