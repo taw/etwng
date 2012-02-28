@@ -293,8 +293,34 @@ module EsfSemanticConverter
     end
     out!("</ary>")
   end
+
+## trade_routes.esf
+
+  def convert_rec_SPLINES
+    each_rec_member("SPLINES") do |ofs_end, i|
+      if @data[@ofs] == 0x01 and i == 1
+        tag = get_value![1] ? "<yes/>" : "<no/>"
+        out!("#{tag}<!-- is land -->")
+      end
+    end
+  end
+
+  def convert_rec_ROUTES
+    each_rec_member_nth_by_type("ROUTES") do |ofs_end, j|
+      if @data[@ofs] == 0x08 and j == 0
+        val = get_value![1]
+        out!("<u>#{val}</u><!-- start point -->")
+      elsif @data[@ofs] == 0x08 and j == 1
+        val = get_value![1]
+        out!("<u>#{val}</u><!-- end point -->")
+      elsif @data[@ofs] == 0x0a and j == 0
+        val = get_value![1]
+        out!("<flt>#{val}</flt><!-- length of route -->")
+      end
+    end
+  end
   
-## traderoutes.esf arrays
+## trade_routes.esf arrays
 
   def convert_ary_SETTLEMENTS
     convert_ary_contents_str("settlements")
