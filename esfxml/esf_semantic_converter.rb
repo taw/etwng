@@ -149,12 +149,14 @@ module EsfSemanticConverter
   def convert_ary_PORT_INDICES
     data = get_ary_contents(:s, :u)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
+    @port_indices = Hash.new(data)
     out_ary!("port_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
 
   def convert_ary_SETTLEMENT_INDICES
     data = get_ary_contents(:s, :u)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
+    @settlement_indices = Hash.new(data)
     out_ary!("settlement_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
   
@@ -676,6 +678,16 @@ module EsfSemanticConverter
         send(@esf_type_handlers[get_byte]) if xofs == @ofs
         i += 1
       end
+    end
+  end
+  
+  def each_rec_member_nth_by_type(tag)
+    nth_by_type = Hash.new(0)
+    each_rec_member(tag) do |ofs_end, i|
+      type = @data[@ofs]
+      j = nth_by_type[type]
+      nth_by_type[type] += 1
+      yield(ofs_end, j)
     end
   end
 
@@ -1330,6 +1342,49 @@ module EsfSemanticConverter
       when [20, 0x0e]
         val = get_value![1]
         out!("<s>#{val.xml_escape}</s><!-- this is NOT relationship -->")
+      end
+    end
+  end
+
+  def convert_rec_TRADE_SEGMENTS
+    each_rec_member_nth_by_type("TRADE_SEGMENTS") do |ofs_end, j|
+      if @data[@ofs] == 0x01 and j == 0
+        tag = get_value![1] ? "<yes/>" : "<no/>"
+        out!("#{tag}<!-- is land -->")
+      elsif @data[@ofs] == 0x08 and j == 0
+        val = get_value![1]
+        out!("<u>#{val}</u><!-- number of sub-segments -->")
+      elsif @data[@ofs] == 0x0c and j % 4 == 0
+        out!("<!-- sub-segment ##{j / 4} -->")
+        # pass through
+      elsif @data[@ofs] == 0x4a and j == 0
+        out!("<!-- lengths of sub-segments -->")
+        # pass through
+      elsif @data[@ofs] == 0x4a and j == 1
+        out!("<!-- cummulative lengths of sub-segments -->")
+        # pass through
+      elsif @data[@ofs] == 0x0a and j == 0
+        val = get_value![1]
+        out!("<flt>#{val}</flt><!-- length of segment -->")
+      end
+    end
+  end
+
+  def convert_rec_TRADE_ROUTES
+    pi = @port_indices || {}
+    si = @settlement_indices || {}
+    each_rec_member_nth_by_type("TRADE_ROUTES") do |ofs_end, j|
+      if @data[@ofs] == 0x08 and j == 0
+        val = get_value![1]
+        name = pi[val] || si[val] || "unknown"
+        out!("<u>#{val}</u><!-- start point (#{name}) -->")
+      elsif @data[@ofs] == 0x08 and j == 1
+        val = get_value![1]
+        name = pi[val] || si[val] || "unknown"
+        out!("<u>#{val}</u><!-- end point (#{name}) -->")
+      elsif @data[@ofs] == 0x0a and j == 0
+        val = get_value![1]
+        out!("<flt>#{val}</flt><!-- length of route -->")
       end
     end
   end
