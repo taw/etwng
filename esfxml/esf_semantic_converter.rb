@@ -149,14 +149,14 @@ module EsfSemanticConverter
   def convert_ary_PORT_INDICES
     data = get_ary_contents(:s, :u)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
-    @port_indices = Hash.new(data)
+    @port_indices = Hash[data.map{|name,value| [value, name]}]
     out_ary!("port_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
 
   def convert_ary_SETTLEMENT_INDICES
     data = get_ary_contents(:s, :u)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
-    @settlement_indices = Hash.new(data)
+    @settlement_indices = Hash[data.map{|name,value| [value, name]}]
     out_ary!("settlement_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
   
