@@ -1,0 +1,128 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "fileutils"
+require "nokogiri"
+require "pathname"
+require "pp"
+
+class QuadTreeBitArray
+  def initialize(path)
+    content = File.open(path, 'rb', &:read)                                                                                                      
+    @doc = Nokogiri::XML.parse(content)
+    parse!
+  end
+  
+  def parse!
+    root = @doc.children[0]
+    a, b, c = root.xpath("u").map{|x| x.content.to_i}
+    # 2048, 1024, 2048 - X, ???, Y, wtf are they anyway???
+    node = root.xpath("*")[-1]
+    @map = (0...2047).map{ "\x00" * 2048 * 3 }
+    draw_quad_tree!(node, 0, 2047, 0, 2047)
+  end
+  
+  def draw_quad_tree!(node, x0, x1, y0, y1)
+    if node.name == "quad_tree_node"
+      xm = (x0+x1)/2
+      ym = (y0+y1)/2
+      children = node.xpath("*")
+      raise "Wrong number of children" unless children.size == 4
+      # What was their order again?
+      draw_quad_tree!(children[2], x0,   xm, y0,   ym)
+      draw_quad_tree!(children[3], xm+1, x1, y0,   ym)
+      draw_quad_tree!(children[0], x0,   xm, ym+1, y1)
+      draw_quad_tree!(children[1], xm+1, x1, ym+1, y1)
+    elsif node.name == "quad_tree_leaf"
+      mask = node.content.to_i(16)
+      return if mask == 0 # preinitialized to all-0s for performance
+      lines = [mask].pack("Q").unpack("C*")
+      lines = lines[4,4] + lines[0,4] # esf2xml concatenates VV into Q wrong !!!
+      ysz = (y1-y0+1)
+      xsz = (x1-x0+1)
+      color = [rand(256), rand(256), rand(256)].pack("CCC")
+      lines = lines.map{|line_code| draw_line(xsz, line_code, color)}
+
+      (0...ysz).each{|y|
+        @map[y0 + y][x0*3, xsz*3] = lines[(y*8)/ysz]
+      }
+    else
+      raise "Unknown node type #{node.name}"
+    end
+  end
+  
+  def draw_line(size, line, color)
+    (0...size).map{|x|
+      xi = (x*8)/size
+      line[xi] == 1 ? color : "\x00\x00\x00"
+    }.join
+  end
+  
+  def save!(pnm_path)
+    File.open(pnm_path, 'wb'){|fh|
+      fh.print "P6\n2048 2048\n255\n", @map.join
+    }
+  end
+end
+
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} quadtree.xml quadtree.pnm"
+  STDERR.puts "   or: #{$0} directory_in directory_out"
+  exit 1
+end
+
+source = Pathname(ARGV[0])
+target = Pathname(ARGV[1])
+
+if source.directory?
+  sources = []
+  source.find do |source_file|
+    sources << source_file if source_file.file?
+  end
+  sources.sort.each do |source_file|
+    target_subdir   = target + source_file.dirname.relative_path_from(source)
+    target_basename = source_file.basename(".xml").to_s + ".pnm"
+    target_file = target_subdir + target_basename
+    FileUtils.mkdir_p target_subdir
+    QuadTreeBitArray.new(source_file).save!(target_file)
+  end
+else
+  QuadTreeBitArray.new(source).save!(target)
+end
+
+__END__
+u,u,u,quad_tree_node
+
+<quad_tree_node>                                                                                                                               
+ <quad_tree_leaf>0000000000000000</quad_tree_leaf>                                                                                             
+ <quad_tree_leaf>0000000000000000</quad_tree_leaf>                                                                                             
+ <quad_tree_leaf>0000000000000000</quad_tree_leaf>                                                                                             
+ <quad_tree_node>                                                                                                                              
+  <quad_tree_leaf>f8f8f8f800000000</quad_tree_leaf>                                                                                            
+  <quad_tree_leaf>013f3f3f00000000</quad_tree_leaf>                                                                                            
+  <quad_tree_leaf>f8f8f0f0f8f8f8f8</quad_tree_leaf>                                                                                            
+  <quad_tree_leaf>7f7f7f3f3f3f3f3f</quad_tree_leaf>                                                                                            
+ </quad_tree_node>                                                                                                                             
+</quad_tree_node>
+
+From svg_qt.rb:
+
+draw_qtree(x0,    xh, y0+yh, yh, qt[0])                                                                                                         
+draw_qtree(x0+xh, xh, y0+yh, yh, qt[1])                                                                                                         
+draw_qtree(x0,    xh, y0,    yh, qt[2])                                                                                                         
+draw_qtree(x0+xh, xh, y0,    yh, qt[3])
+
+(0..7).each{|yi|                                                                                                                                
+  line = lines[yi]                                                                                                                              
+  if line == 0                                                                                                                                  
+  elsif line == 0xFF                                                                                                                            
+    rect(x0,xs,y0+yi*ym,ym)                                                                                                                     
+  else                                                                                                                                          
+    (0..7).each{|xi|                                                                                                                            
+      if line[xi]==1                                                                                                                            
+        rect(x0+xi*xm,xm,y0+yi*ym,ym)                                                                                                           
+      end                                                                                                                                       
+    }                                                                                                                                           
+  end                                                                                                                                           
+}
