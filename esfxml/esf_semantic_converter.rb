@@ -675,7 +675,7 @@ module EsfSemanticConverter
       a, b = get_bytes(10).unpack("xVxV")
       a = "%08x" % a
       b = "%08x" % b
-      out!(%Q[<quad_tree_leaf>#{a}#{b}</quad_tree_leaf>])
+      out!(%Q[<quad_tree_leaf>#{b}#{a}</quad_tree_leaf>])
     else
       tag!("quad_tree_node") do
         send(@esf_type_handlers[get_byte]) while @ofs < ofs_end

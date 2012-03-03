@@ -538,8 +538,8 @@ module XmlTagHandlers
       ab = buf.to_i(16)
       a = ab >> 32
       b = ab & 0xFFFF_FFFF
-      @esf.put_u a
       @esf.put_u b
+      @esf.put_u a
     end
   end
   
