@@ -326,6 +326,10 @@ module EsfSemanticConverter
     convert_ary_contents_str("settlements")
   end
 
+  def convert_ary_PORTS
+    convert_ary_contents_str("ports")
+  end
+
 ## pathfinding.esf arrays
 
   def convert_rec_grid_data

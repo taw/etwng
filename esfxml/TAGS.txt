@@ -1,4 +1,4 @@
-Right now about 102 xml tags corresponding to about 64 esf node types are supported.
+Right now about 103 xml tags corresponding to about 65 esf node types are supported.
 There are about 1000 esf node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -84,6 +84,15 @@ Examples of each semantic tag below:
  virginia
  pennsylvania
 </settlements>
+
+<ports>
+ port:new_spain:campeche
+ port:guatemala:puerto_barrios
+ port:france:marseille
+ port:persia:bandar_abbas
+ port:anatolia:antalya
+ port:malta:marsaxlokk
+</ports>
 
 == regions.esf ==
 
