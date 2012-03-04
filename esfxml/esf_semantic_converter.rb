@@ -306,13 +306,16 @@ module EsfSemanticConverter
   end
 
   def convert_rec_ROUTES
+    names = (@ports || []) + (@settlements || [])
     each_rec_member_nth_by_type("ROUTES") do |ofs_end, j|
       if @data[@ofs] == 0x08 and j == 0
         val = get_value![1]
-        out!("<u>#{val}</u><!-- start point -->")
+        name = names[val] || "unknown"
+        out!("<u>#{val}</u><!-- start point (#{name}) -->")
       elsif @data[@ofs] == 0x08 and j == 1
         val = get_value![1]
-        out!("<u>#{val}</u><!-- end point -->")
+        name = names[val] || "unknown"
+        out!("<u>#{val}</u><!-- end point (#{name}) -->")
       elsif @data[@ofs] == 0x0a and j == 0
         val = get_value![1]
         out!("<flt>#{val}</flt><!-- length of route -->")
@@ -323,11 +326,17 @@ module EsfSemanticConverter
 ## trade_routes.esf arrays
 
   def convert_ary_SETTLEMENTS
-    convert_ary_contents_str("settlements")
+    data = get_ary_contents(:s).flatten
+    raise SemanticFail.new if data.any?{|name| name =~ /\s/}
+    @settlements = data
+    out_ary!("settlements", "", data.map{|name| " #{name.xml_escape}" })
   end
 
   def convert_ary_PORTS
-    convert_ary_contents_str("ports")
+    data = get_ary_contents(:s).flatten
+    raise SemanticFail.new if data.any?{|name| name =~ /\s/}
+    @ports = data
+    out_ary!("ports", "", data.map{|name| " #{name.xml_escape}" })
   end
 
 ## pathfinding.esf arrays
