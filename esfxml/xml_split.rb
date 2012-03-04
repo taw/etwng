@@ -50,6 +50,7 @@ XmlSplit = {
   :ROAD_SLOT                     => "region_slot/%s-road",
   :SAVE_GAME_HEADER              => "save_game_header/%s",
   :SETTLEMENT                    => "region_slot/%s",
+  :TRADE_NODE_ROUTES             => "trade_node/%s",
   :TREE_LOD_LIST                 => "tree_lod_list",
   :VICTORY_CONDITION_OPTIONS     => "victory_conditions/%s",
   :WORLD                         => "campaign_env/world",
