@@ -18,7 +18,7 @@ class QuadTreeBitArray
     a, b, c = root.xpath("u").map{|x| x.content.to_i}
     # 2048, 1024, 2048 - X, ???, Y, wtf are they anyway???
     node = root.xpath("*")[-1]
-    @map = (0...2047).map{ "\x00" * 2048 }
+    @map = (0...2048).map{ "\x00" * 2048 }
     draw_quad_tree!(node, 0, 2047, 0, 2047)
   end
   
