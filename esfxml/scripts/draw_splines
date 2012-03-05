@@ -36,11 +36,15 @@ class SVG
     @contents << %Q[<path d="#{vertices_path}" style="#{style}"/>]
   end
   def set_view(x0, y0, x1, y1, pixels)
+    # Frame around image
+    add_path("M #{x0} #{y0} L #{x0} #{y1} L #{x1} #{y1} L #{x1} #{y0} Z",
+      "stroke: black: stroke-width: 5px; fill:none")
+    
     dx, dy = x1-x0, y1-y0
-    x0 -= 0.05 * dx
-    x1 += 0.05 * dx
-    y0 -= 0.05 * dy
-    y1 += 0.05 * dy
+    # x0 -= 0.05 * dx
+    # x1 += 0.05 * dx
+    # y0 -= 0.05 * dy
+    # y1 += 0.05 * dy
     dx, dy = x1-x0, y1-y0
     dz = [dx, dy].max
     xsz = pixels * (dx / dz)
@@ -73,7 +77,7 @@ def draw_splines!(xml_path, svg_path)
   # * min y (y coordinate is flipped)
   # * max x
   # * max y (y coordinate is flipped)
-  # * pixel size of wider dimention (narrower dimension proportional) 
+  # * pixel size of wider dimention (narrower dimension proportional)
   svg.set_view(-1280.0, -640.0, 1280.0, 640.0, 1000)
   parse_splines(xml_path).each{|coords, is_land|
     style = is_land ? land_style : sea_style
