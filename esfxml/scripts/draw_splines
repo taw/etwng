@@ -68,6 +68,12 @@ def draw_splines!(xml_path, svg_path)
   land_style = "stroke: red; stroke-width: 2px; fill:none"
   sea_style  = "stroke: blue; stroke-width: 2px; fill:none"
   svg = SVG.new
+  # To draw a different region change these parameters:
+  # * min x
+  # * min y (y coordinate is flipped)
+  # * max x
+  # * max y (y coordinate is flipped)
+  # * pixel size of wider dimention (narrower dimension proportional) 
   svg.set_view(-1280.0, -640.0, 1280.0, 640.0, 1000)
   parse_splines(xml_path).each{|coords, is_land|
     style = is_land ? land_style : sea_style
