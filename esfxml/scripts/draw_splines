@@ -1,0 +1,85 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "nokogiri"
+
+class File
+  def self.write(path, contents)
+    File.open(path, 'wb'){|fh| fh.write contents}
+  end
+end
+
+def parse_splines(xml_path)
+  contents = File.open(xml_path, 'rb', &:read)
+  doc = Nokogiri.parse(contents)
+  (doc/"rec[type='SPLINES']").map{|s|
+    v2a = s.xpath("v2_ary")[0].content.strip.split(/[,; \n\r\t]+/).map(&:to_f)
+    vertices = []
+    vertices << [v2a.shift, -v2a.shift] until v2a.empty?
+    is_land = (!s.xpath("yes").empty?)
+    [vertices, is_land]
+  }
+end
+
+class SVG
+  attr_accessor :width, :height, :transform
+  def initialize
+    @contents = []
+    @width = "100%"
+    @height = "100%"
+    @transform = ""
+  end
+  def <<(cnt)
+    @contents << cnt
+  end
+  def add_path(vertices_path, style)
+    @contents << %Q[<path d="#{vertices_path}" style="#{style}"/>]
+  end
+  def set_view(x0, y0, x1, y1, pixels)
+    dx, dy = x1-x0, y1-y0
+    x0 -= 0.05 * dx
+    x1 += 0.05 * dx
+    y0 -= 0.05 * dy
+    y1 += 0.05 * dy
+    dx, dy = x1-x0, y1-y0
+    dz = [dx, dy].max
+    xsz = pixels * (dx / dz)
+    ysz = pixels * (dy / dz)
+    @transform = "scale(#{1000.0/dz}) translate(#{-x0}, #{-y0})"
+    @width = "#{xsz}"
+    @height = "#{ysz}"
+  end
+  def to_s
+    rv = %Q@<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="#{width}" height="#{height}" version="1.1" xmlns="http://www.w3.org/2000/svg">
+<g transform="#{transform}">@
+    rv << @contents.join
+    rv << "</g>\n"
+    rv << "</svg>\n"
+    rv
+  end
+  def save(file_name)
+    File.write(file_name, to_s)
+  end
+end
+
+def draw_splines!(xml_path, svg_path)
+  land_style = "stroke: red; stroke-width: 2px; fill:none"
+  sea_style  = "stroke: blue; stroke-width: 2px; fill:none"
+  svg = SVG.new
+  svg.set_view(-1280.0, -640.0, 1280.0, 640.0, 1000)
+  parse_splines(xml_path).each{|coords, is_land|
+    style = is_land ? land_style : sea_style
+    path = "M " + coords.map{|x,y| "#{x} #{y}"}.join(" L ")
+    svg.add_path(path, style)
+  }  
+  svg.save(svg_path)
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} trade_routes/esf.xml out.svg"
+  exit 1
+end
+
+draw_splines!(ARGV[0], ARGV[1])
