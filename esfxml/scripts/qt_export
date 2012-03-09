@@ -29,14 +29,14 @@ class QuadTreeBitArray
       children = node.xpath("*")
       raise "Wrong number of children" unless children.size == 4
       # What was their order again?
-      draw_quad_tree!(children[2], x0,   xm, y0,   ym)
-      draw_quad_tree!(children[3], xm+1, x1, y0,   ym)
-      draw_quad_tree!(children[0], x0,   xm, ym+1, y1)
-      draw_quad_tree!(children[1], xm+1, x1, ym+1, y1)
+      draw_quad_tree!(children[0], x0,   xm, y0,   ym)
+      draw_quad_tree!(children[1], xm+1, x1, y0,   ym)
+      draw_quad_tree!(children[2], x0,   xm, ym+1, y1)
+      draw_quad_tree!(children[3], xm+1, x1, ym+1, y1)
     elsif node.name == "quad_tree_leaf"
       mask = node.content.to_i(16)
       return if mask == 0 # map is preinitialized to all-0s for performance
-      lines = [mask].pack("Q").unpack("C*")
+      lines = [mask].pack("Q").unpack("C*").reverse
       ysz = (y1-y0+1)
       xsz = (x1-x0+1)
       lines = lines.map{|line_code| draw_line(xsz, line_code)}
