@@ -1361,6 +1361,23 @@ module EsfSemanticConverter
     end
   end
   
+  def convert_rec_CHARACTER
+    each_rec_member_nth_by_type("CHARACTER") do |ofs_end, i|
+      if i == 0 and @data[@ofs] == 0x48
+        data = get_value![1].unpack("l*").map{|u| u * (0.5**20) }
+        if data.empty?
+          out!("<v2x_ary/>")
+        else
+          out!("<v2x_ary>")
+          until data.empty?
+            out!(" #{data.shift},#{data.shift}")
+          end
+          out!("</v2x_ary>")
+        end
+      end
+    end
+  end
+  
   def convert_rec_DIPLOMACY_RELATIONSHIP
     each_rec_member("DIPLOMACY_RELATIONSHIP") do |ofs_end, i|
       case [i, @data[@ofs]]
