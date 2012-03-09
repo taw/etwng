@@ -18,7 +18,7 @@ class QuadTreeBitArray
     a, b, c = root.xpath("u").map{|x| x.content.to_i}
     # 2048, 1024, 2048 - X, ???, Y, wtf are they anyway???
     node = root.xpath("*")[-1]
-    @map = (0...2048).map{ "\x00" * 2048 }
+    @map = (0...2048).map{ "\xFF" * 2048 }
     draw_quad_tree!(node, 0, 2047, 0, 2047)
   end
   
@@ -49,7 +49,7 @@ class QuadTreeBitArray
   end
   
   def draw_line(size, line)
-    (0...size).map{|x| line[(x*8)/size] == 1 ? "\xFF" : "\x00"}.join
+    (0...size).map{|x| line[(x*8)/size] == 1 ? "\x00" : "\xFF"}.join
   end
   
   def save!(pgm_path)
