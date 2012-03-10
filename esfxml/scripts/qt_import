@@ -1,0 +1,128 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "fileutils"
+require "pathname"
+require "pp"
+
+def parse_pgm(path_in)
+  File.open(path_in, 'rb'){|fh_in|
+    p5 = fh_in.readline
+    sz = fh_in.readline
+    l255 = fh_in.readline
+    data_in = fh_in.read
+
+    raise "Format error" unless p5 == "P5\n" and l255 == "255\n" and sz =~ /\A(\d+) (\d+)\n\z/
+    xsz, ysz = $1.to_i, $2.to_i
+    raise "Bad file size" unless data_in.size == xsz * ysz
+    return [xsz, ysz, data_in]
+  }
+end
+
+class QuadTreeBitArray
+  def initialize(path)
+    xsz, ysz, data = parse_pgm(path)
+    raise "Only 2048x2048 PGMs supported" unless xsz == 2048 and ysz == 2048
+    @xml_out   = []
+    @xml_stack = []
+    @data = (0...2048).map{|y| data[2048*y, 2048] }
+    parse_data!
+  end
+
+  def xml!(str)
+    @xml_out << (" " * @xml_stack.size + str)
+  end
+  
+  def xml_push!(open, close)
+    xml! open
+    @xml_stack << close
+  end
+    
+  def xml_pop!
+    xml! @xml_stack.pop
+  end
+  
+  def parse_data!
+    xml! %Q[<?xml version="1.0"?>]
+    xml_push! %Q[<rec type="QUAD_TREE_BIT_ARRAY">], "</rec>" 
+    xml! "<u>2048</u>"
+    xml! "<u>1024</u>"
+    xml! "<u>2048</u>"
+    parse_pixels!(0, 2047, 0, 2047)
+    xml_pop!
+  end
+  
+  def all_white?(x0, x1, y0, y1)
+    cmp = "\xFF" * (x1-x0+1)
+    (y0..y1).all?{|y| @data[y][x0..x1] == cmp }
+  end
+
+  def all_black?(x0, x1, y0, y1)
+    cmp = "\x00" * (x1-x0+1)
+    (y0..y1).all?{|y| @data[y][x0..x1] == cmp }
+  end
+  
+  def print_leaf!(x0, x1, y0, y1)
+    u = 0
+    (y0..y1).each{|y|
+      @data[y][x0..x1].unpack("C*").reverse.each{|i|
+        u = (u << 1) + (i == 0 ? 1 : 0)
+      }
+    }
+    xml!("<quad_tree_leaf>%016x</quad_tree_leaf>" % u)
+  end
+  
+  def parse_pixels!(x0, x1, y0, y1)
+    if all_white?(x0, x1, y0, y1)
+      xml!("<quad_tree_leaf>0000000000000000</quad_tree_leaf>")
+    elsif all_black?(x0, x1, y0, y1)
+      xml!("<quad_tree_leaf>ffffffffffffffff</quad_tree_leaf>")
+    elsif x1-x0 == 7 and y1-y0 == 7
+      print_leaf!(x0, x1, y0, y1)
+    else
+      xm = (x0+x1) / 2
+      ym = (y0+y1) / 2
+      xml_push! "<quad_tree_node>", "</quad_tree_node>"
+      parse_pixels!(x0,   xm, y0,   ym)
+      parse_pixels!(xm+1, x1, y0,   ym)
+      parse_pixels!(x0,   xm, ym+1, y1)
+      parse_pixels!(xm+1, x1, ym+1, y1)
+      xml_pop!
+    end
+  end
+  
+  def save!(target)
+    File.open(target, 'wb'){|fh|
+      fh.puts @xml_out
+    }
+  end
+end
+
+
+
+
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} quadtree.pgm quadtree.xml"
+  STDERR.puts "   or: #{$0} directory_in directory_out"
+  exit 1
+end
+
+source = Pathname(ARGV[0])
+target = Pathname(ARGV[1])
+
+if source.directory?
+  sources = []
+  source.find do |source_file|
+    sources << source_file if source_file.file?
+  end
+  sources.sort.each do |source_file|
+    target_subdir   = target + source_file.dirname.relative_path_from(source)
+    target_basename = source_file.basename(".pgm").to_s + ".xml"
+    target_file = target_subdir + target_basename
+    FileUtils.mkdir_p target_subdir
+    QuadTreeBitArray.new(source_file).save!(target_file)
+  end
+else
+  QuadTreeBitArray.new(source).save!(target)
+end

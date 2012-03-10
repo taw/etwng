@@ -59,7 +59,6 @@ class QuadTreeBitArray
   end
 end
 
-
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} quadtree.xml quadtree.pgm"
   STDERR.puts "   or: #{$0} directory_in directory_out"

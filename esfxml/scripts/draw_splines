@@ -38,7 +38,7 @@ class SVG
   def set_view(x0, y0, x1, y1, pixels)
     # Frame around image
     add_path("M #{x0} #{y0} L #{x0} #{y1} L #{x1} #{y1} L #{x1} #{y0} Z",
-      "stroke: black: stroke-width: 5px; fill:none")
+      "stroke: black: stroke-width: 15px; fill:none")
     
     dx, dy = x1-x0, y1-y0
     # x0 -= 0.05 * dx
