@@ -15,11 +15,71 @@ class QuadTreeBitArray
   
   def parse!
     root = @doc.children[0]
+    @version_2 = (root["version"] == "2")
     @xsz, @ysz, @qsz = root.xpath("u").map{|x| x.content.to_i}
-    node = root.xpath("*")[-1]
-    @padding_line = "\xFF" * @qsz
-    @map = (0...@qsz).map{ @padding_line.dup }
-    draw_quad_tree!(node, 0, @qsz-1, 0, @qsz-1)
+    node = root.xpath("*")[-1]    
+    if @version_2 # S2TW
+      # What we know about this data structure:
+      # * 8 consecutive bytes, printed as 
+      #   bin_data.each{|u| puts "%08b" % u}
+      #   often form quarter-circular pattern
+      #   Like leaf_node in version 1
+      # * there's a lot of other bytes as well
+      # * smallest qt is 9 bytes (all 0s)
+      # * every byte matters, there are qt of a lot of byte sizes
+      # * 640x640 means exactly 3/8 of x-size and of y-size is padding
+      # * smallest non-zero entry is 16 bytes:
+      #   10011010 9A 154
+      #   10100110 A6 166
+      #   10100110 A6 166
+      #   10011010 9A 154
+      #   10100110 A6 166
+      #   10011010 9A 154
+      #   01101010 6A 106
+      #   00000000 00 0
+      # 
+      #   00000000 00 0
+      #   00011100 1C 28
+      #   00111110 3E 62
+      #   01111111 7F 127
+      #   01111111 7F 127
+      #   01111111 7F 127
+      #   00111110 3E 62
+      #   00011100 1C 28      
+      
+      # Guess:
+      # Quad tree control byte: 10 = empty, 01 = descent, 11 = full
+      # 00000000 = 8 byte QT follows
+      
+      bin_data = node.content.strip.split(/[;,\s]+/).map{|x| x.to_i(16)}
+      puts ""
+      puts "#{bin_data.size} bytes"
+      bin_data.each{|u| puts "%08b %02X %d" % [u,u,u]}
+      
+      puts "Decoding attempt:"
+
+      ctl_sz = [1024]
+      
+      until bin_data.empty?
+        u = bin_data.shift
+        sz = ctl_sz.pop
+        if u == 0
+          p [:qt, sz, bin_data.shift(8)]
+        else
+          ctln = [u&3, (u>>2)&3, (u>>4)&3, (u>>6)&3].map{|v|
+            [:fail, :qt, :empty, :full][v]
+          }
+          ctln.each{|v| ctl_sz << (sz/2) if v == :qt}
+          p [:ctln, sz, *ctln]
+        end
+      end
+    
+      puts ""
+    else # ETW/NTW
+      @padding_line = "\xFF" * @qsz
+      @map = (0...@qsz).map{ @padding_line.dup }
+      draw_quad_tree!(node, 0, @qsz-1, 0, @qsz-1)
+    end
   end
   
   def draw_quad_tree!(node, x0, x1, y0, y1)
@@ -61,6 +121,10 @@ class QuadTreeBitArray
   end
   
   def save!(pgm_path)
+    if @version_2
+      puts "Saving of version 2 files not supported yet"
+      return
+    end
     raise "Only files with XSZ=QSZ supported, here: xsz=#{@xsz},ysz=#{@ysz},qsz=#{@qsz}" unless @xsz==@qsz
     raise "Padding contains non-zeroes" unless map_padding.all?{|line| line == @padding_line }
     File.open(pgm_path, 'wb'){|fh|
