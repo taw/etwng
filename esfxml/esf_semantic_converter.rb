@@ -562,6 +562,11 @@ module EsfSemanticConverter
   end
 
 ## startpos.esf records
+  def convert_rec_CULTURE_PATHS
+    agent, culture = get_rec_contents(:s, :s)
+    out!(%Q[<culture_path agent="#{agent.xml_escape}" culture="#{culture.xml_escape}"/>])
+  end
+
   def convert_rec_CAMPAIGN_VICTORY_CONDITIONS
     campaign_type_labels = [" (short)", " (long)", " (prestige)", " (global domination)", " (unplayable)"]
     data = get_rec_contents([:ary, :REGION_KEYS, nil], :bool, :u, :u, :bool, :u, :bool, :bool)

@@ -157,6 +157,13 @@ module XmlTagHandlers
 
   ## Semantic data types - startpos.esf
   
+  def on_empty_node_culture_path(attributes, buf, ctx)
+    put_rec "CULTURE_PATHS" do
+      @esf.put_s attributes[:agent]
+      @esf.put_s attributes[:culture]
+    end
+  end
+
   def on_text_node_v2x_ary(attributes, buf, ctx)
     data = buf.strip.split(/[\s,]+/).map{|u| (1048576.0 * u.to_f).round.to_i}
     @esf.put_4x("\x48", data.pack("l*"))

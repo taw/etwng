@@ -1,4 +1,4 @@
-Right now about 103 xml tags corresponding to about 65 esf node types are supported.
+Right now about 104 xml tags corresponding to about 66 esf node types are supported.
 There are about 1000 esf node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -182,6 +182,8 @@ Examples of each semantic tag below:
 <wind_map unknown="0.00729600992053747" pgm="wind_map-0001.pgm"/>
 
 == startpos.esf ==
+
+<culture_path agent="pirate" culture="european"/>
 
 <quad_tree_node>
  <quad_tree_leaf>feffffff00e0f8fe</quad_tree_leaf>
