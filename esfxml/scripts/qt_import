@@ -14,18 +14,19 @@ def parse_pgm(path_in)
 
     raise "Format error" unless p5 == "P5\n" and l255 == "255\n" and sz =~ /\A(\d+) (\d+)\n\z/
     xsz, ysz = $1.to_i, $2.to_i
-    raise "Bad file size" unless data_in.size == xsz * ysz
+    raise "Bad file size, got:#{data_in.size}, expected: #{xsz}*#{ysz}=#{xsz*ysz}" unless data_in.size == xsz * ysz
     return [xsz, ysz, data_in]
   }
 end
 
 class QuadTreeBitArray
   def initialize(path)
-    xsz, ysz, data = parse_pgm(path)
-    raise "Only 2048x2048 PGMs supported" unless xsz == 2048 and ysz == 2048
+    @xsz, @ysz, data = parse_pgm(path)
+    @qsz = [@xsz, @ysz].max
     @xml_out   = []
     @xml_stack = []
-    @data = (0...2048).map{|y| data[2048*y, 2048] }
+    @padding_line = "\xFF" * @qsz
+    @data = (0...@qsz-@ysz).map{ @padding_line }  + (0...@qsz).map{|y| data[@qsz*y, @qsz] }
     parse_data!
   end
 
@@ -45,10 +46,10 @@ class QuadTreeBitArray
   def parse_data!
     xml! %Q[<?xml version="1.0"?>]
     xml_push! %Q[<rec type="QUAD_TREE_BIT_ARRAY">], "</rec>" 
-    xml! "<u>2048</u>"
-    xml! "<u>1024</u>"
-    xml! "<u>2048</u>"
-    parse_pixels!(0, 2047, 0, 2047)
+    xml! "<u>#{@xsz}</u>"
+    xml! "<u>#{@ysz}</u>"
+    xml! "<u>#{@qsz}</u>"
+    parse_pixels!(0, @qsz-1, 0, @qsz-1)
     xml_pop!
   end
   
@@ -97,10 +98,6 @@ class QuadTreeBitArray
     }
   end
 end
-
-
-
-
 
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} quadtree.pgm quadtree.xml"
