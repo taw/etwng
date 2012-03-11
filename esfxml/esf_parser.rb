@@ -5,6 +5,7 @@ end
 
 class Float
   def pretty_single
+    return self if nan?
     begin
       rv = (100_000.0 * self).round / 100_000.0
       return rv if self != rv and [self].pack("f") == [rv].pack("f")

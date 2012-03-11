@@ -29,7 +29,12 @@ module EsfConvertBasic
     out!("<uint64>#{data}</uint64><!-- speculative type -->")
   end
   def convert_0a!
-    out!("<flt>#{get_flt}</flt>")
+    val = get_flt
+    if val.nan?
+      out!("<fltnan>%08X</fltnan>" % [val].pack("f").unpack("V"))
+    else
+      out!("<flt>#{val}</flt>")
+    end
   end
   def convert_0c!
     out!("<v2 x=\"#{get_flt}\" y=\"#{get_flt}\"/>")

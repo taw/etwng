@@ -1086,6 +1086,9 @@ module XmlTagHandlers
   def on_text_node_flt(attributes, buf, ctx)
     @esf.put_flt buf.to_f
   end
+  def on_text_node_fltnan(attributes, buf, ctx)
+    @esf.put_flt [buf.to_i(16)].pack("V").unpack("f")[0]
+  end
   def on_text_node_uint64(attributes, buf, ctx)
     @esf.data << "\x09"
     @esf.data << [buf.to_i].pack("Q")
