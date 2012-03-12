@@ -27,7 +27,12 @@ class QuadTreeBitArray
     @xml_stack = []
     @padding_line = "\xFF" * @qsz
     @data = (0...@qsz-@ysz).map{ @padding_line }  + (0...@qsz).map{|y| data[@qsz*y, @qsz] }
-    parse_data!
+    if @qsz == 1024 # S2TW quick hack, proper switch should actually do some logic
+      @xsz = @ysz = 640
+      parse_data_v2!
+    else
+      parse_data!
+    end
   end
 
   def xml!(str)
@@ -41,6 +46,49 @@ class QuadTreeBitArray
     
   def xml_pop!
     xml! @xml_stack.pop
+  end
+
+  def parse_data_v2!
+    xml! %Q[<?xml version="1.0"?>]
+    xml_push! %Q[<rec type="QUAD_TREE_BIT_ARRAY" version="2">], "</rec>" 
+    xml! "<u>#{@xsz}</u>"
+    xml! "<u>#{@ysz}</u>"
+    xml! "<u>#{@qsz}</u>"
+    data = parse_pixels_v2!(0, @qsz-1, 0, @qsz-1)
+    xml! "<bin6>" + data.unpack("C*").map{|x| "%02x" % x}.join(" ") + "</bin6>"
+    xml_pop!
+  end
+  
+  def parse_pixels_v2!(x0, x1, y0, y1)
+    if x1-x0+1 == 8
+      return [0, parse_leaf!(x0, x1, y0, y1)].pack("CQ")
+    # S2TW uses 9-byte (00 00 00 00 00 00 00 00 00) not 1-byte (AA) encoding for this
+    # special case this
+    elsif x1-x0+1 == 1024 and all_white?(x0, x1, y0, y1) 
+      return "\x00" * 9
+    else
+      xm = (x0+x1) / 2
+      ym = (y0+y1) / 2
+      codes = []
+      extra_data = []
+      [
+        [x0,   xm, y0,   ym],
+        [xm+1, x1, y0,   ym],
+        [x0,   xm, ym+1, y1],      
+        [xm+1, x1, ym+1, y1,]
+      ].each{|xs, xe, ys, ye|
+        if all_white?(xs, xe, ys, ye)
+          codes << 2
+        elsif all_black?(xs, xe, ys, ye)
+          codes << 3
+        else
+          codes << 1
+          extra_data << parse_pixels_v2!(xs, xe, ys, ye)
+        end
+      }
+      ctl_byte = (codes[3] << 6) + (codes[2] << 4) + (codes[1] << 2) + codes[0]
+      return [ctl_byte].pack("C") + extra_data.join
+    end
   end
   
   def parse_data!
@@ -62,15 +110,19 @@ class QuadTreeBitArray
     cmp = "\x00" * (x1-x0+1)
     (y0..y1).all?{|y| @data[y][x0..x1] == cmp }
   end
-  
-  def print_leaf!(x0, x1, y0, y1)
+
+  def parse_leaf!(x0, x1, y0, y1)
     u = 0
     (y0..y1).each{|y|
       @data[y][x0..x1].unpack("C*").reverse.each{|i|
         u = (u << 1) + (i == 0 ? 1 : 0)
       }
     }
-    xml!("<quad_tree_leaf>%016x</quad_tree_leaf>" % u)
+    u
+  end
+  
+  def print_leaf!(x0, x1, y0, y1)
+    xml!("<quad_tree_leaf>%016x</quad_tree_leaf>" % parse_leaf!(x0, x1, y0, y1))
   end
   
   def parse_pixels!(x0, x1, y0, y1)
