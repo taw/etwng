@@ -590,7 +590,6 @@ module EsfSemanticConverter
   #   raise SemanticFail.new
   # end
 
-  
   def convert_rec_CAMPAIGN_BONUS_VALUE_BLOCK
     (types, data), = get_rec_contents([:rec, :CAMPAIGN_BONUS_VALUE, nil])
     # types, data = get_rec_contents_dynamic
@@ -865,12 +864,50 @@ module EsfSemanticConverter
   def convert_rec_CAI_BDI_RECRUITMENT_NEW_FORCE_OF_OR_REINFORCE_TO_STRENGTH
     autoconvert_v2x "CAI_BDI_RECRUITMENT_NEW_FORCE_OF_OR_REINFORCE_TO_STRENGTH", 4
   end
+
+  def convert_rec_FACTION_INTERNATIONAL_TRADE_ROUTES_ARRAY
+    annotate_rec_nth "FACTION_INTERNATIONAL_TRADE_ROUTES_ARRAY",
+      [:u, 0] => "route id"
+  end
+
+  def convert_rec_INTERNATIONAL_TRADE_ROUTE
+    cnt = nil
   
+    each_rec_member_nth_by_type("INTERNATIONAL_TRADE_ROUTE") do |ofs_end, i|
+      if @data[@ofs] == 0x08 and i == 0
+        cnt = val = get_value![1]
+        out!("<u>#{val}</u><!-- number of connections -->")
+      elsif @data[@ofs] == 0x08 and (i-1)%2 == 0 and (i-1)/2 < cnt-1
+        val = get_value![1]
+        out!("<u>#{val}</u><!-- start point -->")
+      elsif @data[@ofs] == 0x08 and (i-1)%2 == 1 and (i-1)/2 < cnt-1
+        val = get_value![1]
+        out!("<u>#{val}</u><!-- end point -->")
+      elsif @data[@ofs] == 0x06 and i < cnt
+        tag = get_value![1] ? "<yes/>" : "<no/>"
+        out!("#{tag}<!-- is sea -->")
+      elsif @data[@ofs] == 0x04 and i < cnt
+        val = get_value![1]
+        out!("<i>#{val}</i><!-- faction id -->")
+      elsif @data[@ofs] == 0x04 and i == cnt
+        val = get_value![1]
+        out!("<i>#{val}</i><!-- route id -->")
+      elsif @data[@ofs] == 0x48 and i == 0
+        data = get_value![1].unpack("V*")
+        out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- commodities quantity -->")
+      elsif @data[@ofs] == 0x48 and i == 1
+        data = get_value![1].unpack("V*")
+        out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- resources quantity -->")
+      end
+    end
+  end
+
   def convert_rec_FACTION
     @dir_builder.faction_name = lookahead_str
-    tag!("rec", :type=>"FACTION") do
-      convert_until_ofs!(get_u)
-    end
+    annotate_rec_nth "FACTION",
+      [:i, 0] => "faction id",
+      [:s, 0] => "faction label",
+      [:s, 1] => "on screen label"
     @dir_builder.faction_name = nil
   end
 
@@ -899,6 +936,45 @@ module EsfSemanticConverter
     symbolic_names[0x4c] = :v2_ary
     
     each_rec_member(type) do |ofs_end, i|
+      field_type = symbolic_names[@data[ofs]]
+      next unless field_type
+      annotation = annotations[[field_type, i]]
+      next unless annotation
+      annotation = "<!-- #{annotation} -->"
+      case field_type
+      when :s, :asc
+        v = get_value![1]
+        if v.empty?
+          out!("<#{field_type}/>" + annotation)
+        else
+          out!("<#{field_type}>#{v.xml_escape}</#{field_type}>" + annotation)
+        end
+      when :i, :u, :u2, :i2, :byte, :flt
+        v = get_value![1]
+        out!("<#{field_type}>#{v}</#{field_type}>" + annotation)
+      when :bool
+        tag = get_value![1] ? "<yes/>" : "<no/>"
+        out!(tag + annotation)
+      when :v2_ary
+        data = get_value![1].unpack("f*").map(&:pretty_single)
+        if data.empty?
+          out!("<v2_ary/>" + annotation)
+        else
+          out!("<v2_ary>" + annotation)
+          out!(" #{data.shift},#{data.shift}") until data.empty?
+          out!("</v2_ary>")
+        end
+      when :v2, :v3
+        raise "Implement me: annotations for v2/v3"
+      end
+    end
+  end
+
+  def annotate_rec_nth(type, annotations)
+    symbolic_names = [nil, :bool, nil, :i2, :i, nil, :byte, :u2, :u, nil, :flt, nil, :v2, :v3, :s, :asc]
+    symbolic_names[0x4c] = :v2_ary
+    
+    each_rec_member_nth_by_type(type) do |ofs_end, i|
       field_type = symbolic_names[@data[ofs]]
       next unless field_type
       annotation = annotations[[field_type, i]]

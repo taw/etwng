@@ -40,3 +40,4 @@ cuf/font
 cuf/out
 pack/*.pack
 rigid_splines/samples
+cs2parsed/out

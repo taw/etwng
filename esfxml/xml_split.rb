@@ -67,5 +67,4 @@ XmlSplit = {
   :EF_LINE_LIST                  => "eflines",
   :areas                         => "area/%s-%d",
   :slot_descriptions             => "slot/%s",
-  :FACTION_FLAG_AND_COLOURS      => "flag/%f-%d",
 }
