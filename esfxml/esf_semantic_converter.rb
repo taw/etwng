@@ -872,6 +872,7 @@ module EsfSemanticConverter
 
   def convert_rec_INTERNATIONAL_TRADE_ROUTE
     cnt = nil
+    is_sea = nil
     each_rec_member_nth_by_type("INTERNATIONAL_TRADE_ROUTE") do |ofs_end, i|
       if @data[@ofs] == 0x08 and i == 0
         cnt = val = get_value![1]
@@ -883,11 +884,16 @@ module EsfSemanticConverter
         val = get_value![1]
         out!("<u>#{val}</u><!-- end point (#{port_lookpup(val)}) -->")
       elsif @data[@ofs] == 0x01 and i < cnt
-        tag = get_value![1] ? "<yes/>" : "<no/>"
+        is_sea = val = get_value![1]
+        tag = val ? "<yes/>" : "<no/>"
         out!("#{tag}<!-- is sea -->")
       elsif @data[@ofs] == 0x04 and i < cnt
         val = get_value![1]
-        out!("<i>#{val}</i><!-- faction/region id -->")
+        if is_sea == nil or is_sea == true
+          out!("<i>#{val}</i><!-- faction id -->")
+        else
+          out!("<i>#{val}</i><!-- region id -->")
+        end
       elsif @data[@ofs] == 0x04 and i == cnt
         val = get_value![1]
         out!("<i>#{val}</i><!-- route id -->")
