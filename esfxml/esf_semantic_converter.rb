@@ -872,23 +872,22 @@ module EsfSemanticConverter
 
   def convert_rec_INTERNATIONAL_TRADE_ROUTE
     cnt = nil
-  
     each_rec_member_nth_by_type("INTERNATIONAL_TRADE_ROUTE") do |ofs_end, i|
       if @data[@ofs] == 0x08 and i == 0
         cnt = val = get_value![1]
         out!("<u>#{val}</u><!-- number of connections -->")
       elsif @data[@ofs] == 0x08 and (i-1)%2 == 0 and (i-1)/2 < cnt-1
         val = get_value![1]
-        out!("<u>#{val}</u><!-- start point -->")
+        out!("<u>#{val}</u><!-- start point (#{port_lookpup(val)}) -->")
       elsif @data[@ofs] == 0x08 and (i-1)%2 == 1 and (i-1)/2 < cnt-1
         val = get_value![1]
-        out!("<u>#{val}</u><!-- end point -->")
-      elsif @data[@ofs] == 0x06 and i < cnt
+        out!("<u>#{val}</u><!-- end point (#{port_lookpup(val)}) -->")
+      elsif @data[@ofs] == 0x01 and i < cnt
         tag = get_value![1] ? "<yes/>" : "<no/>"
         out!("#{tag}<!-- is sea -->")
       elsif @data[@ofs] == 0x04 and i < cnt
         val = get_value![1]
-        out!("<i>#{val}</i><!-- faction id -->")
+        out!("<i>#{val}</i><!-- faction/region id -->")
       elsif @data[@ofs] == 0x04 and i == cnt
         val = get_value![1]
         out!("<i>#{val}</i><!-- route id -->")
@@ -900,6 +899,46 @@ module EsfSemanticConverter
         out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- resources quantity -->")
       end
     end
+  end
+
+  def convert_rec_FACTION_DOMESTIC_TRADE_ROUTES_ARRAY
+    annotate_rec_nth "FACTION_DOMESTIC_TRADE_ROUTES_ARRAY",
+      [:u, 0] => "route id"
+  end
+
+  def convert_rec_DOMESTIC_TRADE_ROUTE
+    cnt = nil
+    each_rec_member_nth_by_type("DOMESTIC_TRADE_ROUTE") do |ofs_end, i|
+      if @data[@ofs] == 0x0e and i == 0
+        v = get_value![1]
+        out!("<s>#{v.xml_escape}</s><!-- theatre id -->")
+      elsif @data[@ofs] == 0x08 and i == 0
+        cnt = val = get_value![1]
+        out!("<u>#{val}</u><!-- number of connections -->")
+      elsif @data[@ofs] == 0x08 and (i-1)%2 == 0 and (i-1)/2 < cnt-1
+        val = get_value![1]
+        out!("<u>#{val}</u><!-- start point (#{port_lookpup(val)}) -->")
+      elsif @data[@ofs] == 0x08 and (i-1)%2 == 1 and (i-1)/2 < cnt-1
+        val = get_value![1]
+        out!("<u>#{val}</u><!-- end point (#{port_lookpup(val)}) -->")
+      elsif @data[@ofs] == 0x48 and i == 0
+        data = get_value![1].unpack("V*")
+        out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- commodities quantity -->")
+      end
+    end
+  end
+  
+  def convert_rec_CAMPAIGN_TRADE_MANAGER
+    annotate_rec_nth "CAMPAIGN_TRADE_MANAGER",
+      [:u4_ary, 0] => "commodities baseline price per unit",
+      [:u4_ary, 1] => "commodities current price per unit",
+      [:u4_ary, 5] => "resources trade value",
+      [:flt_ary, 0] => "demand"
+  end
+
+  def convert_rec_TEATHRES
+    annotate_rec_nth "THEATRES",
+      [:s, 0] => "theatre id"
   end
 
   def convert_rec_FACTION
@@ -973,6 +1012,8 @@ module EsfSemanticConverter
   def annotate_rec_nth(type, annotations)
     symbolic_names = [nil, :bool, nil, :i2, :i, nil, :byte, :u2, :u, nil, :flt, nil, :v2, :v3, :s, :asc]
     symbolic_names[0x4c] = :v2_ary
+    symbolic_names[0x4a] = :flt_ary
+    symbolic_names[0x48] = :u4_ary
     
     each_rec_member_nth_by_type(type) do |ofs_end, i|
       field_type = symbolic_names[@data[ofs]]
@@ -994,6 +1035,20 @@ module EsfSemanticConverter
       when :bool
         tag = get_value![1] ? "<yes/>" : "<no/>"
         out!(tag + annotation)
+      when :flt_ary
+        data = get_value![1].unpack("f*").map(&:pretty_single)
+        if data.empty?
+          out!("<flt_ary/>" + annotation)
+        else
+          out!("<flt_ary>#{data.join(" ")}</flt_ary>" + annotation)
+        end
+      when :u4_ary
+        data = get_value![1].unpack("V*")
+        if data.empty?
+          out!("<u4_ary/>" + annotation)
+        else
+          out!("<u4_ary>#{data.join(" ")}</u4_ary>" + annotation)
+        end
       when :v2_ary
         data = get_value![1].unpack("f*").map(&:pretty_single)
         if data.empty?
@@ -1503,8 +1558,20 @@ module EsfSemanticConverter
       elsif @data[@ofs] == 0x0a and j == 0
         val = get_value![1]
         out!("<flt>#{val}</flt><!-- length of segment -->")
+      elsif @data[@ofs] == 0x48 and j == 0
+        out!("<!-- domestic trade route ids -->")
+        # pass through
+      elsif @data[@ofs] == 0x48 and j == 1
+        out!("<!-- international trade route ids -->")
+        # pass through
       end
     end
+  end
+
+  def port_lookpup(val)
+    pi = @port_indices || {}
+    si = @settlement_indices || {}
+    pi[val] || si[val] || "unknown"
   end
 
   def convert_rec_TRADE_ROUTES
