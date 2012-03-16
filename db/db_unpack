@@ -137,6 +137,7 @@ class DbFile
     header = "version #{@version}"
     header << ", schema #{@table_name}" if @schema
     header << ", guid #{@guid}" if @guid
+    header << ", strict" if $strict
     if !schema
       if empty?
         return "#{header}, empty, no schema\n"
@@ -145,17 +146,23 @@ class DbFile
       end
     end
     data = parse_data
-    return [
-      header,
-      schema.map{|name, field_type| "#{name}(#{field_type})"}.join("\t"),
-      *data.map{|row| row.map{|f|
-        if f.is_a?(Float)
-          float_to_tsv(f)
-        else
-          f.inspect
-        end
-      }.join("\t") }
-    ].join("\n") + "\n"
+    data = data.map{|row| row.map{|f| f.is_a?(Float) ? float_to_tsv(f) : f.inspect }}
+    schema_line = schema.map{|name, field_type| "#{name}(#{field_type})"}
+    
+    if $strict
+      rv = ""
+      csv = FCSV.new(rv, :col_sep => ",")
+      csv << [header]
+      csv << schema_line
+      data.each{|row| csv << row}
+      rv
+    else
+      return [
+        header,
+        schema_line.join("\t"),
+        *data.map{|row| row.join("\t") }
+      ].join("\n") + "\n"
+    end
   end
   
   def tsv
@@ -201,18 +208,30 @@ class DbFile
 end
 
 def parse_argv
-  if ARGV[0] == '--comma'
-    comma_mode = true
-    ARGV.shift
-  else
-    comma_mode = false
+  comma_mode = false
+  strict = false
+
+  loop do
+    if ARGV[0] == '--strict'
+      require "rubygems"
+      require "fastercsv"
+      strict = true
+      ARGV.shift
+      redo
+    end
+    if ARGV[0] == '--comma'
+      comma_mode = true
+      ARGV.shift
+      redo
+    end
+    break
   end
   
   unless ARGV.size == 2 or ARGV.size == 3
-    STDERR.puts "Usage: #{$0} [--comma] input/ output/ [fail/]"
+    STDERR.puts "Usage: #{$0} [--comma] [--tsv] input/ output/ [fail/]"
   end
   
-  [Pathname(ARGV[0]), Pathname(ARGV[1]), ARGV[2] && Pathname(ARGV[2]), comma_mode]
+  [Pathname(ARGV[0]), Pathname(ARGV[1]), ARGV[2] && Pathname(ARGV[2]), comma_mode, strict]
 end
 
 def convert_each_db_table(source_root, target_root, fail_root=nil)
@@ -223,7 +242,11 @@ def convert_each_db_table(source_root, target_root, fail_root=nil)
   sources.sort.each do |source_path|
     relative_path = source_path.relative_path_from(source_root)
     table_name    = source_path.dirname.basename.to_s
-    target_path   = Pathname((target_root+relative_path).to_s + ".tsv")
+    if $strict
+      target_path   = Pathname((target_root+relative_path).to_s + ".csv")
+    else
+      target_path   = Pathname((target_root+relative_path).to_s + ".tsv")
+    end
     fail_path     = fail_root && Pathname(fail_root + relative_path)
     dbfile = DbFile.new(source_path, table_name, target_path, fail_path)
     dbfile.try_convert!
@@ -231,5 +254,5 @@ def convert_each_db_table(source_root, target_root, fail_root=nil)
 end
 
 schemata = DbSchemata.new
-source_root, target_root, fail_root, $comma_mode = parse_argv
+source_root, target_root, fail_root, $comma_mode, $strict = parse_argv
 convert_each_db_table(source_root, target_root, fail_root)

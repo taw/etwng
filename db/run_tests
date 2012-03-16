@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+FileUtils.rm_rf "tmp/tests"
+FileUtils.mkdir_p "tmp/tests"
+
+puts "Normal:"
+system "./db_unpack samples tmp/tests/out-1"
+system "./db_pack tmp/tests/out-1 tmp/tests/recreated-1"
+system "diff -ru samples tmp/tests/recreated-1"
+
+puts "Comma:"
+system "./db_unpack --comma samples tmp/tests/out-2"
+system "./db_pack tmp/tests/out-2 tmp/tests/recreated-2"
+system "diff -ru samples tmp/tests/recreated-2"
+
+puts "Strict:"
+system "./db_unpack --strict samples tmp/tests/out-3"
+system "./db_pack tmp/tests/out-3 tmp/tests/recreated-3"
+system "diff -ru samples tmp/tests/recreated-3"
+
+puts "Strict+comma:"
+system "./db_unpack --comma --strict samples tmp/tests/out-4"
+system "./db_pack tmp/tests/out-4 tmp/tests/recreated-4"
+system "diff -ru samples tmp/tests/recreated-4"
