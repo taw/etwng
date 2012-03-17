@@ -190,10 +190,15 @@ module EsfSemanticConverter
     
     out!(%Q[<cell x='#{x}' y='#{y}' mask='#{mask}'>])
     until data.empty?
-      coord1, coord2, mask1, mask2 = data.shift(4)
+      c1, c2, mask1, mask2 = data.shift(4)
       mask1 = "%08x" % mask1
       mask2 = "%08x" % mask2
-      out!(%[ <cell_quad mask1='#{mask1}' coord1='#{coord1}' mask2='#{mask2}' coord2='#{coord2}'/>])
+      c1x = @region_data_vertices[2*c1]
+      c1y = @region_data_vertices[2*c1+1]
+      c2x = @region_data_vertices[2*c2]
+      c2y = @region_data_vertices[2*c2+1]
+
+      out!(%[ <cell_quad v1='#{c1} (#{c1x},#{c1y})' v2='#{c2} (#{c2x},#{c2y})' mask1='#{mask1}' mask2='#{mask2}'/>])
     end
     out!(%Q[</cell>])
   end
@@ -473,7 +478,7 @@ module EsfSemanticConverter
     tag!("rec", :type=>"region_data") do
       convert_until_ofs!(get_u)
     end
-    @region_data_vertices = nil
+    # @region_data_vertices = nil
   end
 
   def convert_rec_faces
