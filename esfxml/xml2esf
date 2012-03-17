@@ -49,11 +49,11 @@ module XmlTagHandlers
 
   ## Semantic data types - regions.esf
   def on_empty_node_cell_quad(attributes, buf, ctx)
-    id1 = attributes[:id1].to_i
-    id2 = attributes[:id2].to_i
+    mask1 = attributes[:mask1].to_i(16)
+    mask2 = attributes[:mask2].to_i(16)
     coord1 = attributes[:coord1].to_i
     coord2 = attributes[:coord2].to_i
-    data = [coord1, coord2, id1, id2].pack("l*")
+    data = [coord1, coord2, mask1, mask2].pack("l*")
     @stack[-1][3][:data] << data
   end
 
@@ -64,7 +64,7 @@ module XmlTagHandlers
   def on_end_node_cell(attributes, buf, ctx)
     put_rec "cell" do
       @esf.put_v2 attributes[:x].to_f, attributes[:y].to_f
-      @esf.put_u attributes[:id].to_i
+      @esf.put_u attributes[:mask].to_i(16)
       @esf.put_4x("\x48", ctx[:data])
     end
   end

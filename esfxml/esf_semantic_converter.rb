@@ -183,14 +183,17 @@ module EsfSemanticConverter
   end
 
   def convert_rec_cell
-    (x,y), id, data = get_rec_contents(:v2, :u, :bin8)
+    (x,y), mask, data = get_rec_contents(:v2, :u, :bin8)
+    mask = "%08x" % mask
     raise SemanticFali.new if (data.size % 16) != 0
     data = data.unpack("l*")
     
-    out!(%Q[<cell x='#{x}' y='#{y}' id='#{id}'>])
+    out!(%Q[<cell x='#{x}' y='#{y}' mask='#{mask}'>])
     until data.empty?
-      coord1, coord2, id1, id2 = data.shift(4)
-      out!(%[ <cell_quad id1='#{id1}' coord1='#{coord1}' id2='#{id2}' coord2='#{coord2}'/>])
+      coord1, coord2, mask1, mask2 = data.shift(4)
+      mask1 = "%08x" % mask1
+      mask2 = "%08x" % mask2
+      out!(%[ <cell_quad mask1='#{mask1}' coord1='#{coord1}' mask2='#{mask2}' coord2='#{coord2}'/>])
     end
     out!(%Q[</cell>])
   end
