@@ -190,15 +190,15 @@ module EsfSemanticConverter
     
     out!(%Q[<cell x='#{x}' y='#{y}' mask='#{mask}'>])
     until data.empty?
-      c1, c2, mask1, mask2 = data.shift(4)
-      mask1 = "%08x" % mask1
-      mask2 = "%08x" % mask2
+      c1, c2, ab1, ab2 = data.shift(4)
+      a1, b1 = ab1 >> 16, ab1 & 0xffff
+      a2, b2 = ab2 >> 16, ab2 & 0xffff
       c1x = @region_data_vertices[2*c1]
       c1y = @region_data_vertices[2*c1+1]
       c2x = @region_data_vertices[2*c2]
       c2y = @region_data_vertices[2*c2+1]
 
-      out!(%[ <cell_quad v1='#{c1} (#{c1x},#{c1y})' v2='#{c2} (#{c2x},#{c2y})' mask1='#{mask1}' mask2='#{mask2}'/>])
+      out!(%[ <line_segment v1='#{c1} (#{c1x},#{c1y})' a1='#{a1}' b1='#{b1}' v2='#{c2} (#{c2x},#{c2y})' a2='#{a2}' b2='#{b2}'/>])
     end
     out!(%Q[</cell>])
   end
