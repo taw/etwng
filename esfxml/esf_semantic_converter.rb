@@ -183,12 +183,14 @@ module EsfSemanticConverter
   end
 
   def convert_rec_cell
-    (x,y), mask, data = get_rec_contents(:v2, :u, :bin8)
-    mask = "%08x" % mask
+    (x,y), ab0, data = get_rec_contents(:v2, :u, :bin8)
     raise SemanticFali.new if (data.size % 16) != 0
     data = data.unpack("l*")
+
+    a0, b0 = ab0 >> 16, ab0 & 0xffff
+    a0n = (a0 == -1 ? "invalid" : @regions_lookup_table[a0]) || "unknown"
     
-    out!(%Q[<cell x='#{x}' y='#{y}' mask='#{mask}'>])
+    out!(%Q[<cell x='#{x}' y='#{y}' region='#{a0} (#{a0n})' area='#{b0}'>])
     until data.empty?
       c1, c2, ab1, ab2 = data.shift(4)
       a1, b1 = ab1 >> 16, ab1 & 0xffff
@@ -198,7 +200,10 @@ module EsfSemanticConverter
       c2x = @region_data_vertices[2*c2]
       c2y = @region_data_vertices[2*c2+1]
 
-      out!(%[ <line_segment v1='#{c1} (#{c1x},#{c1y})' a1='#{a1}' b1='#{b1}' v2='#{c2} (#{c2x},#{c2y})' a2='#{a2}' b2='#{b2}'/>])
+      a1n = (a1 == -1 ? "invalid" : @regions_lookup_table[a1]) || "unknown"
+      a2n = (a2 == -1 ? "invalid" : @regions_lookup_table[a2]) || "unknown"
+
+      out!(%[ <line_segment v1='#{c1} (#{c1x},#{c1y})' region1='#{a1} (#{a1n})' area1='#{b1}' v2='#{c2} (#{c2x},#{c2y})' region2='#{a2} (#{a2n})' area2='#{b2}'/>])
     end
     out!(%Q[</cell>])
   end
@@ -471,6 +476,16 @@ module EsfSemanticConverter
     return nil unless @data[@ofs+12] == 0x4c
     end_ofs, = @data[@ofs+13, 4].unpack("V")
     @data[@ofs+17..end_ofs].unpack("f*").map(&:pretty_single)
+  end
+  
+  def convert_ary_regions
+    @regions_lookup_table = []
+    raise QuietSemanticFail.new
+  end
+
+  def convert_rec_regions
+    @regions_lookup_table << lookahead_str
+    raise QuietSemanticFail.new
   end
   
   def convert_rec_region_data

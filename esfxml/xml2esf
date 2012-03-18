@@ -49,11 +49,11 @@ module XmlTagHandlers
 
   ## Semantic data types - regions.esf
   def on_empty_node_line_segment(attributes, buf, ctx)
-    a1 = attributes[:a1].to_i
-    b1 = attributes[:b1].to_i
+    a1 = attributes[:region1].to_i
+    b1 = attributes[:area1].to_i
     ab1 = (a1 << 16) | b1
-    a2 = attributes[:a2].to_i
-    b2 = attributes[:b2].to_i
+    a2 = attributes[:region2].to_i
+    b2 = attributes[:area2].to_i
     ab2 = (a2 << 16) | b2
     v1 = attributes[:v1].to_i
     v2 = attributes[:v2].to_i
@@ -67,8 +67,11 @@ module XmlTagHandlers
 
   def on_end_node_cell(attributes, buf, ctx)
     put_rec "cell" do
+      a0 = attributes[:region].to_i
+      b0 = attributes[:area].to_i
+      ab0 = (a0 << 16) | b0
       @esf.put_v2 attributes[:x].to_f, attributes[:y].to_f
-      @esf.put_u attributes[:mask].to_i(16)
+      @esf.put_u ab0
       @esf.put_4x("\x48", ctx[:data])
     end
   end
