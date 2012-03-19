@@ -478,22 +478,45 @@ module EsfSemanticConverter
     @data[@ofs+17..end_ofs].unpack("f*").map(&:pretty_single)
   end
   
+  def lookahead_region_names
+    save_ofs = @ofs
+    ofs_end = get_u
+    count = get_u
+    
+    rv = []
+    
+    count.times do
+      rec_end_ofs = get_u
+      while @ofs < rec_end_ofs
+        t = get_byte
+        if t == 14
+          if @abcf
+            rv << @str_lookup[get_u]
+          else
+            rv << get_s
+          end
+          @ofs = rec_end_ofs
+        else
+          warn "Unexpected field type #{t} during lookahead of region names"
+          return []
+        end
+      end
+    end
+    return rv
+  ensure
+    @ofs = save_ofs
+  end
+  
   def convert_ary_regions
-    @regions_lookup_table = []
+    @regions_lookup_table = lookahead_region_names
     raise QuietSemanticFail.new
   end
 
-  def convert_rec_regions
-    @regions_lookup_table << lookahead_str
-    raise QuietSemanticFail.new
-  end
-  
   def convert_rec_region_data
     @region_data_vertices = lookahead_region_data_vertices
     tag!("rec", :type=>"region_data") do
       convert_until_ofs!(get_u)
     end
-    # @region_data_vertices = nil
   end
 
   def convert_rec_faces
