@@ -65,6 +65,6 @@ XmlSplit = {
   :WALL_LIST                     => "walls/%d",
   :ROAD_LIST                     => "roads",
   :EF_LINE_LIST                  => "eflines",
-  :areas                         => "area/%s-%d",
+  :areas                         => "area/%s-%D",
   :slot_descriptions             => "slot/%s",
 }

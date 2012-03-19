@@ -46,7 +46,7 @@ class DirBuilder
     alloc_key = [base_name, semantic_name, @faction_name, ext]
     name = base_name
     if name =~ /%f/
-      fn = @faction_name || "" 
+      fn = @faction_name || ""
       if fn == ""
         # Delete - after %f if %f is empty
         name = name.sub(/%f-?/, "")
@@ -73,6 +73,8 @@ class DirBuilder
       ix = "%04d" % i
       if name =~ /%d/
         rel_path = rel_path.sub("%d", ix)
+      elsif name =~ /%D/
+          rel_path = rel_path.sub("%D", ix)
       elsif i > 0
         rel_path += "-" unless rel_path =~ /[-\/]\z/
         rel_path += ix
