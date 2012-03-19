@@ -101,7 +101,9 @@ module XmlTagHandlers
   end
   def on_empty_node_connectivity(attributes, buf, ctx)
     put_rec "connectivity" do
-      @esf.put_u attributes[:mask].hex
+      a = attributes[:region].to_i
+      b =  attributes[:area].to_i
+      @esf.put_u((a << 16) | b)
       @esf.put_u attributes[:from].to_i
       @esf.put_u attributes[:to].to_i
     end

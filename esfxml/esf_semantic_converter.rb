@@ -539,8 +539,10 @@ module EsfSemanticConverter
   end
 
   def convert_rec_connectivity
-    mask, cfrom, cto = get_rec_contents(:u, :u, :u)
-    out!("<connectivity mask=\"#{"%08x" % mask}\" from=\"#{cfrom}\" to=\"#{cto}\"/>")
+    ab, cfrom, cto = get_rec_contents(:u, :u, :u)
+    a, b = ab >> 16, ab & 0xffff
+    an = (a == -1 ? "invalid" : @regions_lookup_table[a]) || "unknown"
+    out!(%Q[<connectivity region="#{a} (#{an})" area="#{b}" from=\"#{cfrom}\" to=\"#{cto}\"/>])
   end
 
   def convert_rec_climate_map
