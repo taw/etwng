@@ -514,6 +514,9 @@ module EsfSemanticConverter
 
   def convert_rec_region_data
     @region_data_vertices = lookahead_region_data_vertices
+    @region_data_num ||= 0
+    @region_data_num += 1
+    dir_builder.region_data_num = @region_data_num
     tag!("rec", :type=>"region_data") do
       convert_until_ofs!(get_u)
     end

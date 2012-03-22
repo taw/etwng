@@ -3,6 +3,7 @@ class DirBuilder
   attr_reader :xml_printer
   # Semanitc names extras
   attr_accessor :faction_name
+  attr_accessor :region_data_num
   
   def initialize(out_dir)
     @out_dir = out_dir
@@ -10,6 +11,7 @@ class DirBuilder
     @xml_printer = nil
     FileUtils.mkdir_p @out_dir
     @semantic_names_stack = []
+    @region_data_num = 0
   end
 
   def save_binfile(base_name, semantic_name, ext, data)
@@ -43,8 +45,9 @@ class DirBuilder
 
   def alloc_new_path(base_name, semantic_name, ext)
     semantic_name = semantic_name.gsub(/[:\/\/]/, "-") if semantic_name
-    alloc_key = [base_name, semantic_name, @faction_name, ext]
+    alloc_key = [base_name, semantic_name, @faction_name, @region_data_num, ext]
     name = base_name
+    name = name.gsub("%R", @region_data_num.to_s)
     if name =~ /%f/
       fn = @faction_name || ""
       if fn == ""
