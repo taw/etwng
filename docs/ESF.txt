@@ -61,3 +61,10 @@ Entire poi.esf is huge blob of those, first approximation:
     bool
 
 It seems that esf leaves far too many options, so they picked one at random.
+
+----
+
+More official documentation:
+
+* http://www.twcenter.net/forums/showthread.php?p=9911495&highlight=64#post9911495
+* http://blogs.sega.com/totalwar/2012/03/20/fao-modders-changes-to-esfsave-format/
