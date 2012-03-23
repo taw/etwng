@@ -67,4 +67,5 @@ XmlSplit = {
   :EF_LINE_LIST                  => "eflines",
   :areas                         => "area-%R/%s-%D",
   :slot_descriptions             => "slot/%s",
+  :COMPRESSED_DATA               => "compressed_data",
 }
