@@ -110,45 +110,56 @@ module EsfBasicBinaryOps
     get_bytes(get_u2*2).unpack("v*").pack("U*")
   end
   def lookahead_str
-    return nil if @abca
-    end_ofs = @data[@ofs, 4].unpack("V")[0]
-    la_ofs = @ofs + 4
+    save_ofs = @ofs
+    if @abca
+      end_ofs = get_ofs_end
+    else
+      end_ofs = get_u
+    end
+  
     # Only single <rec> inside <rec>
     # Just ignore existence of container, and see what's inside
-    if la_ofs < end_ofs and @data[la_ofs] == 0x80 and @data[la_ofs+4, 4].unpack("V")[0] == end_ofs
-      la_ofs += 8
+    if !@abca and @ofs < end_ofs and @data[@ofs] == 0x80 and @data[@ofs+4, 4].unpack("V")[0] == end_ofs
+      @ofs += 8
     end
     
-    while la_ofs < end_ofs
-      tag = @data[la_ofs]
+    while @ofs < end_ofs
+      tag = @data[@ofs]
       # puts "At #{la_ofs}, tag #{"%02x" % tag}"
       if tag == 0x0e
         if @abcf
-          i, = @data[la_ofs+1, 4].unpack("V")
+          i, = @data[@ofs+1, 4].unpack("V")
           return @str_lookup[i]
         else
-          sz, = @data[la_ofs+1, 2].unpack("v")
-          rv = @data[la_ofs+3, sz*2].unpack("v*").pack("U*")
+          sz, = @data[@ofs+1, 2].unpack("v")
+          rv = @data[@ofs+3, sz*2].unpack("v*").pack("U*")
           return nil if rv == ""
           if rv.size > 128
-            puts "Warning: Too long name suggested for file name at #{@ofs}/#{la_ofs}: #{rv.inspect}"
+            puts "Warning: Too long name suggested for file name at #{save_ofs}/#{@ofs}: #{rv.inspect}"
             return nil
           end
           return rv
         end
-      elsif tag <= 0x10
-        sz = [3, 2, nil, 3, 5, nil, 2, 3, 5, nil, 5, nil, 9, 13, nil, nil, 3][tag]
+      elsif tag <= 0x20
+        sz = [
+          nil, 2, nil, 3, 5, 9, 2, 3,
+          5, 9, 5, nil, 9, 13, nil, nil,
+          3, nil, 1, 1, 1, 1, 2, 3, 4,
+          1, 2, 3, 4, 1,
+        ][tag]
         return nil unless sz
-        la_ofs += sz
-      elsif tag >= 0x40 and tag <= 0x4f
-        la_ofs = @data[la_ofs+1, 4].unpack("V")[0]
-      elsif tag == 0x80 or tag == 0x81
-        la_ofs = @data[la_ofs+4, 4].unpack("V")[0]
+        @ofs += sz
+      elsif !@abca and tag >= 0x40 and tag <= 0x5f
+        @ofs = @data[@ofs+1, 4].unpack("V")[0]
+      elsif !@abca and tag == 0x80 or tag == 0x81
+        @ofs = @data[@ofs+4, 4].unpack("V")[0]
       else
         return nil
       end
     end
     return nil
+  ensure
+    @ofs = save_ofs
   end
   def get_byte
     rv = @data[@ofs]
