@@ -327,14 +327,13 @@ class EsfBuilder
     if @abca
       @data_stack << @data
       @data = ""
-      @children << 0
     else
-      @adjust_children << @data.size
       @adjust_ofs << @data.size
       @data << "\x00\x00\x00\x00"
-      @children << 0
+      @adjust_children << @data.size
       @data << "\x00\x00\x00\x00"
     end
+    @children << 0
   end
   def pop_marker_ofs
     if @abca and !@data_stack.empty? # root market works old style
@@ -350,8 +349,8 @@ class EsfBuilder
       # OFS POSITION IS RELATIVE TO BOTH OF THEM
       @data << encode_number(child_data.size) << encode_number(@children.pop) << child_data
     else
-      @data[@adjust_ofs.pop, 4] = [@data.size].pack("V")
       @data[@adjust_children.pop, 4] = [@children.pop].pack("V")
+      @data[@adjust_ofs.pop, 4] = [@data.size].pack("V")
     end
   end
 end
