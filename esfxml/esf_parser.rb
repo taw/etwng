@@ -191,6 +191,7 @@ module EsfBasicBinaryOps
     else
       rv = (@data[@ofs,3]+"\xFF").unpack("l")[0]
     end
+    warn "Not tested I:#{@data[@ofs,3].unpack("C*")*' '} I:#{rv}"
     @ofs += 3
     rv
   end
@@ -339,6 +340,42 @@ module EsfGetData
   def get_10!
     [:angle, get_angle]
   end
+  def get_12!
+    [:bool, true]
+  end
+  def get_13!
+    [:bool, false]
+  end
+  def get_14!
+    [:u, 0]
+  end
+  def get_15!
+    [:u, 1]
+  end
+  def get_16!
+    [:u, get_i1]
+  end
+  def get_17!
+    [:u, get_i2]
+  end
+  def get_18!
+    [:u, get_i3]
+  end
+  def get_19!
+    [:i, 0]
+  end
+  def get_1a!
+    [:i, get_i1]
+  end
+  def get_1b!
+    [:i, get_i2]
+  end
+  def get_1c!
+    [:i, get_i3]
+  end
+  def get_1d!
+    [:flt, 0.0]
+  end
   def get_40!
     [:bin0, get_ofs_bytes]
   end
@@ -387,7 +424,11 @@ module EsfParserSemantic
   def get_rec_contents_dynamic
     types   = []
     data    = []
-    end_ofs = get_u
+    if @abca
+      end_ofs = get_ofs_end
+    else
+      end_ofs = get_u
+    end
     while @ofs < end_ofs
       t, d = send(@esf_type_handlers_get[get_byte])
       types << t
@@ -402,7 +443,11 @@ module EsfParserSemantic
   
   def get_rec_contents(*expect_types)
     data    = []
-    end_ofs = get_u
+    if @abca
+      end_ofs = get_ofs_end
+    else
+      end_ofs = get_u
+    end
     while @ofs < end_ofs
       t, d = send(@esf_type_handlers_get[get_byte])
       raise SemanticFail.new unless t == expect_types.shift
@@ -411,18 +456,39 @@ module EsfParserSemantic
     data
   end
   
+  # Disabled in ABCA mode
   def get_81!
+    raise "This code is supposed to be disabled in ABCA mode" if @abca
     node_type, version = get_node_type_and_version
     ofs_end, count = get_u, get_u
     [[:ary, node_type, version], (0...count).map{ get_rec_contents_dynamic }]
   end
 
+  # Disabled in ABCA mode
   def get_80!
+    raise "This code is supposed to be disabled in ABCA mode" if @abca
     node_type, version = get_node_type_and_version
     [[:rec, node_type, version], get_rec_contents_dynamic]
   end
 
+  def get_abca_ary!
+    node_type, version = get_node_type_and_version_abca
+    ofs_end, count = get_ofs_end_and_item_count
+    [[:ary, node_type, version], (0...count).map{ get_rec_contents_dynamic }]
+  end
+  
+  def get_abca_rec!
+    # Special case root node, since it follows the old style for some reason
+    if @ofs == 0x11
+      node_type, version = get_node_type_and_version
+    else
+      node_type, version = get_node_type_and_version_abca
+    end
+    [[:rec, node_type, version], get_rec_contents_dynamic]
+  end
+
   def get_ary_contents(*expect_types)
+    raise SemanticFail.new if @abca
     data = []
     ofs_end, count = get_u, get_u
     data.push get_rec_contents(*expect_types) while @ofs < ofs_end
@@ -430,6 +496,7 @@ module EsfParserSemantic
   end
 
   def get_ary_contents_dynamic
+    raise SemanticFail.new if @abca
     data = []
     ofs_end, count = get_u, get_u
     data.push get_rec_contents_dynamic while @ofs < ofs_end
@@ -491,6 +558,14 @@ class EsfParser
       name = ("get_%02x!" % i).to_sym
       out[i] = name if respond_to?(name)
     }
+    if @abca
+      (0x80..0xa0).each{|i|
+        out[i] = :get_abca_rec!
+      }
+      (0xc0..0xdf).each{|i|
+        out[i] = :get_abca_ary!
+      }
+    end
     out
   end
 end

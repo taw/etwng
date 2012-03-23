@@ -714,6 +714,21 @@ module XmlTagHandlers
       @esf.put_s buf
     end
   end
+  def on_text_node_date2(attributes, buf, ctx)
+    buf = buf.strip
+    if buf == ""
+      is = [0,0,0,0]
+    else
+      is = buf.split(/\s+/).map(&:to_i)
+      raise "Wrong date format, expected four integers: `#{buf}'" unless is.size == 4
+    end
+    put_rec "DATE", "2" do
+      @esf.put_u is[3]
+      @esf.put_u is[2]
+      @esf.put_u is[1]
+      @esf.put_u is[0]
+    end
+  end
   def on_text_node_date(attributes, buf, ctx)
     if buf == ""
       year, season = 0, 'summer' 

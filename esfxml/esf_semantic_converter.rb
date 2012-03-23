@@ -1470,6 +1470,15 @@ module EsfSemanticConverter
     health, name, faction, gov = get_rec_contents(:u, :s, :s, :s)
     out!("<building health=\"#{health}\" name=\"#{name.xml_escape}\" faction=\"#{faction.xml_escape}\" government=\"#{gov.xml_escape}\"/>")
   end
+
+  def covert_v2_rec_DATE
+    a,b,c,d = get_rec_contents(:u, :u, :u, :u)
+    if [a,b,c,d] == [0,0,0,0]
+      out!("<date2/>")
+    else
+      out!("<date2>#{d} #{c} #{b} #{a}</date2>")
+    end
+  end
   
   def convert_rec_DATE
     date = ensure_date(get_rec_contents_dynamic)
@@ -1816,4 +1825,5 @@ module EsfSemanticConverter
     end
   end
   ConvertSemanticRec[39][:FACTION] = :covert_v39_rec_FACTION
+  ConvertSemanticRec[2][:DATE] = :covert_v2_rec_DATE
 end
