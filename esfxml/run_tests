@@ -43,16 +43,16 @@ class SampleTest
 end
 
 sample_tests = [
-  # "bmd.dat",
+  "bmd.dat",
   # "episode_one_pathfinding.esf",
   # "eu_north.esf",
-  # "pathfinding.esf",
+  "pathfinding.esf",
   # "poi.esf",
   # "portugal_winter_1702_uni_1.empire_save",
-  #"regions.esf",
-  # "sea_grids.esf",
+  "regions.esf",
+  "sea_grids.esf",
   # "startpos.esf",
-  # "trade_routes.esf",
+  "trade_routes.esf",
   # "uk.empire_save",
   # "van_0.empire_save",
   # "van_1.empire_save",
@@ -71,7 +71,7 @@ sample_tests = [
   #"sho_pathfinding.esf",
   #"sho_regions.esf",
 
-  #"sho_startpos.esf",
+  "sho_startpos.esf",
   
   # "ntw_egy_startpos.esf",
   # "ntw_eur_startpos.esf",

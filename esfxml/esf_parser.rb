@@ -51,6 +51,13 @@ module EsfBasicBinaryOps
     end
     rv
   end
+  def get_ofs_end_and_item_count
+    # Position of ofs_end is relative to end of item_count
+    # which is a weird way to encode things
+    ofs_end = get_item_count
+    item_count = get_item_count
+    [ofs_end + @ofs, item_count]
+  end
   def get_u
     rv = @data[@ofs,4].unpack("V")[0]
     @ofs += 4
@@ -173,13 +180,18 @@ module EsfBasicBinaryOps
     rv
   end
   def get_u3
-    rv = ("\x00"+@data[@ofs,3]).unpack("V")[0]
-    @ofs += 4
+    rv = (@data[@ofs,3]+"\x00").unpack("V")[0]
+    # warn "Not tested U:#{@data[@ofs,3].unpack("C*")*' '} U:#{rv}"
+    @ofs += 3
     rv
   end
   def get_i3
-    rv = ("\x00"+@data[@ofs,3]).unpack("l")[0]
-    @ofs += 4
+    if @data[@ofs+2] >= 128
+      rv = (@data[@ofs,3]+"\xFF").unpack("l")[0]
+    else
+      rv = (@data[@ofs,3]+"\xFF").unpack("l")[0]
+    end
+    @ofs += 3
     rv
   end
   def get_bool

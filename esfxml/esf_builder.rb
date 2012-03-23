@@ -5,9 +5,10 @@ class EsfBuilder
   attr_reader :type_codes
   def initialize
     @data             = ""
-    @adjust_ofs       = []
-    @adjust_children  = []
-    @children         = []
+    @adjust_ofs       = [] # Non-ABCA. ABCA uses it for root node
+    @adjust_children  = [] # Non-ABCA
+    @children         = [] # Both ABCA and non-ABCA
+    @data_stack       = [] # ABCA
     @type_codes       = Hash.new{|ht,k|
       # warn "Unknown node name #{k.inspect}"
       add_type_code(k)
@@ -29,6 +30,9 @@ class EsfBuilder
     rv = @type_codes[name] = @type_codes.size
     @node_types << name
     rv
+  end
+  def put(bytes)
+    @data << bytes
   end
   def put_yes
     if @abca
@@ -131,13 +135,16 @@ class EsfBuilder
   end
   # ABCA only!
   def put_number(val)
+    @data << encode_number(val)
+  end
+  def encode_number(val)
     r = [val & 0x7f]
     val >>= 7
     while val != 0
       r << ((val & 0x7f) | 0x80)
       val >>= 7
     end
-    @data << r.reverse.pack("C*")
+    r.reverse.pack("C*")
   end
   def asc_lookup(str)
     unless @asc_lookup[str]
@@ -258,12 +265,10 @@ class EsfBuilder
     else
       @data << [0x81, type_code, version].pack("CvC")
     end
-    push_marker_ofs
-    push_marker_children
+    push_marker_ofs_and_children
   end
   def end_ary
-    pop_marker_children
-    pop_marker_ofs
+    pop_marker_ofs_and_children
   end
   def start_esf(magic, padding)
     @data << magic.pack("V*")
@@ -309,35 +314,43 @@ class EsfBuilder
   def inc_children
     @children[-1] += 1
   end
-  def put(bytes)
-    @data << bytes
-  end
   def push_marker_ofs
-    @adjust_ofs << @data.size
-    @data << "\x00\x00\x00\x00"
+    if @abca and !@adjust_ofs.empty?
+      @data_stack << @data
+      @data = ""
+    else
+      @adjust_ofs << @data.size
+      @data << "\x00\x00\x00\x00"
+    end
   end
-  def push_marker_children
-    @adjust_children << @data.size
-    @children << 0
-    @data << "\x00\x00\x00\x00"
-  end
-  # This is full of fail
-  def encode_number_as_4_bytes(val)
-    raise "Number too big to encode as 4 bytes - #{val}" if val > 0x0fffffff
-    rv = [((val >> 21) & 0x7f) | 0x80, ((val >> 14) & 0x7f) | 0x80, ((val >> 7) & 0x7f) | 0x80, val & 0x7f].pack("C*")
+  def push_marker_ofs_and_children
+    if @abca
+      @data_stack << @data
+      @data = ""
+      @children << 0
+    else
+      @adjust_children << @data.size
+      @adjust_ofs << @data.size
+      @data << "\x00\x00\x00\x00"
+      @children << 0
+      @data << "\x00\x00\x00\x00"
+    end
   end
   def pop_marker_ofs
-    if @abca and @adjust_ofs.size != 1 # root market works old style
-      at = @adjust_ofs.pop
-      @data[at, 4] = encode_number_as_4_bytes(@data.size - at - 4)
+    if @abca and !@data_stack.empty? # root market works old style
+      @data, child_data = @data_stack.pop, @data
+      @data << encode_number(child_data.size) << child_data
     else
       @data[@adjust_ofs.pop, 4] = [@data.size].pack("V")
     end
   end
-  def pop_marker_children
+  def pop_marker_ofs_and_children
     if @abca
-      @data[@adjust_children.pop, 4] = encode_number_as_4_bytes(@children.pop)
+      @data, child_data = @data_stack.pop, @data
+      # OFS POSITION IS RELATIVE TO BOTH OF THEM
+      @data << encode_number(child_data.size) << encode_number(@children.pop) << child_data
     else
+      @data[@adjust_ofs.pop, 4] = [@data.size].pack("V")
       @data[@adjust_children.pop, 4] = [@children.pop].pack("V")
     end
   end

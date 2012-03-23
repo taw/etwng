@@ -84,7 +84,7 @@ module EsfConvertBasic
     out!("<u>1</u>")
   end
   def convert_16!
-    out!("<u>#{get_byte}</u>")
+    out!("<u>#{get_u1}</u>")
   end
   def convert_17!
     out!("<u>#{get_u2}</u>")
@@ -352,7 +352,7 @@ class EsfConverter < EsfParser
     node_type, version = get_node_type_and_version_abca
     csa = ConvertSemanticAry[version][node_type]
     warn "Semantic conversion of arrays in CSA mode not supported yet" if csa
-    ofs_end, count = get_ofs_end, get_item_count
+    ofs_end, count = get_ofs_end_and_item_count
     if count == 0
       tag!("ary", :type=>node_type, :version=>version)
     else
