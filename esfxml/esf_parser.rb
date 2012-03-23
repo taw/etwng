@@ -134,6 +134,22 @@ module EsfBasicBinaryOps
     @ofs += 1
     rv
   end
+  alias_method :get_u1, :get_byte
+  def get_i1
+    rv = @data[@ofs,1].unpack("c")[0]
+    @ofs += 1
+    rv
+  end
+  def get_u3
+    rv = ("\x00"+@data[@ofs,3]).unpack("V")[0]
+    @ofs += 4
+    rv
+  end
+  def get_i3
+    rv = ("\x00"+@data[@ofs,3]).unpack("l")[0]
+    @ofs += 4
+    rv
+  end
   def get_bool
     case b = get_byte
     when 1

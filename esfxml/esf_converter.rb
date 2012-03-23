@@ -71,6 +71,42 @@ module EsfConvertBasic
   def convert_10!
     out!("<angle>#{get_angle}</angle>")
   end
+  def convert_12!
+    out!("<yes/>")
+  end
+  def convert_13!
+    out!("<no/>")
+  end
+  def convert_14!
+    out!("<u>0</u>")
+  end
+  def convert_15!
+    out!("<u>1</u>")
+  end
+  def convert_16!
+    out!("<u>#{get_byte}</u>")
+  end
+  def convert_17!
+    out!("<u>#{get_u2}</u>")
+  end
+  def convert_18!
+    out!("<u>#{get_u3}</u>")
+  end
+  def convert_19!
+    out!("<i>0</i>")
+  end
+  def convert_1a!
+    out!("<i>#{get_i1}</i>")
+  end
+  def convert_1b!
+    out!("<i>#{get_i2}</i>")
+  end
+  def convert_1c!
+    out!("<i>#{get_i3}</i>")
+  end
+  def convert_1d!
+    out!("<flt>0.0</flt>")
+  end
   def convert_4x!(tag)
     data = get_ofs_bytes
     if data.empty?
@@ -174,6 +210,48 @@ module EsfConvertBasic
     else
       convert_4x!("binF", &:to_hex_dump)
     end
+  end
+  def convert_50!
+    convert_4x!("bin10", &:to_hex_dump)
+  end
+  def convert_51!
+    convert_4x!("bin11", &:to_hex_dump)
+  end
+  def convert_52!
+    convert_4x!("bin12", &:to_hex_dump)
+  end
+  def convert_53!
+    convert_4x!("bin13", &:to_hex_dump)
+  end
+  def convert_54!
+    convert_4x!("bin14", &:to_hex_dump)
+  end
+  def convert_55!
+    convert_4x!("bin15", &:to_hex_dump)
+  end
+  def convert_56!
+    convert_4x!("bin16", &:to_hex_dump)
+  end
+  def convert_57!
+    convert_4x!("bin17", &:to_hex_dump)
+  end
+  def convert_58!
+    convert_4x!("bin18", &:to_hex_dump)
+  end
+  def convert_59!
+    convert_4x!("bin19", &:to_hex_dump)
+  end
+  def convert_5a!
+    convert_4x!("bin1a", &:to_hex_dump)
+  end
+  def convert_5b!
+    convert_4x!("bin1b", &:to_hex_dump)
+  end
+  def convert_5c!
+    convert_4x!("bin1c", &:to_hex_dump)
+  end
+  def convert_5d!
+    convert_4x!("bin1d", &:to_hex_dump)
   end
 end
 
