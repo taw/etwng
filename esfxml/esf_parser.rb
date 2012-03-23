@@ -184,6 +184,7 @@ module EsfBasicBinaryOps
   end
   def parse_node_types
     @node_types = (0...get_u2).map{ get_ascii.to_sym }
+    @padding = 0
     if @abcf
       @str_table  = []
       @str_lookup = {}
@@ -205,7 +206,14 @@ module EsfBasicBinaryOps
       @str_table = nil
       @asc_table = nil
     end
-    raise "Extra data past end of file" if @ofs != @data.size
+    if @ofs != @data.size
+      padding = get_bytes(@data.size - @ofs)
+      if padding == "\x00" * padding.size
+        @padding = padding.size
+      else
+        raise "Extra non-zero data past end of file"
+      end
+    end
   end
   def get_ofs_bytes
     get_bytes(get_u - @ofs)
