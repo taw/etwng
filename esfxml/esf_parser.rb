@@ -41,6 +41,16 @@ module EsfBasicBinaryOps
     @ofs += 4
     rv
   end
+  def get_i8
+    rv = @data[@ofs,8].unpack("q")[0]
+    @ofs += 8
+    rv
+  end
+  def get_u8
+    rv = @data[@ofs,8].unpack("Q")[0]
+    @ofs += 8
+    rv
+  end
   def get_i2
     rv = @data[@ofs,2].unpack("s")[0]
     @ofs += 2

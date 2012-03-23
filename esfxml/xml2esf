@@ -1076,8 +1076,6 @@ module XmlTagHandlers
   def on_end_node_asc_ary(attributes, buf, ctx)
     @esf.put_asc_ary ctx[:asc_ary]
   end
-
-  
   def on_text_node_u(attributes, buf, ctx)
     @esf.put_u buf.to_i
   end
@@ -1106,8 +1104,10 @@ module XmlTagHandlers
     @esf.put_flt [buf.to_i(16)].pack("V").unpack("f")[0]
   end
   def on_text_node_uint64(attributes, buf, ctx)
-    @esf.data << "\x09"
-    @esf.data << [buf.to_i].pack("Q")
+    @esf.put_u8(buf.to_i)
+  end
+  def on_text_node_int64(attributes, buf, ctx)
+    @esf.put_i8(buf.to_i)
   end
   def on_text_node_u4_ary(attributes, buf, ctx)
     @esf.put_u4_ary buf.strip.split(/\s+/).map(&:to_i)

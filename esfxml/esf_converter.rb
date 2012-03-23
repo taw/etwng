@@ -15,6 +15,9 @@ module EsfConvertBasic
   def convert_04!
     out!("<i>#{get_i}</i>")
   end
+  def convert_05!
+    out!("<int64>#{get_u8}</int64>")
+  end
   def convert_06!
     out!("<byte>#{get_byte}</byte>")
   end
@@ -25,8 +28,7 @@ module EsfConvertBasic
     out!("<u>#{get_u}</u>")
   end
   def convert_09!
-    data, = get_bytes(8).unpack("Q")
-    out!("<uint64>#{data}</uint64><!-- speculative type -->")
+    out!("<uint64>#{get_u8}</uint64>")
   end
   def convert_0a!
     val = get_flt
