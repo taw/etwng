@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
 
+# This doesn't test esf->xml->esf (esf == esf)
+# It tests esf->xml->esf->xml (xml == xml)
+# which is a weaker condition
+
 require "fileutils"
 
 class SampleTest
@@ -11,6 +15,9 @@ class SampleTest
   end
   def xmldir
     "tmp/" + @filename.gsub(".", "_") + "_dir"
+  end
+  def xmldir2
+    "tmp/" + @filename.gsub(".", "_") + "_dir2"
   end
   def recreated
     "tmp/recreated_#{@filename}"
@@ -27,57 +34,30 @@ class SampleTest
     FileUtils.rm_rf xmldir
     system *(ruby + ["./esf2xml", source, xmldir])
   end
+  def convert_re!
+    puts "Converting again #{@filename}"
+    FileUtils.rm_rf xmldir2
+    system *(ruby + ["./esf2xml", recreated, xmldir2])
+  end
+  
   def convert_back!
     puts "Recreating #{@filename}"
     FileUtils.rm_rf recreated
     system *(ruby + ["./xml2esf", xmldir, recreated])
   end
   def compare!
-    system "diff", source, recreated
+    system "diff", "-ruN", xmldir, xmldir2
+    #system "diff", source, recreated
   end
   def run!
     convert! or return 1
     convert_back! or return 1
+    convert_re! or return 1
     compare!
   end
 end
 
 sample_tests = [
-  # "bmd.dat",
-  # "episode_one_pathfinding.esf",
-  # "eu_north.esf",
-  # "pathfinding.esf",
-  # "poi.esf",
-  # "portugal_winter_1702_uni_1.empire_save",
-  #"regions.esf",
-  # "sea_grids.esf",
-  # "startpos.esf",
-  # "trade_routes.esf",
-  # "uk.empire_save",
-  # "van_0.empire_save",
-  # "van_1.empire_save",
-  # "van_2.empire_save",
-  # "van_3.empire_save",
-  # "van_4.empire_save",
-
-  #"campaign_sho_castle_1_fort.esf",
-  #"campaign_sho_castle_2_stronghold.esf",
-  #"campaign_sho_castle_3_fortress.esf",
-  #"campaign_sho_castle_4_castle.esf",
-  #"campaign_sho_castle_5_citadel.esf",
-  #"sho_sea_grids.esf",
-  #"sho_poi.esf",
-  #"sho_campaign.tree_list",
-  #"sho_pathfinding.esf",
-  #"sho_regions.esf",
-
-  #"sho_startpos.esf",
-  
-  # "ntw_egy_startpos.esf",
-  # "ntw_eur_startpos.esf",
-  # "ntw_ita_startpos.esf",
-  # "ntw_tut_startpos.esf",
-  
   "startpos_boshin.esf",
 ].map{|filename| SampleTest.new(filename)}.sort_by(&:size)
 
