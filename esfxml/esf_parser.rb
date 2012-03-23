@@ -353,13 +353,13 @@ module EsfGetData
     [:u, 1]
   end
   def get_16!
-    [:u, get_i1]
+    [:u, get_u1]
   end
   def get_17!
-    [:u, get_i2]
+    [:u, get_u2]
   end
   def get_18!
-    [:u, get_i3]
+    [:u, get_u3]
   end
   def get_19!
     [:i, 0]

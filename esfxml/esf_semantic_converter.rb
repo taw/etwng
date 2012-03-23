@@ -613,6 +613,17 @@ module EsfSemanticConverter
   end
 
 ## startpos.esf records
+  def convert_rec_COMPRESSED_DATA
+    # 5-byte block containing the information required by LZMA to decompress the data (often called ‘encode properties’)
+    cdata, (mtypes, mdata) = get_rec_contents(:bin6, [:rec, :COMPRESSED_DATA_INFO, nil])
+    raise SemanticFail.new unless mtypes == [:u, :bin6]
+    sz, meta = mdata
+    meta = meta.unpack("C*").map{|x| "%02X" % x}*" "
+    path, rel_path = dir_builder.alloc_new_path("compressed_data", nil, ".data")
+    File.write(path, cdata)
+    out!("<compressed_data size=\"#{sz}\" meta=\"#{meta}\" path=\"#{rel_path.xml_escape}\"/>")
+  end
+  
   def convert_rec_CULTURE_PATHS
     agent, culture = get_rec_contents(:s, :s)
     out!(%Q[<culture_path agent="#{agent.xml_escape}" culture="#{culture.xml_escape}"/>])
