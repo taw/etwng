@@ -398,7 +398,7 @@ class EsfConverter < EsfParser
   def convert!
     @done = false
     @dir_builder.open_main_xml do
-      tag!("esf", :magic => magic.join(" ")) do
+      tag!("esf", :magic => magic.join(" "), :padding => padding) do
         put_node_types!
         send(@esf_type_handlers[get_byte])
       end

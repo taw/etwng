@@ -223,7 +223,7 @@ module EsfBasicBinaryOps
   end
   def parse_node_types
     @node_types = (0...get_u2).map{ get_ascii.to_sym }
-    @padding = 0
+    @padding = nil
     if @abcf
       @str_table  = []
       @str_lookup = {}
@@ -448,7 +448,7 @@ class EsfParser
   include EsfParserSemantic
 
   attr_accessor :ofs
-  attr_reader :magic, :node_types
+  attr_reader :magic, :padding, :node_types
 
   def with_temp_ofs(tmp)
     orig = @ofs

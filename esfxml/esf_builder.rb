@@ -101,8 +101,9 @@ class EsfBuilder
         @data << "\x1a" << [val].pack("c")
       elsif val <= 0x7fff and val >= -0x8000
         @data << "\x1b" << [val].pack("v")
+      elsif val <= 0x7fffff and val >= -0x800000
+        @data << "\x1c" << [val].pack("V")[0,3]
       else
-        # FIXME: 3 byte encoding \x1c
         @data << "\x04" << [val].pack("V")
       end
     else
@@ -119,8 +120,9 @@ class EsfBuilder
         @data << "\x16" << [val].pack("C")
       elsif val <= 0xffff
         @data << "\x17" << [val].pack("v")
+      elsif val <= 0xffffff
+        @data << "\x18" << [val].pack("V")[0,3]
       else
-        # FIXME: 3 byte encoding \x18
         @data << "\x08" << [val].pack("V")
       end
     else
@@ -263,7 +265,7 @@ class EsfBuilder
     pop_marker_children
     pop_marker_ofs
   end
-  def start_esf(magic)
+  def start_esf(magic, padding)
     @data << magic.pack("V*")
     @abcf = (magic[0] == 0xabcf or magic[0] == 0xabca)
     @abca = (magic[0] == 0xabca)
@@ -273,6 +275,7 @@ class EsfBuilder
     @asc_table  = []
     @asc_lookup = {}
     @asc_max    = -1
+    @padding    = padding
     push_marker_ofs
   end
   def end_esf
@@ -296,6 +299,9 @@ class EsfBuilder
         @data << str
         @data << [i].pack("V")
       end
+    end
+    if @padding
+      @data << "\x00" * @padding
     end
   end
 

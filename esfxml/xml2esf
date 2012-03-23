@@ -987,7 +987,7 @@ module XmlTagHandlers
 
   def on_start_node_esf(attributes)
     raise "Magic attribute required" unless attributes[:magic]
-    @esf.start_esf attributes[:magic].split(/\s+/).map(&:to_i)
+    @esf.start_esf attributes[:magic].split(/\s+/).map(&:to_i), attributes[:padding].to_i
     [true, nil, {}]
   end
   def on_end_node_esf(attributes, buf, ctx)
