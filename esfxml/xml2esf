@@ -1137,7 +1137,7 @@ module XmlTagHandlers
     @esf.put_bool_ary buf.strip.split(/[\s,]+/).map(&:to_i)
   end
   def put_bin_hex(type, buf)
-    @esf.put_4x(type, buf.strip.split(/[;,\s]+/).map{|x| x.to_i(16)}.pack("C*"))
+    @esf.put_4x([type].pack("C"), buf.strip.split(/[;,\s]+/).map{|x| x.to_i(16)}.pack("C*"))
   end
   def on_text_node_bin0(attributes, buf, ctx)
     put_bin_hex(0x40, buf)

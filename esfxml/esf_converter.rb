@@ -273,14 +273,30 @@ class EsfConverter < EsfParser
       name = ("convert_%02x!" % i).to_sym
       out[i] = name if respond_to?(name)
     }
+    if @abca
+      (0x80..0xa0).each{|i|
+        out[i] = :convert_abca_rec!
+      }
+      (0xc0..0xdf).each{|i|
+        out[i] = :convert_abca_ary!
+      }
+    end
     out
   end
   
   def convert_rec_basic!(node_type, version)
     csr = ConvertSemanticRec[version][node_type]
-    try_semantic(node_type){ return send(csr) } if csr
+    if @abca
+      warn "High level conversion disabled in ABCA mode for #{node_type}" if csr
+    else
+      try_semantic(node_type){ return send(csr) } if csr
+    end
     tag!("rec", :type=>node_type, :version=>version) do
-      ofs_end = get_u
+      if @abca
+        ofs_end = get_ofs_end
+      else
+        ofs_end = get_u
+      end
       send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
     end
   end
@@ -301,15 +317,42 @@ class EsfConverter < EsfParser
     send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
   end
 
+  # Disabled in ABCA mode
   def convert_80!
     convert_rec!(*get_node_type_and_version)
   end
 
+  def convert_abca_rec!
+    # Special case root node, since it follows the old style for some reason
+    if @ofs == 0x11
+      convert_rec!(*get_node_type_and_version)
+    else
+      convert_rec!(*get_node_type_and_version_abca)
+    end
+  end
+
+  # Disabled in ABCA bode
   def convert_81!
     node_type, version = get_node_type_and_version
     csa = ConvertSemanticAry[version][node_type]
     try_semantic(node_type){ return send(csa) } if csa
     ofs_end, count = get_u, get_u
+    if count == 0
+      tag!("ary", :type=>node_type, :version=>version)
+    else
+      tag!("ary", :type=>node_type, :version=>version) do
+        count.times do
+          convert_rec!(node_type, nil)
+        end
+      end
+    end
+  end
+  
+  def convert_abca_ary!
+    node_type, version = get_node_type_and_version_abca
+    csa = ConvertSemanticAry[version][node_type]
+    warn "Semantic conversion of arrays in CSA mode not supported yet" if csa
+    ofs_end, count = get_ofs_end, get_item_count
     if count == 0
       tag!("ary", :type=>node_type, :version=>version)
     else

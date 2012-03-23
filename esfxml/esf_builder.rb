@@ -31,13 +31,25 @@ class EsfBuilder
     rv
   end
   def put_yes
-    @data << "\x01\x01"
+    if @abca
+      @data << "\x12"
+    else
+      @data << "\x01\x01"
+    end
   end
   def put_no
-    @data << "\x01\x00"
+    if @abca
+      @data << "\x13"
+    else
+      @data << "\x01\x00"
+    end
   end
   def put_bool(val)
-    @data << (val ? "\x01\x01" : "\x01\x00")
+    if @abca
+      @data << (val ? "\x12" : "\x13")
+    else
+      @data << (val ? "\x01\x01" : "\x01\x00")
+    end
   end
   def put_v2(x,y)
     @data << [0x0c, x, y].pack("Cff")
@@ -46,38 +58,84 @@ class EsfBuilder
     @data << [0x0d, x, y, z].pack("Cfff")
   end
   def put_byte(val)
-    @data << "\x06"
-    @data << [val].pack("C")
+    @data << "\x06" << [val].pack("C")
   end
   def put_flt(val)
-    @data << "\x0a"
-    @data << [val].pack("f")
+    if @abca
+      v = [val].pack("f")
+      if v == "\x00\x00\x00\x00" # remember about negative -0.0
+        @data << "\x1d"
+      else
+        @data << "\x0a" << v
+      end
+    else
+      @data << "\x0a" << [val].pack("f")
+    end
   end
   def put_fix(val)
     put_i((1048576.0 * val).round.to_i)
   end
   def put_i2(val)
-    @data << "\x03"
-    @data << [val].pack("v")
+    @data << "\x03" << [val].pack("v")
+  end
+  def put_i8(val)
+    @data << "\x05" << [val].pack("q")
+  end
+  def put_u8(val)
+    @data << "\x09" << [val].pack("Q")
   end
   def put_u2(val)
-    @data << "\x07"
-    @data << [val].pack("v")
+    @data << "\x07" << [val].pack("v")
   end
   def put_u2angle(val)
-    @data << "\x10"
-    @data << [val].pack("v")
+    @data << "\x10" << [val].pack("v")
   end
   def put_angle(val)
     put_u2angle((val * 0x10000 / 360.0).round.to_i)
   end
   def put_i(val)
-    @data << "\x04"
-    @data << [val].pack("V")
+    if @abca
+      if val == 0
+        @data << "\x19"
+      elsif val <= 127 and val >= -128
+        @data << "\x1a" << [val].pack("c")
+      elsif val <= 0x7fff and val >= -0x8000
+        @data << "\x1b" << [val].pack("v")
+      else
+        # FIXME: 3 byte encoding \x1c
+        @data << "\x04" << [val].pack("V")
+      end
+    else
+      @data << "\x04" << [val].pack("V")
+    end
   end
   def put_u(val)
-    @data << "\x08"
-    @data << [val].pack("V")
+    if @abca
+      if val == 0
+        @data << "\x14"
+      elsif val == 1
+        @data << "\x15"
+      elsif val <= 255
+        @data << "\x16" << [val].pack("C")
+      elsif val <= 0xffff
+        @data << "\x17" << [val].pack("v")
+      else
+        # FIXME: 3 byte encoding \x18
+        @data << "\x08" << [val].pack("V")
+      end
+    else
+      @data << "\x08" << [val].pack("V")
+    end
+  end
+  # ABCA only!
+  def put_number(val)
+    r = [val & 0x7f]
+    val >>= 7
+    while val != 0
+      r << ((val & 0x7f) | 0x80)
+      val >>= 7
+    end
+    @data << r.reverse.pack("C*")
   end
   def asc_lookup(str)
     unless @asc_lookup[str]
@@ -118,18 +176,30 @@ class EsfBuilder
   def put_str_ary(strs)
     raise "Tag type <str_ary> requires ESF version ABCF (S2TW) or newer" unless @abcf
     @data << "\x4e"
-    @data << [@data.size + 4 + strs.size*4].pack("V")
+    if @abca
+      put_number(strs.size*4)
+    else
+      @data << [@data.size + 4 + strs.size*4].pack("V")
+    end
     @data << strs.map{|str| str_lookup(str)}.pack("V*")
   end
   def put_asc_ary(strs)
     raise "Tag type <asc_ary> requires ESF version ABCF (S2TW) or newer" unless @abcf
     @data << "\x4f"
-    @data << [@data.size + 4 + strs.size*4].pack("V")
+    if @abca
+      put_number(strs.size*4)
+    else
+      @data << [@data.size + 4 + strs.size*4].pack("V")
+    end
     @data << strs.map{|str| asc_lookup(str)}.pack("V*")
   end
   def put_4x(code, ary_data)
     @data << code
-    @data << [@data.size + 4 + ary_data.size].pack("V")
+    if @abca
+      put_number(ary_data.size)
+    else
+      @data << [@data.size + 4 + ary_data.size].pack("V")
+    end
     @data << ary_data
   end
   def put_u4_ary(elems)
@@ -162,7 +232,12 @@ class EsfBuilder
   def start_rec(type_str, version_str)
     type_code = @type_codes[type_str]
     version = version_str ? version_str.to_i : DefaultVersions[type_str.to_sym]
-    @data << [0x80, type_code, version].pack("CvC")
+    if @abca and @data.size != 16 # root node is somehow not following new rules
+      raise "No idea how to encode that: #{type_code} #{version}" if type_code > 511 or version > 15
+      @data << [0x8000 + (version << 9) + type_code].pack("n")
+    else
+      @data << [0x80, type_code, version].pack("CvC")
+    end
     push_marker_ofs
   end
   def end_rec
@@ -175,7 +250,12 @@ class EsfBuilder
   def start_ary(type_str, version_str)
     type_code = @type_codes[type_str]
     version = version_str ? version_str.to_i : DefaultVersions[type_str.to_sym]
-    @data << [0x81, type_code, version].pack("CvC")
+    if @abca
+      raise "No idea how to encode that: #{type_code} #{version}" if type_code > 511 or version > 15
+      @data << [0xc000 + (version << 9) + type_code].pack("n")
+    else
+      @data << [0x81, type_code, version].pack("CvC")
+    end
     push_marker_ofs
     push_marker_children
   end
@@ -185,7 +265,8 @@ class EsfBuilder
   end
   def start_esf(magic)
     @data << magic.pack("V*")
-    @abcf = (magic[0] == 0xabcf)
+    @abcf = (magic[0] == 0xabcf or magic[0] == 0xabca)
+    @abca = (magic[0] == 0xabca)
     @str_table  = []
     @str_lookup = {}
     @str_max    = -1
@@ -234,10 +315,24 @@ class EsfBuilder
     @children << 0
     @data << "\x00\x00\x00\x00"
   end
+  # This is full of fail
+  def encode_number_as_4_bytes(val)
+    raise "Number too big to encode as 4 bytes - #{val}" if val > 0x0fffffff
+    rv = [((val >> 21) & 0x7f) | 0x80, ((val >> 14) & 0x7f) | 0x80, ((val >> 7) & 0x7f) | 0x80, val & 0x7f].pack("C*")
+  end
   def pop_marker_ofs
-    @data[@adjust_ofs.pop, 4] = [@data.size].pack("V")
+    if @abca and @adjust_ofs.size != 1 # root market works old style
+      at = @adjust_ofs.pop
+      @data[at, 4] = encode_number_as_4_bytes(@data.size - at - 4)
+    else
+      @data[@adjust_ofs.pop, 4] = [@data.size].pack("V")
+    end
   end
   def pop_marker_children
-    @data[@adjust_children.pop, 4] = [@children.pop].pack("V")
+    if @abca
+      @data[@adjust_children.pop, 4] = encode_number_as_4_bytes(@children.pop)
+    else
+      @data[@adjust_children.pop, 4] = [@children.pop].pack("V")
+    end
   end
 end

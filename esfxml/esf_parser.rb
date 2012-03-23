@@ -31,6 +31,26 @@ class String
 end
 
 module EsfBasicBinaryOps
+  def get_ofs_end
+    rv = 0
+    while true
+      b = @data[@ofs]
+      rv = (rv << 7) + (b & 0x7f)
+      @ofs += 1
+      break if b & 0x80 == 0
+    end
+    @ofs + rv
+  end
+  def get_item_count
+    rv = 0
+    while true
+      b = @data[@ofs]
+      rv = (rv << 7) + (b & 0x7f)
+      @ofs += 1
+      break if b & 0x80 == 0
+    end
+    rv
+  end
   def get_u
     rv = @data[@ofs,4].unpack("V")[0]
     @ofs += 4
@@ -90,6 +110,7 @@ module EsfBasicBinaryOps
     get_bytes(get_u2*2).unpack("v*").pack("U*")
   end
   def lookahead_str
+    return nil if @abca
     end_ofs = @data[@ofs, 4].unpack("V")[0]
     la_ofs = @ofs + 4
     # Only single <rec> inside <rec>
@@ -178,6 +199,13 @@ module EsfBasicBinaryOps
       b = get_u
       raise "Incorrect ESF magic followup" unless a == 0
       @magic = [0xABCF, a, b]
+    when 0xABCA
+      @abcf = true
+      @abca = true
+      a = get_u
+      b = get_u
+      raise "Incorrect ESF magic followup" unless a == 0
+      @magic = [0xABCA, a, b]
     else
       raise "Incorrect ESF magic: %X" % magic
     end
@@ -216,11 +244,25 @@ module EsfBasicBinaryOps
     end
   end
   def get_ofs_bytes
-    get_bytes(get_u - @ofs)
+    if @abca
+      get_bytes(get_item_count)
+    else
+      get_bytes(get_u - @ofs)
+    end
   end
   def get_node_type_and_version
     node_type = @node_types[get_u2]
     version   = get_byte
+    version   = nil if version == DefaultVersions[node_type]
+    [node_type, version]
+  end
+  # PRECONDITION: ofs one byte after where it should be !!!
+  def get_node_type_and_version_abca
+    # Yes, it's reverse endian
+    a, = @data[@ofs-1, 2].unpack("n")
+    @ofs += 1
+    version = (a >> 9) & 0x0f
+    node_type = @node_types[a & 0x1ff]
     version   = nil if version == DefaultVersions[node_type]
     [node_type, version]
   end
