@@ -167,11 +167,13 @@ module XmlTagHandlers
   ## Semantic data types - startpos.esf
   def on_empty_node_compressed_data(attributes, buf, ctx)
     cdata = File.open(File.join(@in_dir, attributes[:path]), 'rb', &:read)
+    meta = cdata[0,5]
+    cdata = cdata[5+8..-1]
     put_rec "COMPRESSED_DATA" do
       @esf.put_4x "\x46", cdata
       put_rec "COMPRESSED_DATA_INFO" do
         @esf.put_u attributes[:size].to_i
-        @esf.put_4x "\x46", attributes[:meta].strip.split(/\s+/).map(&:hex).pack("C*")
+        @esf.put_4x "\x46", meta
       end
     end
   end

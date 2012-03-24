@@ -622,10 +622,9 @@ module EsfSemanticConverter
     cdata, (mtypes, mdata) = get_rec_contents(:bin6, [:rec, :COMPRESSED_DATA_INFO, nil])
     raise SemanticFail.new unless mtypes == [:u, :bin6]
     sz, meta = mdata
-    meta = meta.unpack("C*").map{|x| "%02X" % x}*" "
-    path, rel_path = dir_builder.alloc_new_path("compressed_data", nil, ".data")
-    File.write(path, cdata)
-    out!("<compressed_data size=\"#{sz}\" meta=\"#{meta}\" path=\"#{rel_path.xml_escape}\"/>")
+    path, rel_path = dir_builder.alloc_new_path("compressed_data", nil, ".esf.xz")
+    File.write(path, meta + [-1].pack("Q") + cdata)
+    out!("<compressed_data size=\"#{sz}\" path=\"#{rel_path.xml_escape}\"/>")
   end
   
   def convert_rec_CULTURE_PATHS
