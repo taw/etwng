@@ -52,6 +52,8 @@ module EsfSemanticConverter
 
 ## startpos.esf arrays
   def lookahead_faction_ids
+    return nil if @abca
+    
     save_ofs = @ofs
     ofs_end = get_u
     count = get_u
@@ -479,6 +481,8 @@ module EsfSemanticConverter
   end
   
   def lookahead_region_names
+    return nil if @abca
+    
     save_ofs = @ofs
     ofs_end = get_u
     count = get_u
@@ -749,6 +753,7 @@ module EsfSemanticConverter
   end
   
   def convert_rec_QUAD_TREE_BIT_ARRAY_NODE
+    raise SemanticFail.new if @abca
     ofs_end = get_u
     if ofs_end - @ofs == 10 and @data[@ofs] == 0x08 and @data[@ofs+5] == 0x08
       a, b = get_bytes(10).unpack("xVxV")
@@ -775,7 +780,11 @@ module EsfSemanticConverter
   
   def each_rec_member(type)
     tag!("rec", :type => type) do
-      ofs_end = get_u
+      if @abca
+        ofs_end = get_ofs_end
+      else
+        ofs_end = get_u
+      end
       i = 0
       while @ofs < ofs_end
         xofs = @ofs
@@ -900,6 +909,7 @@ module EsfSemanticConverter
   end
   
   def convert_rec_FORT
+    raise SemanticFail.new if @abca
     tag!("rec", :type => "FORT") do
       ofs_end = get_u
       convert_v2x! if lookahead_v2x?(ofs_end)

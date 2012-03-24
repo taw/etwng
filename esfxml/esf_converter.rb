@@ -274,10 +274,10 @@ class EsfConverter < EsfParser
       out[i] = name if respond_to?(name)
     }
     if @abca
-      (0x80..0xa0).each{|i|
+      (0x80..0xbf).each{|i|
         out[i] = :convert_abca_rec!
       }
-      (0xc0..0xdf).each{|i|
+      (0xc0..0xff).each{|i|
         out[i] = :convert_abca_ary!
       }
     end
@@ -286,11 +286,6 @@ class EsfConverter < EsfParser
   
   def convert_rec_basic!(node_type, version)
     csr = ConvertSemanticRec[version][node_type]
-    # if @abca
-    #   warn "High level conversion disabled in ABCA mode for #{node_type}" if csr
-    # else
-    #   try_semantic(node_type){ return send(csr) } if csr
-    # end
     try_semantic(node_type){ return send(csr) } if csr
     tag!("rec", :type=>node_type, :version=>version) do
       if @abca
@@ -325,7 +320,7 @@ class EsfConverter < EsfParser
 
   def convert_abca_rec!
     # Special case root node, since it follows the old style for some reason
-    if @ofs == 0x11
+    if @ofs == 0x11 or @data[@ofs-1] & 0x20 != 0
       convert_rec!(*get_node_type_and_version)
     else
       convert_rec!(*get_node_type_and_version_abca)
@@ -350,9 +345,12 @@ class EsfConverter < EsfParser
   end
   
   def convert_abca_ary!
-    node_type, version = get_node_type_and_version_abca
+    if @data[@ofs-1] & 0x20 != 0
+      node_type, version = get_node_type_and_version
+    else
+      node_type, version = get_node_type_and_version_abca
+    end
     csa = ConvertSemanticAry[version][node_type]
-    # warn "Semantic conversion of arrays in CSA mode not supported yet" if csa
     try_semantic(node_type){ return send(csa) } if csa
     ofs_end, count = get_ofs_end_and_item_count
     if count == 0
