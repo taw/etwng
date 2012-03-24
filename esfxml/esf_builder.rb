@@ -106,7 +106,7 @@ class EsfBuilder
       elsif val <= 0x7fff and val >= -0x8000
         @data << "\x1b" << [val].pack("v")
       elsif val <= 0x7fffff and val >= -0x800000
-        @data << "\x1c" << [val].pack("V")[0,3]
+        @data << "\x1c" << [val].pack("N")[1,3] # big-endian ???
       else
         @data << "\x04" << [val].pack("V")
       end
@@ -125,7 +125,7 @@ class EsfBuilder
       elsif val <= 0xffff
         @data << "\x17" << [val].pack("v")
       elsif val <= 0xffffff
-        @data << "\x18" << [val].pack("V")[0,3]
+        @data << "\x18" << [val].pack("N")[1,3] # big-endian ???
       else
         @data << "\x08" << [val].pack("V")
       end
@@ -241,9 +241,12 @@ class EsfBuilder
   def start_rec(type_str, version_str)
     type_code = @type_codes[type_str]
     version = version_str ? version_str.to_i : DefaultVersions[type_str.to_sym]
-    if @abca and @data.size != 16 # root node is somehow not following new rules
-      raise "No idea how to encode that: #{type_code} #{version}" if type_code > 511 or version > 15
-      @data << [0x8000 + (version << 9) + type_code].pack("n")
+    if @abca and !(@data.size == 16 and @data_stack.empty?) # root node is somehow not following new rules
+      if type_code > 511 or version > 15
+        @data << [0xA0, type_code, version].pack("CvC")
+      else
+        @data << [0x8000 + (version << 9) + type_code].pack("n")
+      end
     else
       @data << [0x80, type_code, version].pack("CvC")
     end
@@ -260,8 +263,11 @@ class EsfBuilder
     type_code = @type_codes[type_str]
     version = version_str ? version_str.to_i : DefaultVersions[type_str.to_sym]
     if @abca
-      raise "No idea how to encode that: #{type_code} #{version}" if type_code > 511 or version > 15
-      @data << [0xc000 + (version << 9) + type_code].pack("n")
+      if type_code > 511 or version > 15
+        @data << [0xe0, type_code, version].pack("CvC")
+      else
+        @data << [0xc000 + (version << 9) + type_code].pack("n")
+      end
     else
       @data << [0x81, type_code, version].pack("CvC")
     end

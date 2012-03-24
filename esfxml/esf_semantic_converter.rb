@@ -623,8 +623,8 @@ module EsfSemanticConverter
     raise SemanticFail.new unless mtypes == [:u, :bin6]
     sz, meta = mdata
     path, rel_path = dir_builder.alloc_new_path("compressed_data", nil, ".esf.xz")
-    File.write(path, meta + [-1].pack("Q") + cdata)
-    out!("<compressed_data size=\"#{sz}\" path=\"#{rel_path.xml_escape}\"/>")
+    File.write(path, meta + [sz].pack("Q") + cdata)
+    out!("<compressed_data path=\"#{rel_path.xml_escape}\"/>")
   end
   
   def convert_rec_CULTURE_PATHS
@@ -687,7 +687,6 @@ module EsfSemanticConverter
       out!(%Q[<campaign_bonus_14 subtype="#{subtype}" value="#{value}" unit_type="#{data[0].xml_escape}"/>])
     else
       pp [:cbv, type, subtype, value, types, data]
-      puts ""
       raise SemanticFail.new
     end
   end

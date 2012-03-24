@@ -9,6 +9,9 @@ module EsfConvertBasic
   def convert_01!
     out!(get_bool ? "<yes/>" : "<no/>")
   end
+  def convert_02!
+    out!("<i1>#{get_i1}</i1>")
+  end
   def convert_03!
     out!("<i2>#{get_u2}</i2>")
   end  

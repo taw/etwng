@@ -149,8 +149,8 @@ module EsfBasicBinaryOps
         end
       elsif tag <= 0x20
         sz = [
-          nil, 2, nil, 3, 5, 9, 2, 3,
-          5, 9, 5, nil, 9, 13, nil, nil,
+          nil, 2, 1, 3, 5, 9, 2, 3,
+          5, 9, 5, 9, 9, 13, nil, nil,
           3, nil, 1, 1, 1, 1, 2, 3, 4,
           1, 2, 3, 4, 1,
         ][tag]
@@ -180,16 +180,17 @@ module EsfBasicBinaryOps
     rv
   end
   def get_u3
-    rv = (@data[@ofs,3]+"\x00").unpack("V")[0]
+    rv = ("\x00"+@data[@ofs,3]).unpack("N")[0]
     # warn "Not tested U:#{@data[@ofs,3].unpack("C*")*' '} U:#{rv}"
     @ofs += 3
     rv
   end
   def get_i3
-    if @data[@ofs+2] >= 128
-      rv = (@data[@ofs,3]+"\xFF").unpack("l")[0]
+    # "l>" "l<" only work in 1.9, not 1.8.7
+    if @data[@ofs] >= 128
+      rv = ("\xFF"+@data[@ofs,3]).unpack("N")[0] - 0x1_0000_0000
     else
-      rv = (@data[@ofs,3]+"\x00").unpack("l")[0]
+      rv = ("\x00"+@data[@ofs,3]).unpack("N")[0]
     end
     # warn "Not tested I:#{@data[@ofs,3].unpack("C*")*' '} I:#{rv}"
     @ofs += 3
@@ -298,6 +299,9 @@ end
 module EsfGetData
   def get_01!
     [:bool, get_bool]
+  end
+  def get_02!
+    [:i1, get_i1]
   end
   def get_03!
     [:i2, get_i2]

@@ -168,11 +168,12 @@ module XmlTagHandlers
   def on_empty_node_compressed_data(attributes, buf, ctx)
     cdata = File.open(File.join(@in_dir, attributes[:path]), 'rb', &:read)
     meta = cdata[0,5]
+    size = cdata[5, 8].unpack("Q")[0]
     cdata = cdata[5+8..-1]
     put_rec "COMPRESSED_DATA" do
       @esf.put_4x "\x46", cdata
       put_rec "COMPRESSED_DATA_INFO" do
-        @esf.put_u attributes[:size].to_i
+        @esf.put_u size
         @esf.put_4x "\x46", meta
       end
     end
@@ -1214,7 +1215,55 @@ module XmlTagHandlers
   def on_text_node_binF(attributes, buf, ctx)
     put_bin_hex(0x4F, buf)
   end
-  
+  def on_text_node_bin10(attributes, buf, ctx)
+    put_bin_hex(0x50, buf)
+  end
+  def on_text_node_bin11(attributes, buf, ctx)
+    put_bin_hex(0x51, buf)
+  end
+  def on_text_node_bin12(attributes, buf, ctx)
+    put_bin_hex(0x52, buf)
+  end
+  def on_text_node_bin13(attributes, buf, ctx)
+    put_bin_hex(0x53, buf)
+  end
+  def on_text_node_bin14(attributes, buf, ctx)
+    put_bin_hex(0x54, buf)
+  end
+  def on_text_node_bin15(attributes, buf, ctx)
+    put_bin_hex(0x55, buf)
+  end
+  def on_text_node_bin16(attributes, buf, ctx)
+    put_bin_hex(0x56, buf)
+  end
+  def on_text_node_bin17(attributes, buf, ctx)
+    put_bin_hex(0x57, buf)
+  end
+  def on_text_node_bin18(attributes, buf, ctx)
+    put_bin_hex(0x58, buf)
+  end
+  def on_text_node_bin19(attributes, buf, ctx)
+    put_bin_hex(0x59, buf)
+  end
+  def on_text_node_bin1a(attributes, buf, ctx)
+    put_bin_hex(0x5a, buf)
+  end
+  def on_text_node_bin1b(attributes, buf, ctx)
+    put_bin_hex(0x5b, buf)
+  end
+  def on_text_node_bin1c(attributes, buf, ctx)
+    put_bin_hex(0x5c, buf)
+  end
+  def on_text_node_bin1d(attributes, buf, ctx)
+    put_bin_hex(0x5d, buf)
+  end
+  def on_text_node_bin1e(attributes, buf, ctx)
+    put_bin_hex(0x5e, buf)
+  end
+  def on_text_node_bin1f(attributes, buf, ctx)
+    put_bin_hex(0x5f, buf)
+  end
+
   ## Common node types  
   def on_start_text_node(attributes)
     [false, "", {}]
