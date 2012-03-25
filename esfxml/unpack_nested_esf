@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+ruby = "jruby"
+# ruby = "ruby"
+
+quiet = nil
+if ARGV[0] == "--quiet"
+  quiet = ARGV.shift
+end
+
+unless ARGV.size == 2
+  STDERR.puts <<EOF
+Usage:
+  #{$0} input.esf output_dir
+To hide progress bar:
+  #{$0} --quiet input.esf output_dir
+EOF
+  exit 1
+end
+
+in_file = ARGV[0]
+out_dir = ARGV[1]
+if File.exist?(out_dir)
+  STDERR.puts "#{out_dir} already exists"
+  exit 1
+end
+
+
+system *[ruby, "esf2xml", quiet, in_file, out_dir].compact
+if File.exist?("#{out_dir}/compressed_data.esf.xz")
+  system "lzma", "-dk", "#{out_dir}/compressed_data.esf.xz"
+end
+if File.exist?("#{out_dir}/compressed_data.esf")
+  system *[ruby, "esf2xml", quiet, "#{out_dir}/compressed_data.esf", "#{out_dir}/compressed_data"].compact
+end

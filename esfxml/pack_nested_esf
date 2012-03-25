@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+ruby = "jruby"
+# ruby = "ruby"
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input_dir output.esf"
+  exit 1
+end
+
+in_dir = ARGV[0]
+out_file = ARGV[1]
+
+if File.exist?("#{in_dir}/compressed_data")
+  system ruby, "xml2esf", "#{in_dir}/compressed_data", "#{in_dir}/compressed_data.esf"
+end
+if File.exist?("#{in_dir}/compressed_data.esf")
+  system "lzma", "-kf", "-S", ".xz", "#{in_dir}/compressed_data.esf"
+end
+system ruby, "xml2esf", in_dir, out_file

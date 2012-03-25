@@ -168,7 +168,7 @@ module XmlTagHandlers
   def on_empty_node_compressed_data(attributes, buf, ctx)
     cdata = File.open(File.join(@in_dir, attributes[:path]), 'rb', &:read)
     meta = cdata[0,5]
-    size = cdata[5, 8].unpack("Q")[0]
+    size = cdata[5, 8].unpack("q")[0]
     cdata = cdata[5+8..-1]
     put_rec "COMPRESSED_DATA" do
       @esf.put_4x "\x46", cdata
