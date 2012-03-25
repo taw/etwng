@@ -398,31 +398,39 @@ module EsfSemanticConverter
         out!(%Q[</i2_ary>])
       elsif i == 10 and @data[@ofs] == 0x47 and region_names
         v = get_value![1].unpack("v*")
-            
-        out!(%Q[<u2_ary>])
+        
+        if v.index(0)
+          out!(%Q[<u2_ary>])
 
-        idx_to_names = []
+          idx_to_names = []
           
-        while v[0] != 0
-          i    = v.shift
-          name = region_names[i]
-          idx_to_names << name
-          out!(" #{i} <!-- #{name} -->")
-        end
+          while v[0] != 0
+            i    = v.shift
+            name = region_names[i]
+            idx_to_names << name
+            out!(" #{i} <!-- #{name} -->")
+          end
 
-        v.shift
-        out!("")
-        out!(" 0 <!-- separator -->")
-        out!("")
+          v.shift
+          out!("")
+          out!(" 0 <!-- separator -->")
+          out!("")
 
-        until v.empty?
-          sz = v.shift
-          elems = (0...sz).map{ v.shift }
-          elems_names = elems.map{|i| idx_to_names[i-1] }
-          out!(%Q[ #{sz} #{elems.join(", ")} <!-- #{elems_names.join(", ") }-->])
-        end
+          until v.empty?
+            sz = v.shift
+            elems = (0...sz).map{ v.shift }
+            elems_names = elems.map{|i| idx_to_names[i-1] }
+            out!(%Q[ #{sz} #{elems.join(", ")} <!-- #{elems_names.join(", ") }-->])
+          end
            
-        out!(%Q[</u2_ary>])
+          out!(%Q[</u2_ary>])
+        else
+          out!(%Q[<u2_ary>])
+          v.each{|i|
+            out!(" #{i}")
+          }
+          out!(%Q[</u2_ary>])
+        end
       end
     end
   end
@@ -456,13 +464,17 @@ module EsfSemanticConverter
             out!(" <!-- closed line -->")
           end
         else
-          x, y = @pathfinding_vertices_ary[i]
-          x = x*scale
-          y = y*scale
-          if i <= 3
-            out!(" #{i}")
+          if i < @pathfinding_vertices_ary.size
+            x, y = @pathfinding_vertices_ary[i]
+            x = x*scale
+            y = y*scale
+            if i <= 3
+              out!(" #{i}")
+            else
+              out!(" #{i} <!-- #{x},#{y} -->")
+            end
           else
-            out!(" #{i} <!-- #{x},#{y} -->")
+            out!(" #{i}")
           end
           cnt -= 1
         end
