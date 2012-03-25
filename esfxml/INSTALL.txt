@@ -1,0 +1,33 @@
+== Windows ==
+
+To use converters you need:
+
+Step 1.
+Install JRuby.
+You can download it from: http://jruby.org/download
+
+Step 2.
+Install nokogiri gem.
+Double click on install_nokogiri.bat in this directory
+or from command line run: jgem install nokogiri --pre
+
+Step 3.
+Install lzma.exe from LZMA SDK.
+You can download it from http://www.7-zip.org/sdk.html
+(this is necessary only to mod new Shogun 2 Total War files,
+for Empire Total War and Napoleon Total War it's optional)
+
+== Linux and OSX ==
+
+Converters work with either JRuby on standard Ruby.
+
+Whichever you installed you need to install gem nokogiri, with either:
+# Ruby
+$ sudo gem install nokogiri
+# JRuby
+$ sudo jgem install nokogiri --pre
+
+Then install lzma command, in either lzma or p7zip package for your distribution.
+If you cannot find it in your distribution, check here - http://www.7-zip.org/download.html
+(this is necessary only to mod new Shogun 2 Total War files,
+for Empire Total War and Napoleon Total War it's optional)
