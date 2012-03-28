@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "fileutils"
+require "pathname"
+require "pp"
+
+def parse_pgm(path_in)
+  File.open(path_in, 'rb'){|fh_in|
+    p5 = fh_in.readline
+    sz = fh_in.readline
+    l255 = fh_in.readline
+    data_in = fh_in.read
+
+    raise "Format error" unless p5 == "P5\n" and l255 == "255\n" and sz =~ /\A(\d+) (\d+)\n\z/
+    xsz, ysz = $1.to_i, $2.to_i
+    raise "Bad file size, got:#{data_in.size}, expected: #{xsz}*#{ysz}=#{xsz*ysz}" unless data_in.size == xsz * ysz
+    return [xsz, ysz, data_in]
+  }
+end
+
+def print_pixel_coordinates(file_in, file_out, value)
+  xsz, ysz, data = parse_pgm(file_in)
+  File.open(file_out, 'wb'){|fh|
+    ysz.times{|y|
+      xsz.times{|x|
+        c = data[y*xsz+x]
+        fh.puts "#{x},#{y}" if c == value
+      }
+    }
+  }
+end
+
+unless ARGV.size == 3
+  STDERR.puts "Usage: #{$0} image.pgm coordinates.tsv <pixel value>"
+  exit 1
+end
+
+print_pixel_coordinates(ARGV[0], ARGV[1], ARGV[2].to_i)
