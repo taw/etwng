@@ -126,29 +126,33 @@ end
 
 ## startpos.esf arrays
   def lookahead_faction_ids
-    return nil if @abca
-    
     save_ofs = @ofs
     ofs_end, count = get_ofs_end_and_item_count
     
     rv = {}
     id = nil
     
-    count.times do
+    count.times do |i|
       rec_ofs_end = get_ofs_end
-      return nil unless get_byte == 0x80
-      return nil unless get_node_type_and_version[0] == :FACTION # Version number doesn't really matter
-      return nil unless rec_ofs_end == get_u
+      node_type, version = get_rec_header!
+      return nil unless node_type == :FACTION # Version number doesn't really matter
+      return nil unless rec_ofs_end == get_ofs_end
+
       while @ofs < rec_ofs_end
         t = get_byte
-        if t == 0x80 or t == 0x81
+        if !@absa and (t == 0x80 or t == 0x81)
           @ofs += 3
           @ofs  = get_u
-        elsif t == 4
+        elsif @abca and (t >= 0x80 and t <= 0xbf)
+          @ofs += 1
+          @ofs  = get_ofs_end
+        elsif t == 0x04
           id = get_u
-        elsif t == 8
+        elsif t == 0x16
+          id = get_u1
+        elsif t == 0x08
           @ofs += 4
-        elsif t == 14
+        elsif t == 0x0e
           if @abcf
             rv[id] = @str_lookup[get_u]
           else
@@ -156,7 +160,7 @@ end
           end
           @ofs = rec_ofs_end
         else
-          warn "Unexpected field type #{t} during lookahead of faction ids"
+          warn "Unexpected field type %02X during lookahead of faction ids" % t
           return nil
         end
       end
@@ -1097,10 +1101,10 @@ end
     @dir_builder.faction_name = nil
   end
 
-  def covert_v39_rec_FACTION
+  def convert_versioned_rec_FACTION(version)
     @dir_builder.faction_name = lookahead_str
-    tag!("rec", :type=>"FACTION", :version => 39) do
-      convert_until_ofs!(get_u)
+    tag!("rec", :type=>"FACTION", :version => version) do
+      convert_until_ofs!(get_ofs_end)
     end
     @dir_builder.faction_name = nil
   end
@@ -1467,7 +1471,7 @@ end
     out!("<building health=\"#{health}\" name=\"#{name.xml_escape}\" faction=\"#{faction.xml_escape}\" government=\"#{gov.xml_escape}\"/>")
   end
 
-  def covert_v2_rec_DATE
+  def convert_v2_rec_DATE
     a,b,c,d = get_rec_contents(:u, :u, :u, :u)
     if [a,b,c,d] == [0,0,0,0]
       out!("<date2/>")
@@ -1812,6 +1816,12 @@ end
       ConvertSemanticRec[nil][$1.gsub("__", " ").to_sym] = m
     end
   end
-  ConvertSemanticRec[39][:FACTION] = :covert_v39_rec_FACTION
-  ConvertSemanticRec[2][:DATE] = :covert_v2_rec_DATE
+  # Range of these covering NTW...S2TW
+  # We only care about faction name lookup
+  (39..46).each{|version|
+    m = :"convert_v#{version}_rec_FACTION"
+    define_method(m){ convert_versioned_rec_FACTION(version)}
+    ConvertSemanticRec[version][:FACTION] = m
+  }
+  ConvertSemanticRec[2][:DATE] = :convert_v2_rec_DATE
 end

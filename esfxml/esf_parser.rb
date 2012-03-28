@@ -145,24 +145,31 @@ module EsfBasicBinaryOps
   end
   def lookahead_str
     save_ofs = @ofs
-    end_ofs = get_ofs_end
+    ofs_end = get_ofs_end
   
     # Only single <rec> inside <rec>
     # Just ignore existence of container, and see what's inside
-    if !@abca and @ofs < end_ofs and @data[@ofs] == 0x80 and @data[@ofs+4, 4].unpack("V")[0] == end_ofs
-      @ofs += 8
+    if @ofs < ofs_end
+      if @abca
+        if @data[@ofs] >= 0x80 and @data[@ofs] <= 0xbf
+          save_ofs2 = @ofs
+          get_rec_header!
+          @ofs = save_ofs2 unless ofs_end == get_ofs_end
+        end
+      else
+        if @data[@ofs] == 0x80 and @data[@ofs+4, 4].unpack("V")[0] == ofs_end
+          @ofs += 8
+        end
+      end
     end
     
-    while @ofs < end_ofs
-      tag = @data[@ofs]
-      # puts "At #{la_ofs}, tag #{"%02x" % tag}"
+    while @ofs < ofs_end
+      tag = get_byte
       if tag == 0x0e
         if @abcf
-          i, = @data[@ofs+1, 4].unpack("V")
-          return @str_lookup[i]
+          return @str_lookup[get_u]
         else
-          sz, = @data[@ofs+1, 2].unpack("v")
-          rv = @data[@ofs+3, sz*2].unpack("v*").pack("U*")
+          rv = get_s
           return nil if rv == ""
           if rv.size > 128
             puts "Warning: Too long name suggested for file name at #{save_ofs}/#{@ofs}: #{rv.inspect}"
@@ -172,18 +179,28 @@ module EsfBasicBinaryOps
         end
       elsif tag <= 0x20
         sz = [
-          nil, 2, 1, 3, 5, 9, 2, 3,
-          5, 9, 5, 9, 9, 13, nil, nil,
-          3, nil, 1, 1, 1, 1, 2, 3, 4,
-          1, 2, 3, 4, 1,
+          nil, 1, 0, 2, 4, 8, 1, 2,
+          4, 8, 4, 8, 8, 12, nil, nil,
+          2, nil, 0, 0, 0, 0, 1, 2, 3,
+          0, 1, 2, 3, 0,
         ][tag]
         return nil unless sz
         @ofs += sz
-      elsif !@abca and tag >= 0x40 and tag <= 0x5f
-        @ofs = @data[@ofs+1, 4].unpack("V")[0]
-      elsif !@abca and tag == 0x80 or tag == 0x81
-        @ofs = @data[@ofs+4, 4].unpack("V")[0]
+      elsif tag >= 0x40 and tag <= 0x5f
+        @ofs = get_ofs_end 
+      elsif !@abca and (tag == 0x80 or tag == 0x81)
+        @ofs += 3
+        @ofs = get_ofs_end
+      elsif @abca and (tag >= 0x80 and tag <= 0xbf)
+        @ofs -= 1
+        get_rec_header!
+        @ofs = get_ofs_end
+      elsif @abca and (tag >= 0xc0 and tag <= 0xff)
+        @ofs -= 1
+        get_ary_header!
+        @ofs = get_ofs_end_and_item_count[0]
       else
+        warn "str_lookup_fail %02x" % tag
         return nil
       end
     end
@@ -562,6 +579,41 @@ module EsfParserSemantic
     node_type, version = get_node_type_and_version
     [[:rec, node_type, version], get_rec_contents_dynamic]
   end
+
+  # Low level function to parse record header without parsing record itself
+  # Returns [node_type, version] or [nil, nil] if not a record
+  # This API is pretty awful, but it's only used by lookahead_faction_ids and lookahead_str
+  # @ofs at first byte of header (0x80)!
+  def get_rec_header!
+    if @abca
+      return [nil, nil] unless get_byte.between?(0x80, 0xbf)
+      if @ofs == 0x11 or @data[@ofs-1] & 0x20 != 0
+        get_node_type_and_version
+      else
+        get_node_type_and_version_abca
+      end
+    else
+      return [nil, nil] unless get_byte == 0x80
+      get_node_type_and_version
+    end
+  end
+
+  # Another ridiculous API
+  # @ofs at first byte of header (0x81/0xc0)!
+  def get_ary_header!
+    if @abca
+      return [nil, nil] unless get_byte.between?(0xc0, 0xff)
+      if @data[@ofs-1] & 0x20 != 0
+        node_type, version = get_node_type_and_version
+      else
+        node_type, version = get_node_type_and_version_abca
+      end
+    else
+      return [nil, nil] unless get_byte == 0x81
+      get_node_type_and_version
+    end
+  end
+
 
   def get_abca_ary!
     if @data[@ofs-1] & 0x20 != 0
