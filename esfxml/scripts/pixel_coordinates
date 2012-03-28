@@ -25,15 +25,19 @@ def print_pixel_coordinates(file_in, file_out, value)
     ysz.times{|y|
       xsz.times{|x|
         c = data[y*xsz+x]
-        fh.puts "#{x},#{y}" if c == value
+        if value
+          fh.puts "#{x},#{y}" if c == value
+        else
+          fh.puts "#{x},#{y},#{c}"
+        end
       }
     }
   }
 end
 
-unless ARGV.size == 3
-  STDERR.puts "Usage: #{$0} image.pgm coordinates.tsv <pixel value>"
+unless ARGV.size == 3 or ARGV.size == 2
+  STDERR.puts "Usage: #{$0} image.pgm coordinates.tsv [<pixel value>]"
   exit 1
 end
 
-print_pixel_coordinates(ARGV[0], ARGV[1], ARGV[2].to_i)
+print_pixel_coordinates(ARGV[0], ARGV[1], ARGV[2] ? ARGV[2].to_i : nil)
