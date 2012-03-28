@@ -212,10 +212,48 @@ class EsfBuilder
     @data << ary_data
   end
   def put_u4_ary(elems)
-    put_4x("\x48", elems.pack("V*"))
+    if @abca
+      pack_u1 = elems.pack("C*")
+      if pack_u1.unpack("C*") == elems
+        put_4x("\x56", pack_u1)
+        return
+      end
+      pack_u2 = elems.pack("v*")
+      if pack_u2.unpack("v*") == elems
+        put_4x("\x57", pack_u2)
+        return
+      end
+      if elems.all?{|x| x <= 0xffffff}
+        pack_u3 = elems.map{|e| [e].pack("N")[1,3]}.join
+        put_4x("\x58", pack_u3)
+      else
+        put_4x("\x48", elems.pack("V*"))
+      end
+    else
+      put_4x("\x48", elems.pack("V*"))
+    end
   end
   def put_i4_ary(elems)
-    put_4x("\x44", elems.pack("V*"))
+    if @abca
+      pack_i1 = elems.pack("c*")
+      if pack_i1.unpack("c*") == elems
+        put_4x("\x5a", pack_i1)
+        return
+      end
+      pack_i2 = elems.pack("v*")
+      if pack_i2.unpack("v*") == elems
+        put_4x("\x5b", pack_i2)
+        return
+      end
+      if elems.all?{|x| x <= 0x7fffff and x >= -0x800000}
+        pack_i3 = elems.map{|e| [e].pack("N")[1,3]}.join
+        put_4x("\x5c", pack_i3)
+      else
+        put_4x("\x44", elems.pack("V*"))
+      end
+    else
+      put_4x("\x44", elems.pack("V*"))
+    end
   end
   def put_i2_ary(elems)
     put_4x("\x43", elems.pack("v*"))

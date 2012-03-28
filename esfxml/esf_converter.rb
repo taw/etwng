@@ -128,7 +128,7 @@ module EsfConvertBasic
     convert_4x!("i1_ary"){|data| data.unpack("c*").join(" ")}
   end
   def convert_43!
-    convert_4x!("i2_ary"){|data| data.unpack("v*").join(" ")}
+    convert_4x!("i2_ary"){|data| data.unpack("s*").join(" ")}
   end
   def convert_44!
     convert_4x!("i4_ary"){|data| data.unpack("l*").join(" ")}
@@ -233,25 +233,25 @@ module EsfConvertBasic
     convert_4x!("bin15", &:to_hex_dump)
   end
   def convert_56!
-    convert_4x!("bin16", &:to_hex_dump)
+    convert_4x!("u4_ary"){|data| data.unpack("C*").join(" ")}
   end
   def convert_57!
-    convert_4x!("bin17", &:to_hex_dump)
+    convert_4x!("u4_ary"){|data| data.unpack("v*").join(" ")}
   end
   def convert_58!
-    convert_4x!("bin18", &:to_hex_dump)
+    convert_4x!("u4_ary"){|data| unpack_u3be_ary(data).join(" ")}
   end
   def convert_59!
     convert_4x!("bin19", &:to_hex_dump)
   end
   def convert_5a!
-    convert_4x!("bin1a", &:to_hex_dump)
+    convert_4x!("i4_ary"){|data| data.unpack("c*").join(" ")}
   end
   def convert_5b!
-    convert_4x!("bin1b", &:to_hex_dump)
+    convert_4x!("i4_ary"){|data| data.unpack("s*").join(" ")}
   end
   def convert_5c!
-    convert_4x!("bin1c", &:to_hex_dump)
+    convert_4x!("i4_ary"){|data| unpack_i3be_ary(data).join(" ")}
   end
   def convert_5d!
     convert_4x!("bin1d", &:to_hex_dump)

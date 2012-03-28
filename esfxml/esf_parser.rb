@@ -317,6 +317,31 @@ module EsfBasicBinaryOps
   def size
     @data.size
   end
+  
+  ### May as well go to String#unpack
+  def unpack_u3be_ary(str)
+    rv = []
+    xofs = 0
+    while xofs < str.size
+      rv << ("\x00"+str[xofs,3]).unpack("N")[0]
+      xofs += 3
+    end
+    rv
+  end
+   
+  def unpack_i3be_ary(str)
+    rv = []
+    xofs = 0
+    while xofs < str.size
+      if str[xofs] >= 128
+        rv << ("\xFF"+str[xofs,3]).unpack("N")[0] - 0x1_0000_0000
+      else
+        rv << ("\x00"+str[xofs,3]).unpack("N")[0]
+      end
+      xofs += 3
+    end
+    rv
+  end
 end
 
 module EsfGetData
