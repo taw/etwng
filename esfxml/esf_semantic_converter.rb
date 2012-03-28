@@ -518,38 +518,49 @@ end
     each_rec_member("pathfinding_areas") do |ofs_end, i|
       next unless i == 1 and @data[@ofs] == 0x48
       data = get_value![1].unpack("V*")
-      out!("<u4_ary>")
-      cnt = 0
-      scale = 0.5**20
-      until data.empty?
-        i = data.shift
-        if cnt == 0
-          cnt = i
-          out!("")
-          out!(" #{i} <!-- vertices count -->")
-          nx_has_0123 = !(data[0, i] & [0,1,2,3]).empty?
-          if nx_has_0123
-            # out!(" <!-- open line -->")
-          else
-            out!(" <!-- closed line -->")
-          end
-        else
-          if i < @pathfinding_vertices_ary.size
-            x, y = @pathfinding_vertices_ary[i]
-            x = x*scale
-            y = y*scale
-            if i <= 3
-              out!(" #{i}")
+      if data[0] >= data.size
+        warn "Vertices count greater than data size, skipping annotations"
+        out!("<u4_ary>")
+        data.each{|u| out!(" #{u}")}
+        out!("</u4_ary>")
+      else
+        out!("<u4_ary>")
+        cnt = 0
+        scale = 0.5**20
+        until data.empty?
+          i = data.shift
+          if cnt == 0
+            cnt = i
+            if cnt > data.size
+              warn "Vertices count greater than data size, annotations for pathfinding_areas will be wrong"
             else
-              out!(" #{i} <!-- #{x},#{y} -->")
+              out!("")
+              out!(" #{i} <!-- vertices count -->")
+              nx_has_0123 = !(data[0, i] & [0,1,2,3]).empty?
+              if nx_has_0123
+                # out!(" <!-- open line -->")
+              else
+                out!(" <!-- closed line -->")
+              end
             end
           else
-            out!(" #{i}")
+            if i < @pathfinding_vertices_ary.size
+              x, y = @pathfinding_vertices_ary[i]
+              x = x*scale
+              y = y*scale
+              if i <= 3
+                out!(" #{i}")
+              else
+                out!(" #{i} <!-- #{x},#{y} -->")
+              end
+            else
+              out!(" #{i}")
+            end
+            cnt -= 1
           end
-          cnt -= 1
         end
+        out!("</u4_ary>")
       end
-      out!("</u4_ary>")
     end
     @pathfinding_vertices_ary = nil
   end
