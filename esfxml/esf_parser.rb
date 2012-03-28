@@ -32,14 +32,18 @@ end
 
 module EsfBasicBinaryOps
   def get_ofs_end
-    rv = 0
-    while true
-      b = @data[@ofs]
-      rv = (rv << 7) + (b & 0x7f)
-      @ofs += 1
-      break if b & 0x80 == 0
+    if @abca
+      rv = 0
+      while true
+        b = @data[@ofs]
+        rv = (rv << 7) + (b & 0x7f)
+        @ofs += 1
+        break if b & 0x80 == 0
+      end
+      @ofs + rv
+    else
+      get_u
     end
-    @ofs + rv
   end
   def get_item_count
     rv = 0
@@ -52,11 +56,15 @@ module EsfBasicBinaryOps
     rv
   end
   def get_ofs_end_and_item_count
-    # Position of ofs_end is relative to end of item_count
-    # which is a weird way to encode things
-    ofs_end = get_item_count
-    item_count = get_item_count
-    [ofs_end + @ofs, item_count]
+    if @abca
+      # Position of ofs_end is relative to end of item_count
+      # which is a weird way to encode things
+      ofs_end = get_item_count
+      item_count = get_item_count
+      [ofs_end + @ofs, item_count]
+    else
+      [get_u, get_u]
+    end
   end
   def get_u
     rv = @data[@ofs,4].unpack("V")[0]
@@ -116,13 +124,28 @@ module EsfBasicBinaryOps
   def get_s
     get_bytes(get_u2*2).unpack("v*").pack("U*")
   end
+  LookaheadTypeTable = [
+    nil, :bool, :i1, :i2, :i, :i8, :byte, :u2,    # 00 - 07
+    :u, :u8, :flt, :double, :v2, :v3, :s, :asc,   # 08 - 0f
+    :angle, nil, :bool, :bool, :u, :u, :u, :u,    # 10 - 17
+    :u, :i, :i, :i, :i, :flt, nil, nil,           # 18 - 1f
+    nil, nil, nil, nil, nil, nil, nil, nil,       # 20 - 27
+    nil, nil, nil, nil, nil, nil, nil, nil,       # 28 - 2f
+    nil, nil, nil, nil, nil, nil, nil, nil,       # 30 - 37
+    nil, nil, nil, nil, nil, nil, nil, nil,       # 38 - 3f
+
+    # These don't necessarily convert well yet, especially 50+... 
+    nil, :bool_ary, :i1_ary, :i2_ary, :i_ary, :i8_ary, :byte_ary, :u2_ary,      # 40 - 47
+    :u_ary, :u8_ary, :flt_ary, :double_ary, :v2_ary, :v3_ary, :s_ary, :asc_ary, # 48 - 4f
+    :angle_ary, nil, :bool_ary, :bool_ary, :u_ary, :u_ary, :u_ary, :u_ary,      # 40 - 47
+    :u_ary, :i_ary, :i_ary, :i_ary, :i_ary, :flt_ary, nil, nil,                 # 48 - 4f
+  ]
+  def lookahead_type
+    LookaheadTypeTable[@data[@ofs]]
+  end
   def lookahead_str
     save_ofs = @ofs
-    if @abca
-      end_ofs = get_ofs_end
-    else
-      end_ofs = get_u
-    end
+    end_ofs = get_ofs_end
   
     # Only single <rec> inside <rec>
     # Just ignore existence of container, and see what's inside
@@ -476,12 +499,8 @@ module EsfParserSemantic
   def get_rec_contents_dynamic
     types   = []
     data    = []
-    if @abca
-      end_ofs = get_ofs_end
-    else
-      end_ofs = get_u
-    end
-    while @ofs < end_ofs
+    ofs_end = get_ofs_end
+    while @ofs < ofs_end
       t, d = send(@esf_type_handlers_get[get_byte])
       types << t
       data  << d
@@ -495,12 +514,8 @@ module EsfParserSemantic
   
   def get_rec_contents(*expect_types)
     data    = []
-    if @abca
-      end_ofs = get_ofs_end
-    else
-      end_ofs = get_u
-    end
-    while @ofs < end_ofs
+    ofs_end = get_ofs_end
+    while @ofs < ofs_end
       t, d = send(@esf_type_handlers_get[get_byte])
       raise SemanticFail.new unless t == expect_types.shift
       data << d
@@ -545,22 +560,14 @@ module EsfParserSemantic
 
   def get_ary_contents(*expect_types)
     data = []
-    if @abca
-      ofs_end, count = get_ofs_end_and_item_count
-    else
-      ofs_end, count = get_u, get_u
-    end
+    ofs_end, count = get_ofs_end_and_item_count
     data.push get_rec_contents(*expect_types) while @ofs < ofs_end
     data
   end
 
   def get_ary_contents_dynamic
     data = []
-    if @abca
-      ofs_end, count = get_ofs_end_and_item_count
-    else
-      ofs_end, count = get_u, get_u
-    end
+    ofs_end, count = get_ofs_end_and_item_count
     data.push get_rec_contents_dynamic while @ofs < ofs_end
     data
   end

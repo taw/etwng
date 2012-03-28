@@ -48,6 +48,80 @@ module EsfSemanticConverter
     date
   end
 
+## Annotation system
+
+def annotate_value!(annotation)
+  low_level_tag = @data[@ofs] # Temporary workaround, move logic to get_value!
+  t, v = get_value!
+  annotation = annotation ? "<!-- #{annotation} -->" : ""
+  case t
+  when :bool
+    tag = v ? "<yes/>" : "<no/>"
+    out!("#{tag}#{annotation}")
+  when :i1, :i2, :i, :i8, :byte, :u2, :u, :u8, :flt
+    # flt nan handling here?
+    out!("<#{t}>#{v}</#{t}>#{annotation}")
+  when :s, :asc
+    if v.empty?
+      out!("<#{t}/>#{annotation}")
+    else
+      out!("<#{t}>#{v.xml_escape}</#{t}>#{annotation}")
+    end
+  when :v2_ary
+    data = v.unpack("f*").map(&:pretty_single)
+    if data.empty?
+      out!("<v2_ary/>#{annotation}")
+    else
+      out!("<v2_ary>#{annotation}")
+      out!(" #{data.shift},#{data.shift}") until data.empty?
+      out!("</v2_ary>")
+    end
+  when :flt_ary
+    data = v.unpack("f*").map(&:pretty_single)
+    if data.empty?
+      out!("<flt_ary/>#{annotation}")
+    else
+      out!("<flt_ary>#{data.join(" ")}</flt_ary>#{annotation}")
+    end
+  # FAIL: lookahead_type returns :u_ary
+  #       get_value! gets :bin8
+  # This is performance hack for dealing with binary data, but yuck...
+  when :u_ary, :bin8
+    raise "FIXME: U4 arrays other than 048 not supported yet" unless low_level_tag == 0x48
+    data = v.unpack("V*")
+    if data.empty?
+      out!("<u4_ary/>#{annotation}")
+    else
+      out!("<u4_ary>#{data.join(" ")}</u4_ary>#{annotation}")
+    end
+  when :v2
+    out!("<v2 x=\"#{v[0]}\" y=\"#{v[1]}\"/>#{annotation}")
+  when :v3
+    out!("<v3 x=\"#{v[0]}\" y=\"#{v[1]}\" z=\"#{v[2]}\"/>#{annotation}")
+  else
+    raise "Trying to annotate value of unknown type: #{t}"
+  end
+end
+
+def annotate_rec(type, annotations)
+  each_rec_member(type) do |ofs_end, i|
+    field_type = lookahead_type
+    if field_type
+      annotation = annotations[[field_type, i]]
+      annotate_value!(annotation) if annotation
+    end
+  end
+end
+
+def annotate_rec_nth(type, annotations)
+  each_rec_member_nth_by_type(type) do |ofs_end, i, field_type|
+    if field_type
+      annotation = annotations[[field_type, i]]
+      annotate_value!(annotation) if annotation
+    end
+  end
+end
+
 ## Tag converters
 
 ## startpos.esf arrays
@@ -55,18 +129,17 @@ module EsfSemanticConverter
     return nil if @abca
     
     save_ofs = @ofs
-    ofs_end = get_u
-    count = get_u
+    ofs_end, count = get_ofs_end_and_item_count
     
     rv = {}
     id = nil
     
     count.times do
-      rec_end_ofs = get_u
+      rec_ofs_end = get_ofs_end
       return nil unless get_byte == 0x80
       return nil unless get_node_type_and_version[0] == :FACTION # Version number doesn't really matter
-      return nil unless rec_end_ofs == get_u
-      while @ofs < rec_end_ofs
+      return nil unless rec_ofs_end == get_u
+      while @ofs < rec_ofs_end
         t = get_byte
         if t == 0x80 or t == 0x81
           @ofs += 3
@@ -81,7 +154,7 @@ module EsfSemanticConverter
           else
             rv[id] = get_s
           end
-          @ofs = rec_end_ofs
+          @ofs = rec_ofs_end
         else
           warn "Unexpected field type #{t} during lookahead of faction ids"
           return nil
@@ -313,27 +386,25 @@ module EsfSemanticConverter
 
   def convert_rec_SPLINES
     each_rec_member("SPLINES") do |ofs_end, i|
-      if @data[@ofs] == 0x01 and i == 1
-        tag = get_value![1] ? "<yes/>" : "<no/>"
-        out!("#{tag}<!-- is land -->")
+      if i == 1 and lookahead_type == :bool
+        annotate_value!("is land")
       end
     end
   end
 
   def convert_rec_ROUTES
     names = (@ports || []) + (@settlements || [])
-    each_rec_member_nth_by_type("ROUTES") do |ofs_end, j|
-      if @data[@ofs] == 0x08 and j == 0
+    each_rec_member_nth_by_type("ROUTES") do |ofs_end, j, type|
+      if j == 0 and type == :u
         val = get_value![1]
         name = names[val] || "unknown"
         out!("<u>#{val}</u><!-- start point (#{name}) -->")
-      elsif @data[@ofs] == 0x08 and j == 1
+      elsif j == 1 and type == :u
         val = get_value![1]
         name = names[val] || "unknown"
         out!("<u>#{val}</u><!-- end point (#{name}) -->")
-      elsif @data[@ofs] == 0x0a and j == 0
-        val = get_value![1]
-        out!("<flt>#{val}</flt><!-- length of route -->")
+      elsif j == 0 and type == :flt
+        annotate_value!("length of route")
       end
     end
   end
@@ -360,32 +431,27 @@ module EsfSemanticConverter
     region_names = nil
     
     each_rec_member("grid_data") do |ofs_end, i|
+      tag = lookahead_type
       if i == 0 and lookahead_v2x?(ofs_end)
         x = get_value![1] * 0.5**20
         y = get_value![1] * 0.5**20
-        out!(%Q[<v2x x="#{x}" y="#{y}"/> <!-- starting point -->])
-      elsif i == 1 and @data[@ofs] == 0x07
-        v = get_value![1]
-        out!(%Q[<u2>#{v}</u2> <!-- starting x cell -->])
-      elsif i == 2 and @data[@ofs] == 0x07
-        v = get_value![1]
-        out!(%Q[<u2>#{v}</u2> <!-- starting y cell -->])
-      elsif i == 3 and @data[@ofs] == 0x04
+        out!(%Q[<v2x x="#{x}" y="#{y}"/><!-- starting point -->])
+      elsif i == 1 and tag == :u2
+        annotate_value!("starting x cell")
+      elsif i == 2 and tag == :u2
+        annotate_value!("starting y cell")
+      elsif i == 3 and tag == :i
         v = get_value![1]
         vs = v * 0.5**20
-        out!(%Q[<i>#{v}</i> <!-- dimension of cells (#{vs}) -->])
-      elsif i == 4 and @data[@ofs] == 0x08
-        v = get_value![1]
-        out!(%Q[<u>#{v}</u> <!-- columns -->])
-      elsif i == 5 and @data[@ofs] == 0x08
-        v = get_value![1]
-        out!(%Q[<u>#{v}</u> <!-- rows -->])
-      elsif i == 7 and @data[@ofs] == 0x07
-        v = get_value![1]
-        out!(%Q[<u2>#{v}</u2> <!-- number of passable regions -->])
-      elsif i == 8 and @data[@ofs] == 0x07
-        v = get_value![1]
-        out!(%Q[<u2>#{v}</u2> <!-- number of listed regions (generally equals to the previous number, but not compulsory) -->])
+        out!(%Q[<i>#{v}</i><!-- dimension of cells (#{vs}) -->])
+      elsif i == 4 and tag == :u
+        annotate_value!("columns")
+      elsif i == 5 and tag == :u
+        annotate_value!("rows")
+      elsif i == 7 and tag == :u2
+        annotate_value!("number of passable regions")
+      elsif i == 8 and tag == :u2
+        annotate_value!("number of listed regions (generally equals to the previous number, but not compulsory)")
       elsif i == 9 and @data[@ofs] == 0x43
         v = get_value![1].unpack("s*")
         region_names = {}
@@ -488,22 +554,19 @@ module EsfSemanticConverter
   def lookahead_region_data_vertices
     return nil unless @data[@ofs+4] == 0x80
     return nil unless @data[@ofs+12] == 0x4c
-    end_ofs, = @data[@ofs+13, 4].unpack("V")
-    @data[@ofs+17..end_ofs].unpack("f*").map(&:pretty_single)
+    ofs_end, = @data[@ofs+13, 4].unpack("V")
+    @data[@ofs+17..ofs_end].unpack("f*").map(&:pretty_single)
   end
   
   def lookahead_region_names
-    return nil if @abca
-    
     save_ofs = @ofs
-    ofs_end = get_u
-    count = get_u
+    ofs_end, count = get_ofs_end_and_item_count
     
     rv = []
     
     count.times do
-      rec_end_ofs = get_u
-      while @ofs < rec_end_ofs
+      rec_ofs_end = get_ofs_end
+      while @ofs < rec_ofs_end
         t = get_byte
         if t == 14
           if @abcf
@@ -511,7 +574,7 @@ module EsfSemanticConverter
           else
             rv << get_s
           end
-          @ofs = rec_end_ofs
+          @ofs = rec_ofs_end
         else
           warn "Unexpected field type #{t} during lookahead of region names"
           return []
@@ -603,23 +666,18 @@ module EsfSemanticConverter
   
   def convert_rec_areas
     each_rec_member("areas") do |ofs_end, i|
-      case [i, @data[@ofs, 1]]
-      when [0, "\x01"]
-        tag = get_value![1] ? "<yes/>" : "<no/>"
-        out!("#{tag}<!-- is land bridge -->")
-      when [1, "\x01"]
-        tag = get_value![1] ? "<yes/>" : "<no/>"
-        out!("#{tag}<!-- English Channel coast ? -->")
-      when [2, "\x01"]
-        tag = get_value![1] ? "<yes/>" : "<no/>"
-        out!("#{tag}<!-- passable -->")
-      when [5, "\x07"]
-        v = get_value![1]
-        out!("<u2>#{v}</u2><!-- unknown1 id -->")
-      when [8, "\x07"]
-        v = get_value![1]
-        out!("<u2>#{v}</u2><!-- unknown2 id -->")
-      when [9, "\x07"]
+      case [i, lookahead_type]
+      when [0, :bool]
+        annotate_value!("is land bridge")
+      when [1, :bool]
+        annotate_value!("English Channel coast ?")
+      when [2, :bool]
+        annotate_value!("passable")
+      when [5, :u2]
+        annotate_value!("unknown1 id")
+      when [8, :u2]
+        annotate_value!("unknown2 id")
+      when [9, :u2]
         v = get_value![1]
         labels = {104 => "mainland"}
         label = labels[v] ? " (#{v}=#{labels[v]})" : ""
@@ -763,8 +821,7 @@ module EsfSemanticConverter
   end
   
   def convert_rec_QUAD_TREE_BIT_ARRAY_NODE
-    raise SemanticFail.new if @abca
-    ofs_end = get_u
+    ofs_end = get_ofs_end
     if ofs_end - @ofs == 10 and @data[@ofs] == 0x08 and @data[@ofs+5] == 0x08
       a, b = get_bytes(10).unpack("xVxV")
       a = "%08x" % a
@@ -778,11 +835,21 @@ module EsfSemanticConverter
   end
   
   def lookahead_v2x?(ofs_end)
-    @ofs+10 <= ofs_end and @data[@ofs, 1] == "\x04" and @data[@ofs+5, 1] == "\x04"
+    # STDERR.puts "LOOKAHEAD v2x #{@ofs} #{@data[@ofs, 10].unpack("C*").map{|u| "%02x " % u}}"
+    u4_encodings = {0x04 => 4, 0x19 => 0, 0x1a => 1, 0x1b => 2, 0x1c => 3}
+    return false unless @ofs < ofs_end and u4_encodings[@data[@ofs]]
+    ofs2 = @ofs + 1 + u4_encodings[@data[@ofs]]
+    return false unless ofs2 < ofs_end and u4_encodings[@data[ofs2]]
+    # STDERR.puts "YES! %02X %02X" % [@data[@ofs], @data[ofs2]]
+    true
+    # rv = (@ofs+10 <= ofs_end and @data[@ofs, 1] == "\x04" and @data[@ofs+5, 1] == "\x04")
+    # warn "Lookahead v2x fail: #{@ofs}/#{ofs_end}" unless rv
+    # rv
   end
   
   # Call only if lookahead_v2x? says it's ok
   def convert_v2x!
+    # puts "Convert v2x: #{@ofs} #{@data[@ofs]} #{@data[@ofs+5]}"
     x = get_value![1] * 0.5**20
     y = get_value![1] * 0.5**20
     out!(%Q[<v2x x="#{x}" y="#{y}"/>])
@@ -790,11 +857,7 @@ module EsfSemanticConverter
   
   def each_rec_member(type)
     tag!("rec", :type => type) do
-      if @abca
-        ofs_end = get_ofs_end
-      else
-        ofs_end = get_u
-      end
+      ofs_end = get_ofs_end
       i = 0
       while @ofs < ofs_end
         xofs = @ofs
@@ -808,10 +871,10 @@ module EsfSemanticConverter
   def each_rec_member_nth_by_type(tag)
     nth_by_type = Hash.new(0)
     each_rec_member(tag) do |ofs_end, i|
-      type = @data[@ofs]
+      type = lookahead_type
       j = nth_by_type[type]
       nth_by_type[type] += 1
-      yield(ofs_end, j)
+      yield(ofs_end, j, type)
     end
   end
 
@@ -881,15 +944,15 @@ module EsfSemanticConverter
 
   def convert_rec_LOCOMOTABLE
     each_rec_member("LOCOMOTABLE") do |ofs_end, i|
+      type = lookahead_type
       # Steps 0/1 take two elements, so steps 6/7 really mean elements 8/9
       if i == 0 or i == 1
+        raise "Something is wrong here" unless lookahead_v2x?(ofs_end)
         convert_v2x!
-      elsif i == 6 and @data[ofs] == 4
-        v = get_value![1]
-        out!("<i>#{v}</i><!-- Movement Points total -->")
-      elsif i == 7 and @data[ofs] == 4
-        v = get_value![1]
-        out!("<i>#{v}</i><!-- Movement Points left -->")
+      elsif i == 6 and type == :i
+        annotate_value!("Movement Points total")
+      elsif i == 7 and type == :i
+        annotate_value!("Movement Points left")
       end
     end
   end
@@ -905,7 +968,7 @@ module EsfSemanticConverter
         out!("<bin6>#{str.join(' ; ')}</bin6>")
       elsif i == 4 and @data[@ofs] == 0x46
         v = get_value![1].unpack("C*")
-        out!("<bin6> <!-- #{v.size/12} empty cells -->")
+        out!("<bin6><!-- #{v.size/12} empty cells -->")
         until v.empty?
           line = v.shift(12).map{|x| "%02x" % x}
           part0 = line[0,4].join(" ")
@@ -919,9 +982,8 @@ module EsfSemanticConverter
   end
   
   def convert_rec_FORT
-    raise SemanticFail.new if @abca
     tag!("rec", :type => "FORT") do
-      ofs_end = get_u
+      ofs_end = get_ofs_end
       convert_v2x! if lookahead_v2x?(ofs_end)
       send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
     end
@@ -955,30 +1017,28 @@ module EsfSemanticConverter
   def convert_rec_INTERNATIONAL_TRADE_ROUTE
     cnt = nil
     is_sea = nil
-    each_rec_member_nth_by_type("INTERNATIONAL_TRADE_ROUTE") do |ofs_end, i|
-      if @data[@ofs] == 0x08 and i == 0
+    each_rec_member_nth_by_type("INTERNATIONAL_TRADE_ROUTE") do |ofs_end, i, type|
+      if i == 0 and type == :u
         cnt = val = get_value![1]
         out!("<u>#{val}</u><!-- number of connections -->")
-      elsif @data[@ofs] == 0x08 and (i-1)%2 == 0 and (i-1)/2 < cnt-1
+      elsif type == :u and (i-1)%2 == 0 and (i-1)/2 < cnt-1
         val = get_value![1]
         out!("<u>#{val}</u><!-- start point (#{port_lookpup(val)}) -->")
-      elsif @data[@ofs] == 0x08 and (i-1)%2 == 1 and (i-1)/2 < cnt-1
+      elsif type == :u and (i-1)%2 == 1 and (i-1)/2 < cnt-1
         val = get_value![1]
         out!("<u>#{val}</u><!-- end point (#{port_lookpup(val)}) -->")
-      elsif @data[@ofs] == 0x01 and i < cnt
+      elsif type == :bool and i < cnt
         is_sea = val = get_value![1]
         tag = val ? "<yes/>" : "<no/>"
         out!("#{tag}<!-- is sea -->")
-      elsif @data[@ofs] == 0x04 and i < cnt
-        val = get_value![1]
+      elsif type == :i and i < cnt
         if is_sea == nil or is_sea == true
-          out!("<i>#{val}</i><!-- faction id -->")
+          annotate_value!("faction id")
         else
-          out!("<i>#{val}</i><!-- region id -->")
+          annotate_value!("region id")
         end
-      elsif @data[@ofs] == 0x04 and i == cnt
-        val = get_value![1]
-        out!("<i>#{val}</i><!-- route id -->")
+      elsif type == :i and i == cnt
+        annotate_value!("route id")
       elsif @data[@ofs] == 0x48 and i == 0
         data = get_value![1].unpack("V*")
         out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- commodities quantity -->")
@@ -996,17 +1056,16 @@ module EsfSemanticConverter
 
   def convert_rec_DOMESTIC_TRADE_ROUTE
     cnt = nil
-    each_rec_member_nth_by_type("DOMESTIC_TRADE_ROUTE") do |ofs_end, i|
-      if @data[@ofs] == 0x0e and i == 0
-        v = get_value![1]
-        out!("<s>#{v.xml_escape}</s><!-- theatre id -->")
-      elsif @data[@ofs] == 0x08 and i == 0
+    each_rec_member_nth_by_type("DOMESTIC_TRADE_ROUTE") do |ofs_end, i, type|
+      if type == :s and i == 0
+        annotate_value!("theatre id")
+      elsif type == :u and i == 0
         cnt = val = get_value![1]
         out!("<u>#{val}</u><!-- number of connections -->")
-      elsif @data[@ofs] == 0x08 and (i-1)%2 == 0 and (i-1)/2 < cnt-1
+      elsif type == :u and (i-1)%2 == 0 and (i-1)/2 < cnt-1
         val = get_value![1]
         out!("<u>#{val}</u><!-- start point (#{port_lookpup(val)}) -->")
-      elsif @data[@ofs] == 0x08 and (i-1)%2 == 1 and (i-1)/2 < cnt-1
+      elsif type == :u and (i-1)%2 == 1 and (i-1)/2 < cnt-1
         val = get_value![1]
         out!("<u>#{val}</u><!-- end point (#{port_lookpup(val)}) -->")
       elsif @data[@ofs] == 0x48 and i == 0
@@ -1018,9 +1077,9 @@ module EsfSemanticConverter
   
   def convert_rec_CAMPAIGN_TRADE_MANAGER
     annotate_rec_nth "CAMPAIGN_TRADE_MANAGER",
-      [:u4_ary, 0] => "commodities baseline price per unit",
-      [:u4_ary, 1] => "commodities current price per unit",
-      [:u4_ary, 5] => "resources trade value",
+      [:u_ary, 0] => "commodities baseline price per unit",
+      [:u_ary, 1] => "commodities current price per unit",
+      [:u_ary, 5] => "resources trade value",
       [:flt_ary, 0] => "demand"
   end
 
@@ -1056,100 +1115,6 @@ module EsfSemanticConverter
     attrs = %Q[ faction="#{faction.xml_escape}" religion="#{religion.xml_escape}" gov="#{gov.xml_escape}" unknown="#{unknown}" social_class="#{social_class.xml_escape}"]
     unit_list = unit_list.map{|unit| ensure_types(unit, :s)}.flatten
     out_ary!("rebel_setup", attrs, unit_list.map{|unit| " #{unit}"})
-  end
-  
-  def annotate_rec(type, annotations)
-    symbolic_names = [nil, :bool, nil, :i2, :i, nil, :byte, :u2, :u, nil, :flt, nil, :v2, :v3, :s, :asc]
-    symbolic_names[0x4c] = :v2_ary
-    
-    each_rec_member(type) do |ofs_end, i|
-      field_type = symbolic_names[@data[ofs]]
-      next unless field_type
-      annotation = annotations[[field_type, i]]
-      next unless annotation
-      annotation = "<!-- #{annotation} -->"
-      case field_type
-      when :s, :asc
-        v = get_value![1]
-        if v.empty?
-          out!("<#{field_type}/>" + annotation)
-        else
-          out!("<#{field_type}>#{v.xml_escape}</#{field_type}>" + annotation)
-        end
-      when :i, :u, :u2, :i2, :byte, :flt
-        v = get_value![1]
-        out!("<#{field_type}>#{v}</#{field_type}>" + annotation)
-      when :bool
-        tag = get_value![1] ? "<yes/>" : "<no/>"
-        out!(tag + annotation)
-      when :v2_ary
-        data = get_value![1].unpack("f*").map(&:pretty_single)
-        if data.empty?
-          out!("<v2_ary/>" + annotation)
-        else
-          out!("<v2_ary>" + annotation)
-          out!(" #{data.shift},#{data.shift}") until data.empty?
-          out!("</v2_ary>")
-        end
-      when :v2, :v3
-        raise "Implement me: annotations for v2/v3"
-      end
-    end
-  end
-
-  def annotate_rec_nth(type, annotations)
-    symbolic_names = [nil, :bool, nil, :i2, :i, nil, :byte, :u2, :u, nil, :flt, nil, :v2, :v3, :s, :asc]
-    symbolic_names[0x4c] = :v2_ary
-    symbolic_names[0x4a] = :flt_ary
-    symbolic_names[0x48] = :u4_ary
-    
-    each_rec_member_nth_by_type(type) do |ofs_end, i|
-      field_type = symbolic_names[@data[ofs]]
-      next unless field_type
-      annotation = annotations[[field_type, i]]
-      next unless annotation
-      annotation = "<!-- #{annotation} -->"
-      case field_type
-      when :s, :asc
-        v = get_value![1]
-        if v.empty?
-          out!("<#{field_type}/>" + annotation)
-        else
-          out!("<#{field_type}>#{v.xml_escape}</#{field_type}>" + annotation)
-        end
-      when :i, :u, :u2, :i2, :byte, :flt
-        v = get_value![1]
-        out!("<#{field_type}>#{v}</#{field_type}>" + annotation)
-      when :bool
-        tag = get_value![1] ? "<yes/>" : "<no/>"
-        out!(tag + annotation)
-      when :flt_ary
-        data = get_value![1].unpack("f*").map(&:pretty_single)
-        if data.empty?
-          out!("<flt_ary/>" + annotation)
-        else
-          out!("<flt_ary>#{data.join(" ")}</flt_ary>" + annotation)
-        end
-      when :u4_ary
-        data = get_value![1].unpack("V*")
-        if data.empty?
-          out!("<u4_ary/>" + annotation)
-        else
-          out!("<u4_ary>#{data.join(" ")}</u4_ary>" + annotation)
-        end
-      when :v2_ary
-        data = get_value![1].unpack("f*").map(&:pretty_single)
-        if data.empty?
-          out!("<v2_ary/>" + annotation)
-        else
-          out!("<v2_ary>" + annotation)
-          out!(" #{data.shift},#{data.shift}") until data.empty?
-          out!("</v2_ary>")
-        end
-      when :v2, :v3
-        raise "Implement me: annotations for v2/v3"
-      end
-    end
   end
   
   def autoconvert_v2x(type, *positions)
@@ -1585,9 +1550,9 @@ module EsfSemanticConverter
   
   def convert_rec_ALLIED_IN_WAR_AGAINST
     each_rec_member("ALLIED_IN_WAR_AGAINST") do |ofs_end, i|
-      if i == 0 and @data[@ofs] == 0x08
+      if i == 0 and lookahead_type == :u
         id = get_value![1]
-        tag = "<u>#{id}</u>"        
+        tag = "<u>#{id}</u>"
         tag += "<!-- #{@faction_ids[id].xml_escape} -->" if @faction_ids and @faction_ids[id]
         out!(tag)
       end
@@ -1613,48 +1578,40 @@ module EsfSemanticConverter
   
   def convert_rec_DIPLOMACY_RELATIONSHIP
     each_rec_member("DIPLOMACY_RELATIONSHIP") do |ofs_end, i|
-      case [i, @data[@ofs]]
-      when [0, 0x04]
+      case [i, lookahead_type]
+      when [0, :i]
         id = get_value![1]
         tag = "<i>#{id}</i>"        
         tag += "<!-- #{@faction_ids[id].xml_escape} -->" if @faction_ids and @faction_ids[id]
         out!(tag)
-      when [2, 0x01]
-        tag = get_value![1] ? "<yes/>" : "<no/>"
-        out!("#{tag}<!-- trade agreement -->")
-      when [3, 0x04]
-        val = get_value![1]
-        out!("<i>#{val}</i><!-- military access turns (-1 = unlimited) -->")
-      when [4, 0x0e]
-        val = get_value![1]
-        out!("<s>#{val.xml_escape}</s><!-- relationship -->")
-      when [20, 0x0e]
-        val = get_value![1]
-        out!("<s>#{val.xml_escape}</s><!-- this is NOT relationship -->")
+      when [2, :bool]
+        annotate_value!("trade agreement")
+      when [3, :i]
+        annotate_value!("military access turns (-1 = unlimited)")
+      when [4, :s]
+        annotate_value!("relationship")
+      when [20, :s]
+        annotate_value!("this is NOT relationship")
       end
     end
   end
 
   def convert_rec_TRADE_SEGMENTS
-    each_rec_member_nth_by_type("TRADE_SEGMENTS") do |ofs_end, j|
-      if @data[@ofs] == 0x01 and j == 0
-        tag = get_value![1] ? "<yes/>" : "<no/>"
-        out!("#{tag}<!-- is land -->")
-      elsif @data[@ofs] == 0x08 and j == 0
-        val = get_value![1]
-        out!("<u>#{val}</u><!-- number of sub-segments -->")
-      elsif @data[@ofs] == 0x0c and j % 4 == 0
-        out!("<!-- sub-segment ##{j / 4} -->")
-        # pass through
+    each_rec_member_nth_by_type("TRADE_SEGMENTS") do |ofs_end, j, type|
+      if type == :bool and j == 0
+        annotate_value!("is land")
+      elsif type == :u and j == 0
+        annotate_value!("number of sub-segments")
+      elsif type == :v2 and j % 4 == 0
+        annotate_value!("sub-segment ##{j / 4}")
+      elsif type == :flt and j == 0
+        annotate_value!("length of segment")
       elsif @data[@ofs] == 0x4a and j == 0
         out!("<!-- lengths of sub-segments -->")
         # pass through
       elsif @data[@ofs] == 0x4a and j == 1
         out!("<!-- cummulative lengths of sub-segments -->")
         # pass through
-      elsif @data[@ofs] == 0x0a and j == 0
-        val = get_value![1]
-        out!("<flt>#{val}</flt><!-- length of segment -->")
       elsif @data[@ofs] == 0x48 and j == 0
         out!("<!-- domestic trade route ids -->")
         # pass through
@@ -1674,16 +1631,16 @@ module EsfSemanticConverter
   def convert_rec_TRADE_ROUTES
     pi = @port_indices || {}
     si = @settlement_indices || {}
-    each_rec_member_nth_by_type("TRADE_ROUTES") do |ofs_end, j|
-      if @data[@ofs] == 0x08 and j == 0
+    each_rec_member_nth_by_type("TRADE_ROUTES") do |ofs_end, j, type|
+      if type == :u and j == 0
         val = get_value![1]
         name = pi[val] || si[val] || "unknown"
         out!("<u>#{val}</u><!-- start point (#{name}) -->")
-      elsif @data[@ofs] == 0x08 and j == 1
+      elsif type == :u and j == 1
         val = get_value![1]
         name = pi[val] || si[val] || "unknown"
         out!("<u>#{val}</u><!-- end point (#{name}) -->")
-      elsif @data[@ofs] == 0x0a and j == 0
+      elsif type == :flt and j == 0
         val = get_value![1]
         out!("<flt>#{val}</flt><!-- length of route -->")
       end
