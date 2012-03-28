@@ -30,6 +30,9 @@ class QuadTreeBitArray
     if @qsz == 1024 # S2TW quick hack, proper switch should actually do some logic
       @xsz = @ysz = 640
       parse_data_v2!
+    elsif @qsz == 2048 # S2TW Boshin campaign hack, even uglier...
+      @xsz = @ysz = 1120
+      parse_data_v2!
     else
       parse_data!
     end
