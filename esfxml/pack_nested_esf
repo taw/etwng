@@ -3,6 +3,14 @@
 ruby = "jruby"
 # ruby = "ruby"
 
+def windows?
+  if RUBY_PLATFORM == 'java'
+    java.lang.System.getProperty("os.name") =~ /win/i
+  else
+    RUBY_PLATFORM =~ /win/i
+  end
+end
+
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} input_dir output.esf"
   exit 1
@@ -15,6 +23,11 @@ if File.exist?("#{in_dir}/compressed_data")
   system ruby, "xml2esf", "#{in_dir}/compressed_data", "#{in_dir}/compressed_data.esf"
 end
 if File.exist?("#{in_dir}/compressed_data.esf")
-  system "lzma", "-kf", "-S", ".xz", "#{in_dir}/compressed_data.esf"
+  if windows?
+    # No idea what -a0 -d18 are...
+    system "lzma", "e", "#{in_dir}/compressed_data.esf", "#{in_dir}/compressed_data.esf.xz", "-a0", "-d18"
+  else
+    system "lzma", "-kf", "-S", ".xz", "#{in_dir}/compressed_data.esf"
+  end
 end
 system ruby, "xml2esf", in_dir, out_file
