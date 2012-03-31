@@ -525,6 +525,7 @@ end
         out!("</u4_ary>")
       else
         out!("<u4_ary>")
+        start = true
         cnt = 0
         scale = 0.5**20
         until data.empty?
@@ -534,7 +535,8 @@ end
             if cnt > data.size
               warn "Vertices count greater than data size, annotations for pathfinding_areas will be wrong"
             else
-              out!("")
+              out!("") unless start
+              start = false
               out!(" #{i} <!-- vertices count -->")
               nx_has_0123 = !(data[0, i] & [0,1,2,3]).empty?
               if nx_has_0123
