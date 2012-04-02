@@ -157,6 +157,15 @@ module XmlTagHandlers
   
   
   ## Semantic data types - pathfinding.esf
+  def on_empty_node_boundaries(attributes, buf, ctx)
+    path_id = attributes[:path_id].to_i
+    vertex_index = attributes[:vertex_index].to_i
+    put_rec "boundaries" do
+      @esf.put_u attributes[:unknown].to_i
+      @esf.put_u((path_id << 16) + vertex_index)
+    end
+  end
+    
   def on_text_node_vertices(attributes, buf, ctx)
     semantic_put_ary("vertices", buf.strip.split(/[\s,]+/), 2) do |x, y|
       @esf.put_i((x.to_f * 1048576.0).round.to_i)
