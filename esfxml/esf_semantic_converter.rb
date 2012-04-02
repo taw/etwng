@@ -899,6 +899,14 @@ end
     autoconvert_v2x "OBSTACLE", 7, 8
   end
 
+  def convert_rec_boundaries
+    a, b = get_rec_contents(:u, :u)
+    tag!("rec", :type => "boundaries") do
+      out!("<u>%d</u><!-- %08x -->" % [a,a])
+      out!("<u>%d</u><!-- %08x -->" % [b,b])
+    end
+  end
+
   def convert_rec_OBSTACLE_BOUNDARIES
     data, = get_rec_contents(:bin8)
     data = data.unpack("V*")
