@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+def extract_data(src)
+  data = File.open(src, 'rb').readlines
+  rv = []
+  until data.empty?
+    if data.shift.strip == '<rec type="boundaries">'
+      data.shift =~ %r[<u>\d+</u><!--\s*(.*?)\s*-->]
+      a = $1
+      data.shift =~ %r[<u>\d+</u><!--\s*(.*?)\s*-->]
+      b = $1
+      rv << [a,b]
+    end
+  end
+  rv
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} grid_data.xml out.tsv"
+  exit 1
+end
+
+src, target = *ARGV
+
+data = extract_data(src)
+File.open(target, 'wb'){|fh|
+  data.each{|a,b|
+    fh.puts [a,b].join("\t")
+  }
+}
