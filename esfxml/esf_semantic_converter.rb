@@ -901,9 +901,9 @@ end
 
   def convert_rec_boundaries
     a, b = get_rec_contents(:u, :u)
-    b0 = b >> 16
-    b1 = b & 0xFFFF # vertex_id is index to u4_ary in corresponding pathfinding-*.xml
-    out!(%Q[<boundaries unknown="%d (%08x)" path_id="%d" vertex_index="%d"/>] % [a,a,b0,b1])
+    path_id = [b >> 16].pack("v").unpack("s")[0]
+    vertex_index = b & 0xFFFF # vertex_id is index to u4_ary in corresponding pathfinding-*.xml
+    out!(%Q[<boundaries unknown="%d (%08x)" path_id="%d" vertex_index="%d"/>] % [a,a,path_id,vertex_index])
   end
 
   def convert_rec_OBSTACLE_BOUNDARIES
