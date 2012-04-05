@@ -901,8 +901,9 @@ end
 
   def convert_rec_boundaries
     a, b = get_rec_contents(:u, :u)
-    path_id = [b >> 16].pack("v").unpack("s")[0]
-    vertex_index = b & 0xFFFF # vertex_id is index to u4_ary in corresponding pathfinding-*.xml
+    path_id = b >> 22
+    path_id = -1 if path_id == 1023
+    vertex_index = b & 0x3FFFFF # vertex_id is index to u4_ary in corresponding pathfinding-*.xml
     out!(%Q[<boundaries unknown="%d (%08x)" path_id="%d" vertex_index="%d"/>] % [a,a,path_id,vertex_index])
   end
 

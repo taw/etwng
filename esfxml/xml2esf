@@ -162,7 +162,7 @@ module XmlTagHandlers
     vertex_index = attributes[:vertex_index].to_i
     put_rec "boundaries" do
       @esf.put_u attributes[:unknown].to_i
-      @esf.put_u((path_id << 16) + vertex_index)
+      @esf.put_u((path_id << 22) + vertex_index)
     end
   end
     
