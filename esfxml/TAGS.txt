@@ -65,10 +65,10 @@ Examples of each semantic tag below:
 
 == pathfinding.esf ==
 
-<ary type="boundaries">
- <boundaries unknown="2 (00000002)" path_id="65472" vertex_index="19"/>
- <boundaries unknown="2400256256 (8f110100)" path_id="0" vertex_index="24"/>
-</ary>
+<ary type="boundaries">                                                                                                                              
+ <boundaries unknown1="0 (0000)" unknown2="2 (0002)" path_id="-1" vertex_index="5"/>                                                                 
+ <boundaries unknown1="3345 (0d11)" unknown2="0 (0000)" path_id="0" vertex_index="13"/>                                                              
+</ary>                                                                                                                                               
 
 <vertices>
   -2047.99999904633,-2047.99999904633

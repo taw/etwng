@@ -160,8 +160,10 @@ module XmlTagHandlers
   def on_empty_node_boundaries(attributes, buf, ctx)
     path_id = attributes[:path_id].to_i
     vertex_index = attributes[:vertex_index].to_i
+    u1 = attributes[:unknown1].to_i
+    u2 = attributes[:unknown2].to_i
     put_rec "boundaries" do
-      @esf.put_u attributes[:unknown].to_i
+      @esf.put_u((u1 << 16) + u2)
       @esf.put_u((path_id << 22) + vertex_index)
     end
   end
