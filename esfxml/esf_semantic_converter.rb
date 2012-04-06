@@ -901,12 +901,14 @@ end
 
   def convert_rec_boundaries
     a, b = get_rec_contents(:u, :u)
-    u1 = a >> 16
-    u2 = a & 0xFFFF
+    u1 = a >> 24
+    u2 = (a >> 16) & 0xFF
+    u3 = (a >> 8) & 0xFF
+    u4 = a & 0xFF
     path_id = b >> 22
     path_id = -1 if path_id == 1023
     vertex_index = b & 0x3FFFFF # vertex_id is index to u4_ary in corresponding pathfinding-*.xml
-    out!(%Q[<boundaries unknown1="%d (%04x)" unknown2="%d (%04x)" path_id="%d" vertex_index="%d"/>] % [u1,u1,u2,u2,path_id,vertex_index])
+    out!(%Q[<boundaries unknown1="%d (%02x)" unknown2="%d (%02x)" unknown3="%d (%02x)" unknown4="%d (%02x)" path_id="%d" vertex_index="%d"/>] % [u1,u1,u2,u2,u3,u3,u4,u4,path_id,vertex_index])
   end
 
   def convert_rec_OBSTACLE_BOUNDARIES
