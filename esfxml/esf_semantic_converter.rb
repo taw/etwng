@@ -480,6 +480,7 @@ end
             i    = v.shift
             name = region_names[i]
             idx_to_names << name
+            @path_ids_to_names << name
             out!(" #{i} <!-- #{name} -->")
           end
 
