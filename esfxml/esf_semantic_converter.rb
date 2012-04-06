@@ -911,11 +911,6 @@ end
     u1 = a >> 24
     u2 = a & 0xFFFFFF
 
-    u2a = (u2 >> 12)
-    u2a -= 4096 if u2a >= 2048
-    u2b = u2 & 0xFFF
-    u2x = "%d %d" % [u2a, u2b] 
-
     path_id = b >> 22
     path_id = -1 if path_id == 1023
     if path_id == -1
@@ -924,7 +919,7 @@ end
       path_name = @path_ids_to_names[path_id] || "?"
     end
     vertex_index = b & 0x3FFFFF # vertex_id is index to u4_ary in corresponding pathfinding-*.xml
-    out!(%Q[<boundaries unknown1="%d (%02x)" unknown2="%d (%06x | %s)" path_id="%d (%s)" vertex_index="%d"/>] % [u1,u1,u2,u2,u2x,path_id,path_name,vertex_index])
+    out!(%Q[<boundaries unknown1="%d (%02x)" unknown2="%d (%06x)" path_id="%d (%s)" vertex_index="%d"/>] % [u1,u1,u2,u2,path_id,path_name,vertex_index])
     # out!(%Q[<boundaries unknown="%d (%08x)" path_id="%d" vertex_index="%d"/>] % [a,a,path_id,vertex_index])
   end
 
@@ -1023,6 +1018,17 @@ end
           out!(" #{part0} ; #{part1} ; #{part2}")
         end
         out!("</bin6>")
+      elsif i == 2 and lookahead_type == :u
+        val = get_value![1]
+        out! "<u>%d</u><!-- %08x -->" % [val, val]
+      elsif i == 3 and lookahead_type == :u2
+        val = get_value![1]
+        if val == 0xFFFF
+          path_name = "transition"
+        else
+          path_name = @path_ids_to_names[val] || "?"
+        end
+        out! "<u2>%d</u2><!-- %s -->" % [val, path_name]
       end
     end
   end
