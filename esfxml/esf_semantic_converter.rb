@@ -434,6 +434,8 @@ end
   def convert_rec_grid_data
     region_names = nil
     
+    @path_ids_to_names = []
+    
     each_rec_member("grid_data") do |ofs_end, i|
       tag = lookahead_type
       if i == 0 and lookahead_v2x?(ofs_end)
@@ -483,14 +485,18 @@ end
 
           v.shift
           out!("")
-          out!(" 0 <!-- separator -->")
+          out!(" 0 <!-- sea -->")
           out!("")
 
+          @path_ids_to_names << "sea"
+          
           until v.empty?
             sz = v.shift
             elems = (0...sz).map{ v.shift }
             elems_names = elems.map{|i| idx_to_names[i-1] }
-            out!(%Q[ #{sz} #{elems.join(", ")} <!-- #{elems_names.join(", ") }-->])
+            path = elems_names.join(", ")
+            @path_ids_to_names << path
+            out!(%Q[ #{sz} #{elems.join(", ")} <!-- #{path} -->])
           end
            
           out!(%Q[</u2_ary>])
@@ -911,8 +917,13 @@ end
 
     path_id = b >> 22
     path_id = -1 if path_id == 1023
+    if path_id == -1
+      path_name = "transition"
+    else
+      path_name = @path_ids_to_names[path_id] || "?"
+    end
     vertex_index = b & 0x3FFFFF # vertex_id is index to u4_ary in corresponding pathfinding-*.xml
-    out!(%Q[<boundaries unknown1="%d (%02x)" unknown2="%d (%06x | %s)" path_id="%d" vertex_index="%d"/>] % [u1,u1,u2,u2,u2x,path_id,vertex_index])
+    out!(%Q[<boundaries unknown1="%d (%02x)" unknown2="%d (%06x | %s)" path_id="%d (%s)" vertex_index="%d"/>] % [u1,u1,u2,u2,u2x,path_id,path_name,vertex_index])
     # out!(%Q[<boundaries unknown="%d (%08x)" path_id="%d" vertex_index="%d"/>] % [a,a,path_id,vertex_index])
   end
 
