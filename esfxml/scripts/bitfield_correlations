@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+
+data = []
+
+STDIN.each{|line|
+  data << $1.to_i if line =~ /unknown="(\d+)/
+}
+counts = (0..31).map{ 0 }
+deps   = (0..31).map{ (0..31).map{ 0 } }
+data.each{|d|
+  (0..31).each{|i|
+    counts[i] += d[i]
+    (0..31).each{|j|
+      deps[i][j] += d[i]*d[j]
+    }
+  }
+}
+
+pcts = counts.map{|c| 100.0 * c.to_f / data.size}.reverse
+puts "Bit:       " + (0..31).to_a.reverse.map{|i| "%02d " % i }.join(" ")
+puts "Percents: " + pcts.map{|x| "%02d%%" % x.round }.join(" ")
+
+puts ""
+
+puts "Dependence%:" + (0..31).to_a.reverse.map{|i| "  %02d" % i }.join(" ")
+(0..31).to_a.reverse.each{|j|
+  print "%02d:          " % j
+  (0..31).to_a.reverse.each{|i|
+    pi = counts[i].to_f / data.size
+    pj = counts[j].to_f / data.size
+    pij = deps[i][j].to_f / data.size
+    stddev_i = Math.sqrt(pi * (1.0 - pi))
+    stddev_j = Math.sqrt(pj * (1.0 - pj))
+    cov_ij = pij - pi*pj
+    cor_ij = cov_ij / stddev_i / stddev_j
+    # 
+    # if i == 0 and j == 0
+    #   p [:i, 0, :j, 0]
+    #   p [:ci, counts[i], :cj, counts[j]]
+    #   p [:dij, deps[i][j]]
+    #   p [:dsz, data.size]
+    #   p [:pi, pi, :pj, pj]
+    #   p [:oi, stddev_i, :oj, stddev_j]
+    #   p [:cov, cov_ij]
+    #   p [:cor, cor_ij]
+    # end
+
+    if cor_ij.nan?
+      print " XXX "
+    else
+      print "%+-4d " % (100.0*cor_ij).round
+    end
+  }
+  print "\n"
+}
