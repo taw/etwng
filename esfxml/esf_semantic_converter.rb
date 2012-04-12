@@ -906,23 +906,6 @@ end
     autoconvert_v2x "OBSTACLE", 7, 8
   end
 
-  def convert_rec_boundaries
-    a, b = get_rec_contents(:u, :u)
-    u1 = a >> 24
-    u2 = a & 0xFFFFFF
-
-    path_id = b >> 22
-    path_id = -1 if path_id == 1023
-    if path_id == -1
-      path_name = "transition"
-    else
-      path_name = @path_ids_to_names[path_id] || "?"
-    end
-    vertex_index = b & 0x3FFFFF # vertex_id is index to u4_ary in corresponding pathfinding-*.xml
-    out!(%Q[<boundaries unknown1="%d (%02x)" unknown2="%d (%06x)" path_id="%d (%s)" vertex_index="%d"/>] % [u1,u1,u2,u2,path_id,path_name,vertex_index])
-    # out!(%Q[<boundaries unknown="%d (%08x)" path_id="%d" vertex_index="%d"/>] % [a,a,path_id,vertex_index])
-  end
-
   def convert_rec_OBSTACLE_BOUNDARIES
     data, = get_rec_contents(:bin8)
     data = data.unpack("V*")
@@ -997,9 +980,27 @@ end
       end
     end
   end
+  
+  def parse_path_boundary_data(a)
+    u1 = a >> 24
+    u2 = (a >> 4) & 0xFFFFF
+    u3 = a & 0xF
+    u3n = ["passable area", "sea boundary", "transition area", "river", "land bridge area",
+      "land bridge transition area", "road", "slot"][u3] || "unknown"
+    %Q[unknown1="%d (%02x)" unknown2="%d (%05x)" path_type="%d (%s)"] % [u1,u1,u2,u2,u3,u3n]
+  end
+  
+  def parse_path_id(path_id)
+    if path_id == 1023 or path_id == -1
+      path_name = "transition"
+    else
+      path_name = @path_ids_to_names[path_id] || "?"
+    end
+    %Q[path_id="%d (%s)"] % [path_id, path_name]
+  end
 
   def convert_rec_grid_cells
-    each_rec_member("grid_cells") do |ofs_end, i|
+    each_rec_member_nth_by_type("grid_cells") do |ofs_end, i|
       if i == 0 and @data[@ofs] == 0x46
         v = get_value![1].unpack("C*")
         str = []
@@ -1007,7 +1008,7 @@ end
           str << v.shift(4).map{|x| "%02x" % x}.join(" ")
         end
         out!("<bin6>#{str.join(' ; ')}</bin6>")
-      elsif i == 4 and @data[@ofs] == 0x46
+      elsif i == 1 and @data[@ofs] == 0x46
         v = get_value![1].unpack("C*")
         out!("<bin6><!-- #{v.size/12} empty cells -->")
         until v.empty?
@@ -1018,19 +1019,26 @@ end
           out!(" #{part0} ; #{part1} ; #{part2}")
         end
         out!("</bin6>")
-      elsif i == 2 and lookahead_type == :u
+      elsif i == 0 and lookahead_type == :u
         val = get_value![1]
-        out! "<u>%d</u><!-- %08x -->" % [val, val]
-      elsif i == 3 and lookahead_type == :u2
-        val = get_value![1]
-        if val == 0xFFFF
-          path_name = "transition"
-        else
-          path_name = @path_ids_to_names[val] || "?"
-        end
-        out! "<u2>%d</u2><!-- %s -->" % [val, path_name]
+        t2,path_id = get_value!
+        raise "Error converitng grid_cells" unless t2 == :u2
+        attrs = parse_path_boundary_data(val)
+        attrs2 = parse_path_id(path_id)
+        out!(%Q[<boundaries_empty %s %s/>] % [attrs,attrs2])
       end
     end
+  end
+
+  # vertex_id is index to u4_ary in corresponding pathfinding-*.xml
+  def convert_rec_boundaries
+    a, b = get_rec_contents(:u, :u)
+    attrs = parse_path_boundary_data(a)
+    path_id = b >> 22
+    path_id = -1 if path_id == 1023
+    attrs2 = parse_path_id(path_id)
+    vertex_index = b & 0x3FFFFF
+    out!(%Q[<boundaries %s %s vertex_index="%d"/>] % [attrs,attrs2,vertex_index])
   end
   
   def convert_rec_FORT
