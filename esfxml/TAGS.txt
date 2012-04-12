@@ -1,4 +1,4 @@
-Right now about 105 xml tags corresponding to about 67 esf node types are supported.
+Right now about 106 xml tags corresponding to about 67 esf node types are supported.
 There are about 1000 esf node types across all esf varieties.
 Everything else gets generic low-level representation which is
 actually quite adequate most of the time.
@@ -65,10 +65,9 @@ Examples of each semantic tag below:
 
 == pathfinding.esf ==
 
-<ary type="boundaries">                                                                                                                              
- <boundaries unknown1="0 (0000)" unknown2="2 (0002)" path_id="-1" vertex_index="5"/>                                                                 
- <boundaries unknown1="3345 (0d11)" unknown2="0 (0000)" path_id="0" vertex_index="13"/>                                                              
-</ary>                                                                                                                                               
+<boundaries unknown1="134 (86)" unknown2="65552 (10010)" path_type="1 (sea boundary)" path_id="49 (sea)" vertex_index="1528"/>
+
+<boundaries_empty unknown1="255 (ff)" unknown2="69649 (11011)" path_type="0 (passable area)" path_id="0 (new_grenada)"/>
 
 <vertices>
   -2047.99999904633,-2047.99999904633
