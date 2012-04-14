@@ -531,6 +531,9 @@ end
         data.each{|u| out!(" #{u}")}
         out!("</u4_ary>")
       else
+        @vertices_ary_lookup_table = {}
+        idx_start = data.size
+        idx_cur = nil
         out!("<u4_ary>")
         start = true
         cnt = 0
@@ -538,6 +541,8 @@ end
         until data.empty?
           i = data.shift
           if cnt == 0
+            idx = idx_start - data.size - 1
+            idx_cur = @vertices_ary_lookup_table[idx] = []
             cnt = i
             if cnt > data.size
               warn "Vertices count greater than data size, annotations for pathfinding_areas will be wrong"
@@ -559,8 +564,10 @@ end
               y = y*scale
               if i <= 3
                 out!(" #{i}")
+                idx_cur << "#{i}"
               else
                 out!(" #{i} <!-- #{x},#{y} -->")
+                idx_cur << "#{i} (#{x},#{y})"
               end
             else
               out!(" #{i}")
@@ -984,14 +991,10 @@ end
   def parse_path_boundary_data(a)
     u1 = a >> 24
     u2 = (a >> 4) & 0xFFFFF
-    u2a = (u2 >> 10) & 0x3FF
-    u2a -= 0x400 if u2a >= 0x200
-    u2b = u2 & 0x3FF
-    u2b -= 0x400 if u2b >= 0x200
     u3 = a & 0xF
     u3n = ["passable area", "sea boundary", "transition area", "river", "land bridge area",
       "land bridge transition area", "road", "slot"][u3] || "unknown"
-    %Q[unknown1="%d (%02x)" unknown2="%d (%05x | %d %d)" path_type="%d (%s)"] % [u1,u1,u2,u2,u2a,u2b,u3,u3n]
+    %Q[unknown1="%d (%02x)" unknown2="%d (%05x)" path_type="%d (%s)"] % [u1,u1,u2,u2,u3,u3n]
   end
   
   def parse_path_id(path_id)
@@ -1042,7 +1045,11 @@ end
     path_id = -1 if path_id == 1023
     attrs2 = parse_path_id(path_id)
     vertex_index = b & 0x3FFFFF
-    out!(%Q[<boundaries %s %s vertex_index="%d"/>] % [attrs,attrs2,vertex_index])
+    
+    vertex_path = @vertices_ary_lookup_table[vertex_index]
+    vertex_path = vertex_path ? vertex_path.join("; ") : "no such path"
+    
+    out!(%Q[<boundaries %s %s vertex_index="%d"/><!-- %s -->] % [attrs,attrs2,vertex_index,vertex_path])
   end
   
   def convert_rec_FORT
