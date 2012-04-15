@@ -2,6 +2,7 @@
 
 require "rubygems"
 require "fileutils"
+require "pp"
 
 class File
   def self.write(path, contents)
@@ -56,6 +57,25 @@ class SVG
   end
 end
 
+def prepare_path(path)
+  path = path.map{|p|
+    p =~ /\((.*?)\)/ ? $1 : nil
+  }
+  path.shift while path[0].nil?
+  path.pop while path[-1].nil?
+
+  nil_idx = path.index(nil)
+  
+  if nil_idx
+    first = path[0..nil_idx-1]
+    last  = path[nil_idx+1..-1]
+    path = (last + first).compact
+    path = "M " + path.join(" L ") # svg open path
+  else
+    path = "M " + path.join(" L ") + " Z" # svg closed path
+  end
+end
+
 def extract_paths(xml_path)
   rv = []
   File.readlines(xml_path).each{|line|
@@ -63,8 +83,7 @@ def extract_paths(xml_path)
     next unless line =~ %r[\A\s*<boundaries\s*(.*)><!--(.*)-->\z]
     meta = $1.strip
     path = $2.strip.split(/\s*;\s*/)
-    path = path.map{|p| p =~ /\((.*?)\)/ ? $1 : nil}.compact
-    path = "M " + path.join(" L ") # svg path
+    path = prepare_path(path)
     attrs = Hash[meta.scan(/(\S+)="(.*?)"/)]
     u2 = attrs["unknown2"].to_i
     rv << [path, attrs, [(u2>>16)^0xF, (u2>>12)&0xF, (u2>>8)&0xf, (u2>>4)&0xF, u2&0xF]]
