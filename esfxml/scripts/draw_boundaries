@@ -1,0 +1,136 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "fileutils"
+
+class File
+  def self.write(path, contents)
+    File.open(path, 'wb'){|fh| fh.write contents}
+  end
+end
+
+class SVG
+  attr_accessor :width, :height, :transform
+  def initialize
+    @contents = []
+    @width = "100%"
+    @height = "100%"
+    @transform = ""
+  end
+  def <<(cnt)
+    @contents << cnt
+  end
+  def add_path(vertices_path, style)
+    @contents << %Q[<path d="#{vertices_path}" style="#{style}"/>]
+  end
+  def set_view(x0, y0, x1, y1, pixels)
+    # Frame around image
+    add_path("M #{x0} #{y0} L #{x0} #{y1} L #{x1} #{y1} L #{x1} #{y0} Z",
+      "stroke: black: stroke-width: 15px; fill:none")
+    
+    dx, dy = x1-x0, y1-y0
+    # x0 -= 0.05 * dx
+    # x1 += 0.05 * dx
+    # y0 -= 0.05 * dy
+    # y1 += 0.05 * dy
+    dx, dy = x1-x0, y1-y0
+    dz = [dx, dy].max
+    xsz = pixels * (dx / dz)
+    ysz = pixels * (dy / dz)
+    @transform = "scale(#{pixels/dz}) translate(#{-x0}, #{-y0}) scale(1,-1)"
+    @width = "#{xsz}"
+    @height = "#{ysz}"
+  end
+  def to_s
+    rv = %Q@<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="#{width}" height="#{height}" version="1.1" xmlns="http://www.w3.org/2000/svg">
+<g transform="#{transform}">@
+    rv << @contents.join
+    rv << "</g>\n"
+    rv << "</svg>\n"
+    rv
+  end
+  def save(file_name)
+    File.write(file_name, to_s)
+  end
+end
+
+def extract_paths(xml_path)
+  rv = []
+  File.readlines(xml_path).each{|line|
+    line.chomp!
+    next unless line =~ %r[\A\s*<boundaries\s*(.*)><!--(.*)-->\z]
+    meta = $1.strip
+    path = $2.strip.split(/\s*;\s*/)
+    path = path.map{|p| p =~ /\((.*?)\)/ ? $1 : nil}.compact
+    path = "M " + path.join(" L ") # svg path
+    attrs = Hash[meta.scan(/(\S+)="(.*?)"/)]
+    u2 = attrs["unknown2"].to_i
+    rv << [path, attrs, [(u2>>16)^0xF, (u2>>12)&0xF, (u2>>8)&0xf, (u2>>4)&0xF, u2&0xF]]
+  }
+  rv
+end
+
+class FullMapSVG < SVG
+  def initialize
+    super
+    # To draw a different region change these parameters:
+    # * min x
+    # * min y (y coordinate is flipped)
+    # * max x
+    # * max y (y coordinate is flipped)
+    # * pixel size of wider dimention (narrower dimension proportional)
+    set_view(-1280.0, -640.0, 1280.0, 640.0, 2560)
+  end
+
+  def add_colored_path(vertices_path, color_idx)
+    # These colors are very dubious, but what the hell
+    color = [
+      "#F00", "#0F0", "#00F", "#FF0",
+      "#F0F", "#0FF", "#FFF", "#80F",
+      "#F88", "#8F8", "#88F", "#FF8",
+      "#F8F", "#8FF", "#F80", "#0F8",
+    ][color_idx]
+    style = "stroke: #{color}; stroke-width: 2px; fill:none"
+    add_path(vertices_path, style)
+  end
+end
+
+def full_map_svg(path)
+  svg = SVG.new
+  svg
+  yield svg
+  svg.save(path)
+end
+
+def draw_boundaries!(xml_path, svg_dir)
+  FileUtils.mkdir_p svg_dir
+  paths = extract_paths(xml_path)
+
+  (0..4).each{|i|
+    svg = FullMapSVG.new
+    paths.each{|path, attrs, u2|
+      svg.add_colored_path(path, u2[i])
+    }
+    pat = "xxxxx"
+    pat[i,1] = "Z"
+    svg.save("#{svg_dir}/hex_#{pat}.svg")
+    (0..15).each{|j|
+      svg = FullMapSVG.new
+      paths.each{|path, attrs, u2|
+        svg.add_colored_path(path, u2[i]) if u2[i] == j
+      }
+      pat = "xxxxx"
+      pat[i,1] = "%X" % j
+      svg.save("#{svg_dir}/hex_#{pat}.svg")
+    }
+  }
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} pathfinding/grid_data-1234.xml out_directory"
+  exit 1
+end
+
+draw_boundaries!(ARGV[0], ARGV[1])
