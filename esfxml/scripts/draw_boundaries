@@ -111,7 +111,7 @@ class FullMapSVG < SVG
       "#F88", "#8F8", "#88F", "#FF8",
       "#F8F", "#8FF", "#F80", "#0F8",
     ][color_idx]
-    style = "stroke: #{color}; stroke-width: 2px; fill:none"
+    style = "stroke: #{color}; stroke-width: 0.3px; fill:none"
     add_path(vertices_path, style)
   end
 end
