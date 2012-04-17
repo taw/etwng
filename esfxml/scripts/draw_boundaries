@@ -26,8 +26,7 @@ class SVG
   end
   def set_view(x0, y0, x1, y1, pixels)
     # Frame around image
-    add_path("M #{x0} #{y0} L #{x0} #{y1} L #{x1} #{y1} L #{x1} #{y0} Z",
-      "stroke: black: stroke-width: 15px; fill:none")
+    # add_path("M #{x0} #{y0} L #{x0} #{y1} L #{x1} #{y1} L #{x1} #{y0} Z", "stroke: black: stroke-width: 15px; fill:none")
     
     dx, dy = x1-x0, y1-y0
     # x0 -= 0.05 * dx
@@ -89,7 +88,7 @@ def extract_paths(xml_path)
       attrs = Hash[meta.scan(/(\S+)="(.*?)"/)]
       u2 = attrs["unknown2"].to_i
       paths << [path, attrs, [(u2>>16)^0xF, (u2>>12)&0xF, (u2>>8)&0xf, (u2>>4)&0xF, u2&0xF]]
-    elsif line =~ %r[\A<!--\s*boundingbox\(([0-9.,]*)\)\s*-->]
+    elsif line =~ %r[\A<!--\s*boundingbox\(([\-0-9.,]*)\)\s*-->]
       bbox = $1.split(/,/).map{|u| u.strip.to_f}
     end
   }
