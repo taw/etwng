@@ -58,7 +58,7 @@ class SampleTest
 end
 
 sample_tests = [
-  "startpos_boshin.esf",
+  "startpos_boshin_nested.esf",
 ].map{|filename| SampleTest.new(filename)}.sort_by(&:size)
 
 FileUtils.mkdir_p "tmp"

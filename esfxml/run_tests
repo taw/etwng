@@ -44,7 +44,8 @@ end
 
 sample_tests = [
   #"bmd.dat",
-  "pathfinding.esf",
+  #"pathfinding.esf",
+  "pathfinding_etw.esf",
   #"poi.esf",
   #"regions.esf",
   #"sea_grids.esf",
@@ -71,15 +72,15 @@ sample_tests = [
   #"sho_sea_grids.esf",
   #"sho_poi.esf",
   #"sho_campaign.tree_list",
-  "sho_pathfinding.esf",
+  #"sho_pathfinding.esf",
   #"sho_regions.esf",
 
   #"sho_startpos.esf",
   
   #"ntw_eur_startpos.esf",
-  # "ntw_egy_startpos.esf",
-  # "ntw_ita_startpos.esf",
-  # "ntw_tut_startpos.esf",
+  #"ntw_egy_startpos.esf",
+  #"ntw_ita_startpos.esf",
+  #"ntw_tut_startpos.esf",
   
   #"startpos_boshin.esf",
   #"startpos_boshin_nested.esf",
