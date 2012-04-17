@@ -101,6 +101,7 @@ class XMLPrinter
   def initialize(out_path, rel_path)
     @rel_path = rel_path
     @out_fh   = File.open(out_path, 'wb')
+    # @out_fh.sync = true # for easier debugging
     @out_buf  = ""
     @stack    = []
     @indent   = Hash.new{|ht,k| ht[k]=" "*k}
@@ -128,6 +129,7 @@ class XMLPrinter
   def out!(str)
     @out_buf << @indent[@stack.size] << str << "\n"
     flush! if @out_buf.size > 1_000_000
+    # flush! # for easier debugging
   end
   def out_ary!(tag, attrs, data)
     if data.empty?
