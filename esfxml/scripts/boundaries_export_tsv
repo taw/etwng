@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# Warning: this script will not work with new format of "boundaries" rec
+
 def extract_data(src)
   data = File.open(src, 'rb').readlines
   rv = []
