@@ -87,7 +87,8 @@ def extract_paths(xml_path)
       path = prepare_path(path)
       attrs = Hash[meta.scan(/(\S+)="(.*?)"/)]
       u2 = attrs["unknown2"].to_i
-      paths << [path, attrs, [(u2>>16)^0xF, (u2>>12)&0xF, (u2>>8)&0xf, (u2>>4)&0xF, u2&0xF]]
+      path_type = attrs["path_type"].to_i
+      paths << [path, attrs, [(u2>>16)^0xF, (u2>>12)&0xF, (u2>>8)&0xf, (u2>>4)&0xF, u2&0xF, path_type]]
     elsif line =~ %r[\A<!--\s*boundingbox\(([\-0-9.,]*)\)\s*-->]
       bbox = $1.split(/,/).map{|u| u.strip.to_f}
     end
@@ -129,7 +130,7 @@ def draw_boundaries!(xml_path, svg_dir)
   FileUtils.mkdir_p svg_dir
   paths, bbox = extract_paths(xml_path)
 
-  (0..4).each{|i|
+  (0..5).each{|i|
     svg = FullMapSVG.new(bbox)
     paths.each{|path, attrs, u2|
       svg.add_colored_path(path, u2[i])
