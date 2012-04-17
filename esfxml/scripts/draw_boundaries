@@ -77,30 +77,40 @@ def prepare_path(path)
 end
 
 def extract_paths(xml_path)
-  rv = []
+  paths = []
+  bbox = nil
+  
   File.readlines(xml_path).each{|line|
-    line.chomp!
-    next unless line =~ %r[\A\s*<boundaries\s*(.*)><!--(.*)-->\z]
-    meta = $1.strip
-    path = $2.strip.split(/\s*;\s*/)
-    path = prepare_path(path)
-    attrs = Hash[meta.scan(/(\S+)="(.*?)"/)]
-    u2 = attrs["unknown2"].to_i
-    rv << [path, attrs, [(u2>>16)^0xF, (u2>>12)&0xF, (u2>>8)&0xf, (u2>>4)&0xF, u2&0xF]]
+    line = line.strip
+    if line =~ %r[\A<boundaries\s*(.*)><!--(.*)-->\z]
+      meta = $1.strip
+      path = $2.strip.split(/\s*;\s*/)
+      path = prepare_path(path)
+      attrs = Hash[meta.scan(/(\S+)="(.*?)"/)]
+      u2 = attrs["unknown2"].to_i
+      paths << [path, attrs, [(u2>>16)^0xF, (u2>>12)&0xF, (u2>>8)&0xf, (u2>>4)&0xF, u2&0xF]]
+    elsif line =~ %r[\A<!--\s*boundingbox\(([0-9.,]*)\)\s*-->]
+      bbox = $1.split(/,/).map{|u| u.strip.to_f}
+    end
   }
-  rv
+  [paths, bbox]
 end
 
 class FullMapSVG < SVG
-  def initialize
-    super
+  def initialize(bbox)
+    super()
     # To draw a different region change these parameters:
     # * min x
     # * min y (y coordinate is flipped)
     # * max x
     # * max y (y coordinate is flipped)
     # * pixel size of wider dimention (narrower dimension proportional)
-    set_view(-1280.0, -640.0, 1280.0, 640.0, 2560)
+    if bbox.nil?
+      set_view(-1280.0, -640.0, 1280.0, 640.0, 2560)
+    else
+      # The hell?
+      set_view(bbox[0], -bbox[3], bbox[2], -bbox[1], 2560)
+    end
   end
 
   def add_colored_path(vertices_path, color_idx)
@@ -116,19 +126,12 @@ class FullMapSVG < SVG
   end
 end
 
-def full_map_svg(path)
-  svg = SVG.new
-  svg
-  yield svg
-  svg.save(path)
-end
-
 def draw_boundaries!(xml_path, svg_dir)
   FileUtils.mkdir_p svg_dir
-  paths = extract_paths(xml_path)
+  paths, bbox = extract_paths(xml_path)
 
   (0..4).each{|i|
-    svg = FullMapSVG.new
+    svg = FullMapSVG.new(bbox)
     paths.each{|path, attrs, u2|
       svg.add_colored_path(path, u2[i])
     }
@@ -136,7 +139,7 @@ def draw_boundaries!(xml_path, svg_dir)
     pat[i,1] = "Z"
     svg.save("#{svg_dir}/hex_#{pat}.svg")
     (0..15).each{|j|
-      svg = FullMapSVG.new
+      svg = FullMapSVG.new(bbox)
       paths.each{|path, attrs, u2|
         svg.add_colored_path(path, u2[i]) if u2[i] == j
       }

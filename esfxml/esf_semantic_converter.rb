@@ -436,11 +436,19 @@ end
     
     @path_ids_to_names = []
     
+    x0 = nil
+    y0 = nil
+    cell_dim = nil
+    x1 = nil
+    y1 = nil
+    
     each_rec_member("grid_data") do |ofs_end, i|
       tag = lookahead_type
       if i == 0 and lookahead_v2x?(ofs_end)
         x = get_value![1] * 0.5**20
         y = get_value![1] * 0.5**20
+        x0 = x
+        y0 = y
         out!(%Q[<v2x x="#{x}" y="#{y}"/><!-- starting point -->])
       elsif i == 1 and tag == :u2
         annotate_value!("starting x cell")
@@ -449,11 +457,17 @@ end
       elsif i == 3 and tag == :i
         v = get_value![1]
         vs = v * 0.5**20
+        cell_dim = vs
         out!(%Q[<i>#{v}</i><!-- dimension of cells (#{vs}) -->])
       elsif i == 4 and tag == :u
-        annotate_value!("columns")
+        val = get_value![1]
+        x1 = x0 + val*cell_dim
+        out!("<u>#{val}</u>")
       elsif i == 5 and tag == :u
-        annotate_value!("rows")
+        val = get_value![1]
+        y1 = y0 + val*cell_dim
+        out!("<u>#{val}</u>")
+        out!("<!-- boundingbox(#{x0},#{y0},#{x1},#{y1}) -->")
       elsif i == 7 and tag == :u2
         annotate_value!("number of passable regions")
       elsif i == 8 and tag == :u2
