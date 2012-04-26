@@ -95,7 +95,7 @@ module XmlTagHandlers
     put_rec "wind_map" do
       @esf.put_u xsz/2
       @esf.put_u ysz
-      @esf.put_flt attributes[:unknown].to_f
+      @esf.put_flt attributes[:sea_phillips_constant].to_f
       @esf.put_4x("\x42", data)
     end
   end

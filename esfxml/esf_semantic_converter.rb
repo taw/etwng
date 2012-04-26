@@ -703,10 +703,10 @@ end
   end
 
   def convert_rec_wind_map
-    xsz, ysz, unknown, data = get_rec_contents(:u, :u, :flt, :bin2)
+    xsz, ysz, sea_phillips_constant, data = get_rec_contents(:u, :u, :flt, :bin2)
     path, rel_path = dir_builder.alloc_new_path("maps/wind_map-%d", nil, ".pgm")
     File.write_pgm(path, xsz*2, ysz, data)
-    out!("<wind_map unknown=\"#{unknown}\" pgm=\"#{rel_path.xml_escape}\"/>")
+    out!("<wind_map sea_phillips_constant=\"#{sea_phillips_constant}\" pgm=\"#{rel_path.xml_escape}\"/>")
   end
   
   def convert_rec_areas
@@ -719,14 +719,14 @@ end
       when [2, :bool]
         annotate_value!("passable")
       when [5, :u2]
-        annotate_value!("unknown1 id")
+        annotate_value!("adjoning passable areas id")
       when [8, :u2]
-        annotate_value!("unknown2 id")
+        annotate_value!("impassable land areas id (65535=passable)")
       when [9, :u2]
         v = get_value![1]
         labels = {104 => "mainland"}
         label = labels[v] ? " (#{v}=#{labels[v]})" : ""
-        out!("<u2>#{v}</u2><!-- island id#{label} -->")
+        out!("<u2>#{v}</u2><!-- impassable sea areas id (65535=navigable) | island id#{label} -->")
       end
     end
   end
