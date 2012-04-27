@@ -723,10 +723,7 @@ end
       when [8, :u2]
         annotate_value!("impassable land areas id (65535=passable)")
       when [9, :u2]
-        v = get_value![1]
-        labels = {104 => "mainland"}
-        label = labels[v] ? " (#{v}=#{labels[v]})" : ""
-        out!("<u2>#{v}</u2><!-- impassable sea areas id (65535=navigable) | island id#{label} -->")
+        annotate_value!("island id (65535=navigable, 104=ETW mainland)")
       end
     end
   end
