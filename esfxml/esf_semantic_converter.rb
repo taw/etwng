@@ -508,7 +508,7 @@ end
           until v.empty?
             sz = v.shift
             elems = (0...sz).map{ v.shift }
-            elems_names = elems.map{|i| idx_to_names[i-1] }
+            elems_names = elems.map{|i| region_names[i] }
             path = elems_names.join(", ")
             @path_ids_to_names << path
             out!(%Q[ #{sz} #{elems.join(", ")} <!-- #{path} -->])
