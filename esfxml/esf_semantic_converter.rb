@@ -468,6 +468,8 @@ end
         y1 = y0 + val*cell_dim
         out!("<u>#{val}</u><!-- rows -->")
         out!("<!-- boundingbox(#{x0},#{y0},#{x1},#{y1}) -->")
+      elsif i == 6 and tag == :u
+        annotate_value!("number of traits + number of empty cells")
       elsif i == 7 and tag == :u2
         annotate_value!("number of passable regions")
       elsif i == 8 and tag == :u2
