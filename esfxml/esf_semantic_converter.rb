@@ -1005,7 +1005,7 @@ end
     u3 = a & 0xF
     u3n = ["passable area", "sea boundary", "transition area", "river", "land bridge area",
       "land bridge transition area", "road", "slot"][u3] || "unknown"
-    %Q[unknown1="%d (%02x)" unknown2="%d (%05x)" path_type="%d (%s)"] % [u1,u1,u2,u2,u3,u3n]
+    %Q[passable_part="%d (of 255)" unknown2="%d (%05x)" path_type="%d (%s)"] % [u1,u2,u2,u3,u3n]
   end
   
   def parse_path_id(path_id)

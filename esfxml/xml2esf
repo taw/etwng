@@ -160,7 +160,7 @@ module XmlTagHandlers
   def on_empty_node_boundaries(attributes, buf, ctx)
     path_id = attributes[:path_id].to_i
     vertex_index = attributes[:vertex_index].to_i
-    u1 = attributes[:unknown1].to_i
+    u1 = attributes[:passable_part].to_i
     u2 = attributes[:unknown2].to_i
     path_type = attributes[:path_type].to_i
     unknown = (u1 << 24) + (u2 << 4) + path_type
@@ -172,7 +172,7 @@ module XmlTagHandlers
 
   def on_empty_node_boundaries_empty(attributes, buf, ctx)
     path_id = attributes[:path_id].to_i
-    u1 = attributes[:unknown1].to_i
+    u1 = attributes[:passable_part].to_i
     u2 = attributes[:unknown2].to_i
     path_type = attributes[:path_type].to_i
     unknown = (u1 << 24) + (u2 << 4) + path_type
