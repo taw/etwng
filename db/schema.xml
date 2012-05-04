@@ -431,6 +431,8 @@
     <field name='unknown4' type='int'/>
     <field name='unknown5' type='string' version_start='4'/>
     <field name='unknown6' type='int' version_start='4'/>
+    <field name='unknown8' type='boolean' version_start='9'/>
+    <field name='unknown9' type='string' version_start='9'/>
   </table>
   <table name='avatar_xp_rewards_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -1072,6 +1074,7 @@
     <field name='Settlement_ID' pk='true' type='string'/>
     <field fkey='regions_tables.Region_ID' name='Region' type='string'/>
     <field name='Capital' type='string'/>
+    <field name='unknown' type='string' version_start='3'/>
     <field name='Unknown1' type='int'/>
     <field fkey='slots_tables.Slot_ID' name='Slot' type='string'/>
   </table>
@@ -1120,6 +1123,8 @@
     <field name='unknown1' pk='true' type='string'/>
     <field name='unknown2' pk='true' type='string'/>
     <field name='unknown3' type='float'/>
+    <field name='unknown4' type='optstring' version_start='3'/>
+    <field name='unknown5' type='boolean' version_start='3'/>
   </table>
   <table name='cdir_campaign_junctions_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -1252,7 +1257,7 @@
   <table name='character_skill_node_sets_tables'>
     <field name='unknown1' type='boolean'/>
     <field name='unknown2' type='string'/>
-    <field name='unknown3' type='boolean'/>
+    <field name='unknown3' type='optstring'/>
     <field name='unknown4' type='optstring'/>
     <field name='unknown5' type='string'/>
   </table>
@@ -1284,6 +1289,7 @@
     <field name='Unknown2' type='boolean'/>
     <field name='Unknown3' type='int'/>
     <field fkey='trait_categories_tables.Trait_Category_ID' name='Trait_Category' type='string'/>
+    <field name='Unknown3' type='boolean' version_start='2'/>
   </table>
   <table name='climate_to_erosion_settings_tables'>
     <field name='Climate_ID' pk='true' type='string'/>
@@ -1966,6 +1972,9 @@
     <field fkey='government_types_tables.Government_ID' name='Government_x0020_Type' type='string'/>
     <field name='Gender' type='string'/>
     <field name='Title' type='string'/>
+    <field name='unknown' type='optstring' version_start='3'/>
+    <field name='unknown' type='int' version_start='3'/>
+    <field name='unknown' type='int' version_start='3'/>
   </table>
   <table name='ministerial_positions_switching_loyalty_effects_tables'>
     <field name='unknown1' type='string'/>

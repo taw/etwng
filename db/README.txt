@@ -35,9 +35,9 @@ number converted is:
 
 ETW         533/  540
 NTW         479/  482
-S2TW demo   810/  904
-S2TW       9937/12414
-all       11759/14340
+S2TW demo   812/  904
+S2TW       9979/12414
+all       11803/14340
 
 == Issues ==
 
