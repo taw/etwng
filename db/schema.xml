@@ -159,14 +159,24 @@
     <field name='Movement_points_in_campaign' type='int'/>
     <field name='Unknown2' type='int'/>
     <field name='Unknown3' type='int'/>
-    <field name='Unknown4' type='boolean'/>
+    <field name='Is_Playable' type='boolean'/>
     <field name='Model_type' type='string'/>
+    <field name='unknown7' type='int' version_start='5'/>
     <field name='Portraits_and_names_IDRef' type='optstring'/>
     <field name='Unknown6' type='boolean'/>
     <field fkey='agent_attributes_tables.Attribute_ID' name='Attribute' type='string'/>
     <field name='Agent_related_to_religion_type' type='optstring'/>
     <field name='Unknown8' type='int'/>
     <field name='Unknown9' type='int' version_start='2'/>
+    <field name='Recruitment cost' type='int' version_start='5'/>
+    <field name='Voice Selected' type='string' version_start='5'/>
+    <field name='Voice Move Ordered' type='string' version_start='5'/>
+    <field name='Voice Completed' type='string' version_start='5'/>
+    <field name='Voice Move OutofAP' type='string' version_start='5'/>
+    <field name='Voice Move Illegal' type='string' version_start='5'/>
+    <field name='Voice Embark' type='string' version_start='5'/>
+    <field name='Voice Disembark' type='string' version_start='5'/>
+    <field name='Voice Death' type='string' version_start='5'/>
   </table>
   <table name='aide_de_camp_speeches_tables'>
     <field name='adc_idref' pk='true' type='string'/>
@@ -1008,6 +1018,7 @@
     <field name='unknown5' type='boolean'/>
     <field name='unknown6' type='boolean'/>
     <field name='unknown7' type='boolean'/>
+    <field name='unknown8' type='optstring' version_start='3'/>
   </table>
   <table name='campaign_character_arts_tables'>
     <field name='unknown1' type='string'/>
@@ -1835,6 +1846,9 @@
     <field name='Date_Birth' type='int'/>
     <field name='Date_Death' type='int'/>
     <field name='Notes' type='string'/>
+    <field name='unknown' type='string' version_start='4'/>
+    <field name='unknown' type='string' version_start='4'/>
+    <field name='unknown' type='boolean' version_start='4'/>
   </table>
   <table name='honour_effects_tables'>
     <field name='unknown1' type='boolean'/>

@@ -159,14 +159,24 @@
     <xs:attribute name='Movement_points_in_campaign' type='xs:int' use='required' />
     <xs:attribute name='Unknown2' type='xs:int' use='required' />
     <xs:attribute name='Unknown3' type='xs:int' use='required' />
-    <xs:attribute name='Unknown4' type='xs:boolean' use='required' />
+    <xs:attribute name='Is_Playable' type='xs:boolean' use='required' />
     <xs:attribute name='Model_type' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='unknown7' type='xs:int' use='required' />
     <xs:attribute msprop:Optional='true' name='Portraits_and_names_IDRef' type='xs:string' />
     <xs:attribute name='Unknown6' type='xs:boolean' use='required' />
     <xs:attribute name='Attribute' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' name='Agent_related_to_religion_type' type='xs:string' />
     <xs:attribute name='Unknown8' type='xs:int' use='required' />
     <xs:attribute msprop:VersionStart='2' name='Unknown9' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Recruitment cost' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice Selected' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice Move Ordered' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice Completed' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice Move OutofAP' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice Move Illegal' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice Embark' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice Disembark' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice Death' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="aide_de_camp_speeches_tables">
     <xs:attribute name='adc_idref' type='xs:string' use='required' />
@@ -1008,6 +1018,7 @@
     <xs:attribute name='unknown5' type='xs:boolean' use='required' />
     <xs:attribute name='unknown6' type='xs:boolean' use='required' />
     <xs:attribute name='unknown7' type='xs:boolean' use='required' />
+    <xs:attribute msprop:Optional='true' msprop:VersionStart='3' name='unknown8' type='xs:string' />
   </xs:complexType>
   <xs:complexType name="campaign_character_arts_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
@@ -1835,6 +1846,9 @@
     <xs:attribute name='Date_Birth' type='xs:int' use='required' />
     <xs:attribute name='Date_Death' type='xs:int' use='required' />
     <xs:attribute name='Notes' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="honour_effects_tables">
     <xs:attribute name='unknown1' type='xs:boolean' use='required' />
