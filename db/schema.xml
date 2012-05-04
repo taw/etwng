@@ -295,6 +295,7 @@
     <field name='unknown4' type='boolean'/>
     <field name='unknown5' type='boolean'/>
     <field name='unknown6' type='optstring'/>
+    <field name='unknown7' type='int' version_start='6'/>
   </table>
   <table name='avatar_army_makeup_traits_tables'>
     <field name='unknown1' type='float'/>
@@ -331,8 +332,9 @@
     <field name='unknown3' type='string'/>
   </table>
   <table name='avatar_flags_tables'>
-    <field name='unknown1' type='float'/>
+    <field name='unknown1' type='int'/>
     <field name='unknown2' type='string'/>
+    <field name='unknown4' type='string' version_start='2'/>
   </table>
   <table name='avatar_ranks_tables'>
     <field name='unknown1' type='int'/>
@@ -344,6 +346,7 @@
     <field name='unknown7' type='int'/>
     <field name='unknown8' type='int'/>
     <field name='unknown9' type='int'/>
+    <field name='unknown10' type='int' version_start='3'/>
   </table>
   <table name='avatar_skill_chain_lookups_tables'>
     <field name='unknown1' pk='true' type='string'/>
@@ -1668,6 +1671,21 @@
     <field name='color_r3' type='int'/>
     <field name='color_g3' type='int'/>
     <field name='color_b3' type='int'/>
+  </table>
+  <table name='faction_variables_optional_overrides_tables'>
+    <field name='unknown' type='optstring'/>
+    <field name='unknown' type='boolean'/>
+    <field name='unknown' type='boolean'/>
+    <field name='unknown' type='optstring'/>
+    <field name='unknown' type='string'/>
+    <field name='unknown' type='blob4'/>
+  </table>
+  <table name='faction_variables_tables'>
+    <field name='unknown' type='string'/>
+    <field name='unknown' type='string'/>
+    <field name='unknown' type='boolean'/>
+    <field name='unknown' type='boolean'/>
+    <field name='unknown' type='blob2'/>
   </table>
   <table name='factions_tables'>
     <field name='Faction_ID' pk='true' type='string'/>
