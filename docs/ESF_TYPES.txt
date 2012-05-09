@@ -1,0 +1,20 @@
+    00 - 16-bit int of some kind [signed ???] This is not a valid type code
+    01 - 8-bit, boolean (0 false, 1 true)
+    02 - ??? 8-bit signed integer
+    03 - 16-bit int of some kind [unsigned ???] 16-bit signed integer
+    04 - 32-bit signed int
+    05 - ??? 64-bit signed integer
+    06 - 8-bit unsigned int
+    07 - 16-bit int of some kind [unsigned ???] 16-bit unsigned integer
+    08 - 32-bit unsigned int
+    09 - 64-bit something 64-bit unsigned integer
+    0a - 32-bit single precision float
+    0b - ??? 64-bit double precision float
+    0c - pair of 32-bit single precision floats (x,y coordinates)
+    0d - triple of 32-bit single precision floats (x,y,z coordinates)
+    0e - UTF-16 string (encoded directly in old ESF formats, or index to lookup table in S2TW's new format)
+    0f - ASCII string (encoded directly in old ESF formats, or index to lookup table in S2TW's new format)
+    10 - 16-bit int of some kind [unsigned ???] 16-bit angle (1 = 2π/65536)
+    40..4f - array types directly corresponding to 00..0f scalar types
+    80 - object with multiple fields
+    81 - array of objects of the same type
