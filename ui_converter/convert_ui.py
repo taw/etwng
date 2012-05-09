@@ -20,7 +20,7 @@ class TypeCastReader(io.BufferedReader):
     def readShort(self):
         return(struct.unpack("h",self.read(2))[0])
     def readUShort(self):
-        return(struct.unpack("h",self.read(2))[0])
+        return(struct.unpack("H",self.read(2))[0])
     def readFloat(self):
         return(struct.unpack("f",self.read(4))[0])
     def readDouble(self):
@@ -91,8 +91,10 @@ class uiEntry(debuggable_converter):
         self.flag12 = 0
         self.flag13 = 0
         self.flag14 = 0
-        
         self.flag6 = 0
+        self.flag7 = 0
+        self.flag8 = 0
+        self.flag9 = 0
         
         self.parentName = "" #ascii
         
@@ -149,9 +151,13 @@ class uiEntry(debuggable_converter):
         self.flag12 = handle.readByte()
         self.flag13 = handle.readByte()
         self.flag14 = handle.readByte()
-        
         if self.version >= 47:
           self.flag6 = handle.readByte()
+        if self.version >= 50:
+          self.flag7 = handle.readByte()
+          self.flag8 = handle.readByte()
+          self.flag9 = handle.readByte()
+
         self.parentName = handle.readASCII()
         
         self.int1 = handle.readInt()
@@ -197,6 +203,12 @@ class uiEntry(debuggable_converter):
         if self.version >= 39:
           self.int28 = handle.readInt()
 
+          # Just throw out decoding and hope for the best
+          for i in range(self.int28):
+            handle.readASCII() # name
+            handle.readASCII() # or 00 00
+            for j in range(16):
+              handle.readInt() # some of them are floats (second one especially)
 
         self.numChildren = handle.readInt()
         
@@ -232,6 +244,10 @@ class uiEntry(debuggable_converter):
         handle.writeByte(self.flag14)
         if self.version >= 47:
           handle.writeByte(self.flag6)
+        if self.version >= 50:
+          handle.writeByte(self.flag7)
+          handle.writeByte(self.flag8)
+          handle.writeByte(self.flag9)
         
         handle.writeASCII(self.parentName)
         
@@ -303,6 +319,9 @@ class uiEntry(debuggable_converter):
 %(indent+1)s<flag13>%(flag13)i</flag13>
 %(indent+1)s<flag14>%(flag14)i</flag14>
 %(indent+1)s<flag6>%(flag6)i</flag6>
+%(indent+1)s<flag7>%(flag7)i</flag7>
+%(indent+1)s<flag8>%(flag8)i</flag8>
+%(indent+1)s<flag9>%(flag9)i</flag9>
 %(indent+1)s<parentName>%(parentName)s</parentName>
 %(indent+1)s<int1>%(int1)i</int1>
 %(indent+1)s<tooltip>%(tooltip)s</tooltip>
@@ -312,7 +331,7 @@ class uiEntry(debuggable_converter):
 %(indent+1)s<flag4>%(flag4)i</flag4>
 %(indent+1)s<script>%(script)s</script>
 %(indent+1)s<tgas num="%(numTGAs)i">
-"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "title2": self.title2, "string10" : self.string10, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "flag6": self.flag6, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "script": self.script, "numTGAs": self.numTGAs})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "title2": self.title2, "string10" : self.string10, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "flag6": self.flag6, "flag7": self.flag7, "flag8": self.flag8, "flag9": self.flag9, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "script": self.script, "numTGAs": self.numTGAs})
         for tga in self.TGAs:
             tga.writeToXML(handle)
         
@@ -390,6 +409,12 @@ class uiEntry(debuggable_converter):
                 self.flag14 = int(child.firstChild.data)
             elif child.nodeName == "flag6":
                 self.flag6 = int(child.firstChild.data)
+            elif child.nodeName == "flag7":
+                self.flag7 = int(child.firstChild.data)
+            elif child.nodeName == "flag8":
+                self.flag8 = int(child.firstChild.data)
+            elif child.nodeName == "flag9":
+                self.flag9 = int(child.firstChild.data)
             elif child.nodeName == "parentName":
                 if len(child.childNodes) > 0:
                     self.parentName = child.firstChild.data
@@ -1015,7 +1040,7 @@ def convertUIToXML(uiFilename, textFilename):
         return
     versionNumber = int(versionString[7:10])
 
-    if versionNumber not in [32, 33, 39, 43, 44, 46, 47, 49]:
+    if versionNumber not in [32, 33, 39, 43, 44, 46, 47, 49, 50]:
       print("Version %d not supported" % versionNumber)
       return
     
