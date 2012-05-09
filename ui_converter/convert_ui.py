@@ -74,6 +74,7 @@ class uiEntry:
         self.indent = indent
         self.id = 0
         self.title = "" #ascii
+        self.title2 = "" #ascii
         self.xOff = 0
         self.yOff = 0
         self.flag1 = 0
@@ -128,6 +129,8 @@ class uiEntry:
         """
         self.id = handle.readInt()
         self.title = handle.readASCII()
+        if self.version >= 43:
+          self.title2 = handle.readASCII()
         self.xOff = handle.readInt()
         self.yOff = handle.readInt()
         self.flag1 = handle.readByte()
@@ -200,6 +203,9 @@ class uiEntry:
         """
         handle.writeInt(self.id)
         handle.writeASCII(self.title)
+        if self.version >= 43:
+          handle.writeASCII(self.title2)
+        
         handle.writeInt(self.xOff)
         handle.writeInt(self.yOff)
         handle.writeByte(self.flag1)
@@ -264,6 +270,7 @@ class uiEntry:
         handle.write("""%(indent)s<uiEntry>
 %(indent+1)s<id>%(id)i</id>
 %(indent+1)s<title>%(title)s</title>
+%(indent+1)s<title2>%(title2)s</title2>
 %(indent+1)s<xOff>%(xOff)i</xOff>
 %(indent+1)s<yOff>%(yOff)i</yOff>
 %(indent+1)s<flag1>%(flag1)i</flag1>
@@ -282,7 +289,7 @@ class uiEntry:
 %(indent+1)s<flag4>%(flag4)i</flag4>
 %(indent+1)s<script>%(script)s</script>
 %(indent+1)s<tgas num="%(numTGAs)i">
-"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "script": self.script, "numTGAs": self.numTGAs})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "title2": self.title2, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "script": self.script, "numTGAs": self.numTGAs})
         for tga in self.TGAs:
             tga.writeToXML(handle)
         
@@ -329,6 +336,9 @@ class uiEntry:
                 self.id = int(child.firstChild.data)
             elif child.nodeName == "title":
                 self.title = child.firstChild.data
+            elif child.nodeName == "title2":
+                if len(child.childNodes) > 0:
+                    self.title2 = child.firstChild.data
             elif child.nodeName == "xOff":
                 self.xOff = int(child.firstChild.data)
             elif child.nodeName == "yOff":
@@ -601,6 +611,7 @@ class state:
         self.version = version
         self.indent = indent
         self.title = ""
+        self.twui = ""
         self.TGAUses = []
         self.transitions = []
         
@@ -637,6 +648,8 @@ class state:
         self.int12 = handle.readInt()
         self.int13 = handle.readInt()
         self.int14 = handle.readInt() # determines what the color of each pixel in the texture is multiplied with (alpha overlay if you like)
+        if self.version >= 43:
+          self.twui = handle.readASCII()
         self.int15 = handle.readInt()
         self.int16 = handle.readInt()
         self.int17 = handle.readInt()
@@ -694,6 +707,8 @@ class state:
         handle.writeInt(self.int12)
         handle.writeInt(self.int13)
         handle.writeInt(self.int14)
+        if self.version >= 43:
+          handle.writeASCII(self.twui)
         handle.writeInt(self.int15)
         handle.writeInt(self.int16)
         handle.writeInt(self.int17)
@@ -747,6 +762,7 @@ class state:
 %(indent+1)s<int12>%(int12)i</int12>
 %(indent+1)s<int13>%(int13)i</int13>
 %(indent+1)s<textAlphaMultiply>%(int14)i</textAlphaMultiply>
+%(indent+1)s<twui>%(twui)s</twui>
 %(indent+1)s<int15>%(int15)i</int15>
 %(indent+1)s<int16>%(int16)i</int16>
 %(indent+1)s<int17>%(int17)i</int17>
@@ -761,7 +777,7 @@ class state:
 %(indent+1)s<stateDescription>%(stateDescription)s</stateDescription>
 %(indent+1)s<eventText>%(eventText)s</eventText>
 %(indent+1)s<tgaUses num="%(numTGAUses)i">
-"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "width": self.width, "height": self.height, "stateText": self.stateText, "tooltip": self.tooltip, "int7": self.int7, "int8": self.int8, "int9": self.int9, "int10": self.int10, "int11": self.int11, "flag7": self.flag7, "localisationID": self.localisationID, "tooltipID": self.tooltipID, "font": self.font, "int12": self.int12, "int13": self.int13, "int14": self.int14, "int15": self.int15, "int16": self.int16, "int17": self.int17, "flag8": self.flag8, "flag9": self.flag9, "flag10": self.flag10, "normalt0": self.normalt0, "int18": self.int18, "int19": self.int19, "int20": self.int20, "int21": self.int21, "stateDescription": self.stateDescription, "eventText": self.eventText, "numTGAUses": self.numTGAUses})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "width": self.width, "height": self.height, "stateText": self.stateText, "tooltip": self.tooltip, "int7": self.int7, "int8": self.int8, "int9": self.int9, "int10": self.int10, "int11": self.int11, "flag7": self.flag7, "localisationID": self.localisationID, "tooltipID": self.tooltipID, "font": self.font, "int12": self.int12, "int13": self.int13, "int14": self.int14, "twui": self.twui, "int15": self.int15, "int16": self.int16, "int17": self.int17, "flag8": self.flag8, "flag9": self.flag9, "flag10": self.flag10, "normalt0": self.normalt0, "int18": self.int18, "int19": self.int19, "int20": self.int20, "int21": self.int21, "stateDescription": self.stateDescription, "eventText": self.eventText, "numTGAUses": self.numTGAUses})
         
         for i in range(self.numTGAUses):
             self.TGAUses[i].writeToXML(handle)
@@ -828,6 +844,9 @@ class state:
                 self.int13 = int(child.firstChild.data)
             elif child.nodeName == "textAlphaMultiply":
                 self.int14 = int(child.firstChild.data)
+            elif child.nodeName == "twui":
+                if len(child.childNodes) > 0:
+                    self.twui = child.firstChild.data
             elif child.nodeName == "int15":
                 self.int15 = int(child.firstChild.data)
             elif child.nodeName == "int16":
@@ -882,6 +901,8 @@ class transition:
         self.short1 = 0
         self.int1 = 0
         self.int2 = 0
+        self.short2 = 0
+        self.int3 = 0
         
     def readFrom(self, handle):
         """
@@ -893,6 +914,9 @@ class transition:
           self.short1 = handle.readShort()
           self.int1 = handle.readInt()
           self.int2 = handle.readInt()
+        if self.version >= 43:
+          self.short2 = handle.readShort()
+          self.int3 = handle.readInt()
     
     def writeTo(self, handle):
         """
@@ -904,12 +928,25 @@ class transition:
           handle.writeShort(self.short1)
           handle.writeInt(self.int1)
           handle.writeInt(self.int2)
+        if self.version >= 43:
+          handle.writeShort(self.short2)
+          handle.writeInt(self.int3)
         
     def writeToXML(self, handle):
         """
         Writes to a text file handle
         """
-        handle.write("%(indent)s<transition>\n%(indent+1)s<type>%(type)i</type>\n%(indent+1)s<stateIDRef>%(id)i</stateIDRef>\n%(indent+1)s<short1>%(short1)i</short1>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent+1)s<int2>%(int2)i</int2>\n%(indent)s</transition>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "type": self.type, "id": self.id, "short1": self.short1, "int1": self.int1, "int2": self.int2})
+        handle.write(
+"""%(indent)s<transition>
+%(indent+1)s<type>%(type)i</type>
+%(indent+1)s<stateIDRef>%(id)i</stateIDRef>
+%(indent+1)s<short1>%(short1)i</short1>
+%(indent+1)s<int1>%(int1)i</int1>
+%(indent+1)s<int2>%(int2)i</int2>
+%(indent+1)s<short2>%(short2)i</short2>
+%(indent+1)s<int3>%(int3)i</int3>
+%(indent)s</transition>
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "type": self.type, "id": self.id, "short1": self.short1, "short2": self.short2, "int1": self.int1, "int2": self.int2, "int3": self.int3})
 
     def constructFromNode(self, node):
         """
@@ -926,10 +963,14 @@ class transition:
                 self.id = int(child.firstChild.data)
             elif child.nodeName == "short1":
                 self.short1 = int(child.firstChild.data)
+            elif child.nodeName == "short2":
+                self.short2 = int(child.firstChild.data)
             elif child.nodeName == "int1":
                 self.int1 = int(child.firstChild.data)
             elif child.nodeName == "int2":
                 self.int2 = int(child.firstChild.data)
+            elif child.nodeName == "int3":
+                self.int3 = int(child.firstChild.data)
     
         
 def convertUIToXML(uiFilename, textFilename):
@@ -941,7 +982,7 @@ def convertUIToXML(uiFilename, textFilename):
         return
     versionNumber = int(versionString[7:10])
 
-    if versionNumber not in [32, 33, 39]:
+    if versionNumber not in [32, 33, 39, 43]:
       print("Version %d not supported" % versionNumber)
       return
     

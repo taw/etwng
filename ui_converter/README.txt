@@ -39,3 +39,9 @@ Depending on version of ui layout file you want to convert do one of the followi
 
 $ python3.1 convert_ui.py -u uifile uifile.xml
 $ python3.1 convert_ui.py -x uifile.xml uifile
+
+== S2TW Support ==
+
+I added support for some S2TW files.
+
+For now only Version043 is supported, that's 3 files total, but it's important first step.

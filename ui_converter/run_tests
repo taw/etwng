@@ -27,6 +27,7 @@ class RunAllTests
     # when 'Version039', 'Version033', 'Version032'
       puts "Conversion of #{source} to #{xml}"
       return 'ui->xml fail' unless system "./convert_ui.py", "-u", source, xml
+      return 'ui->xml fail' unless File.exist?(xml)
       
       puts "Conversion of #{xml} back to #{out}"
       return 'xml->ui fail' unless system "./convert_ui.py", "-x", xml, out
