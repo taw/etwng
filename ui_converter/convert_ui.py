@@ -66,9 +66,14 @@ class TypeCastWriter(io.BufferedWriter):
     def writeASCII(self,arg):
         self.writeUShort(len(arg))
         self.write(arg.encode("ascii"))
-        
-        
-class uiEntry:
+
+class debuggable_converter:
+  def indented_print(self, str, handle):
+    print("%s%s (%x)" % (" "*self.indent, str, handle.tell()))
+  def debug(self, name, handle):
+    print("%s%s.%s=%s (%x)" % (" "*self.indent, type(self).__name__, name, self.__dict__[name], handle.tell()))
+
+class uiEntry(debuggable_converter):
     def __init__(self, version, indent):
         self.version = version
         self.indent = indent
@@ -421,7 +426,7 @@ class uiEntry:
                 if len(child.childNodes) > 0:
                     self.template = child.firstChild.data
                         
-class tgaEntry:
+class tgaEntry(debuggable_converter):
     def __init__(self, version, indent):
         self.version = version
         self.indent = indent
@@ -478,7 +483,7 @@ class tgaEntry:
             elif child.nodeName == "int1":
                 self.int1 = int(child.firstChild.data)
 
-class tgaUse:
+class tgaUse(debuggable_converter):
     def __init__(self, version, indent):
         self.version = version
         self.indent = indent
@@ -606,7 +611,7 @@ class tgaUse:
             elif child.nodeName == "int3":
                 self.int3 = int(child.firstChild.data)
 
-class state:
+class state(debuggable_converter):
     def __init__(self, version, indent):
         self.version = version
         self.indent = indent
@@ -894,7 +899,7 @@ class state:
                         atransition.constructFromNode(transitionNode)
                         self.transitions.append(atransition)
 
-class transition:
+class transition(debuggable_converter):
     def __init__(self, version, indent):
         self.version = version
         self.indent = indent
