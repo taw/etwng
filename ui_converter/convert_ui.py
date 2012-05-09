@@ -127,6 +127,7 @@ class uiEntry(debuggable_converter):
         
         # after the last child follows a template string
         self.template = "" #ascii
+        self.flag5 = 0
         
     def readFrom(self, handle):
         """
@@ -201,6 +202,8 @@ class uiEntry(debuggable_converter):
             self.children.append(child)
         
         self.template = handle.readASCII()
+        if self.version >= 44:
+          self.flag5 = handle.readByte()
     
     def writeTo(self, handle):
         """
@@ -267,6 +270,9 @@ class uiEntry(debuggable_converter):
             child.writeTo(handle)
             
         handle.writeASCII(self.template)
+        
+        if self.version >= 44:
+          handle.writeByte(self.flag5)
 
     def writeToXML(self, handle):
         """
@@ -325,7 +331,10 @@ class uiEntry(debuggable_converter):
         for child in self.children:
             child.writeToXML(handle)
         
-        handle.write("%(indent+1)s</children>\n%(indent+1)s<template>%(template)s</template>\n%(indent)s</uiEntry>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "template": self.template})
+        handle.write("""%(indent+1)s</children>
+%(indent+1)s<template>%(template)s</template>
+%(indent+1)s<flag5>%(flag5)i</flag5>
+%(indent)s</uiEntry>\n"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "flag5": self.flag5, "template": self.template})
         
     def constructFromNode(self, node):
         """
@@ -354,6 +363,8 @@ class uiEntry(debuggable_converter):
                 self.flag2 = int(child.firstChild.data)
             elif child.nodeName == "flag3":
                 self.flag3 = int(child.firstChild.data)
+            elif child.nodeName == "flag5":
+                self.flag5 = int(child.firstChild.data)
             elif child.nodeName == "flag11":
                 self.flag11 = int(child.firstChild.data)
             elif child.nodeName == "flag12":
@@ -987,7 +998,7 @@ def convertUIToXML(uiFilename, textFilename):
         return
     versionNumber = int(versionString[7:10])
 
-    if versionNumber not in [32, 33, 39, 43]:
+    if versionNumber not in [32, 33, 39, 43, 44]:
       print("Version %d not supported" % versionNumber)
       return
     
