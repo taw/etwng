@@ -44,4 +44,6 @@ $ python3.1 convert_ui.py -x uifile.xml uifile
 
 I added support for some S2TW files.
 
-For now only Version043 is supported, that's 3 files total, but it's important first step.
+All files Version039-Version049 are supported, and some of Version050 files.
+
+Version051, Version052, and Version054 files are not supported.

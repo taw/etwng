@@ -125,7 +125,7 @@ class uiEntry(debuggable_converter):
         self.eventsEnd = "" #ascii
         
         self.int27 = 0
-        self.int28 = 0
+        self.int28 = 0 # number of mysterious entries
         self.numChildren = 0
         self.children = []
         
@@ -191,7 +191,11 @@ class uiEntry(debuggable_converter):
             self.states.append(newstate)
 
         self.int26 = handle.readInt()
-        
+
+        # In version 51 there's sometimes a mystery byte 00 here,
+        # and sometimes there isn't.
+        # (as far as I can tell)
+
         ev = handle.readASCII()
         while ev != "events_end":
             self.events.append(ev)
@@ -218,6 +222,7 @@ class uiEntry(debuggable_converter):
             self.children.append(child)
         
         self.template = handle.readASCII()
+    
         if self.version >= 44:
           self.flag5 = handle.readByte()
         if self.version >= 49:
@@ -300,6 +305,7 @@ class uiEntry(debuggable_converter):
 
         if self.version >= 49:
           handle.writeASCII(self.string10)
+
     def writeToXML(self, handle):
         """
         Writes to a text file handle
@@ -738,6 +744,8 @@ class state(debuggable_converter):
             trans = transition(self.version, self.indent + 2)
             trans.readFrom(handle)
             self.transitions.append(trans)
+
+
     
     def writeTo(self, handle):
         """
