@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+require "pp"
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input_dir output.farm_fields_tile_texture"
+  exit 1
+end
+
+def load_fftt_dir(path)
+  dataht = {}
+  Pathname(path).children.each{|file|
+    if file.basename.to_s =~ /\A(\d+)([ab])\.jpg\z/
+      pairid, fileid = $1.to_i, $2 == "a" ? 0 : 1
+      dataht[pairid] ||= [nil, nil]
+      raise "Multiplie files for #{$1.to_i} #{$2}" if dataht[pairid][fileid]
+      dataht[pairid][fileid] = file.open('rb'){|fh| fh.read}
+    else
+      raise "No idea what to do with file #{file}"
+    end
+  }
+  data = (1..dataht.size).map{|i|
+    val = dataht.delete(i) or raise "Files #{i}a.jpg / #{i}b.jpg expected" 
+    raise "File #{i}a.jpg expected" unless val[0]
+    raise "File #{i}b.jpg expected" unless val[1]
+    val
+  }
+  raise "Extra files found: #{dataht.keys.sort.join(" ")}" unless dataht.empty?
+  data
+end
+
+def save_fftt(preheader, data)
+  data = data.map{|a,b| [a.size, b.size].pack("VV") + a + b }
+  stream = ""
+  ofs = 8 + preheader.size + 4 * data.size
+  stream << preheader
+  stream << [data.size].pack("V")
+  stream << [ofs].pack("V")
+  data.each{|part| stream << [ofs += part.size].pack("V") }
+  data.each{|part| stream << part }
+  stream
+end
+
+input_dir, output_file = *ARGV
+stream = save_fftt("\x01", load_fftt_dir(input_dir))
+File.open(output_file, 'wb'){|fh| fh.write stream}

@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+def save_obj(path_prefix, data)
+  File.open(path_prefix+"a.jpg", "wb"){|fh| fh.write data[0]}
+  File.open(path_prefix+"b.jpg", "wb"){|fh| fh.write data[1]}
+end
+
+def save_fftt(output_dir, data)
+  FileUtils.mkdir_p(output_dir)
+  data.each_with_index{|obj,i|
+    save_obj("%s/%04d" % [output_dir, i+1], obj)
+  }
+end
+
+def parse_fftt(input_path)
+  data = File.open(input_path, 'rb').read
+  v1, hcnt, = data.unpack("CV")
+  ofs = data[5, 4 + hcnt*4].unpack("V*")
+  raise "Input file has incorrect headers" unless v1 == 1 and ofs[0] == 4*hcnt+9 and ofs[-1] == data.size
+  (0...hcnt).map{|i|
+    part = data[ofs[i]...ofs[i+1]]
+    sza,szb = part.unpack("VV")
+    raise "Part #{i} is of unknown kind" unless sza+szb+8 == part.size
+    [part[8,sza], part[8+sza,szb]]
+  }
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input.farm_fields_tile_texture output_dir"
+  exit 1
+end
+
+input_file, output_dir = *ARGV
+
+if File.exist?(output_dir)
+  STDERR.puts "Already exists: #{output_dir}, please move it and try again"
+  exit 1
+end
+
+save_fftt(output_dir, parse_fftt(input_file))
