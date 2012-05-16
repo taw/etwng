@@ -8,7 +8,9 @@ def save_obj(path_prefix, data)
 end
 
 def save_fftt(output_dir, data)
+  type, data = *data
   FileUtils.mkdir_p(output_dir)
+  File.open("%s/type.txt" % output_dir, 'wb'){|fh| fh.puts type} if type
   data.each_with_index{|obj,i|
     save_obj("%s/%04d" % [output_dir, i+1], obj)
   }
@@ -18,13 +20,20 @@ def parse_fftt(input_path)
   data = File.open(input_path, 'rb').read
   hcnt, = data.unpack("V")
   ofs = data[4, 4 + hcnt*4].unpack("V*")
-  raise "Input file has incorrect headers" unless ofs[0] == 4*hcnt+8 and ofs[-1] == data.size
-  (0...hcnt).map{|i|
+  if ofs[0] == 4*hcnt+8 and ofs[-1] == data.size
+    type = nil
+  else
+    type, hcnt = data.unpack("CV")
+    ofs = data[5, 4 + hcnt*4].unpack("V*")
+    raise "Input file has incorrect headers" unless ofs[0] == 4*hcnt+9 and ofs[-1] == data.size
+  end
+  files = (0...hcnt).map{|i|
     part = data[ofs[i]...ofs[i+1]]
     sza,szb = part.unpack("VV")
     raise "Part #{i} is of unknown kind" unless sza+szb+8 == part.size
     [part[8,sza], part[8+sza,szb]]
   }
+  [type, files]
 end
 
 unless ARGV.size == 2

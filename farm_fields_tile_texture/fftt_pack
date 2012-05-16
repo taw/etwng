@@ -10,12 +10,15 @@ end
 
 def load_fftt_dir(path)
   dataht = {}
+  type = nil
   Pathname(path).children.each{|file|
     if file.basename.to_s =~ /\A(\d+)([ab])\.jpg\z/
       pairid, fileid = $1.to_i, $2 == "a" ? 0 : 1
       dataht[pairid] ||= [nil, nil]
       raise "Multiplie files for #{$1.to_i} #{$2}" if dataht[pairid][fileid]
       dataht[pairid][fileid] = file.open('rb'){|fh| fh.read}
+    elsif file.basename.to_s == "type.txt"
+      type = file.open('rb'){|fh| fh.read}.to_i
     else
       raise "No idea what to do with file #{file}"
     end
@@ -27,11 +30,12 @@ def load_fftt_dir(path)
     val
   }
   raise "Extra files found: #{dataht.keys.sort.join(" ")}" unless dataht.empty?
-  data
+  [type, data]
 end
 
-def save_fftt(preheader, data)
+def save_fftt(type, data)
   data = data.map{|a,b| [a.size, b.size].pack("VV") + a + b }
+  preheader = type ? [type].pack("C") : ""
   stream = ""
   ofs = 8 + preheader.size + 4 * data.size
   stream << preheader
@@ -43,5 +47,5 @@ def save_fftt(preheader, data)
 end
 
 input_dir, output_file = *ARGV
-stream = save_fftt("", load_fftt_dir(input_dir))
+stream = save_fftt(*load_fftt_dir(input_dir))
 File.open(output_file, 'wb'){|fh| fh.write stream}
