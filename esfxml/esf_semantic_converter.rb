@@ -1059,10 +1059,14 @@ end
     attrs2 = parse_path_id(path_id)
     vertex_index = b & 0x3FFFFF
     
-    vertex_path = @vertices_ary_lookup_table[vertex_index]
-    vertex_path = vertex_path ? vertex_path.join("; ") : "no such path"
+    if @vertices_ary_lookup_table
+      vertex_path = @vertices_ary_lookup_table[vertex_index]
+      vertex_path = vertex_path ? vertex_path.join("; ") : "no such path"
+      out!(%Q[<boundaries %s %s vertex_index="%d"/><!-- %s -->] % [attrs,attrs2,vertex_index,vertex_path])
+    else
+      out!(%Q[<boundaries %s %s vertex_index="%d"/>] % [attrs,attrs2,vertex_index])
+    end
     
-    out!(%Q[<boundaries %s %s vertex_index="%d"/><!-- %s -->] % [attrs,attrs2,vertex_index,vertex_path])
   end
   
   def convert_rec_FORT
