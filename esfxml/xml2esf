@@ -157,6 +157,17 @@ module XmlTagHandlers
   
   
   ## Semantic data types - pathfinding.esf
+  def on_text_node_cell_id_coords(attributes, buf, ctx)
+    data_in = buf.strip.split(/[\s=,]+/).map(&:to_i)
+    data = []
+    until data_in.empty?
+      row, col, cell_id = data_in.shift(3)
+      data << (row << 16) + col
+      data << cell_id
+    end
+    @esf.put_u4_ary data
+  end
+  
   def on_empty_node_boundaries(attributes, buf, ctx)
     path_id = attributes[:path_id].to_i
     vertex_index = attributes[:vertex_index].to_i

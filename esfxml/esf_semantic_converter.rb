@@ -978,11 +978,14 @@ end
         out!("</grid_paths>")
       elsif i == 5 and @data[ofs] == 0x48
         v = get_value![1].unpack("V*")
-        out!("<u4_ary>")
+        out!("<cell_id_coords>")
         until v.empty?
-          out!(" #{v.shift} #{v.shift}")
+          rc = v.shift
+          row, col = rc>>16, rc & 0xffff
+          cell_id = v.shift
+          out!(" #{row},#{col}=#{cell_id}")
         end
-        out!("</u4_ary>")
+        out!("</cell_id_coords>")
       end
     end
   end
