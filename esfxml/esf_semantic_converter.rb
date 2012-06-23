@@ -939,8 +939,8 @@ end
 
     out!("<obstacle_boundaries>")
     recs.each do |pairs, id|
-      idhex = "%04x:%04x" % [id >> 16, id & 0xFFFF]
-      out!(" <obstacle_boundaries_entry id=\"#{id} (#{idhex})\">")
+      row, col = id >> 16, id & 0xFFFF
+      out!(%Q[ <obstacle_boundaries_entry row="#{row}" col="#{col}">])
       pairs.each do |a,b|
         out!("  #{a} #{b}")
       end
@@ -953,7 +953,7 @@ end
     each_rec_member("PATHFINDING_GRID") do |ofs_end, i|
       if i == 0 and @data[ofs] == 0x08
         v = get_value![1]
-        out!("<u>#{v}</u><!-- number of cells -->")
+        out!("<u>#{v}</u><!-- grid_paths -->")
       elsif i == 1 and @data[ofs] == 0x48
         v = get_value![1].unpack("l*")
         parts = []

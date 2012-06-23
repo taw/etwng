@@ -281,9 +281,10 @@ module XmlTagHandlers
   end
 
   def on_end_node_obstacle_boundaries_entry(attributes, buf, ctx)
-    id = attributes[:id].to_i
+    row = attributes[:row].to_i
+    col = attributes[:col].to_i
     pairs = buf.strip.split(/[\s,]+/).map(&:to_i)
-    @stack[-1][3][:data] << [pairs.size/2].pack("V") << pairs.pack("V*") << [id, 0].pack("VV")
+    @stack[-1][3][:data] << [pairs.size/2].pack("V") << pairs.pack("V*") << [(row<<16) + col, 0].pack("VV")
   end
 
   def on_end_node_grid_paths(attributes, buf, ctx)
