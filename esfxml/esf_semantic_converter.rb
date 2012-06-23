@@ -939,7 +939,8 @@ end
 
     out!("<obstacle_boundaries>")
     recs.each do |pairs, id|
-      out!(" <obstacle_boundaries_entry id=\"#{id}\">")
+      idhex = "%04x:%04x" % [id >> 16, id & 0xFFFF]
+      out!(" <obstacle_boundaries_entry id=\"#{id} (#{idhex})\">")
       pairs.each do |a,b|
         out!("  #{a} #{b}")
       end
