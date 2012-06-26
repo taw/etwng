@@ -1105,10 +1105,6 @@ end
     end
   end
   
-  def convert_rec_SIEGEABLE_GARRISON_RESIDENCE
-    autoconvert_v2x "SIEGEABLE_GARRISON_RESIDENCE", 10
-  end
-  
   def convert_rec_CAI_BDI_COMPONENT_PROPERTY_SET
     autoconvert_v2x "CAI_BDI_COMPONENT_PROPERTY_SET", 10, 13
   end
@@ -1252,7 +1248,9 @@ end
   def convert_rec_REGION
     annotate_rec("REGION",
       [:s, 0] => "name",
-      [:i, 4] => "region id"
+      [:i, 4] => "Region Number",
+      [:u, 19] => "Faction Number",
+      [:u, 21] => "Governor Number"
     )
   end
   
@@ -1402,10 +1400,12 @@ end
     )
   end
 
+  # FIXME: v2x + annotations
   def convert_rec_SIEGEABLE_GARRISON_RESIDENCE
-    annotate_rec("SIEGEABLE_GARRISON_RESIDENCE",
-      [:u, 1] => "slot id [?]"
-    )
+    autoconvert_v2x "SIEGEABLE_GARRISON_RESIDENCE", 10
+    # annotate_rec("SIEGEABLE_GARRISON_RESIDENCE",
+    #   [:u, 1] => "slot id [?]"
+    # )
   end
   
   def convert_rec_CAI_WORLD_BUILDING_SLOTS
