@@ -1199,7 +1199,7 @@ end
   
   def convert_rec_FACTION_TECHNOLOGY_MANAGER
     annotate_rec "FACTION_TECHNOLOGY_MANAGER",
-      [:i, 1] => "tech tree id"
+      [:i, 1] => "technology number"
   end
   
   def convert_rec_REBEL_SETUP
@@ -1247,7 +1247,7 @@ end
   def convert_rec_MILITARY_FORCE
     annotate_rec("MILITARY_FORCE", 
       [:u, 0] => "general character id [?]",
-      [:u, 1] => "commander id"
+      [:u, 1] => "Character Number"
     )
   end
 
@@ -1257,18 +1257,78 @@ end
     )
   end
 
+  def convert_rec_CAI_WORLD_UNITS
+    annotate_rec("CAI_WORLD_UNITS",
+      [:u, 1] => "Unit ID",
+      [:u_ary, 9] => "BDI information",
+      [:u_ary, 13] => "BDI information",
+      [:u_ary, 20] => "BDI information"
+    )
+  end
+
   def convert_rec_CAI_UNIT
     annotate_rec("CAI_UNIT", 
-      [:u, 1] => "unit id"
+      [:u, 0] => "Character ID",
+      [:u, 1] => "Unit Number",
+      [:u, 2] => "Resource ID"
+    )
+  end
+  
+  def convert_rec_CAI_WORLD_TRADING_POSTS
+    annotate_rec("CAI_WORLD_TRADING_POSTS",
+      [:u, 1] => "Trade Post ID",
+      [:u_ary, 20] => "BDI information"
+    )
+  end
+  
+  def convert_rec_CAI_GARRISONABLE
+    annotate_rec("CAI_GARRISONABLE",
+      [:u, 0] => "Resource ID",
+      [:u, 2] => "Resource ID"
+    )
+  end
+  
+  def convert_rec_CAI_FACTION_LEARNT_PARAMETERS_INFO
+    annotate_rec("CAI_FACTION_LEARNT_PARAMETERS_INFO",
+      [:u, 0] => "Faction ID"
     )
   end
   
   def convert_rec_CAI_REGION
     annotate_rec("CAI_REGION",
-      [:u, 2] => "cai region id",
+      [:u_ary, 0] => "Theatre ID",
+      [:u_ary, 1] => "HLCIS ID",
+      [:u, 2] => "Settlement ID",
+      [:u_ary, 3] => "Region Slot IDs of region_slots in this region",
+      [:flt, 4] => "X coordinate",
+      [:flt, 5] => "Y coordinate",
+      [:u_ary, 7] => "Boundary ID",
       [:s, 10] => "name",
-      [:u, 11] => "region id",
-      [:u, 12] => "cai faction-related-something id [wild guess ???]"
+      [:u, 11] => "Region Number",
+      [:u_ary, 13] => "Faction ID"
+    )
+  end
+  
+  def convert_rec_CAI_WORLD_REGIONS
+    annotate_rec("CAI_WORLD_REGIONS",
+      [:u, 2] => "Region ID",
+      [:u_ary, 10] => "BDI information",
+      [:u_ary, 14] => "BDI information",
+      [:u_ary, 21] => "BDI information"
+    )
+  end
+  
+  def convert_rec_CAI_REGION_BOUNDARY
+    annotate_rec("CAI_REGION_BOUNDARY",
+      [:u, 0] => "Region ID A",
+      [:u, 1] => "Region ID 2",
+      [:flt, 2] => "Distance between Region ID A and Region ID B"
+    )
+  end
+
+  def convert_rec_CAI_WORLD_REGION_BOUNDARIES
+    annotate_rec("CAI_WORLD_REGION_BOUNDARIES",
+      [:u, 1] => "Boundary ID"
     )
   end
   
@@ -1290,9 +1350,42 @@ end
     )
   end
   
+  def convert_rec_CAI_WORLD_BUILDING_SLOTS
+    annotate_rec("CAI_WORLD_BUILDING_SLOTS",
+      [:u, 1] => "Building ID",
+      [:u_ary, 9] => "BDI information",
+      [:u, 11] => "0 = unemerged, 1 = emerged",
+      [:u_ary, 13] => "BDI information",
+      [:u_ary, 20] => "BDI information"
+    )
+  end
+  
+  def convert_rec_CAI_CHARACTER
+    annotate_rec("CAI_CHARACTER",
+      [:u, 0] => "Resource ID",
+      [:u, 1] => "Unit ID",
+      [:u, 2] => "Resource ID",
+      [:u, 3] => "Character Number"
+    )
+  end
+  
+  def convert_rec_CAI_WORLD_CHARACTERS
+    annotate_rec("CAI_WORLD_CHARACTERS",
+      [:u, 2] => "Character ID"
+    )
+  end
+  
+  def convert_rec_CAI_WORLD_TECHNOLOGY_TREES
+    annotate_rec("CAI_WORLD_TECHNOLOGY_TREES",
+      [:u, 1] => "Technology ID"
+    )
+  end
+  
   def convert_rec_CAI_BUILDING_SLOT
     annotate_rec("CAI_BUILDING_SLOT",
-      [:u, 0] => "slot id [?]"
+      [:u, 0] => "Building Number",
+      [:u, 1] => "Bulding type: 0 = settlement, 1 = wall/road, 2 = town, 3 = port, 4 = mine, 5 = farm, 6 = trade resource, 7 = multiple trade resources", 
+      [:u, 2] => "Settlement ID"
     )
   end
   
@@ -1308,6 +1401,14 @@ end
       [:u, 0] => "goverorship id [???]",
       [:u, 1] => "governorship theatre id [???]",
       [:u, 2] => "governorship cai id [???]"
+    )
+  end
+  
+  def convert_rec_REGION_FACTORS
+    annotate_rec("REGION_FACTORS",
+      [:u, 2] => "Lower class population",
+      [:u, 3] => "Middle class population",
+      [:u, 4] => "Upper class population"
     )
   end
   
@@ -1433,7 +1534,7 @@ end
 
   def convert_rec_CAI_TECHNOLOGY_TREE
     data, = get_rec_contents(:u)
-    out!("<cai_technology_tree>#{data}</cai_technology_tree><!-- tech tree id -->")
+    out!("<cai_technology_tree>#{data}</cai_technology_tree><!-- technology number -->")
   end
   
   def convert_rec_RandSeed
@@ -1650,19 +1751,34 @@ end
       end
     end
   end
+
+  def convert_rec_CHARACTER_DETAILS
+    annotate_rec("CHARACTER_DETAILS",
+      [:u, 10] => "Character Number"
+    )
+  end
   
   def convert_rec_CHARACTER
     each_rec_member_nth_by_type("CHARACTER") do |ofs_end, i|
-      if i == 0 and @data[@ofs] == 0x48
-        data = get_value![1].unpack("l*").map{|u| u * (0.5**20) }
-        if data.empty?
-          out!("<v2x_ary/>")
-        else
-          out!("<v2x_ary>")
-          until data.empty?
-            out!(" #{data.shift},#{data.shift}")
+      case [i, lookahead_type]
+      when [0, :i]
+        annotate_value!("Character Number")
+      when [0, :u]
+        annotate_value!("Resource Number")
+      when [1, :u]
+        annotate_value!("Unit Number")
+      else
+        if i == 0 and @data[@ofs] == 0x48
+          data = get_value![1].unpack("l*").map{|u| u * (0.5**20) }
+          if data.empty?
+            out!("<v2x_ary/>")
+          else
+            out!("<v2x_ary>")
+            until data.empty?
+              out!(" #{data.shift},#{data.shift}")
+            end
+            out!("</v2x_ary>")
           end
-          out!("</v2x_ary>")
         end
       end
     end
