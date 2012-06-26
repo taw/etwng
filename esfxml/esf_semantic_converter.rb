@@ -181,6 +181,30 @@ end
     out_ary!("unit_list", "", data.map{|name| " #{name.xml_escape}" })
   end
 
+  def convert_rec_CAI_BDI_COMPONENT_BLOCK_OWNS
+    annotate_rec("CAI_BDI_COMPONENT_BLOCK_OWNS",
+      [:u, 0] => "BDI information",
+      [:u, 1] => "Resource ID"
+    )
+  end
+  
+  def convert_rec_CAI_WORLD_REGION_HLCIS
+    annotate_rec("CAI_WORLD_REGION_HLCIS",
+      [:u, 1] => "HLCIS ID"
+    )
+  end
+  
+  def convert_rec_CAI_WORLD_RESOURCE_MOBILES
+    annotate_rec("CAI_WORLD_RESOURCE_MOBILES",
+      [:u, 3] => "Resource ID",
+      [:u_ary, 11] => "BDI information",
+      [:u, 13] => "HLCIS ID",
+      [:u_ary, 15] => "BDI information",
+      [:u_ary, 19] => "BDI information",
+      [:u_ary, 22] => "BDI information"
+    )
+  end
+
   def convert_ary_CAI_HISTORY_EVENT_HTML_CLASSES
     data = get_ary_contents(:asc).flatten
     raise SemanticFail.new if data.any?{|name| name =~ /\s/}
@@ -1106,6 +1130,16 @@ end
       [:u, 0] => "route id"
   end
 
+  def convert_rec_CAI_WORLD_FACTIONS
+    annotate_rec("CAI_WORLD_FACTIONS",
+      [:u, 2] => "Faction ID",
+      [:u_ary, 10] => "BDI information",
+      [:u, 12] => "HLCIS ID",
+      [:u_ary, 14] => "BDI information",
+      [:u_ary, 21] => "BDI information"
+    )
+  end
+
   def convert_rec_INTERNATIONAL_TRADE_ROUTE
     cnt = nil
     is_sea = nil
@@ -1284,12 +1318,18 @@ end
   def convert_rec_CAI_GARRISONABLE
     annotate_rec("CAI_GARRISONABLE",
       [:u, 0] => "Resource ID",
-      [:u, 2] => "Resource ID"
+      [:u_ary, 2] => "Resource ID"
     )
   end
   
-  def convert_rec_CAI_FACTION_LEARNT_PARAMETERS_INFO
-    annotate_rec("CAI_FACTION_LEARNT_PARAMETERS_INFO",
+  def convert_rec_CAI_FACTION_BDI_POOL
+    annotate_rec("CAI_FACTION_BDI_POOL",
+      [:u, 2] => "All these u records are BDI information"
+    )
+  end
+  
+  def convert_rec_CAI_FACTION_MANAGER
+    annotate_rec("CAI_FACTION_MANAGER",
       [:u, 0] => "Faction ID"
     )
   end
@@ -1306,6 +1346,22 @@ end
       [:s, 10] => "name",
       [:u, 11] => "Region Number",
       [:u_ary, 13] => "Faction ID"
+    )
+  end
+  
+  def convert_rec_CAMPAIGN_PLAYER_SETUP
+    annotate_rec("CAMPAIGN_PLAYER_SETUP",
+      [:bool, 4] => "yes = playable, no = non-playable"
+    )
+  end
+  
+  def convert_rec_CAI_RESOURCE_MOBILE
+    annotate_rec("CAI_RESOURCE_MOBILE",
+      [:u, 0] => "Character ID",
+      [:u_ary, 4] => "Character ID",
+      [:u_ary, 5] => "Unit ID",
+      [:u, 10] => "Resource Number",
+      [:u_ary, 15] => "Sea Grid ID"
     )
   end
   
@@ -1340,7 +1396,9 @@ end
   
   def convert_rec_CAI_SETTLEMENT
     annotate_rec("CAI_SETTLEMENT",
-      [:u, 2] => "settlement id [?]"
+      [:u_ary, 0] => "Building_slot ID",
+      [:u, 1] => "Faction ID",
+      [:u, 2] => "Settlement Number"
     )
   end
 
@@ -1377,7 +1435,8 @@ end
   
   def convert_rec_CAI_WORLD_TECHNOLOGY_TREES
     annotate_rec("CAI_WORLD_TECHNOLOGY_TREES",
-      [:u, 1] => "Technology ID"
+      [:u, 1] => "Technology ID",
+      [:u_ary, 20] => "BDI information"
     )
   end
   
@@ -1389,18 +1448,43 @@ end
     )
   end
   
+  def convert_rec_CAI_FACTION_LEARNT_PARAMETERS_INFO
+    annotate_rec("CAI_FACTION_LEARNT_PARAMETERS_INFO",
+      [:u, 0] => "Faction ID"
+    )
+  end
+  
   def convert_rec_CAI_FACTION
     annotate_rec("CAI_FACTION",
-      [:u, 5] => "cai faction id [???]",
-      [:u, 6] => "faction id"
+      [:u_ary, 0] => "Region ID of regions owned by this faction",
+      [:u_ary, 1] => "Theatre ID",
+      [:u_ary, 2] => "HLCIS ID",
+      [:u_ary, 3] => "Resource ID",
+      [:u_ary, 4] => "Character ID",
+      [:u, 5] => "Region ID of capital",
+      [:u, 6] => "faction id",
+      [:u, 9] => "Technology ID",
+      [:u_ary, 10] => "Governor ID",
+      [:u_ary, 31] => "BDI information",
+      [:u, 36] => "Region ID of capital",
+      [:u_ary, 37] => "Region ID of faction's needed for victory conditions"
+    )
+  end
+  
+  def convert_rec_CAI_WORLD_GOVERNORSHIPS
+    annotate_rec("CAI_WORLD_GOVERNORSHIPS",
+      [:u, 1] => "Governor ID",
+      [:u_ary, 9] => "BDI information",
+      [:u_ary, 13] => "BDI information"
     )
   end
   
   def convert_rec_CAI_GOVERNORSHIP
     annotate_rec("CAI_GOVERNORSHIP",
-      [:u, 0] => "goverorship id [???]",
-      [:u, 1] => "governorship theatre id [???]",
-      [:u, 2] => "governorship cai id [???]"
+      [:u, 0] => "Governor Number",
+      [:u, 1] => "Theatre ID",
+      [:u, 2] => "Character ID",
+      [:u_ary, 3] => "Region ID of regions controlled by this Governor"
     )
   end
   
@@ -1501,7 +1585,7 @@ end
     x *= 0.5**20
     y *= 0.5**20
     c = c.unpack("V*").join(" ")
-    out!(%Q[<cai_region_hlci a="#{a}" b="#{b}" c="#{c}" x="#{x}" y="#{y}"/>])
+    out!(%Q[<cai_region_hlci region_id="#{a}" area_id="#{b}" area="#{c}" x="#{x}" y="#{y}"/><!-- area (0 = first area in this region, 1 = second area in this region) -->])
   end
 
   def convert_rec_CAI_TRADING_POST
@@ -1516,7 +1600,7 @@ end
     x *= 0.5**20
     y *= 0.5**20
     b = b.unpack("V*").join(" ")
-    out!(%Q[<cai_situated x="#{x}" y="#{y}" a="#{a}" b="#{b}" c="#{c}"/>])
+    out!(%Q[<cai_situated x="#{x}" y="#{y}" region_id="#{a}" theatre_id="#{b}" area_id="#{c}"/>])
   end
     
   def convert_rec_THEATRE_TRANSITION_INFO
@@ -1530,6 +1614,15 @@ end
     else
       raise SemanticFail.new
     end
+  end
+
+  def convert_rec_CAI_WORLD_SETTLEMENTS
+    annotate_rec("CAI_WORLD_SETTLEMENTS",
+      [:u, 3] => "Settlement ID",
+      [:u_ary, 11] => "BDI information",
+      [:u_ary, 15] => "BDI information",
+      [:u_ary, 22] => "BDI information"
+    )
   end
 
   def convert_rec_CAI_TECHNOLOGY_TREE
