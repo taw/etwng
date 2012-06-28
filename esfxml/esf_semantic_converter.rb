@@ -966,7 +966,9 @@ end
       row, col = id >> 16, id & 0xFFFF
       out!(%Q[ <obstacle_boundaries_entry row="#{row}" col="#{col}">])
       pairs.each do |a,b|
-        out!("  #{a} #{b}")
+        ax = "%08x" % a
+        bx = "%08x" % b
+        out!("  #{a} #{b} <!-- #{ax} #{bx} -->")
       end
       out!( " </obstacle_boundaries_entry>")
     end
