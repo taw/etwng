@@ -1100,10 +1100,14 @@ end
   end
   
   def convert_rec_FORT
-    tag!("rec", :type => "FORT") do
-      ofs_end = get_ofs_end
-      convert_v2x! if lookahead_v2x?(ofs_end)
-      send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
+    each_rec_member("FORT") do |ofs_end, i|
+      if i == 0 and lookahead_v2x?(ofs_end)
+        convert_v2x!
+      elsif i == 4 and lookahead_type == :i
+        annotate_value!("Fort Number")
+      elsif i == 5 and lookahead_type == :i
+        annotate_value!("Faction Number")
+      end
     end
   end
   
@@ -1257,11 +1261,26 @@ end
   end
   
   def convert_rec_REGION_SLOT
-    annotate_rec("REGION_SLOT",
-      [:u, 2] => "region slot id [?]",
-      [:s, 3] => "slot name",
-      [:u, 12] => "4294967295 == 0xFFFF_FFFF [?]"
-    )
+    each_rec_member("REGION_SLOT") do |ofs_end, i|
+      if i == 6 and lookahead_v2x?(ofs_end)
+        convert_v2x!
+      else
+        case [lookahead_type, i]
+        when [:u, 2]
+          annotate_value! "Building slot Number"
+        when [:s, 3]
+          annotate_value! "slot name"
+        when [:bool, 9]
+          annotate_value! "no=unemerged, yes=emerged (town/ports only)"
+        when [:i, 10]
+          annotate_value! "building level (-1=unbuilt, 0=first level, 1=second level etc.)"
+        when [:u, 12]
+          annotate_value! "4294967295 == 0xFFFF_FFFF [?]"
+        when [:u, 13]
+          annotate_value! "Order towns/ports emerge in, 0 = first, 1 = second (town/ports only)"
+        end        
+      end
+    end
   end
   
   def convert_rec_GOVERNMENT
@@ -1402,12 +1421,16 @@ end
     )
   end
 
-  # FIXME: v2x + annotations
   def convert_rec_SIEGEABLE_GARRISON_RESIDENCE
-    autoconvert_v2x "SIEGEABLE_GARRISON_RESIDENCE", 10
-    # annotate_rec("SIEGEABLE_GARRISON_RESIDENCE",
-    #   [:u, 1] => "slot id [?]"
-    # )
+    each_rec_member("SIEGEABLE_GARRISON_RESIDENCE") do |ofs_end, i|
+      if i == 1 and lookahead_type == :u
+        annotate_value!("slot number")
+      elsif i == 10 and lookahead_v2x?(ofs_end)
+        convert_v2x!
+      elsif i == 13 and lookahead_type == :u_ary
+        annotate_value!("Character Number of garrison")
+      end
+    end
   end
   
   def convert_rec_CAI_WORLD_BUILDING_SLOTS
@@ -1558,10 +1581,6 @@ end
     autoconvert_v2x "CAI_BDIM_SIEGE_SH", 5
   end
   
-  def convert_rec_REGION_SLOT
-    autoconvert_v2x "REGION_SLOT", 6
-  end
-  
   def convert_rec_CAI_HLPP_INFO
     autoconvert_v2x "CAI_HLPP_INFO", 1
   end
@@ -1616,6 +1635,14 @@ end
     else
       raise SemanticFail.new
     end
+  end
+
+  def convert_rec_SETTLEMENT
+    annotate_rec("SETTLEMENT",
+      [:s, 3] => "DB table campaign_map_settlements",
+      [:i, 4] => "Settlement Number",
+      [:s, 5] => "DB table campaign_map_settlements"
+    )
   end
 
   def convert_rec_CAI_WORLD_SETTLEMENTS
