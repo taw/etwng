@@ -212,6 +212,28 @@ module XmlTagHandlers
       end
     end
   end
+
+  def on_text_node_BOUNDARIES(attributes, buf, ctx)
+    data = buf.strip.split(/[\s,]+/)
+    ary_data = []
+
+    data.each_slice(2){|a,b|
+      if a == "yes"
+        a = 0x8000_0000
+      elsif a == "no"
+        a = 0x0000_0000
+      else
+        raise "Unrecognized value for a boolean: `#{a}', expected `yes' or `no'"
+      end
+      raise "Unrecognized value for an integer: `#{b}'" unless b=~/\A\d+\z/
+      b = b.to_i
+      ary_data << a+b
+    }
+    
+    put_rec "BOUNDARIES" do
+      @esf.put_4x "\x48", ary_data.pack("V*")
+    end
+  end
   
   def on_empty_node_culture_path(attributes, buf, ctx)
     put_rec "CULTURE_PATHS" do

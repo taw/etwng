@@ -975,6 +975,23 @@ end
     out!("</obstacle_boundaries>")
   end
 
+  def convert_rec_BOUNDARIES
+    data, = get_rec_contents(:bin8)
+    data = data.unpack("V*").map{|x|
+      [(x&0x8000_0000) != 0, x & 0x7FFF_FFFF]
+    }
+    if data.empty?
+      out!("<BOUNDARIES/>")
+    else
+      out!("<BOUNDARIES>")
+      data.each{|a,b|
+        a  = a ? 'yes' : 'no'
+        out!(" #{a},#{b}")
+      }
+      out!("</BOUNDARIES>")
+    end
+  end
+
   def convert_rec_PATHFINDING_GRID
     each_rec_member("PATHFINDING_GRID") do |ofs_end, i|
       if i == 0 and @data[ofs] == 0x08
