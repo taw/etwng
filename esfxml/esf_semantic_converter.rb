@@ -1426,7 +1426,8 @@ end
   
   def convert_rec_CAI_REGION_SLOT
     annotate_rec("CAI_REGION_SLOT",
-      [:u, 1] => "cai region slot id [???]"
+      [:u, 1] => "Building ID",
+      [:bool, 5] => "Yes = port, No = town"
     )
   end
   
@@ -1486,13 +1487,22 @@ end
     annotate_rec("CAI_BUILDING_SLOT",
       [:u, 0] => "Building Number",
       [:u, 1] => "Bulding type: 0 = settlement, 1 = wall/road, 2 = town, 3 = port, 4 = mine, 5 = farm, 6 = trade resource, 7 = multiple trade resources", 
-      [:u, 2] => "Settlement ID"
+      [:u, 2] => "Settlement ID if building is part of the settlement. Region_slot ID if not part of the settlement"
     )
   end
   
   def convert_rec_CAI_FACTION_LEARNT_PARAMETERS_INFO
     annotate_rec("CAI_FACTION_LEARNT_PARAMETERS_INFO",
       [:u, 0] => "Faction ID"
+    )
+  end
+
+  def convert_rec_CAI_WORLD_REGION_SLOTS
+    annotate_rec("CAI_WORLD_REGION_SLOTS",
+      [:u, 3] => "Region Slot ID",
+      [:u_ary, 11] => "BDI information",
+      [:u_ary, 15] => "BDI information",
+      [:u_ary, 22] => "BDI information"
     )
   end
   
