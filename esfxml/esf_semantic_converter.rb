@@ -1427,7 +1427,7 @@ end
   def convert_rec_CAI_REGION_SLOT
     annotate_rec("CAI_REGION_SLOT",
       [:u, 1] => "Building ID",
-      [:bool, 5] => "Yes = port, No = town"
+      [:bool, 5] => "Yes = port, No = town (ports have extra set of coordinates for their sea part following)"
     )
   end
   
