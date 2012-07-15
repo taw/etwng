@@ -47,14 +47,16 @@ class Templates
     record_count = get_u4
     
     record_count.times{|i|
+      init_ofs = @ofs
       # individual records
       name = get_ascii(256)
       # pic = get(244)
       sz = get_u4
       x = get_u4
+      raise "Initial offset incorrect: #{x} != #{init_ofs}" unless x == init_ofs
       data = get(sz)
 
-      path = "out/%08d-%s-%d" % [i+1, name, x]
+      path = "out/%08d-%s" % [i+1, name]
       File.open(path, 'wb'){|fh|
         fh.write(data)
       }
