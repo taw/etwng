@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+
+require "pp"
+require "fileutils"
+
+class Templates
+  attr_accessor :ofs, :data
+  def initialize(path)
+    @data = File.open(path, 'rb', &:read)
+    @ofs = 0
+  end
+  
+  def size
+    @data.size
+  end
+  
+  def get(sz)
+    raise "Trying to read past end of file" if @ofs + sz > @data.size
+    rv = @data[@ofs, sz]
+    @ofs += sz 
+    rv
+  end
+  
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+  
+  def get_asciiz
+    rv = ''
+    while true
+      c = get(1)
+      break if c == "\x00"
+      rv << c
+    end
+    return rv
+  end
+  
+  def get_ascii(n)
+    get(n)[/\A[^\x00]+/]
+  end
+
+  def eof?
+    @ofs == @data.size
+  end
+  
+  def parse!
+    record_count = get_u4
+    
+    record_count.times{|i|
+      # individual records
+      name = get_ascii(256)
+      # pic = get(244)
+      sz = get_u4
+      x = get_u4
+      data = get(sz)
+
+      path = "out/%08d-%s-%d" % [i+1, name, x]
+      File.open(path, 'wb'){|fh|
+        fh.write(data)
+      }
+    }
+    raise "Extra data after end of file" unless eof?
+  end
+end
+
+FileUtils.rm_rf("out")
+FileUtils.mkdir_p("out")
+
+
+file_name = "samples/uied.templates"
+
+Templates.new(file_name).parse!
