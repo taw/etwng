@@ -1,0 +1,133 @@
+#!/usr/bin/env ruby
+
+require "pp"
+require "fileutils"
+
+class File
+  def self.write(path, cnt)
+    File.open(path, 'wb'){|fh| fh.write(cnt)}
+  end
+end
+
+class TRecord
+  attr_accessor :ofs, :data, :path
+  def initialize(path)
+    @path = path
+    @data = File.open(path, 'rb', &:read)
+    @ofs = 0
+  end
+  
+  def size
+    @data.size
+  end
+  
+  def get(sz)
+    raise "Trying to read past end of file" if @ofs + sz > @data.size
+    rv = @data[@ofs, sz]
+    @ofs += sz 
+    rv
+  end
+  
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+
+  def get_i4
+    get(4).unpack("l")[0]
+  end
+
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  
+  def get_byte
+    get(1).unpack("C")[0]
+  end
+  
+  def get_str
+    get(get_u2)
+  end
+  
+  def get_bool
+    v = get_byte
+    if v == 0
+      false
+    elsif v == 1
+      true
+    else
+      raise "Invalid Boolean value #{v}"
+      v
+    end
+  end
+
+  def eof?
+    @ofs == @data.size
+  end
+  
+  def bytes_left
+    @data.size - @ofs
+  end
+  
+  def parse_embedded_tga!
+    save_ofs = @ofs
+    id_len = get_byte
+    raise "Go to hell" if id_len != 0 # The number of bytes that the image ID field consists of. The image ID field can contain any information, but it is common for it to contain the date and time the image was created or a serial number.
+    color_map = get_byte
+    raise "Go to hell" if color_map != 0 # 0 if image file contains no color map
+    image_type = get_byte
+    raise "Go to hell" if image_type != 2 # 2 uncompressed true-color image
+    cmap_spec = get(5) # ignore
+    xorig = get_u2
+    yorig = get_u2
+    xsize = get_u2
+    ysize = get_u2
+    depth = get_byte
+    imgdsc = get_byte
+    
+    raise "Go to hell" unless [depth, imgdsc] == [32, 8]
+    
+    $tga_cnt += 1
+    fname = "tgas/%08d.tga" % $tga_cnt
+    sz = 4*xsize*ysize
+    @ofs += sz
+    File.write(fname, @data[@ofs-18-sz, 18+sz])
+    fname
+  end
+  
+  def parse_subrecord_tga!
+    xx = [get_str, get_u4, get_u4]
+    # tgav = get(xx[-1])
+    xx << "#{bytes_left} bytes left"
+    pp xx
+  end
+
+  def parse!
+    puts "Parsing #{path} of size #{size}"
+    tgas = get_u4
+    tgas.times{|i|
+      puts "tga #{i+1}/#{tgas}:"
+      name = get_str
+      fname = parse_embedded_tga!
+      puts "Tga '#{name}' saved to '#{fname}'"
+    }
+
+    p [:num, get_i4]
+    p [:name, get_str]
+    p [:num, get_i4]
+    p [(0..6).map{ get_byte }]
+    # if xx[-1][0] == true
+    #   xx << get_str
+    # end
+    puts "#{bytes_left} bytes left"
+  end
+end
+
+FileUtils.rm_rf "tgas"
+FileUtils.mkdir_p "tgas"
+$tga_cnt = 0
+
+Dir["out/*"].each{|fn|
+  tr = TRecord.new(fn)
+  tr.parse!
+  puts ""
+}
