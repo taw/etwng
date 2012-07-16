@@ -107,8 +107,12 @@ class TRecord
     p [:name, get_str]
     p [:xofs, get_i4]
     p [:yofs, get_i4]
-    p [:flags, (0..5).map{ get_bool }]
+    p [:has_parent_string, has_parent_name = get_bool]
+    p [:flags, (0..4).map{ get_bool }]
     p [:byte, get_byte]
+    if has_parent_name
+      p [:parent_name, get_str]
+    end
     # if flags[0] == true
     #   p [:str, get_str]
     # end
