@@ -108,14 +108,27 @@ class TRecord
     p [:xofs, get_i4]
     p [:yofs, get_i4]
     p [:has_parent_string, has_parent_name = get_bool]
-    p [:flags, (0..4).map{ get_bool }]
-    p [:byte, get_byte]
+    p [:flags, flags = (0..4).map{ get_bool }]
+    p [:byte0, b0 = get_byte]
     if has_parent_name
       p [:parent_name, get_str]
     end
-    # if flags[0] == true
+    ## This is the last point where we have some clue what's going on, everything after that is a guess
+    
+    p [:short0, s0 = get_u2]
+    @ofs -= 2
+    p [:str0, (get_str rescue nil)]
+
+    # if flags[0]
     #   p [:str, get_str]
     # end
+    # if [b0, flags] == [0, [true, true, true, false, false]]
+    #   p [:xxx, get_str]
+
+    # if [b0, s0, flags] == [0,0,[true, false, true, false, false]]
+    #   p [:xxx, get_str]
+    # end
+
     puts "#{bytes_left} bytes left"
   end
 end

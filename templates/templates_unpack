@@ -25,16 +25,6 @@ class Templates
     get(4).unpack("V")[0]
   end
   
-  def get_asciiz
-    rv = ''
-    while true
-      c = get(1)
-      break if c == "\x00"
-      rv << c
-    end
-    return rv
-  end
-  
   def get_ascii(n)
     get(n)[/\A[^\x00]+/]
   end
