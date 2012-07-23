@@ -93,6 +93,7 @@ module EsfBasicBinaryOps
   end
   def get_flt
     rv = @data[@ofs,4].unpack("f")[0].pretty_single
+    # p rv # this debug print makes poi.esf convert without infinite loop in JRuby
     @ofs += 4
     rv
   end
