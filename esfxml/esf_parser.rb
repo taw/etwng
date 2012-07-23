@@ -92,9 +92,9 @@ module EsfBasicBinaryOps
     rv
   end
   def get_flt
-    rv = @data[@ofs,4].unpack("f")[0]
+    rv = @data[@ofs,4].unpack("f")[0].pretty_single
     @ofs += 4
-    rv.pretty_single
+    rv
   end
   def get_u2
     rv = @data[@ofs,2].unpack("v")[0]
