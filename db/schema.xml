@@ -168,15 +168,15 @@
     <field name='Agent_related_to_religion_type' type='optstring'/>
     <field name='Unknown8' type='int'/>
     <field name='Unknown9' type='int' version_start='2'/>
-    <field name='Recruitment cost' type='int' version_start='5'/>
-    <field name='Voice Selected' type='string' version_start='5'/>
-    <field name='Voice Move Ordered' type='string' version_start='5'/>
-    <field name='Voice Completed' type='string' version_start='5'/>
-    <field name='Voice Move OutofAP' type='string' version_start='5'/>
-    <field name='Voice Move Illegal' type='string' version_start='5'/>
-    <field name='Voice Embark' type='string' version_start='5'/>
-    <field name='Voice Disembark' type='string' version_start='5'/>
-    <field name='Voice Death' type='string' version_start='5'/>
+    <field name='Recruitment_cost' type='int' version_start='5'/>
+    <field name='Voice_Selected' type='string' version_start='5'/>
+    <field name='Voice_Move_Ordered' type='string' version_start='5'/>
+    <field name='Voice_Completed' type='string' version_start='5'/>
+    <field name='Voice_Move_OutofAP' type='string' version_start='5'/>
+    <field name='Voice_Move_Illegal' type='string' version_start='5'/>
+    <field name='Voice_Embark' type='string' version_start='5'/>
+    <field name='Voice_Disembark' type='string' version_start='5'/>
+    <field name='Voice_Death' type='string' version_start='5'/>
   </table>
   <table name='aide_de_camp_speeches_tables'>
     <field name='adc_idref' pk='true' type='string'/>

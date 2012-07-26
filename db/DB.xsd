@@ -168,15 +168,15 @@
     <xs:attribute msprop:Optional='true' name='Agent_related_to_religion_type' type='xs:string' />
     <xs:attribute name='Unknown8' type='xs:int' use='required' />
     <xs:attribute msprop:VersionStart='2' name='Unknown9' type='xs:int' use='required' />
-    <xs:attribute msprop:VersionStart='5' name='Recruitment cost' type='xs:int' use='required' />
-    <xs:attribute msprop:VersionStart='5' name='Voice Selected' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='5' name='Voice Move Ordered' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='5' name='Voice Completed' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='5' name='Voice Move OutofAP' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='5' name='Voice Move Illegal' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='5' name='Voice Embark' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='5' name='Voice Disembark' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='5' name='Voice Death' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Recruitment_cost' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice_Selected' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice_Move_Ordered' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice_Completed' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice_Move_OutofAP' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice_Move_Illegal' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice_Embark' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice_Disembark' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Voice_Death' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="aide_de_camp_speeches_tables">
     <xs:attribute name='adc_idref' type='xs:string' use='required' />
