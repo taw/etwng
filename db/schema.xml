@@ -1064,7 +1064,7 @@
     <field name='Unknown3' type='boolean'/>
     <field name='Map__x0022_texture_x0022_.tga' type='string'/>
     <field name='Map_lookup.tga' type='optstring'/>
-    <field name='unknown2' type='optstring'/>
+    <field name='unknown4' type='optstring'/>
     <field name='Unknown5' type='string'/>
     <field name='Unknown6' type='int'/>
     <field name='Unknown7' type='int'/>
@@ -1289,7 +1289,7 @@
     <field name='Unknown2' type='boolean'/>
     <field name='Unknown3' type='int'/>
     <field fkey='trait_categories_tables.Trait_Category_ID' name='Trait_Category' type='string'/>
-    <field name='Unknown3' type='boolean' version_start='2'/>
+    <field name='Unknown4' type='boolean' version_start='2'/>
   </table>
   <table name='climate_to_erosion_settings_tables'>
     <field name='Climate_ID' pk='true' type='string'/>

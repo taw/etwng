@@ -1064,7 +1064,7 @@
     <xs:attribute name='Unknown3' type='xs:boolean' use='required' />
     <xs:attribute name='Map__x0022_texture_x0022_.tga' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' name='Map_lookup.tga' type='xs:string' />
-    <xs:attribute msprop:Optional='true' name='unknown2' type='xs:string' />
+    <xs:attribute msprop:Optional='true' name='unknown4' type='xs:string' />
     <xs:attribute name='Unknown5' type='xs:string' use='required' />
     <xs:attribute name='Unknown6' type='xs:int' use='required' />
     <xs:attribute name='Unknown7' type='xs:int' use='required' />
@@ -1289,7 +1289,7 @@
     <xs:attribute name='Unknown2' type='xs:boolean' use='required' />
     <xs:attribute name='Unknown3' type='xs:int' use='required' />
     <xs:attribute name='Trait_Category' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='2' name='Unknown3' type='xs:boolean' use='required' />
+    <xs:attribute msprop:VersionStart='2' name='Unknown4' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="climate_to_erosion_settings_tables">
     <xs:attribute name='Climate_ID' type='xs:string' use='required' />
