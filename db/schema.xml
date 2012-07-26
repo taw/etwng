@@ -685,7 +685,7 @@
   </table>
   <table name='battlefield_snow_props_tables'>
     <field name='Prop' pk='true' type='string'/>
-    <field name='unknown' type='boolean'/>
+    <field name='unknown1' type='boolean'/>
   </table>
   <table name='battles_tables'>
     <field name='Map_Name' pk='true' type='string'/>
@@ -729,7 +729,7 @@
     <field name='Culture' pk='true' type='string'/>
     <field fkey='government_types_tables.Government_ID' name='Gov_Type' pk='true' type='string'/>
     <field name='artpiece' type='optstring'/>
-    <field name='Unknown' type='boolean'/>
+    <field name='Unknown1' type='boolean'/>
     <field fkey='building_description_texts_tables.Building_IDRef' name='Description' type='string'/>
     <field name='icon' type='optstring'/>
   </table>
@@ -780,7 +780,7 @@
     <field name='Condition' type='string'/>
     <field name='Turns_to_Build' type='int'/>
     <field name='Cost' type='int'/>
-    <field name='unknown' type='blob48'/>
+    <field name='unknown1' type='blob48'/>
     <field name='Unique' type='boolean'/>
     <field name='Military_prestige' type='int'/>
     <field name='Naval_Prestige' type='int'/>
@@ -801,7 +801,7 @@
     <field fkey='building_levels_tables.Building_ID' name='Building_IDRef' pk='true' type='string'/>
     <field fkey='units_tables.Unit_ID' name='Unit' pk='true' type='string'/>
     <field name='Experience' type='int'/>
-    <field name='Unknown' type='boolean'/>
+    <field name='Unknown4' type='boolean'/>
     <field name='unknown5' type='int' version_start='3'/>
     <field name='unknown6' type='boolean' version_start='3'/>
     <field name='unknown7' type='boolean' version_start='3'/>
@@ -1074,15 +1074,15 @@
     <field name='Settlement_ID' pk='true' type='string'/>
     <field fkey='regions_tables.Region_ID' name='Region' type='string'/>
     <field name='Capital' type='string'/>
-    <field name='unknown' type='string' version_start='3'/>
-    <field name='Unknown1' type='int'/>
+    <field name='unknown1' type='string' version_start='3'/>
+    <field name='Unknown2' type='int'/>
     <field fkey='slots_tables.Slot_ID' name='Slot' type='string'/>
   </table>
   <table name='campaign_map_slots_tables'>
     <field name='Campaign_Map_Slot_ID' pk='true' type='string'/>
     <field fkey='regions_tables.Region_ID' name='Region' type='string'/>
     <field fkey='slots_tables.Slot_ID' name='Slot' type='string'/>
-    <field name='Unknown' type='blob5'/>
+    <field name='Unknown1' type='blob5'/>
   </table>
   <table name='campaign_map_slots_templates_rotations_tables'>
     <field name='Degrees' type='string'/>
@@ -1520,7 +1520,7 @@
   <table name='effects_tables'>
     <field name='Effect_ID' pk='true' type='string'/>
     <field name='Pip_Path' type='optstring'/>
-    <field name='Unknown' type='int'/>
+    <field name='Unknown1' type='int'/>
   </table>
   <table name='empires_regions_junct_tables'>
     <field name='Empire_ID' pk='true' type='string'/>
@@ -1569,13 +1569,13 @@
   <table name='events_tables'>
     <field name='Event_ID' pk='true' type='string'/>
     <field name='Image' type='string'/>
-    <field name='unknown' type='boolean'/>
+    <field name='unknown1' type='boolean'/>
     <field name='Date' type='int'/>
     <field name='Season' type='string'/>
-    <field name='unknown1' type='boolean' version_start='2'/>
+    <field name='unknown2' type='boolean' version_start='2'/>
     <field name='Condition' type='string'/>
     <field name='Image2' type='string'/>
-    <field name='unknown2' type='int' version_start='2'/>
+    <field name='unknown3' type='int' version_start='2'/>
   </table>
   <table name='events_view_group_junct_tables'>
     <field fkey='events_tables.Event_ID' name='Historic_event_ID' pk='true' type='string'/>
@@ -1679,19 +1679,19 @@
     <field name='color_b3' type='int'/>
   </table>
   <table name='faction_variables_optional_overrides_tables'>
-    <field name='unknown' type='optstring'/>
-    <field name='unknown' type='boolean'/>
-    <field name='unknown' type='boolean'/>
-    <field name='unknown' type='optstring'/>
-    <field name='unknown' type='string'/>
-    <field name='unknown' type='blob4'/>
+    <field name='unknown1' type='optstring'/>
+    <field name='unknown2' type='boolean'/>
+    <field name='unknown3' type='boolean'/>
+    <field name='unknown4' type='optstring'/>
+    <field name='unknown5' type='string'/>
+    <field name='unknown6' type='blob4'/>
   </table>
   <table name='faction_variables_tables'>
-    <field name='unknown' type='string'/>
-    <field name='unknown' type='string'/>
-    <field name='unknown' type='boolean'/>
-    <field name='unknown' type='boolean'/>
-    <field name='unknown' type='blob2'/>
+    <field name='unknown1' type='string'/>
+    <field name='unknown2' type='string'/>
+    <field name='unknown3' type='boolean'/>
+    <field name='unknown4' type='boolean'/>
+    <field name='unknown5' type='blob2'/>
   </table>
   <table name='factions_tables'>
     <field name='Faction_ID' pk='true' type='string'/>
@@ -1840,7 +1840,7 @@
     <field fkey='regions_tables.Region_ID' name='Region' pk='true' type='string'/>
   </table>
   <table name='groupings_tables'>
-    <field name='Unknown' pk='true' type='string'/>
+    <field name='Unknown1' pk='true' type='string'/>
   </table>
   <table name='gun_type_to_projectiles_tables'>
     <field fkey='gun_types_tables.Gun_ID' name='Gun_IDRef' pk='true' type='string'/>
@@ -1870,9 +1870,9 @@
     <field name='Date_Birth' type='int'/>
     <field name='Date_Death' type='int'/>
     <field name='Notes' type='string'/>
-    <field name='unknown' type='string' version_start='4'/>
-    <field name='unknown' type='string' version_start='4'/>
-    <field name='unknown' type='boolean' version_start='4'/>
+    <field name='unknown1' type='string' version_start='4'/>
+    <field name='unknown2' type='string' version_start='4'/>
+    <field name='unknown3' type='boolean' version_start='4'/>
   </table>
   <table name='honour_effects_tables'>
     <field name='unknown1' type='boolean'/>
@@ -1972,9 +1972,9 @@
     <field fkey='government_types_tables.Government_ID' name='Government_x0020_Type' type='string'/>
     <field name='Gender' type='string'/>
     <field name='Title' type='string'/>
-    <field name='unknown' type='optstring' version_start='3'/>
-    <field name='unknown' type='int' version_start='3'/>
-    <field name='unknown' type='int' version_start='3'/>
+    <field name='unknown1' type='optstring' version_start='3'/>
+    <field name='unknown2' type='int' version_start='3'/>
+    <field name='unknown3' type='int' version_start='3'/>
   </table>
   <table name='ministerial_positions_switching_loyalty_effects_tables'>
     <field name='unknown1' type='string'/>
@@ -2988,7 +2988,7 @@
   </table>
   <table name='trees_tables'>
     <field name='Tree_ID' pk='true' type='string'/>
-    <field name='unknown' type='blob7'/>
+    <field name='unknown1' type='blob7'/>
   </table>
   <table name='trigger_effects_tables'>
     <field name='unknown1' type='string'/>
@@ -3455,7 +3455,7 @@
     <field fkey='groupings_military_tables.Group' name='Military_x0020_Group' pk='true' type='string'/>
   </table>
   <table name='units_to_special_editions_juncs_tables'>
-    <field name='unknown' type='string'/>
+    <field name='unknown1' type='string'/>
     <field name='Unit_IDRef' type='string'/>
   </table>
   <table name='unrest_cause_to_demands_tables'>

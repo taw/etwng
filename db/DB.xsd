@@ -685,7 +685,7 @@
   </xs:complexType>
   <xs:complexType name="battlefield_snow_props_tables">
     <xs:attribute name='Prop' type='xs:string' use='required' />
-    <xs:attribute name='unknown' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown1' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="battles_tables">
     <xs:attribute name='Map_Name' type='xs:string' use='required' />
@@ -729,7 +729,7 @@
     <xs:attribute name='Culture' type='xs:string' use='required' />
     <xs:attribute name='Gov_Type' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' name='artpiece' type='xs:string' />
-    <xs:attribute name='Unknown' type='xs:boolean' use='required' />
+    <xs:attribute name='Unknown1' type='xs:boolean' use='required' />
     <xs:attribute name='Description' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' name='icon' type='xs:string' />
   </xs:complexType>
@@ -780,7 +780,7 @@
     <xs:attribute name='Condition' type='xs:string' use='required' />
     <xs:attribute name='Turns_to_Build' type='xs:int' use='required' />
     <xs:attribute name='Cost' type='xs:int' use='required' />
-    <xs:attribute msprop:BlobLength='48' name='unknown' type='xs:string' use='required' />
+    <xs:attribute msprop:BlobLength='48' name='unknown1' type='xs:string' use='required' />
     <xs:attribute name='Unique' type='xs:boolean' use='required' />
     <xs:attribute name='Military_prestige' type='xs:int' use='required' />
     <xs:attribute name='Naval_Prestige' type='xs:int' use='required' />
@@ -801,7 +801,7 @@
     <xs:attribute name='Building_IDRef' type='xs:string' use='required' />
     <xs:attribute name='Unit' type='xs:string' use='required' />
     <xs:attribute name='Experience' type='xs:int' use='required' />
-    <xs:attribute name='Unknown' type='xs:boolean' use='required' />
+    <xs:attribute name='Unknown4' type='xs:boolean' use='required' />
     <xs:attribute msprop:VersionStart='3' name='unknown5' type='xs:int' use='required' />
     <xs:attribute msprop:VersionStart='3' name='unknown6' type='xs:boolean' use='required' />
     <xs:attribute msprop:VersionStart='3' name='unknown7' type='xs:boolean' use='required' />
@@ -1074,15 +1074,15 @@
     <xs:attribute name='Settlement_ID' type='xs:string' use='required' />
     <xs:attribute name='Region' type='xs:string' use='required' />
     <xs:attribute name='Capital' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='3' name='unknown' type='xs:string' use='required' />
-    <xs:attribute name='Unknown1' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='3' name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='Unknown2' type='xs:int' use='required' />
     <xs:attribute name='Slot' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="campaign_map_slots_tables">
     <xs:attribute name='Campaign_Map_Slot_ID' type='xs:string' use='required' />
     <xs:attribute name='Region' type='xs:string' use='required' />
     <xs:attribute name='Slot' type='xs:string' use='required' />
-    <xs:attribute msprop:BlobLength='5' name='Unknown' type='xs:string' use='required' />
+    <xs:attribute msprop:BlobLength='5' name='Unknown1' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="campaign_map_slots_templates_rotations_tables">
     <xs:attribute name='Degrees' type='xs:string' use='required' />
@@ -1520,7 +1520,7 @@
   <xs:complexType name="effects_tables">
     <xs:attribute name='Effect_ID' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' name='Pip_Path' type='xs:string' />
-    <xs:attribute name='Unknown' type='xs:int' use='required' />
+    <xs:attribute name='Unknown1' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="empires_regions_junct_tables">
     <xs:attribute name='Empire_ID' type='xs:string' use='required' />
@@ -1569,13 +1569,13 @@
   <xs:complexType name="events_tables">
     <xs:attribute name='Event_ID' type='xs:string' use='required' />
     <xs:attribute name='Image' type='xs:string' use='required' />
-    <xs:attribute name='unknown' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown1' type='xs:boolean' use='required' />
     <xs:attribute name='Date' type='xs:int' use='required' />
     <xs:attribute name='Season' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='2' name='unknown1' type='xs:boolean' use='required' />
+    <xs:attribute msprop:VersionStart='2' name='unknown2' type='xs:boolean' use='required' />
     <xs:attribute name='Condition' type='xs:string' use='required' />
     <xs:attribute name='Image2' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='2' name='unknown2' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='2' name='unknown3' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="events_view_group_junct_tables">
     <xs:attribute name='Historic_event_ID' type='xs:string' use='required' />
@@ -1679,19 +1679,19 @@
     <xs:attribute name='color_b3' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="faction_variables_optional_overrides_tables">
-    <xs:attribute msprop:Optional='true' name='unknown' type='xs:string' />
-    <xs:attribute name='unknown' type='xs:boolean' use='required' />
-    <xs:attribute name='unknown' type='xs:boolean' use='required' />
-    <xs:attribute msprop:Optional='true' name='unknown' type='xs:string' />
-    <xs:attribute name='unknown' type='xs:string' use='required' />
-    <xs:attribute msprop:BlobLength='4' name='unknown' type='xs:string' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown1' type='xs:string' />
+    <xs:attribute name='unknown2' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown3' type='xs:boolean' use='required' />
+    <xs:attribute msprop:Optional='true' name='unknown4' type='xs:string' />
+    <xs:attribute name='unknown5' type='xs:string' use='required' />
+    <xs:attribute msprop:BlobLength='4' name='unknown6' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="faction_variables_tables">
-    <xs:attribute name='unknown' type='xs:string' use='required' />
-    <xs:attribute name='unknown' type='xs:string' use='required' />
-    <xs:attribute name='unknown' type='xs:boolean' use='required' />
-    <xs:attribute name='unknown' type='xs:boolean' use='required' />
-    <xs:attribute msprop:BlobLength='2' name='unknown' type='xs:string' use='required' />
+    <xs:attribute name='unknown1' type='xs:string' use='required' />
+    <xs:attribute name='unknown2' type='xs:string' use='required' />
+    <xs:attribute name='unknown3' type='xs:boolean' use='required' />
+    <xs:attribute name='unknown4' type='xs:boolean' use='required' />
+    <xs:attribute msprop:BlobLength='2' name='unknown5' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="factions_tables">
     <xs:attribute name='Faction_ID' type='xs:string' use='required' />
@@ -1840,7 +1840,7 @@
     <xs:attribute name='Region' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="groupings_tables">
-    <xs:attribute name='Unknown' type='xs:string' use='required' />
+    <xs:attribute name='Unknown1' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="gun_type_to_projectiles_tables">
     <xs:attribute name='Gun_IDRef' type='xs:string' use='required' />
@@ -1870,9 +1870,9 @@
     <xs:attribute name='Date_Birth' type='xs:int' use='required' />
     <xs:attribute name='Date_Death' type='xs:int' use='required' />
     <xs:attribute name='Notes' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='4' name='unknown' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='4' name='unknown' type='xs:string' use='required' />
-    <xs:attribute msprop:VersionStart='4' name='unknown' type='xs:boolean' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown1' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown2' type='xs:string' use='required' />
+    <xs:attribute msprop:VersionStart='4' name='unknown3' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="honour_effects_tables">
     <xs:attribute name='unknown1' type='xs:boolean' use='required' />
@@ -1972,9 +1972,9 @@
     <xs:attribute name='Government_x0020_Type' type='xs:string' use='required' />
     <xs:attribute name='Gender' type='xs:string' use='required' />
     <xs:attribute name='Title' type='xs:string' use='required' />
-    <xs:attribute msprop:Optional='true' msprop:VersionStart='3' name='unknown' type='xs:string' />
-    <xs:attribute msprop:VersionStart='3' name='unknown' type='xs:int' use='required' />
-    <xs:attribute msprop:VersionStart='3' name='unknown' type='xs:int' use='required' />
+    <xs:attribute msprop:Optional='true' msprop:VersionStart='3' name='unknown1' type='xs:string' />
+    <xs:attribute msprop:VersionStart='3' name='unknown2' type='xs:int' use='required' />
+    <xs:attribute msprop:VersionStart='3' name='unknown3' type='xs:int' use='required' />
   </xs:complexType>
   <xs:complexType name="ministerial_positions_switching_loyalty_effects_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
@@ -2988,7 +2988,7 @@
   </xs:complexType>
   <xs:complexType name="trees_tables">
     <xs:attribute name='Tree_ID' type='xs:string' use='required' />
-    <xs:attribute msprop:BlobLength='7' name='unknown' type='xs:string' use='required' />
+    <xs:attribute msprop:BlobLength='7' name='unknown1' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="trigger_effects_tables">
     <xs:attribute name='unknown1' type='xs:string' use='required' />
@@ -3455,7 +3455,7 @@
     <xs:attribute name='Military_x0020_Group' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="units_to_special_editions_juncs_tables">
-    <xs:attribute name='unknown' type='xs:string' use='required' />
+    <xs:attribute name='unknown1' type='xs:string' use='required' />
     <xs:attribute name='Unit_IDRef' type='xs:string' use='required' />
   </xs:complexType>
   <xs:complexType name="unrest_cause_to_demands_tables">
@@ -4948,7 +4948,7 @@
     </xs:unique>
     <xs:unique name="groupings_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//groupings_tables"/>
-      <xs:field xpath="@Unknown"/>
+      <xs:field xpath="@Unknown1"/>
     </xs:unique>
     <xs:unique name="gun_type_to_projectiles_tables_Constraint1" msdata:PrimaryKey="true">
       <xs:selector xpath=".//gun_type_to_projectiles_tables"/>
