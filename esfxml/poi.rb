@@ -3,8 +3,7 @@ class PoiEsfParser
     @types, @data = types, data
   end
   def get(*tags)
-    raise SemanticFail.new unless @types.shift(tags.size) == tags
-    @data.shift(tags.size)
+    tags.map{|t| get1(t)}
   end
   def get1(tag)
     raise SemanticFail.new unless @types.shift == tag
