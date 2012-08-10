@@ -79,7 +79,7 @@ class CS2File
   end
   def get_collision3d
     data = [get_str, get_v3a, get_primary_data_array.size]
-    "Collision(#{data[0]}, #{data[1].size}x/#{data[2].size}x)"
+    ["Collision(#{data[0]}, #{data[1].size}x/#{data[2].size}x)", data[1], data[2]]
   end
 end
 
@@ -113,7 +113,7 @@ files_all = Dir["samples/*"].sort_by{|fn| [File.size(fn), fn]}
 # This looks misparsed:
 # samples/buildings-fort_euro_wooden-fort_euro_wooden_tech.cs2.parsed
 
-files_to_process = ARGV.empty? ? files_sample_small : ARGV
+files_to_process = ARGV.empty? ? files_all : ARGV
 
 FileUtils.mkdir_p "out"
 
