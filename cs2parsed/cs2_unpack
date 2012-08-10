@@ -120,10 +120,11 @@ FileUtils.mkdir_p "out"
 files_to_process.each{|fn|
   fnout = "out/" + File.basename(fn).sub(/\.cs2\.parsed\z/, "") + ".txt"
   txt = []
+
+  cs2 = CS2File.new(fn)
+  puts fn
   
   begin
-    cs2 = CS2File.new(fn)
-    puts fn
     txt << (0..5).map{ cs2.get_flt }
     txt << cs2.get_str
     txt << (0..7).map{ cs2.get_flt }
@@ -193,7 +194,6 @@ files_to_process.each{|fn|
     }
   rescue
     txt << "FAIL #{fn}: #{$!}"
-
     txt << "#{cs2.bytes_left}/#{cs2.size} bytes to go" 
     txt << "ofs: #{cs2.ofs}"
     File.open(fnout, 'w'){|fhout|
