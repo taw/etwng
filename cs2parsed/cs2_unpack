@@ -34,6 +34,7 @@ class CS2File
     size - ofs
   end
   def get(n)
+    raise "Trying to read past end of file" unless size - ofs >= n
     rv, @ofs = @data[@ofs, n], @ofs+n
     rv
   end
@@ -105,7 +106,6 @@ files_sample_small = %W[
   samples/rigidmodels-buildings-prop_town_plant_pot02-prop_town_plant_pot02_tech.cs2.parsed
 
   samples/buildings-ottoman_warehouse04-ottoman_warehouse04_tech.cs2.parsed
-  samples/rigidmodels-buildings-fort_euro_wooden-fort_euro_wooden_tech.cs2.parsed
 ]
 
 files_all = Dir["samples/*"].sort_by{|fn| [File.size(fn), fn]}
@@ -113,7 +113,7 @@ files_all = Dir["samples/*"].sort_by{|fn| [File.size(fn), fn]}
 # This looks misparsed:
 # samples/buildings-fort_euro_wooden-fort_euro_wooden_tech.cs2.parsed
 
-files_to_process = ARGV.empty? ? files_all : ARGV
+files_to_process = ARGV.empty? ? files_sample_small : ARGV
 
 FileUtils.mkdir_p "out"
 
@@ -137,51 +137,67 @@ files_to_process.each{|fn|
     cnt = cs2.get_u4
     txt << [:cnt, cnt]
 
-    txt << [:nth, 0]
-    txt << [cs2.get_str]
-    txt << [cs2.get_z4]
-    txt << cs2.get_collision3d
-    txt << cs2.get_u4_ary{ cs2.get_collision3d } # Windows
-    txt << cs2.get_u4_ary{ cs2.get_collision3d } # Doors
-    txt << cs2.get_u4_ary{ cs2.get_collision3d } # Gates
+    cnt.times{|i|
+      txt << [:nth, i]
+      txt << [:str_a, cs2.get_str]
+      seq_num = cs2.get_u4
+      txt << [:seq_num, seq_num, :expected, i] # Sequential number
+      txt << cs2.get_collision3d
+      txt << cs2.get_u4_ary{ cs2.get_collision3d } # Windows
+      txt << cs2.get_u4_ary{ cs2.get_collision3d } # Doors
+      txt << cs2.get_u4_ary{ cs2.get_collision3d } # Gates
 
 
-    if cnt > 1
-      txt << [:nth, 1]
-      txt << [cs2.get_u4, cs2.get_str]
+      txt << [:ofs, cs2.ofs]
+      txt << [:str_b, cs2.get_u4, cs2.get_str]
       txt << cs2.get_v3a
 
-      # pp cs2.get(64).unpack("V*")
-    end
 
-    # puts "#{cs2.bytes_left-60} bytes skipped ..."
-    # cs2.get(cs2.bytes_left-60)
-
-    # p [cs2.get_u4, cs2.get_str]
-    
-    # cs2.get_v3a
-    # (0..2).map{ cs2.get_u4 }
-    # cs2.get_u4_ary{ cs2.get(12).unpack("ffV") }
-    # 
-    # 
-    # pp [cs2.get_z4, cs2.get_z4]
-    # pp cs2.get(3*4).unpack("f*")
-    # pp cs2.get(3*4).unpack("f*")
-    # pp [cs2.get_z4, cs2.get_z4, cs2.get_z4, cs2.get_z4, cs2.get_z4]
-
-    # cs2.get(13*4).unpack("f*")
-    # cs2.get_str
-
-    # pp cs2.get(8).unpack("v*")
-    # pp cs2.get_v3
-    # pp cs2.get_v3
-    # pp cs2.get(28).unpack("V*")
+      txt << [:ofs, cs2.ofs]
+      # Why 41 ???
+      
+      num_a = cs2.get_u4
+      txt << [:mystery, num_a]
+      
+      txt << [:pipes, cs2.get_u4_ary{
+        [cs2.get_str, cs2.get_u4_ary{ cs2.get_v3}, cs2.get_u4]
+        
+      }]
+      txt << [:mystery, cs2.get_u4]
+      txt << [:mystery2, cs2.get_u4_ary{ [cs2.get_flt, cs2.get_flt, cs2.get_u4] }]
+      
+      txt << [:ofs, cs2.ofs]
   
+      txt << [:mystery3] + cs2.get(52).unpack("V*").map{|u|
+        if u > 256*256*256 then [u].pack("V").unpack("f")[0] else u end
+      }
+    }
+    txt << [:ofs, cs2.ofs]
+
+    u = cs2.get_u4
+    
+    txt << [:footer_size, u]
+    txt << [:footer1, (0...u).map{
+      cs2.get_u4_ary{ cs2.get_v2 }
+    }]
+
+    txt << [:footer2, (0...u).map{
+      cs2.get_u4_ary{ cs2.get_v2 }
+    }]
+  
+
     txt << "#{cs2.bytes_left}/#{cs2.size} bytes to go" 
+    txt << "ofs: #{cs2.ofs}"
     File.open(fnout, 'w'){|fhout|
       fhout.puts txt.map(&:inspect)
     }
   rescue
-    puts "FAIL #{fn}: #{$!}"
+    txt << "FAIL #{fn}: #{$!}"
+
+    txt << "#{cs2.bytes_left}/#{cs2.size} bytes to go" 
+    txt << "ofs: #{cs2.ofs}"
+    File.open(fnout, 'w'){|fhout|
+      fhout.puts txt.map(&:inspect)
+    }
   end
 }
