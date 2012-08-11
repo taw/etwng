@@ -14,7 +14,7 @@ Colors = [
   [255, 100, 100], # 10 lc_as_temp_s_arid
   [255, 255, 153], # 11 lc_sand_desert
   [153, 102,  51], # 12 lc_eu_north_s_arid
-  [141, 180, 266], # 13 lc_am_tropical_humid
+  [141, 180, 226], # 13 lc_am_tropical_humid
   [197, 217, 241], # 14 lc_eu_central_humid
   [255, 204, 102], # 15 lc_am_desert
   [192,  80,  77], # 16 lc_am_se_usa
