@@ -42,7 +42,17 @@ class ModelsBuildings
     get(2*get_u2).unpack("v*").pack("U*")
   end
   def parse
+    version = {:version => 1}
+    
+    if @data[0, 4] == "\375\376\374\377"
+      gsz, = @data[4, 2].unpack("v")
+      version[:guid] = @data[6, gsz*2].unpack("v*").pack("U*")
+      @data = @data[(6+gsz*2)..-1]
+    end
+
     raise "#{@path}: Only version 1 supported" unless get_byte == 1
+    
+    [version] +
     (0...get_u4).map{
       [
         get_str,
@@ -69,7 +79,8 @@ end
 data = ModelsBuildings.new(ARGV[0]).parse
 File.open(ARGV[1], 'wb'){|fh|
   fh.puts "["
-  data.each{|row|
+  fh.puts "  " + data[0].inspect + ","
+  data[1..-1].each{|row|
     fh.puts "  ["
     fh.puts row.map{|x| "    #{x.inspect}," }
     fh.puts "  ],"

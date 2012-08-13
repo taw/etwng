@@ -3,7 +3,17 @@
 class ModelsBuildings
   def initialize(file_name)
     @data = eval(File.open(file_name, 'rb', &:read))
-    @out = [1, @data.size].pack("CV")
+    @version = @data.shift
+    
+    raise "Only version 1 supported" unless @version[:version] == 1
+    if @version[:guid]
+      guid = @version[:guid].unpack("U*").pack("v*")
+      @out = "\xfd\xfe\xfc\xff" + [guid.size/2].pack("v") + guid
+    else
+      @out = ""
+    end
+    
+    @out << [1, @data.size].pack("CV")
     @data.each{|row|
       put_row(*row)
     }
