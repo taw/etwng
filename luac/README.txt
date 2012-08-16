@@ -25,3 +25,7 @@ $ sudo apt-get install build-essential lib32readline6-dev libc6-dev-i386
 Use pack manager to extract .luac files, then decompile each one of them with:
 
 ./luadec -d xxx.luac >xxx.lua
+
+== luadec ==
+
+There's more recent version of luadec on https://github.com/sztupy/luadec51
