@@ -1,0 +1,69 @@
+#!/usr/bin/env ruby
+
+require 'pathname'
+require 'find'
+require 'pp'
+
+def contents(path)
+  out = []
+  path.find{|x|
+    next unless x.file?
+    fn = x.relative_path_from(path).to_s
+    parts = fn.sub(/\.tsv\z/, "").split("/")
+    out << [parts[0], parts[1], parts[3], parts[4]]
+  }
+  out
+end
+
+all_dir, good_dir, fail_dir = *ARGV.map{|d| Pathname(d)}
+
+all  = contents(all_dir)
+good = contents(good_dir)
+fail = contents(fail_dir)
+
+unless all.sort == (good+fail).sort
+  raise "All != good+fail"
+end
+
+status = Hash.new{|ht,k| ht[k] = []}
+bygame = Hash.new{|ht,k| ht[k] = []}
+
+good.each{|game, pack, table, file|
+  status[table] << [game, pack, file, true]
+}
+fail.each{|game, pack, table, file|
+  status[table] << [game, pack, file, false]
+}
+status.to_a.sort.each{|table, entries|
+  tall  = entries.size
+  tgood = entries.select{|game, pack, file, ok| ok}.size
+  if tgood == tall
+    # puts "#{table}: OK (#{tgood}/#{tall})"
+    next
+  end
+  ee = entries.group_by{|game, pack, file, ok| game}.to_a.sort
+
+  puts "#{table} (#{tgood}/#{tall}):"
+  ee.each{|game, gall|
+    ggood = gall.select{|game, pack, file, ok| ok == true}
+    gfail = gall.select{|game, pack, file, ok| ok == false}
+    stats = "#{ggood.size}/#{gall.size}"
+    if ggood.size == gall.size
+      puts "* #{game}: OK (#{stats})"
+    elsif gfail.size == gall.size
+      puts "* #{game}: FAIL (#{stats})"
+      bygame[game] << "* #{table}: FAIL (#{stats})"
+    else
+      failstats = gfail.map{|game, pack, file, ok| "#{pack}.pack:#{file}"}.join(", ")
+      puts "* #{game}: MIXED (#{stats}; failing: #{failstats})"
+      bygame[game] << "* #{table}: MIXED (#{stats}; failing: #{failstats})"
+    end
+  }
+  puts ""
+}
+
+bygame.each{|game, tables|
+  puts "#{game}:"
+  puts tables
+  puts ""
+}
