@@ -47,6 +47,7 @@ sample_tests = [
   #"pathfinding.esf",
   "pathfinding_etw.esf",
   #"poi.esf",
+  "poi_global_map.esf",
   #"regions.esf",
   #"sea_grids.esf",
   #"startpos.esf",
