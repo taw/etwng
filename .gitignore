@@ -9,7 +9,7 @@ esfxml/esf
 esfxml/samples*
 esfxml/out
 esfxml/output
-farm_fields_tile_texture/samples
+farm_fields_tile_texture/samples*
 tmp
 markers/samples
 cs2parsed/samples*
@@ -42,3 +42,4 @@ pack/*.pack
 rigid_splines/samples
 cs2parsed/out
 extras
+templates/samples
