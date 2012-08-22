@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+
+files = Dir["samples_extended/*/*/db/models_building_tables/*"]
+files.each{|mbt|
+  txt = mbt.sub("samples_extended/", "mbt/") + ".txt"
+  FileUtils.mkdir_p File.dirname(txt)
+  system "./models_buildings_unpack", mbt, txt
+}

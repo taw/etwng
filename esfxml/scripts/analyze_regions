@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class File
+  def self.write(path, contents)
+    File.open(path, 'wb'){|fh| fh.write contents}
+  end
+end
+
+class AnalyzeRegions < EsfScript
+  def run!
+    update_each_xml("region_data*", "rec[@type='region_data']") do |rd|
+      rd.xpath("//xml_include").each do |xi|
+        update_xml(xmldir + "/" + xi['path'], '/rec') do |region|
+          analyze_region(region)
+          false
+        end
+      end
+      false
+    end
+  end
+  def analyze_region(region)
+    name = region.xpath("s")[0].content
+    type = region.xpath("asc")[0].content
+    i = region.xpath("i")[0].content
+    
+    p [name, type, i]
+
+    region.xpath("//rec[@type='areas']").each do |area|
+      bools = area.xpath("yes|no").map{|x| x.name == 'yes'}
+      ints  = area.xpath("u2").map{|x| x.content.to_i}
+      p(bools + ints)
+    end
+    
+    # areas = region.xpath("//rec[@type='areas']")
+    # areas = areas.map{|area_node| parse_area(area_node, vertices)}
+    # 
+    # areas.each{|area|
+    #   # area[:faces].each{|face|
+    #   #   svg << %Q[<path d="#{face}" />\n]
+    #   # }
+    #   area[:outlines].each_with_index{|outline, i|
+    #     xs = xs + outline.map{|x,y| x}
+    #     xs = [xs.min, xs.max]
+    #     ys = ys + outline.map{|x,y| y}
+    #     ys = [ys.min, ys.max]
+    #     color = random_land_color
+    #     style="fill:#{color};fill-opacity:0.2;stroke:#{color};stroke-width:0.2px;"
+    #     svg.add_path(outline, style)
+    #     style2="stroke-width:0.5px;stroke:black;fill-opacity:0.2;fill:#{region_color}"
+    #     @world.add_path(outline, style2)
+    #   }
+    # }
+    # svg.set_view(xs.min, ys.min, xs.max, ys.max)
+    # svg.save("regions_svgs/#{name}.svg")
+  end
+end
+
+AnalyzeRegions.new
