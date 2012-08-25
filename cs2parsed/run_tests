@@ -1,0 +1,66 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+files_sample = %W[
+  samples/buildings-prop_field_applebarrels-prop_field_applebarrels_tech.cs2.parsed
+  samples/rigidmodels-buildings-american_gaet-american_gaet_tech.cs2.parsed
+  samples/buildings-fmv_rowboat-fmv_rowboat_tech.cs2.parsed
+  samples/rigidmodels-buildings-native_teepee02-native_teepee02_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_field_cart-prop_field_cart_tech.cs2.parsed
+  samples/buildings-prop_field_haybale_bundle02-prop_field_haybale_bundle02_tech.cs2.parsed
+  samples/buildings-prop_field_tent_small-prop_field_tent_small_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_field_treestump_large-prop_field_treestump_large_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_field_haysheaf-prop_field_haysheaf_tech.cs2.parsed
+  samples/buildings-north_euro_house07a-north_euro_house07a_tech.cs2.parsed
+  samples/buildings-east_euro_house08b-east_euro_house08b_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_town_ottoman_stall01-prop_town_ottoman_stall01_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_town_plant_pot02-prop_town_plant_pot02_tech.cs2.parsed
+]
+
+files_sample_small = %W[
+  samples/buildings-prop_field_applebarrels-prop_field_applebarrels_tech.cs2.parsed
+  samples/rigidmodels-buildings-american_gaet-american_gaet_tech.cs2.parsed
+  samples/buildings-east_euro_house08b-east_euro_house08b_tech.cs2.parsed
+  samples/rigidmodels-buildings-prop_town_plant_pot02-prop_town_plant_pot02_tech.cs2.parsed
+
+  samples/buildings-ottoman_warehouse04-ottoman_warehouse04_tech.cs2.parsed
+]
+
+files_all = Dir["samples/*"].sort_by{|fn| [File.size(fn), fn]}
+
+# This looks misparsed:
+# samples/buildings-fort_euro_wooden-fort_euro_wooden_tech.cs2.parsed
+
+files_to_process = ARGV.empty? ? files_all : ARGV
+
+FileUtils.rm_rf "tmp/unpacked"
+FileUtils.mkdir_p "tmp/unpacked"
+FileUtils.rm_rf "tmp/repacked"
+FileUtils.mkdir_p "tmp/repacked"
+
+files_to_process.each do |path_in|
+  basename = File.basename(path_in).sub(/\.cs2\.parsed\z/, "")
+  puts path_in
+  path_mid = "tmp/unpacked/#{basename}.txt"
+  path_out = "tmp/repacked/#{basename}.cs2.parsed"
+  
+  if system "./cs2_unpack", path_in, path_mid
+    puts "... unpacking OK"
+  else
+    puts "... unpacking FAIL"
+    next
+  end
+  if system "./cs2_unpack", path_mid, path_out
+    puts "... packing OK"
+  else
+    puts "... packing FAIL"
+    next
+  end
+  if system "diff", path_in, path_out
+      puts "... diff OK"
+    else
+      puts "... diff FAIL"
+      next
+  end
+end

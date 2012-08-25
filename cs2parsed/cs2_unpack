@@ -79,125 +79,95 @@ class CS2File
   end
   def get_collision3d
     data = [get_str, get_v3a, get_primary_data_array.size]
-    ["Collision(#{data[0]}, #{data[1].size}x/#{data[2].size}x)", data[1], data[2]]
+    ["Collision(#{data[1].size}x/#{data[2].size}x)", data[0], data[1], data[2]]
   end
+ 
+  def unpack!
+    txt = []
+    success = false
+    begin
+      txt << (0..5).map{ get_flt }
+      txt << get_str
+      txt << (0..7).map{ get_flt }
+      txt << (0..7).map{ get_flt }
+
+      txt << [get_u4, get_str, get_str]
+      txt << (0..7).map{ get_flt }
+      txt << (0..7).map{ get_flt }
+
+      # Levels of destruction ???
+      cnt = get_u4
+      txt << [:cnt, cnt]
+      
+      cnt.times{|i|
+        txt << [:nth, i]
+        txt << [:str_a, get_str]
+        seq_num = get_u4
+        txt << [:seq_num, seq_num, :expected, i] # Sequential number
+        txt << get_collision3d
+        txt << get_u4_ary{ get_collision3d } # Windows
+        txt << get_u4_ary{ get_collision3d } # Doors
+        txt << get_u4_ary{ get_collision3d } # Gates
+
+
+        txt << [:ofs, ofs]
+        txt << [:str_b, get_u4, get_str]
+        txt << get_v3a
+
+        txt << [:ofs, ofs]
+
+        num_a = get_u4
+        txt << [:mystery, num_a]
+
+        txt << [:pipes, get_u4_ary{
+          [get_str, get_u4_ary{ get_v3 }, get_u4]
+
+        }]
+        txt << [:mystery, get_u4]
+        txt << [:mystery2, get_u4_ary{ [get_flt, get_flt, get_u4] }]
+
+        txt << [:ofs, ofs]
+
+        txt << [:mystery3] + get(13*4).unpack("V*").map{|u|
+          if u > 256*256*256 then [u].pack("V").unpack("f")[0] else u end
+        }
+      }
+      txt << [:ofs, ofs]
+
+      u = get_u4
+
+      txt << [:footer_size, u]
+      txt << [:footer1, (0...u).map{ get_u4_ary{ get_v2 } }]
+
+      txt << [:footer2, (0...u).map{
+        get_u4_ary{ get_v2 }
+      }]
+
+      success = true if bytes_left == 0
+    rescue
+      txt << "FAIL: #{$!}"
+      [txt, false]
+    end
+    txt << [:bytes_to_go, "#{bytes_left}/#{size}"]
+    txt << [:ofs, ofs]
+    [txt, success]
+  end  
 end
 
-files_sample = %W[
-  samples/buildings-prop_field_applebarrels-prop_field_applebarrels_tech.cs2.parsed
-  samples/rigidmodels-buildings-american_gaet-american_gaet_tech.cs2.parsed
-  samples/buildings-fmv_rowboat-fmv_rowboat_tech.cs2.parsed
-  samples/rigidmodels-buildings-native_teepee02-native_teepee02_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_cart-prop_field_cart_tech.cs2.parsed
-  samples/buildings-prop_field_haybale_bundle02-prop_field_haybale_bundle02_tech.cs2.parsed
-  samples/buildings-prop_field_tent_small-prop_field_tent_small_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_treestump_large-prop_field_treestump_large_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_field_haysheaf-prop_field_haysheaf_tech.cs2.parsed
-  samples/buildings-north_euro_house07a-north_euro_house07a_tech.cs2.parsed
-  samples/buildings-east_euro_house08b-east_euro_house08b_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_town_ottoman_stall01-prop_town_ottoman_stall01_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_town_plant_pot02-prop_town_plant_pot02_tech.cs2.parsed
-]
+def cs2_unpack(path_in, path_out)
+  cs2 = CS2File.new(path_in)
+  txt, status = cs2.unpack!
+  File.open(path_out, 'w'){|fhout|
+    fhout.puts txt.map(&:inspect)
+  }
+  return status
+end
 
-files_sample_small = %W[
-  samples/buildings-prop_field_applebarrels-prop_field_applebarrels_tech.cs2.parsed
-  samples/rigidmodels-buildings-american_gaet-american_gaet_tech.cs2.parsed
-  samples/buildings-east_euro_house08b-east_euro_house08b_tech.cs2.parsed
-  samples/rigidmodels-buildings-prop_town_plant_pot02-prop_town_plant_pot02_tech.cs2.parsed
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} file.cs2.parsed file.txt"
+  exit 1
+end
 
-  samples/buildings-ottoman_warehouse04-ottoman_warehouse04_tech.cs2.parsed
-]
-
-files_all = Dir["samples/*"].sort_by{|fn| [File.size(fn), fn]}
-
-# This looks misparsed:
-# samples/buildings-fort_euro_wooden-fort_euro_wooden_tech.cs2.parsed
-
-files_to_process = ARGV.empty? ? files_all : ARGV
-
-FileUtils.mkdir_p "out"
-
-files_to_process.each{|fn|
-  fnout = "out/" + File.basename(fn).sub(/\.cs2\.parsed\z/, "") + ".txt"
-  txt = []
-
-  cs2 = CS2File.new(fn)
-  puts fn
-  
-  begin
-    txt << (0..5).map{ cs2.get_flt }
-    txt << cs2.get_str
-    txt << (0..7).map{ cs2.get_flt }
-    txt << (0..7).map{ cs2.get_flt }
-
-    txt << [cs2.get_u4, cs2.get_str, cs2.get_str]
-    txt << (0..7).map{ cs2.get_flt }
-    txt << (0..7).map{ cs2.get_flt }
-
-    # Levels of destruction ???
-    cnt = cs2.get_u4
-    txt << [:cnt, cnt]
-
-    cnt.times{|i|
-      txt << [:nth, i]
-      txt << [:str_a, cs2.get_str]
-      seq_num = cs2.get_u4
-      txt << [:seq_num, seq_num, :expected, i] # Sequential number
-      txt << cs2.get_collision3d
-      txt << cs2.get_u4_ary{ cs2.get_collision3d } # Windows
-      txt << cs2.get_u4_ary{ cs2.get_collision3d } # Doors
-      txt << cs2.get_u4_ary{ cs2.get_collision3d } # Gates
-
-
-      txt << [:ofs, cs2.ofs]
-      txt << [:str_b, cs2.get_u4, cs2.get_str]
-      txt << cs2.get_v3a
-
-
-      txt << [:ofs, cs2.ofs]
-      # Why 41 ???
-      
-      num_a = cs2.get_u4
-      txt << [:mystery, num_a]
-      
-      txt << [:pipes, cs2.get_u4_ary{
-        [cs2.get_str, cs2.get_u4_ary{ cs2.get_v3}, cs2.get_u4]
-        
-      }]
-      txt << [:mystery, cs2.get_u4]
-      txt << [:mystery2, cs2.get_u4_ary{ [cs2.get_flt, cs2.get_flt, cs2.get_u4] }]
-      
-      txt << [:ofs, cs2.ofs]
-  
-      txt << [:mystery3] + cs2.get(52).unpack("V*").map{|u|
-        if u > 256*256*256 then [u].pack("V").unpack("f")[0] else u end
-      }
-    }
-    txt << [:ofs, cs2.ofs]
-
-    u = cs2.get_u4
-    
-    txt << [:footer_size, u]
-    txt << [:footer1, (0...u).map{
-      cs2.get_u4_ary{ cs2.get_v2 }
-    }]
-
-    txt << [:footer2, (0...u).map{
-      cs2.get_u4_ary{ cs2.get_v2 }
-    }]
-  
-
-    txt << "#{cs2.bytes_left}/#{cs2.size} bytes to go" 
-    txt << "ofs: #{cs2.ofs}"
-    File.open(fnout, 'w'){|fhout|
-      fhout.puts txt.map(&:inspect)
-    }
-  rescue
-    txt << "FAIL #{fn}: #{$!}"
-    txt << "#{cs2.bytes_left}/#{cs2.size} bytes to go" 
-    txt << "ofs: #{cs2.ofs}"
-    File.open(fnout, 'w'){|fhout|
-      fhout.puts txt.map(&:inspect)
-    }
-  end
-}
+path_in, path_out = *ARGV
+status = cs2_unpack(path_in, path_out)
+exit(status ? 0 : 1)
