@@ -2,7 +2,7 @@
 
 require "pp"
 require "fileutils"
-require "pathname"
+require "stringio"
 
 class Float
   def pretty_single
@@ -154,7 +154,11 @@ def cs2_unpack(path_in, path_out)
   txt, status = cs2.unpack!
   File.open(path_out, 'w'){|fhout|
     fhout.puts "["
-    fhout.puts txt.map{|r| r.inspect + ","}
+    fhout.puts txt.map{|r|
+      out = StringIO.new
+      PP.pp(r, out, 120)
+      out.string.chomp + ","
+    }
     fhout.puts "]"
   }
   return status

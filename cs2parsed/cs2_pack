@@ -33,11 +33,24 @@ class CS2File
     @data << [v3s.size].pack("V")
     v3s.each{|v3| put_flts(v3)}
   end
+  def put_v2a(v2s)
+    @data << [v2s.size].pack("V")
+    v2s.each{|v2| put_flts(v2)}
+  end
   def put_primary_data_array(pda)
-    warn "No idea how to pack PDA"
-    pp pda
-
-  end  
+    put_u4 pda.size
+    pda.each_with_index{|row, i|
+      put_u4 i
+      if row[0] == true
+        @data << "\x01"
+      elsif row[0] == false
+        @data << "\x00"
+      else
+        raise "Expected true or false, got: #{row[0]}"
+      end
+      @data << row[1..-1].pack("l*")
+    }
+  end
   def put_collision3d(tok)
     unless tok[0] =~ /\ACollision\((\d+)x\/(\d+)x\)\z/
       raise "Expected: Colission(Nx/Mx)"
@@ -52,7 +65,6 @@ class CS2File
     put_str tok[1]
     put_v3a(v3a)
     put_primary_data_array(pda)
-
   end
   def put_array_of_collision3d(tok)
     put_u4 tok.size
@@ -60,7 +72,33 @@ class CS2File
       put_collision3d t
     }
   end
-  
+  def put_pipes(pipes)
+    put_u4 pipes.size
+    pipes.each{|s, v3a, u|
+      put_str s
+      put_v3a v3a
+      put_u4 u
+    }
+  end
+  def put_mystery2(ffua)
+    put_u4 ffua.size
+    ffua.each{|f1,f2,u|
+      put_flt f1
+      put_flt f2
+      put_u4 u
+    }
+  end
+  def put_mystery3(xx)
+    # This is ugly pile of fail
+    xx.map{|x|
+      if x.is_a?(Float)
+        put_flt x
+      else
+        put_u4 x
+      end
+    }
+  end
+
   def shift_stream
     while true
       return nil if @stream.empty?
@@ -71,7 +109,7 @@ class CS2File
       if tok[0] == :ofs
         assert_ofs!(tok[1])
       elsif tok[0] == :bytes_to_go
-        warn "Expected 0 bytes to be left, got #{tok[1]} instead" if tok[1] == 0
+        warn "Expected 0 bytes to be left, got #{tok[1]} instead" unless tok[1] == 0
         assert_ofs!(tok[3])
       else
         return tok
@@ -94,7 +132,7 @@ class CS2File
     raise "Expected token #{type} got #{tok[0]}" unless tok[0] == type
     tok[1..-1]
   end
-  
+
   def repack!
     put_flts shift_token(:flt6)[0]
     put_str shift_token(:str)[0]
@@ -115,7 +153,8 @@ class CS2File
       i = shift_token(:nth) # It doesn't actually do anything
 
       put_str shift_token(:str_a)[0]
-      seq_num = shift_token(:seq_num)[1]
+
+      seq_num = shift_token(:seq_num)[0]
       put_u4 seq_num
       
       put_collision3d(shift_stream)
@@ -123,29 +162,32 @@ class CS2File
       put_array_of_collision3d(shift_stream)
       put_array_of_collision3d(shift_stream)
       
-      put_str shift_token(:str_b)[0]
-      put_flts shift_token(:v3)[0]
+      u, s = shift_token(:str_b)
+      put_u4 u
+      put_str s
+      put_v3a shift_token(:v3a)[0]
       
-      put_u4 shift_token(:mystery)
+      put_u4 shift_token(:mystery)[0]
 
-      # txt << [:pipes, get_u4_ary{
-      #   [get_str, get_u4_ary{ get_v3 }, get_u4]
-      # }]
-      # txt << [:mystery, get_u4]
-      # txt << [:mystery2, get_u4_ary{ [get_flt, get_flt, get_u4] }]
-      # 
-      # txt << [:mystery3] + get(13*4).unpack("V*").map{|u|
-      #   if u > 256*256*256 then [u].pack("V").unpack("f")[0] else u end
-      # }
+      put_pipes shift_token(:pipes)[0]
+      put_u4 shift_token(:mystery)[0]
+      put_mystery2 shift_token(:mystery2)[0]
+      put_mystery3 shift_token(:mystery3)
     }
 
-    # txt << [:footer_size, u]
-    # txt << [:footer1, (0...u).map{ get_u4_ary{ get_v2 } }]
-    # 
-    # txt << [:footer2, (0...u).map{
-    #   get_u4_ary{ get_v2 }
-    # }]
+    footer_size = shift_token(:footer_size)[0]
+    footer1 = shift_token(:footer1)[0]
+    footer2 = shift_token(:footer2)[0]
+    raise "Footer1 size expected: #{footer_size}, got: #{footer1.size}" unless footer1.size == footer_size
+    raise "Footer2 size expected: #{footer_size}, got: #{footer2.size}" unless footer2.size == footer_size
 
+    put_u4 footer_size
+    footer1.each{|v2a|
+      put_v2a v2a
+    }
+    footer2.each{|v2a|
+      put_v2a v2a
+    }
     assert_end_of_stream!
   end
 end
