@@ -112,7 +112,7 @@ class CS2File
 
         txt << [:ofs, ofs]
         txt << [:str_b, get_u4, get_str]
-        txt << [:v3, get_v3a]
+        txt << [:v3a, get_v3a]
 
         txt << [:ofs, ofs]
 
@@ -136,10 +136,7 @@ class CS2File
 
       txt << [:footer_size, u]
       txt << [:footer1, (0...u).map{ get_u4_ary{ get_v2 } }]
-
-      txt << [:footer2, (0...u).map{
-        get_u4_ary{ get_v2 }
-      }]
+      txt << [:footer2, (0...u).map{ get_u4_ary{ get_v2 } }]
 
       success = true if bytes_left == 0
     rescue
