@@ -86,14 +86,14 @@ class CS2File
     txt = []
     success = false
     begin
-      txt << (0..5).map{ get_flt }
-      txt << get_str
-      txt << (0..7).map{ get_flt }
-      txt << (0..7).map{ get_flt }
+      txt << [:flt6, (0..5).map{ get_flt }]
+      txt << [:str, get_str]
+      txt << [:flt8, (0..7).map{ get_flt }]
+      txt << [:flt8, (0..7).map{ get_flt }]
 
-      txt << [get_u4, get_str, get_str]
-      txt << (0..7).map{ get_flt }
-      txt << (0..7).map{ get_flt }
+      txt << [:uss, get_u4, get_str, get_str]
+      txt << [:flt8, (0..7).map{ get_flt }]
+      txt << [:flt8, (0..7).map{ get_flt }]
 
       # Levels of destruction ???
       cnt = get_u4
@@ -121,7 +121,6 @@ class CS2File
 
         txt << [:pipes, get_u4_ary{
           [get_str, get_u4_ary{ get_v3 }, get_u4]
-
         }]
         txt << [:mystery, get_u4]
         txt << [:mystery2, get_u4_ary{ [get_flt, get_flt, get_u4] }]
@@ -148,7 +147,7 @@ class CS2File
       txt << "FAIL: #{$!}"
       [txt, false]
     end
-    txt << [:bytes_to_go, "#{bytes_left}/#{size}"]
+    txt << [:bytes_to_go, bytes_left, :total_size, size]
     txt << [:ofs, ofs]
     [txt, success]
   end  
@@ -158,7 +157,9 @@ def cs2_unpack(path_in, path_out)
   cs2 = CS2File.new(path_in)
   txt, status = cs2.unpack!
   File.open(path_out, 'w'){|fhout|
-    fhout.puts txt.map(&:inspect)
+    fhout.puts "["
+    fhout.puts txt.map{|r| r.inspect + ","}
+    fhout.puts "]"
   }
   return status
 end

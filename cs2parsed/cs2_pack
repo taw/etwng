@@ -1,0 +1,109 @@
+#!/usr/bin/env ruby
+
+require "pp"
+
+class CS2File
+  attr_reader :data
+  def initialize(stream)
+    @data = ""
+    @stream = stream
+  end
+  def ofs
+    @data.size
+  end
+  
+  def put_flt(v)
+    @data << [v].pack("f")
+  end
+  def put_flts(vs)
+    @data << vs.pack("f" * vs.size)
+  end
+  def put_u2(v)
+    @data << [v].pack("v")
+  end
+  def put_u4(v)
+    @data << [v].pack("V")
+  end
+  def put_str(s)
+    s = s.unpack("U*").pack("v*")
+    put_u2(s.size/2)
+    @data << s
+  end  
+  
+  def shift_stream
+    while true
+      return nil if @stream.empty?
+      tok = @stream.shift
+      unless tok.is_a?(Array) and tok[0].is_a?(Symbol)
+        raise "Expected correctly formatted token, got: #{tok.inspect}"
+      end
+      if tok[0] == :ofs
+        assert_ofs!(tok[1])
+      elsif tok[0] == :bytes_to_go
+        warn "Expected 0 bytes to be left, got #{tok[1]} instead" if tok[1] == 0
+        assert_ofs!(tok[3])
+      else
+        return tok
+      end
+    end
+  end
+
+  def assert_ofs!(expected_ofs)
+    warn "Expected offset: #{expected_ofs}, got instead: #{ofs}" unless ofs == expected_ofs
+  end
+  
+  def assert_end_of_stream!
+    tok = shift_stream
+    raise "Tokens left after end of stream" unless tok.nil?
+  end
+  
+  def shift_token(type)
+    tok = shift_stream
+    raise "Expected token #{type} got end of stream" unless tok
+    raise "Expected token #{type} got #{tok[0]}" unless tok[0] == type
+    tok[1..-1]
+  end
+  
+  def repack!
+    put_flts shift_token(:flt6)[0]
+    put_str shift_token(:str)[0]
+    put_flts shift_token(:flt8)[0]
+    put_flts shift_token(:flt8)[0]
+
+    u,s1,s2 = shift_token(:uss)
+    put_u4 u
+    put_str s1
+    put_str s2
+    put_flts shift_token(:flt8)[0]
+    put_flts shift_token(:flt8)[0]
+    
+    cnt = shift_token(:cnt)[0]
+    put_u4 cnt
+    
+    cnt.times{
+      # ...     
+      
+    }
+    # ...
+
+
+    assert_end_of_stream!
+  end
+end
+
+def cs2_pack(path_in, path_out)
+  stream = eval(File.open(path_in, 'rb', &:read))
+  cs2 = CS2File.new(stream)
+  cs2.repack!
+  File.open(path_out, 'wb'){|fh|
+    fh.print cs2.data
+  }
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} file.txt file.cs2.parsed"
+  exit 1
+end
+
+path_in, path_out = *ARGV
+cs2_pack(path_in, path_out)

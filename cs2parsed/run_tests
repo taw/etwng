@@ -51,7 +51,7 @@ files_to_process.each do |path_in|
     puts "... unpacking FAIL"
     next
   end
-  if system "./cs2_unpack", path_mid, path_out
+  if system "./cs2_pack", path_mid, path_out
     puts "... packing OK"
   else
     puts "... packing FAIL"
