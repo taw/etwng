@@ -78,7 +78,7 @@ class CS2File
     }
   end
   def get_collision3d
-    data = [get_str, get_v3a, get_primary_data_array.size]
+    data = [get_str, get_v3a, get_primary_data_array]
     ["Collision(#{data[1].size}x/#{data[2].size}x)", data[0], data[1], data[2]]
   end
  
@@ -112,12 +112,11 @@ class CS2File
 
         txt << [:ofs, ofs]
         txt << [:str_b, get_u4, get_str]
-        txt << get_v3a
+        txt << [:v3, get_v3a]
 
         txt << [:ofs, ofs]
 
-        num_a = get_u4
-        txt << [:mystery, num_a]
+        txt << [:mystery, get_u4]
 
         txt << [:pipes, get_u4_ary{
           [get_str, get_u4_ary{ get_v3 }, get_u4]

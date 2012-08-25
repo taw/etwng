@@ -29,12 +29,43 @@ class CS2File
     put_u2(s.size/2)
     @data << s
   end  
+  def put_v3a(v3s)
+    @data << [v3s.size].pack("V")
+    v3s.each{|v3| put_flts(v3)}
+  end
+  def put_primary_data_array(pda)
+    warn "No idea how to pack PDA"
+    pp pda
+
+  end  
+  def put_collision3d(tok)
+    unless tok[0] =~ /\ACollision\((\d+)x\/(\d+)x\)\z/
+      raise "Expected: Colission(Nx/Mx)"
+    end
+    d1sz, d2sz = $1.to_i, $2.to_i
+    name = tok[1]
+    v3a  = tok[2]
+    pda  = tok[3]
+    raise "Expected v3a size equal to #{d1sz}, got #{v3a.size}" unless d1sz == v3a.size
+    raise "Expected primary data array size equal to #{d2sz}, got #{pda.size}" unless d2sz == pda.size
+
+    put_str tok[1]
+    put_v3a(v3a)
+    put_primary_data_array(pda)
+
+  end
+  def put_array_of_collision3d(tok)
+    put_u4 tok.size
+    tok.each{|t|
+      put_collision3d t
+    }
+  end
   
   def shift_stream
     while true
       return nil if @stream.empty?
       tok = @stream.shift
-      unless tok.is_a?(Array) and tok[0].is_a?(Symbol)
+      unless tok.is_a?(Array)
         raise "Expected correctly formatted token, got: #{tok.inspect}"
       end
       if tok[0] == :ofs
@@ -81,11 +112,39 @@ class CS2File
     put_u4 cnt
     
     cnt.times{
-      # ...     
-      
-    }
-    # ...
+      i = shift_token(:nth) # It doesn't actually do anything
 
+      put_str shift_token(:str_a)[0]
+      seq_num = shift_token(:seq_num)[1]
+      put_u4 seq_num
+      
+      put_collision3d(shift_stream)
+      put_array_of_collision3d(shift_stream)
+      put_array_of_collision3d(shift_stream)
+      put_array_of_collision3d(shift_stream)
+      
+      put_str shift_token(:str_b)[0]
+      put_flts shift_token(:v3)[0]
+      
+      put_u4 shift_token(:mystery)
+
+      # txt << [:pipes, get_u4_ary{
+      #   [get_str, get_u4_ary{ get_v3 }, get_u4]
+      # }]
+      # txt << [:mystery, get_u4]
+      # txt << [:mystery2, get_u4_ary{ [get_flt, get_flt, get_u4] }]
+      # 
+      # txt << [:mystery3] + get(13*4).unpack("V*").map{|u|
+      #   if u > 256*256*256 then [u].pack("V").unpack("f")[0] else u end
+      # }
+    }
+
+    # txt << [:footer_size, u]
+    # txt << [:footer1, (0...u).map{ get_u4_ary{ get_v2 } }]
+    # 
+    # txt << [:footer2, (0...u).map{
+    #   get_u4_ary{ get_v2 }
+    # }]
 
     assert_end_of_stream!
   end
