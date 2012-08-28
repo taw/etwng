@@ -1,0 +1,83 @@
+#!/usr/bin/env ruby
+
+$: << File.dirname(__FILE__)
+require "esf_scripts"
+
+class InitializeVictoryConditions < EsfScript
+  def run!
+    factions = %W[
+      bavaria                                                                
+      chechenya_dagestan
+      cherokee
+      denmark
+      genoa
+      georgia
+      hannover
+      huron
+      inuit
+      iroquoi
+      knights_stjohn
+      morocco
+      mughal
+      mysore
+      papal_states
+      piedmont_savoy
+      plains
+      portugal
+      pueblo
+      safavids
+      venice
+      westphalia
+      wurttemberg
+      
+      barbary_states
+      courland
+      crimean_khanate
+      louisiana
+      new_spain
+      saxony
+      thirteen_colonies
+    ]
+
+    factions.each do |faction_to_change|
+      initialize_victory_conditions!(faction_to_change)
+    end
+  end
+  
+  def initialize_victory_conditions!(faction)
+    path = "#{@xmldir}/victory_conditions/#{faction}.xml"
+    create_new_file(path, victory_conditions_xml(faction))
+    update_each_xml("preopen_map_info/info*.xml", "//ary[@type='VICTORY_CONDITION_OPTIONS']") do |vc|
+      vc.add_child %Q[  <xml_include path="victory_conditions/#{faction}.xml"/>\n]
+      true
+    end
+  end
+  
+  def victory_conditions_xml(faction)
+%Q[<?xml version="1.0"?>
+ <rec type="VICTORY_CONDITION_OPTIONS">
+  <s>#{faction}</s>
+  <ary type="VICTORY_CONDITIONS_BLOCK">
+   <rec type="VICTORY_CONDITIONS_BLOCK">
+    <victory_conditions year="1799" region_count="35" prestige_victory="no" campaign_type="1 (long)">
+    </victory_conditions>
+   </rec>
+   <rec type="VICTORY_CONDITIONS_BLOCK">
+    <victory_conditions year="1750" region_count="25" prestige_victory="no" campaign_type="0 (short)">
+    </victory_conditions>
+   </rec>
+   <rec type="VICTORY_CONDITIONS_BLOCK">
+    <victory_conditions year="1799" region_count="25" prestige_victory="yes" campaign_type="2 (prestige)">
+    </victory_conditions>
+   </rec>
+   <rec type="VICTORY_CONDITIONS_BLOCK">
+    <victory_conditions year="1799" region_count="50" prestige_victory="no" campaign_type="3 (global domination)">
+    </victory_conditions>
+   </rec>
+  </ary>
+ </rec>
+]
+  end
+end
+
+InitializeVictoryConditions.new

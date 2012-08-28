@@ -50,6 +50,11 @@ class EsfScript
     end
   end
   
+  def create_new_file(file_name, doc)
+    warn "File already exists: #{file_name}" if File.exist?(file_name)
+    File.write(file_name, doc.to_s)
+  end
+  
   def update_xml(file_name, xpath)
     content = File.open(file_name, 'rb', &:read)
     doc = Nokogiri::XML.parse(content)
