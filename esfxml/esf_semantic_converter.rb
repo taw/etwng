@@ -98,6 +98,29 @@ def annotate_value!(annotation)
     out!("<v2 x=\"#{v[0]}\" y=\"#{v[1]}\"/>#{annotation}")
   when :v3
     out!("<v3 x=\"#{v[0]}\" y=\"#{v[1]}\" z=\"#{v[2]}\"/>#{annotation}")
+  when :bin16
+    data = v.unpack("C*")
+    if data.empty?
+      out!("<u4_ary/>#{annotation}")
+    else
+      out!("<u4_ary>#{data.join(" ")}</u4_ary>#{annotation}")
+    end
+  when :bin17
+    data = v.unpack("v*")
+    if data.empty?
+      out!("<u4_ary/>#{annotation}")
+    else
+      out!("<u4_ary>#{data.join(" ")}</u4_ary>#{annotation}")
+    end
+  when :bin18
+    data = unpack_u3be_ary(data)
+    if data.empty?
+      out!("<u4_ary/>#{annotation}")
+    else
+      out!("<u4_ary>#{data.join(" ")}</u4_ary>#{annotation}")
+    end
+    
+
   else
     raise "Trying to annotate value of unknown type: #{t}"
   end
