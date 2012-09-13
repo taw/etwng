@@ -290,13 +290,17 @@ module XmlTagHandlers
   end
   
   def on_text_node_grid_path(attributes, buf, ctx)
-    type = attributes[:type].to_i
+    type = attributes[:repetitions].to_i
     points = buf.strip.split(/[\s,]+/).map{|pt| (pt.to_f * 1048576.0).round.to_i}
     @stack[-1][3][:data] << [points.size/2].pack("V") << points.pack("V*") << [type].pack("V")
   end
 
   def on_start_node_grid_paths(attributes)
     [true, nil, {:data => ""}]
+  end
+
+  def on_end_node_grid_paths(attributes, buf, ctx)
+    @esf.put_4x "\x48", ctx[:data]
   end
 
   def on_start_node_obstacle_boundaries(attributes)
@@ -310,18 +314,21 @@ module XmlTagHandlers
   end
 
   def on_start_node_obstacle_boundaries_entry(attributes)
-    [false, "", {}]
+    [true, nil, {:pairs => []}]
   end
 
   def on_end_node_obstacle_boundaries_entry(attributes, buf, ctx)
     row = attributes[:row].to_i
     col = attributes[:col].to_i
-    pairs = buf.strip.split(/[\s,]+/).map(&:to_i)
+    
+    pairs = ctx[:pairs]
     @stack[-1][3][:data] << [pairs.size/2].pack("V") << pairs.pack("V*") << [(row<<16) + col, 0].pack("VV")
   end
 
-  def on_end_node_grid_paths(attributes, buf, ctx)
-    @esf.put_4x "\x48", ctx[:data]
+  def on_empty_node_boundaries_passable_part(attributes, buf, ctx)
+    a = attributes[:a].to_i
+    b = attributes[:b].to_i
+    @stack[-1][3][:pairs] << a << b
   end
 
   def on_text_node_victory_conditions(attributes, buf, ctx)

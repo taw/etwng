@@ -991,7 +991,7 @@ end
       pairs.each do |a,b|
         ax = "%08x" % a
         bx = "%08x" % b
-        out!("  #{a} #{b} <!-- #{ax} #{bx} -->")
+        out!(%Q[  <boundaries_passable_part a="#{a}" b="#{b}"/><!-- #{ax} #{bx} -->])
       end
       out!( " </obstacle_boundaries_entry>")
     end
@@ -1032,8 +1032,8 @@ end
         end
         out!("<grid_paths>")
         scale = 0.5 ** 20
-        parts.each{|part|
-          out!(" <grid_path type=\"#{part[:type]}\">")
+        parts.each_with_index{|part, grid_no|
+          out!(" <grid_path repetitions=\"#{part[:type]}\"><!-- #{grid_no+1} -->")
           part[:points].each{|x,y|
             x *= scale
             y *= scale
