@@ -989,9 +989,24 @@ end
       row, col = id >> 16, id & 0xFFFF
       out!(%Q[ <obstacle_boundaries_entry row="#{row}" col="#{col}">])
       pairs.each do |a,b|
-        ax = "%08x" % a
-        bx = "%08x" % b
-        out!(%Q[  <boundaries_passable_part a="#{a}" b="#{b}"/><!-- #{ax} #{bx} -->])
+        
+        passable_part = a >> 24
+        unknown2      = (a >> 4) & 0xFFFFF
+        path_type     = a & 0xF
+        path_type -= 16 if path_type >= 8
+        
+        path_id = b >> 22
+        grid_path = ((b >> 21) & 1) == 1
+        index = b & 0x1FFFFF
+
+        out!(%Q[  <boundaries_passable_part passable_part="%d (%02x)" unknown2="%d (%05x)" path_type="%d" path_id="%d" grid_path="%s" index="%d"/>] % [
+          passable_part, passable_part,
+          unknown2, unknown2,
+          path_type,
+          path_id,
+          grid_path ? 'yes' : 'no',
+          index
+        ])
       end
       out!( " </obstacle_boundaries_entry>")
     end
