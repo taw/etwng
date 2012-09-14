@@ -65,45 +65,11 @@ class SavFile
   end
 
   def get_ary(&blk)
-    sz = get_u4
-    p [:array_size_is, sz]
-    (0...sz).map(&blk)
+    (0...get_u4).map(&blk)
   end
 
   def get_hex(n)
     get(n).to_hex
-  end
-
-  # Just get some basic idea, samples/Autosave.sav
-  def parse_1!
-    p get_u2
-    p get_str
-    p get_hex(50)
-    p get_str
-    p get(14)
-    32.times{
-      p get_hex(53)
-    }
-    
-    get_u4.times{
-      p [get_asciiz, get_u4]
-    }
-    p get(10)
-    p get_str
-    p get_str
-    get(3804-3459)
-    p get_str
-    
-    get(42768-3922)
-    p get_u4
-    p [get_ascp0, get_ascp0, get_hex(24)]
-    p [get_ascp0, get_ascp0, get_hex(24+8)]
-    p [get_ascp0, get_ascp0, get_hex(24)]
-    p [get_ascp0, get_ascp0, get_hex(24)]
-    p [get_ascp0, get_ascp0, get_hex(24)]
-    p [get_ascp0, get_ascp0, get_hex(24)]
-    
-    p ofs
   end
 
   def parse_section!
@@ -131,6 +97,7 @@ class SavFile
       [get_asciiz, get_u4]
     }
     p get_u2
+
     parse_section!{
       p get_str
       p get_str
@@ -167,15 +134,29 @@ class SavFile
   end
   
   def ofs_scan!
-    cnt = 0
-    last_hit = 0
-    (0..size-3).each{|i|
+    # Skip headers
+    warn "Bad magic" unless get(2) == "\x06\x09"
+    get_str
+    get(50)
+    get_str
+    get(0x70c - 0x62)
+    get_u4
+    big_table = get_ary{
+      [get_asciiz, get_u4]
+    }
+    
+    get_u2 # still headers or already section type?
+    
+    section_stack = []
+    
+    (ofs..size-3).each{|i|
+      while !section_stack.empty? and i >= section_stack[-1][:end]
+        section_stack.pop
+      end
       if @data[i, 4].unpack("V")[0] == i
         secsz = @data[i+4, 4].unpack("V")[0]
-        p [:section, i, i-last_hit, secsz]
-        last_hit = i
-        cnt += 1
-        break if cnt >= 10
+        section_stack << {:start => i, :end => i+secsz}
+        puts("  " * section_stack.size + "Section #{i}...#{i+secsz} size=#{secsz}")
       end
     }
   end
@@ -189,8 +170,5 @@ samples.each{|path|
   sav = SavFile.new(path)
   # sav.ofs_scan!
   sav.parse_2!
+  break
 }
-
-# path = samples[0]
-# sav.parse_1!
-
