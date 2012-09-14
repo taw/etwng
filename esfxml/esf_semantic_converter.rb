@@ -993,9 +993,9 @@ end
         passable_part = a >> 24
         unknown2      = (a >> 4) & 0xFFFFF
         path_type     = a & 0xF
-        path_type -= 16 if path_type >= 8
         
         path_id = b >> 22
+        path_id -= 1024 if path_id >= 512
         grid_path = ((b >> 21) & 1) == 1
         index = b & 0x1FFFFF
 
@@ -1048,7 +1048,7 @@ end
         out!("<grid_paths>")
         scale = 0.5 ** 20
         parts.each_with_index{|part, grid_no|
-          out!(" <grid_path repetitions=\"#{part[:type]}\"><!-- #{grid_no+1} -->")
+          out!(" <grid_path repetitions=\"#{part[:type]}\"><!-- #{grid_no} -->")
           part[:points].each{|x,y|
             x *= scale
             y *= scale

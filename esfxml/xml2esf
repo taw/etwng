@@ -328,9 +328,9 @@ module XmlTagHandlers
   def on_empty_node_boundaries_passable_part(attributes, buf, ctx)
     passable_part = attributes[:passable_part].to_i
     unknown2      = attributes[:unknown2].to_i
-    path_type     = attributes[:path_type].to_i & 0xf
+    path_type     = attributes[:path_type].to_i
     
-    path_id       = attributes[:path_id].to_i
+    path_id       = attributes[:path_id].to_i & 1023
     grid_path     = (attributes[:grid_path] == 'yes') ? 1 : 0
     index         = attributes[:index].to_i
     
