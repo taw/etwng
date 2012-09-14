@@ -1,0 +1,196 @@
+#!/usr/bin/env ruby
+
+class Float
+  def pretty_single
+    rv = (((100_000.0 * self).round / 100_000.0) rescue self)
+    return rv if [self].pack("f") == [rv].pack("f")
+    self
+  end
+end
+
+class String
+  def to_hex
+    unpack("C*").map{|b| "%02x" % b}.join(" ")
+  end
+end
+
+
+class SavFile
+  attr_reader :data, :ofs
+
+  def initialize(path)
+    @data = File.open(path, 'rb', &:read)
+    @ofs = 0
+  end
+
+  def size
+    @data.size
+  end
+  def bytes_left
+    size - ofs
+  end
+  def get(n)
+    raise "Trying to read past end of file" unless size - ofs >= n
+    rv, @ofs = @data[@ofs, n], @ofs+n
+    rv
+  end
+  def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+  def get_i4
+    get(4).unpack("V")[0]
+  end
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  def get_str
+    get(2*get_u2).unpack("v*").pack("U*")
+  end
+  def get_ascp0
+    rv = get(get_u2)
+    warn "Expected null terminated string" unless rv[-1,1] == "\x00"
+    rv[0..-2]
+  end
+  def get_asciiz
+    rv = ""
+    while true
+      c = get(1)
+      break  if c == "\x00"
+      rv << c
+    end
+    rv
+  end
+
+  def get_ary(&blk)
+    sz = get_u4
+    p [:array_size_is, sz]
+    (0...sz).map(&blk)
+  end
+
+  def get_hex(n)
+    get(n).to_hex
+  end
+
+  # Just get some basic idea, samples/Autosave.sav
+  def parse_1!
+    p get_u2
+    p get_str
+    p get_hex(50)
+    p get_str
+    p get(14)
+    32.times{
+      p get_hex(53)
+    }
+    
+    get_u4.times{
+      p [get_asciiz, get_u4]
+    }
+    p get(10)
+    p get_str
+    p get_str
+    get(3804-3459)
+    p get_str
+    
+    get(42768-3922)
+    p get_u4
+    p [get_ascp0, get_ascp0, get_hex(24)]
+    p [get_ascp0, get_ascp0, get_hex(24+8)]
+    p [get_ascp0, get_ascp0, get_hex(24)]
+    p [get_ascp0, get_ascp0, get_hex(24)]
+    p [get_ascp0, get_ascp0, get_hex(24)]
+    p [get_ascp0, get_ascp0, get_hex(24)]
+    
+    p ofs
+  end
+
+  def parse_section!
+    @section_indent ||= 0
+    @section_indent += 1
+    cur_ofs = ofs
+    exp_ofs = get_u4
+    sz = get_u4
+    end_ofs = cur_ofs + sz
+    warn "Bad section ofs, expected #{exp_ofs} is #{cur_ofs}" unless cur_ofs == exp_ofs
+    puts "Section #{cur_ofs}..#{end_ofs}, size=#{sz}, nesting=#{@section_indent}"
+    yield(end_ofs) if block_given?
+    @ofs = end_ofs
+    @section_indent -= 1
+  end
+
+  def parse_2!
+    warn "Bad magic" unless get(2) == "\x06\x09"
+    p get_str
+    p get_hex(50)
+    p get_str
+    get(0x70c - 0x62) # totally obscure
+    p get_u4
+    p get_ary{
+      [get_asciiz, get_u4]
+    }
+    p get_u2
+    parse_section!{
+      p get_str
+      p get_str
+      p get_u2
+      parse_section!{|end_ofs|
+        p data[ofs...end_ofs].unpack("V*")
+      }
+      parse_section!{|end_ofs|
+        p data[ofs...end_ofs].to_hex # not u4 ary
+      }
+      p get_str
+      p get(5)
+      parse_section!{|end_ofs|
+        p data[ofs...end_ofs].to_hex
+      }
+      parse_section!{|end_ofs|
+        # p data[ofs...end_ofs].to_hex
+      }
+      parse_section!{|end_ofs|
+        p data[ofs...end_ofs].unpack("V*")
+      }
+      parse_section!{|end_ofs|
+        cnt = get_u4
+        p [get_ascp0, get_ascp0, get_flt, get_u4, get_u4, get_u4, get_u4, get_u4]
+        # Probably this plus more optional sections:
+        # p [get_ascp0, get_ascp0, get_flt, get_u4, get_ary{ [get_u4, get_u4]}, get_u4, get_u4, get_u4]
+        # p ofs
+      }
+      p ofs
+    }
+
+    p "At ofs #{@ofs} / #{bytes_left}"
+    puts ""
+  end
+  
+  def ofs_scan!
+    cnt = 0
+    last_hit = 0
+    (0..size-3).each{|i|
+      if @data[i, 4].unpack("V")[0] == i
+        secsz = @data[i+4, 4].unpack("V")[0]
+        p [:section, i, i-last_hit, secsz]
+        last_hit = i
+        cnt += 1
+        break if cnt >= 10
+      end
+    }
+  end
+end
+
+
+samples = Dir["samples/*.sav"].sort
+
+samples.each{|path|
+  puts "Parsing #{path}"
+  sav = SavFile.new(path)
+  # sav.ofs_scan!
+  sav.parse_2!
+}
+
+# path = samples[0]
+# sav.parse_1!
+
