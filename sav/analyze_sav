@@ -1,0 +1,251 @@
+#!/usr/bin/env ruby
+
+require "pp"
+
+class String
+  def to_hex
+    unpack("C*").map{|b| "%02x" % b}.join(" ")
+  end
+end
+
+class File
+  def self.write(path, content)
+    File.open(path, 'wb'){|fh|
+      fh.write content
+    }
+  end
+end
+
+class BinaryFileParser
+  attr_reader :data, :ofs
+
+  def initialize(path)
+    @data = File.open(path, 'rb', &:read)
+    @ofs = 0
+  end
+
+  def size
+    @data.size
+  end
+  def bytes_left
+    size - ofs
+  end
+  def get(n)
+    raise "Trying to read past end of file" unless size - ofs >= n
+    rv, @ofs = @data[@ofs, n], @ofs+n
+    rv
+  end
+  def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+  def get_i4
+    get(4).unpack("V")[0]
+  end
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  def get_str
+    get(2*get_u2).unpack("v*").pack("U*")
+  end
+  def get_ary(&blk)
+    (0...get_u4).map(&blk)
+  end
+  def get_asciiz
+    rv = ""
+    while true
+      c = get(1)
+      break  if c == "\x00"
+      rv << c
+    end
+    rv
+  end
+end
+
+class AnalysisFormatter
+  attr_reader :output_binary
+  
+  def initialize(data)
+    @output = []
+    @output_binary = "" # All data except section headers and strings, to verify
+    @stack = [@output]
+    @data = data
+  end
+  
+  def start_section!(ofs, sz)
+    new_section = ["Section #{ofs}...#{ofs+sz} data size=#{sz-8}"]
+    @stack[-1] << new_section
+    @stack << new_section
+  end
+  
+  def end_section!
+    @stack.pop
+  end
+  
+  # It assumes no gaps...
+  def bytes!(ofs, sz)
+    unless @stack[-1][-1] and @stack[-1][-1][0] == :bytes
+      out! :bytes, ofs, 0
+    end
+    @output_binary << @data[ofs, sz]
+    @stack[-1][-1][2] += sz
+  end
+  
+  def string!(str)
+    out! :str, str
+  end
+
+  def unicode!(str)
+    out! :unicode, str
+  end
+  
+  def out!(*token)
+    @stack[-1] << token
+  end
+  
+  def print!
+    pp @output
+    File.write("autosave.dump", @output_binary)
+  end
+end
+
+# FIXME: This is pretty crappy, since some methods throw this, some return nil,
+class LookaheadFailure < Exception
+end
+
+class SavFile < BinaryFileParser
+  def initialize(path)
+    super(path)
+  end
+
+  # throws on out of bound
+  def lookahead_data(start_ofs, end_ofs, sz)
+    raise LookaheadFailure.new if end_ofs - start_ofs < sz
+    @data[start_ofs, sz]
+  end
+
+  # throws on out of bound
+  def lookahead_u4(start_ofs, end_ofs)
+    lookahead_data(start_ofs, end_ofs, 4).unpack("V")[0]
+  end
+
+  def lookahead_u2(start_ofs, end_ofs)
+    lookahead_data(start_ofs, end_ofs, 2).unpack("v")[0]
+  end
+
+  # nil on out of bound
+  # String format: [uint16 size in codepoints], UTF16-LE codepoints
+  # Legal strings rejected due to false positives:
+  # 00 00
+  # Accepted:
+  # 01 00 xx 00  
+  def lookahead_unicode(start_ofs, end_ofs)
+    sz  = lookahead_u2(start_ofs, end_ofs)
+    return nil if sz == 0
+    str = lookahead_data(start_ofs+2, end_ofs, sz*2)
+    # Pretty ridiculous regexp, but we need to be fast:
+    # more characters are valid of course
+    return nil unless str =~ /\A(?:[A-Za-z0-9_ \'\/\.]\x00)*\z/
+    str = str.unpack("v*").pack("U*")
+    
+    return [sz*2+2, str]
+  rescue LookaheadFailure
+    nil
+  end
+
+  # nil on out of bound
+  # String format: [uint16 size in bytes (inclusive of \x00)], ASCII characters, last \x00
+  # There might be "legal", but ignore them due to false positives:
+  # * 00 00 
+  # * 01 00 00
+  # This is accepted:
+  # * 02 00 xx 00
+  def lookahead_asciiz(start_ofs, end_ofs)
+    sz  = lookahead_u2(start_ofs, end_ofs)
+    return nil if sz <= 1
+    str = lookahead_data(start_ofs+2, end_ofs, sz)
+    return nil unless str[-1,1] == "\x00"
+    str = str[0..-2]
+    return nil unless str =~ /\A[A-Za-z0-9_ \'\/\.]*\z/ # more characters are valid of course
+    
+    return [sz+2, str]
+  rescue LookaheadFailure
+    nil
+  end
+  
+  # nil on out of bound
+  def lookahead_section_header(start_ofs, end_ofs)
+    section_ofs = lookahead_u4(start_ofs, end_ofs)
+    section_size = lookahead_u4(start_ofs+4, end_ofs)
+    if section_ofs == start_ofs
+      section_size
+    else
+      nil
+    end
+  rescue LookaheadFailure
+    nil
+  end
+
+  def analyze_data!(start_ofs, end_ofs)
+    @ofs = start_ofs
+    while @ofs < end_ofs
+      sz = lookahead_section_header(ofs, end_ofs)
+      if sz
+        section_end_ofs = ofs+sz
+        @fmt.start_section!(ofs, sz)
+        analyze_data!(ofs+8, section_end_ofs)
+        @fmt.end_section!
+        next
+      end
+      
+      strx = lookahead_asciiz(ofs, end_ofs)
+      if strx
+        sz, str = *strx
+        @fmt.string!(str)
+        @ofs += sz
+        next
+      end
+      
+      strx = lookahead_unicode(ofs, end_ofs)
+      if strx
+        sz, str = *strx
+        @fmt.unicode!(str)
+        @ofs += sz
+        next
+      end
+      
+      @fmt.bytes! @ofs, 1
+      @ofs += 1
+    end
+    @ofs = end_ofs
+  end
+
+  def analyze!
+    # Skip headers
+    warn "Bad magic" unless get(2) == "\x06\x09"
+    get_str
+    get(50)
+    get_str
+    get(0x70c - 0x62)
+    get_u4
+    big_table = get_ary{
+      [get_asciiz, get_u4]
+    }
+
+    @fmt = AnalysisFormatter.new(@data)
+    analyze_data!(ofs, size)
+    @fmt
+  end
+end
+
+samples = Dir["samples/*.sav"].sort
+
+samples.each{|path|
+  puts "Parsing #{path}"
+  sav = SavFile.new(path)
+  fmt = sav.analyze!
+  fmt.print!
+  break
+}

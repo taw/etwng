@@ -14,7 +14,6 @@ class String
   end
 end
 
-
 class SavFile
   attr_reader :data, :ofs
 
@@ -131,34 +130,6 @@ class SavFile
 
     p "At ofs #{@ofs} / #{bytes_left}"
     puts ""
-  end
-  
-  def ofs_scan!
-    # Skip headers
-    warn "Bad magic" unless get(2) == "\x06\x09"
-    get_str
-    get(50)
-    get_str
-    get(0x70c - 0x62)
-    get_u4
-    big_table = get_ary{
-      [get_asciiz, get_u4]
-    }
-    
-    get_u2 # still headers or already section type?
-    
-    section_stack = []
-    
-    (ofs..size-3).each{|i|
-      while !section_stack.empty? and i >= section_stack[-1][:end]
-        section_stack.pop
-      end
-      if @data[i, 4].unpack("V")[0] == i
-        secsz = @data[i+4, 4].unpack("V")[0]
-        section_stack << {:start => i, :end => i+secsz}
-        puts("  " * section_stack.size + "Section #{i}...#{i+secsz} size=#{secsz}")
-      end
-    }
   end
 end
 
