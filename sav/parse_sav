@@ -139,7 +139,6 @@ samples = Dir["samples/*.sav"].sort
 samples.each{|path|
   puts "Parsing #{path}"
   sav = SavFile.new(path)
-  # sav.ofs_scan!
   sav.parse_2!
   break
 }
