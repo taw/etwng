@@ -280,10 +280,11 @@ class SavFile < BinaryFileParser
   end
   
   # nil on out of bound
+  # Rome seems to have ton more false positives wrt offset match
   def lookahead_section_header(start_ofs, end_ofs)
     section_ofs = lookahead_u4(start_ofs, end_ofs)
     section_size = lookahead_u4(start_ofs+4, end_ofs)
-    if section_ofs == start_ofs
+    if section_ofs == start_ofs and section_size >= 8 and start_ofs + section_size <= end_ofs
       section_size
     else
       nil
@@ -330,7 +331,7 @@ class SavFile < BinaryFileParser
     @fmt.start_special_section! "File Header"
 
     magic = get(2)
-    warn "Bad magic" unless magic == "\x06\x09"
+    warn "Bad magic" unless magic == "\x06\x09" or magic == "\x04\x07"
     @fmt.out! :raw, "Magic number #{magic.to_hex}"
 
     @fmt.unicode! get_str
@@ -340,8 +341,13 @@ class SavFile < BinaryFileParser
     
     @fmt.unicode! get_str
 
-    @fmt.bytes! @ofs, 1710
-    @ofs += 1710
+    if magic == "\x04\07" # Rome
+      header_data_sz = 1292-98
+    else # Medieval 2
+      header_data_sz = 1710
+    end
+    @fmt.bytes! @ofs, header_data_sz
+    @ofs += header_data_sz
 
     big_table_sz = get_u4
     
