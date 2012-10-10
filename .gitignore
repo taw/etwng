@@ -43,3 +43,5 @@ rigid_splines/samples
 cs2parsed/out
 extras
 templates/samples
+sav/samples*
+cpg/samples

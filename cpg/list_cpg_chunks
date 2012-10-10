@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+
+class CpgFile
+  def initialize(path)
+    @data = File.open(path, 'rb', &:read)
+    @ofs = 0
+  end
+  
+  def get(sz)
+    raise "Trying to read past end of file" if @ofs + sz > @data.size
+    rv = @data[@ofs, sz]
+    @ofs += sz
+    rv
+  end
+
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+  
+  def eof?
+    @ofs == @data.size
+  end
+
+  def get_asciiz
+    rv = ""
+    while true
+      c = get(1)
+      break if c == "\x00"
+      rv << c
+    end
+    rv
+  end
+
+  def get_chunk
+    orig_ofs = @ofs
+    sz = get_u4
+    name = get_asciiz
+    cdata = get(orig_ofs - @ofs + sz)
+    [name, cdata]
+  end
+
+  def parse!
+    get_u4 # float ?
+    until eof?
+      name, cdata = get_chunk
+      puts "#{name} - #{cdata.size} bytes"
+    end
+  end
+end
+
+ARGV.each{|fn|
+  cpg = CpgFile.new(fn)
+  cpg.parse!
+}
