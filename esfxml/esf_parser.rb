@@ -35,9 +35,8 @@ module EsfBasicBinaryOps
     if @abca
       rv = 0
       while true
-        b = @data[@ofs]
+        b = get_byte
         rv = (rv << 7) + (b & 0x7f)
-        @ofs += 1
         break if b & 0x80 == 0
       end
       @ofs + rv
@@ -48,9 +47,8 @@ module EsfBasicBinaryOps
   def get_item_count
     rv = 0
     while true
-      b = @data[@ofs]
+      b = get_byte
       rv = (rv << 7) + (b & 0x7f)
-      @ofs += 1
       break if b & 0x80 == 0
     end
     rv
@@ -226,6 +224,7 @@ module EsfBasicBinaryOps
     @ofs += 3
     rv
   end
+  
   def get_i3
     # "l>" "l<" only work in 1.9, not 1.8.7
     if @data[@ofs] >= 128
@@ -233,10 +232,10 @@ module EsfBasicBinaryOps
     else
       rv = ("\x00"+@data[@ofs,3]).unpack("N")[0]
     end
-    # warn "Not tested I:#{@data[@ofs,3].unpack("C*")*' '} I:#{rv}"
     @ofs += 3
     rv
   end
+
   def get_bool
     case b = get_byte
     when 1
@@ -248,6 +247,7 @@ module EsfBasicBinaryOps
       true
     end
   end    
+
   def parse_magic
     case magic = get_u
     when 0xABCD
@@ -322,6 +322,7 @@ module EsfBasicBinaryOps
     version   = nil if version == DefaultVersions[node_type]
     [node_type, version]
   end
+
   # PRECONDITION: ofs one byte after where it should be !!!
   def get_node_type_and_version_abca
     # Yes, it's reverse endian

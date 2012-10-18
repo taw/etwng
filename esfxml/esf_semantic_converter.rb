@@ -931,7 +931,6 @@ end
     return false unless @ofs < ofs_end and u4_encodings[@data[@ofs]]
     ofs2 = @ofs + 1 + u4_encodings[@data[@ofs]]
     return false unless ofs2 < ofs_end and u4_encodings[@data[ofs2]]
-    # STDERR.puts "YES! %02X %02X" % [@data[@ofs], @data[ofs2]]
     true
     # rv = (@ofs+10 <= ofs_end and @data[@ofs, 1] == "\x04" and @data[@ofs+5, 1] == "\x04")
     # warn "Lookahead v2x fail: #{@ofs}/#{ofs_end}" unless rv
@@ -940,7 +939,6 @@ end
   
   # Call only if lookahead_v2x? says it's ok
   def convert_v2x!
-    # puts "Convert v2x: #{@ofs} #{@data[@ofs]} #{@data[@ofs+5]}"
     x = get_value![1] * 0.5**20
     y = get_value![1] * 0.5**20
     out!(%Q[<v2x x="#{x}" y="#{y}"/>])
@@ -2160,7 +2158,7 @@ end
                   out_ary!("sea_grid_lands", "", lands.map{|x| " #{x}"})
                   out_ary!("sea_grid_seas", "", seas.map{|x| " #{x}"})
                   out_ary!("sea_grid_ports", "", ports.map{|x| " #{x}"})
-                  out_ary!("sea_grid_numbers", "", numbers.empty? ? "" : " " + numbers.join(" "))
+                  out_ary!("sea_grid_numbers", "", numbers.empty? ? [] : [" " + numbers.join(" ")])
                 end
               end
             end

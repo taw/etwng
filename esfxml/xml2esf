@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+$: << "."
 require 'rubygems'
 require "nokogiri"
 require "esf_builder"
@@ -770,7 +771,7 @@ module XmlTagHandlers
     put_rec "techs" do
       @esf.put_s attributes[:name]
       @esf.put_u attributes[:status].to_i
-      @esf.put_flt attributes[:research_points]
+      @esf.put_flt attributes[:research_points].to_f
       @esf.put_u attributes[:school_slot_id].to_i
       @esf.put_4x("\x48", attributes[:unknown1].split(/\s+/).map(&:to_i).pack("V*"))
       @esf.put_u attributes[:unknown2].to_i
@@ -931,7 +932,7 @@ module XmlTagHandlers
         @esf.put_s ta[:name]
         @esf.put_v2 ta[:minx].to_f, ta[:miny].to_f
         @esf.put_v2 ta[:maxx].to_f, ta[:maxy].to_f
-        @esf.put_flt ta[:factor]
+        @esf.put_flt ta[:factor].to_f
         @esf.put_u xsize
         @esf.put_u ysize
         

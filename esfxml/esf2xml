@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+$: << "."
 require "fileutils"
 require "pp"
 require "esf_converter"
