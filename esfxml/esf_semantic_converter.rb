@@ -51,7 +51,7 @@ module EsfSemanticConverter
 ## Annotation system
 
 def annotate_value!(annotation)
-  low_level_tag = @data[@ofs] # Temporary workaround, move logic to get_value!
+  low_level_tag = @data[@ofs].ord # Temporary workaround, move logic to get_value!
   t, v = get_value!
   annotation = annotation ? "<!-- #{annotation} -->" : ""
   case t
@@ -348,7 +348,7 @@ end
       "total area (different from land area only in ports)",
     ]
     each_rec_member("slot_descriptions") do |ofs_end, i|
-      next unless @data[@ofs] == 0x4c
+      next unless @data[@ofs].ord == 0x4c
       annotation = v2a_annotations.shift
       next unless annotation
       annotation = "<!-- #{annotation} -->"
@@ -521,7 +521,7 @@ end
         annotate_value!("number of passable regions")
       elsif i == 8 and tag == :u2
         annotate_value!("number of listed regions (generally equals to the previous number, but not compulsory)")
-      elsif i == 9 and @data[@ofs] == 0x43
+      elsif i == 9 and @data[@ofs].ord == 0x43
         v = get_value![1].unpack("s*")
         region_names = {}
 
@@ -531,7 +531,7 @@ end
           out!(%Q[ #{r} <!-- #{region_name} -->])
         }
         out!(%Q[</i2_ary>])
-      elsif i == 10 and @data[@ofs] == 0x47 and region_names
+      elsif i == 10 and @data[@ofs].ord == 0x47 and region_names
         v = get_value![1].unpack("v*")
         
         if v.index(0)
@@ -586,7 +586,7 @@ end
   
   def convert_rec_pathfinding_areas
     each_rec_member("pathfinding_areas") do |ofs_end, i|
-      next unless i == 1 and @data[@ofs] == 0x48
+      next unless i == 1 and @data[@ofs].ord == 0x48
       data = get_value![1].unpack("V*")
       if data[0] >= data.size
         warn "Vertices count greater than data size, skipping annotations"
@@ -646,8 +646,8 @@ end
   
 ## regions.esf records
   def lookahead_region_data_vertices
-    return nil unless @data[@ofs+4] == 0x80
-    return nil unless @data[@ofs+12] == 0x4c
+    return nil unless @data[@ofs+4].ord == 0x80
+    return nil unless @data[@ofs+12].ord == 0x4c
     ofs_end, = @data[@ofs+13, 4].unpack("V")
     @data[@ofs+17..ofs_end].unpack("f*").map(&:pretty_single)
   end
@@ -712,7 +712,7 @@ end
   def convert_rec_outlines
     raise SemanticFail.new unless @region_data_vertices
     each_rec_member("outlines") do |ofs_end, i|
-      next unless @data[@ofs] == 0x48
+      next unless @data[@ofs].ord == 0x48
       data = get_value![1]
       out!("<u4_ary>")
       data.unpack("V*").each do |i|
@@ -913,7 +913,7 @@ end
   
   def convert_rec_QUAD_TREE_BIT_ARRAY_NODE
     ofs_end = get_ofs_end
-    if ofs_end - @ofs == 10 and @data[@ofs] == 0x08 and @data[@ofs+5] == 0x08
+    if ofs_end - @ofs == 10 and @data[@ofs].ord == 0x08 and @data[@ofs+5].ord == 0x08
       a, b = get_bytes(10).unpack("xVxV")
       a = "%08x" % a
       b = "%08x" % b
@@ -928,13 +928,10 @@ end
   def lookahead_v2x?(ofs_end)
     # STDERR.puts "LOOKAHEAD v2x #{@ofs} #{@data[@ofs, 10].unpack("C*").map{|u| "%02x " % u}}"
     u4_encodings = {0x04 => 4, 0x19 => 0, 0x1a => 1, 0x1b => 2, 0x1c => 3}
-    return false unless @ofs < ofs_end and u4_encodings[@data[@ofs]]
-    ofs2 = @ofs + 1 + u4_encodings[@data[@ofs]]
-    return false unless ofs2 < ofs_end and u4_encodings[@data[ofs2]]
+    return false unless @ofs < ofs_end and u4_encodings[@data[@ofs].ord]
+    ofs2 = @ofs + 1 + u4_encodings[@data[@ofs].ord]
+    return false unless ofs2 < ofs_end and u4_encodings[@data[ofs2].ord]
     true
-    # rv = (@ofs+10 <= ofs_end and @data[@ofs, 1] == "\x04" and @data[@ofs+5, 1] == "\x04")
-    # warn "Lookahead v2x fail: #{@ofs}/#{ofs_end}" unless rv
-    # rv
   end
   
   # Call only if lookahead_v2x? says it's ok
@@ -1030,10 +1027,10 @@ end
 
   def convert_rec_PATHFINDING_GRID
     each_rec_member("PATHFINDING_GRID") do |ofs_end, i|
-      if i == 0 and @data[ofs] == 0x08
+      if i == 0 and @data[@ofs].ord == 0x08
         v = get_value![1]
         out!("<u>#{v}</u><!-- grid_paths -->")
-      elsif i == 1 and @data[ofs] == 0x48
+      elsif i == 1 and @data[@ofs].ord == 0x48
         v = get_value![1].unpack("l*")
         parts = []
         until v.empty?
@@ -1055,7 +1052,7 @@ end
           out!(" </grid_path>")
         }
         out!("</grid_paths>")
-      elsif i == 5 and @data[ofs] == 0x48
+      elsif i == 5 and @data[@ofs].ord == 0x48
         v = get_value![1].unpack("V*")
         out!("<cell_id_coords>")
         until v.empty?
@@ -1104,14 +1101,14 @@ end
 
   def convert_rec_grid_cells
     each_rec_member_nth_by_type("grid_cells") do |ofs_end, i|
-      if i == 0 and @data[@ofs] == 0x46
+      if i == 0 and @data[@ofs].ord == 0x46
         v = get_value![1].unpack("C*")
         str = []
         until v.empty?
           str << v.shift(4).map{|x| "%02x" % x}.join(" ")
         end
         out!("<bin6>#{str.join(' ; ')}</bin6>")
-      elsif i == 1 and @data[@ofs] == 0x46
+      elsif i == 1 and @data[@ofs].ord == 0x46
         v = get_value![1].unpack("C*")
         out!("<bin6><!-- #{v.size/12} empty cells -->")
         until v.empty?
@@ -1220,10 +1217,10 @@ end
         end
       elsif type == :i and i == cnt
         annotate_value!("route id")
-      elsif @data[@ofs] == 0x48 and i == 0
+      elsif @data[@ofs].ord == 0x48 and i == 0
         data = get_value![1].unpack("V*")
         out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- commodities quantity -->")
-      elsif @data[@ofs] == 0x48 and i == 1
+      elsif @data[@ofs].ord == 0x48 and i == 1
         data = get_value![1].unpack("V*")
         out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- resources quantity -->")
       end
@@ -1249,7 +1246,7 @@ end
       elsif type == :u and (i-1)%2 == 1 and (i-1)/2 < cnt-1
         val = get_value![1]
         out!("<u>#{val}</u><!-- end point (#{port_lookpup(val)}) -->")
-      elsif @data[@ofs] == 0x48 and i == 0
+      elsif @data[@ofs].ord == 0x48 and i == 0
         data = get_value![1].unpack("V*")
         out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- commodities quantity -->")
       end
@@ -1953,7 +1950,7 @@ end
       when [1, :u]
         annotate_value!("Unit Number")
       else
-        if i == 0 and @data[@ofs] == 0x48
+        if i == 0 and @data[@ofs].ord == 0x48
           data = get_value![1].unpack("l*").map{|u| u * (0.5**20) }
           if data.empty?
             out!("<v2x_ary/>")
@@ -1999,16 +1996,16 @@ end
         annotate_value!("sub-segment ##{j / 4}")
       elsif type == :flt and j == 0
         annotate_value!("length of segment")
-      elsif @data[@ofs] == 0x4a and j == 0
+      elsif @data[@ofs].ord == 0x4a and j == 0
         out!("<!-- lengths of sub-segments -->")
         # pass through
-      elsif @data[@ofs] == 0x4a and j == 1
+      elsif @data[@ofs].ord == 0x4a and j == 1
         out!("<!-- cummulative lengths of sub-segments -->")
         # pass through
-      elsif @data[@ofs] == 0x48 and j == 0
+      elsif @data[@ofs].ord == 0x48 and j == 0
         out!("<!-- domestic trade route ids -->")
         # pass through
-      elsif @data[@ofs] == 0x48 and j == 1
+      elsif @data[@ofs].ord == 0x48 and j == 1
         out!("<!-- international trade route ids -->")
         # pass through
       end

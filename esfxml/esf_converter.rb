@@ -323,7 +323,7 @@ class EsfConverter < EsfParser
 
   def convert_abca_rec!
     # Special case root node, since it follows the old style for some reason
-    if @ofs == 0x11 or @data[@ofs-1] & 0x20 != 0
+    if @ofs == 0x11 or @data[@ofs-1].ord & 0x20 != 0
       convert_rec!(*get_node_type_and_version)
     else
       convert_rec!(*get_node_type_and_version_abca)
@@ -348,7 +348,7 @@ class EsfConverter < EsfParser
   end
   
   def convert_abca_ary!
-    if @data[@ofs-1] & 0x20 != 0
+    if @data[@ofs-1].ord & 0x20 != 0
       node_type, version = get_node_type_and_version
     else
       node_type, version = get_node_type_and_version_abca

@@ -139,8 +139,14 @@ module EsfBasicBinaryOps
     :angle_ary, nil, :bool_ary, :bool_ary, :u_ary, :u_ary, :u_ary, :u_ary,      # 40 - 47
     :u_ary, :i_ary, :i_ary, :i_ary, :i_ary, :flt_ary, nil, nil,                 # 48 - 4f
   ]
-  def lookahead_type
-    LookaheadTypeTable[@data[@ofs]]
+  if RUBY_VERSION > '1.9'
+    def lookahead_type
+      LookaheadTypeTable[@data[@ofs].ord] # 1.9
+    end
+  else
+    def lookahead_type
+      LookaheadTypeTable[@data[@ofs]] # 1.8
+    end
   end
   def lookahead_str
     save_ofs = @ofs
@@ -150,13 +156,13 @@ module EsfBasicBinaryOps
     # Just ignore existence of container, and see what's inside
     if @ofs < ofs_end
       if @abca
-        if @data[@ofs] >= 0x80 and @data[@ofs] <= 0xbf
+        if @data[@ofs].ord >= 0x80 and @data[@ofs].ord <= 0xbf
           save_ofs2 = @ofs
           get_rec_header!
           @ofs = save_ofs2 unless ofs_end == get_ofs_end
         end
       else
-        if @data[@ofs] == 0x80 and @data[@ofs+4, 4].unpack("V")[0] == ofs_end
+        if @data[@ofs].ord == 0x80 and @data[@ofs+4, 4].unpack("V")[0] == ofs_end
           @ofs += 8
         end
       end
@@ -207,10 +213,18 @@ module EsfBasicBinaryOps
   ensure
     @ofs = save_ofs
   end
-  def get_byte
-    rv = @data[@ofs]
-    @ofs += 1
-    rv
+  if RUBY_VERSION > '1.9'
+    def get_byte
+      rv = @data[@ofs].ord # 1.9
+      @ofs += 1
+      rv
+    end
+  else
+    def get_byte
+      rv = @data[@ofs] # 1.8
+      @ofs += 1
+      rv
+    end
   end
   alias_method :get_u1, :get_byte
   def get_i1
@@ -227,7 +241,7 @@ module EsfBasicBinaryOps
   
   def get_i3
     # "l>" "l<" only work in 1.9, not 1.8.7
-    if @data[@ofs] >= 128
+    if @data[@ofs].ord >= 128
       rv = ("\xFF"+@data[@ofs,3]).unpack("N")[0] - 0x1_0000_0000
     else
       rv = ("\x00"+@data[@ofs,3]).unpack("N")[0]
@@ -352,7 +366,7 @@ module EsfBasicBinaryOps
     rv = []
     xofs = 0
     while xofs < str.size
-      if str[xofs] >= 128
+      if str[xofs].ord >= 128
         rv << ("\xFF"+str[xofs,3]).unpack("N")[0] - 0x1_0000_0000
       else
         rv << ("\x00"+str[xofs,3]).unpack("N")[0]
@@ -589,7 +603,7 @@ module EsfParserSemantic
   def get_rec_header!
     if @abca
       return [nil, nil] unless get_byte.between?(0x80, 0xbf)
-      if @ofs == 0x11 or @data[@ofs-1] & 0x20 != 0
+      if @ofs == 0x11 or @data[@ofs-1].ord & 0x20 != 0
         get_node_type_and_version
       else
         get_node_type_and_version_abca
@@ -605,7 +619,7 @@ module EsfParserSemantic
   def get_ary_header!
     if @abca
       return [nil, nil] unless get_byte.between?(0xc0, 0xff)
-      if @data[@ofs-1] & 0x20 != 0
+      if @data[@ofs-1].ord & 0x20 != 0
         node_type, version = get_node_type_and_version
       else
         node_type, version = get_node_type_and_version_abca
@@ -616,9 +630,8 @@ module EsfParserSemantic
     end
   end
 
-
   def get_abca_ary!
-    if @data[@ofs-1] & 0x20 != 0
+    if @data[@ofs-1].ord & 0x20 != 0
       node_type, version = get_node_type_and_version
     else
       node_type, version = get_node_type_and_version_abca
@@ -629,7 +642,7 @@ module EsfParserSemantic
   
   def get_abca_rec!
     # Special case root node, since it follows the old style for some reason
-    if @ofs == 0x11 or @data[@ofs-1] & 0x20 != 0
+    if @ofs == 0x11 or @data[@ofs-1].ord & 0x20 != 0
       node_type, version = get_node_type_and_version
     else
       node_type, version = get_node_type_and_version_abca
