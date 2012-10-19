@@ -88,8 +88,8 @@ class AnalysisFormatter
     @path_parts << 0
   end
   
-  def start_section!(ofs, sz, tag)
-    start_special_section! "Section #{ofs}...#{ofs+sz} datasize=#{sz-8} tag?=#{tag}"
+  def start_section!(ofs, sz)
+    start_special_section! "Section #{ofs}...#{ofs+sz} datasize=#{sz-8}"
   end
   
   def end_section!
@@ -299,7 +299,7 @@ class SavFile < BinaryFileParser
       sz = lookahead_section_header(ofs, end_ofs)
       if sz
         section_end_ofs = ofs+sz
-        @fmt.start_section!(ofs, sz, @data[ofs-2, 2].unpack("CC").join(" "))
+        @fmt.start_section!(ofs, sz)
         analyze_data!(ofs+8, section_end_ofs)
         @fmt.end_section!
         next
