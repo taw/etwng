@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+class SavTest
+  attr_reader :path
+  
+  def initialize(path)
+    @path = path
+  end
+  
+  def unpacked_path
+    "tmp/" + File.basename(@path, ".sav") + "_dir"
+  end
+  
+  def recreated_path
+    "tmp/recreated_" + File.basename(@path)
+  end
+  
+  def test!
+    unless system "./unpack_sav", path, unpacked_path
+      STDERR.puts "Unpacking failed: #{path}"
+      return
+    end
+    unless system "./pack_sav", unpacked_path, recreated_path
+      STDERR.puts "Repacking failed: #{recreated_path}"
+      return
+    end
+    if system "diff", path, recreated_path
+      STDERR.puts "Conversion OK: #{path}"
+    end
+  end
+
+  def self.run_tests!(samples)
+    samples.each{|sample|
+      SavTest.new(sample).test!
+    }
+  end
+end
+
+all_samples = Dir["samples_blank/*"]
+
+if ARGV.empty?
+  SavTest.run_tests! all_samples
+else
+  SavTest.run_tests! ARGV
+end

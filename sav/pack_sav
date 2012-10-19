@@ -1,0 +1,124 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+
+class File
+  def self.write(path, data)
+    File.open(path, 'wb'){|fh|
+      fh.write(data)
+    }
+  end
+end
+
+class BinaryFileWriter
+  attr_reader :path
+  def initialize(path)
+    @data = ""
+    @path = path
+    @section_stack = []
+  end
+  def ofs
+    @data.size
+  end
+  def <<(bytes)
+    @data << bytes
+  end
+  def put_u2!(v)
+    @data << [v].pack("v")
+  end
+  def put_u4!(v)
+    @data << [v].pack("V")
+  end
+  def put_str!(str)
+    str = str.unpack("U*").pack("v*")
+    @data << [str.size/2].pack("v") << str
+  end
+  def put_asciiz!(str)
+    @data << str << "\x00"
+  end
+  def put_versions!(v)
+    put_u4! v.size
+    v.each{|n,i|
+      put_asciiz! n
+      put_u4! i
+    }
+  end
+  def start_section!
+    @section_stack << ofs
+    put_u4! ofs
+    put_u4! 0
+  end
+  def end_section!
+    section_ofs = @section_stack.pop
+    section_size = ofs - section_ofs
+    @data[section_ofs+4, 4] = [section_size].pack("V")
+  end
+  def save!
+    File.write(@path, @data)
+  end
+end
+
+class DirTreeReader
+  attr_reader :path
+  def initialize(path)
+    @path = Pathname(path)
+  end
+  def parse_text_file(rel_path)
+    full_path = @path + Pathname(rel_path)
+    File.readlines(full_path).map{|l| eval(l)}
+  end
+  def read_bin_file(rel_path)
+    full_path = @path + Pathname(rel_path)
+    File.open(full_path, "rb", &:read)
+  end
+end
+
+
+class SavRepacker
+  def initialize(path_in, path_out)
+    @in  = DirTreeReader.new(path_in)
+    @out = BinaryFileWriter.new(path_out)
+  end
+  
+  def parse_text_file!(rel_path)
+    @in.parse_text_file(rel_path).each{|cmd|
+      run_command! cmd
+    }
+  end
+  
+  def run_command!(cmd)
+    case cmd[0]
+    when :magic
+      @out << [cmd[1], cmd[2]].pack("CC")
+    when :bytes
+      @out << @in.read_bin_file(cmd[1])
+    when :str
+      @out.put_str! cmd[1]
+    when :u2
+      @out.put_u2! cmd[1]
+    when :versions
+      @out.put_versions! cmd[1..-1]
+    when :section
+      @out.start_section!
+      parse_text_file! cmd[1]
+      @out.end_section!
+    else
+      warn "Unknown command: #{cmd[0]}"
+    end    
+  end
+  
+  def run!
+    parse_text_file! "save_game.txt"
+    @out.save!
+  end
+end
+
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} <dir_in> <file_out.sav>"
+  exit 1
+end
+
+path_in, path_out = ARGV
+
+SavRepacker.new(path_in, path_out).run!
