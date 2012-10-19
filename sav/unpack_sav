@@ -102,14 +102,15 @@ class DirBuilder
       txt_path = "#{@path}/#{name_hint}.txt"
     else
       @txt_count += 1
-      txt_path = "%s/section-%06d.txt" % [@path, @txt_count]
+      rel_txt_path = "section-%06d.txt" % @txt_count
+      txt_path = "#{@path}/#{rel_txt_path}"
     end
     oldfh = @txtfh
     FileUtils.mkdir_p File.dirname(txt_path)
     @txtfh = File.open(txt_path, 'wb')
     @txtfh.sync = true
     yield
-    return txt_path
+    return rel_txt_path
   ensure
     @txtfh.close if @txtfh
     @txtfh = oldfh
@@ -121,9 +122,10 @@ class DirBuilder
 
   def save_bin(x)
     @binout_count += 1
-    binpath = "%s/data/%06d.bin" % [@path, @binout_count]
-    File.write(binpath, x)
-    binpath
+    rel_bin_path = "data/%06d.bin" % @binout_count
+    bin_path = "#{@path}/#{rel_bin_path}"
+    File.write(bin_path, x)
+    rel_bin_path
   end
 end
 
@@ -137,7 +139,7 @@ class SavUnpacker < BinaryFileParser
   def save_bytes! sz
     return if sz == 0
     start_ofs = @ofs
-    @out.txt! [:bytes, @out.save_bin(get(sz)), start_ofs, sz]
+    @out.txt! [:bytes, @out.save_bin(get(sz))]
   end
   def save_bytes_backward!(sz)
     @ofs -= sz
@@ -157,22 +159,18 @@ class SavUnpacker < BinaryFileParser
     }
   end
   def parse_section_data!(section_ofs, section_size)
-    # p [:psd_in, @ofs, section_ofs, section_ofs+section_size]
     descend_section(section_ofs+section_size){
       @ofs += 8
-      section_txt = @out.open_txt {
+      rel_section_txt_path = @out.open_txt {
         scan_section_data!
       }
-      @out.txt! [:section, section_txt, section_ofs, section_size]
+      @out.txt! [:section, rel_section_txt_path]
     }
-    # p [:psd_out, section_ofs, section_ofs+section_size]
   end
   def scan_section_data!
     raise "Section end #{@end} before ofs #{@ofs}" if @end < @ofs
-    # p [:ssd_in, @ofs, @end]
     bstart = @ofs
     until eos?
-      # p [:ssd_loop, @ofs]
       sec = lookahead_section_header
       if sec
         save_bytes_backward! @ofs-bstart
@@ -183,7 +181,6 @@ class SavUnpacker < BinaryFileParser
       end
     end
     save_bytes_backward! @ofs-bstart
-    # p [:ssd_out, @ofs, @end]
   end
 end
 
