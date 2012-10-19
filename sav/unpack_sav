@@ -1,0 +1,197 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+class File
+  def self.write(path, data)
+    File.open(path, 'wb'){|fh|
+      fh.write(data)
+    }
+  end
+end
+
+class BinaryFileParser
+  def initialize(path)
+    @data = File.open(path, 'rb', &:read)
+    @ofs = 0
+    @end = @data.size
+  end
+
+  def data_available
+    @end - @ofs
+  end
+  
+  def get(sz)
+    raise "Data requested more than size of section: #{sz} at #{@ofs}...#{@end}" if sz > data_available
+    rv = @data[@ofs, sz]
+    @ofs += sz
+    rv
+  end
+  
+  def eos?
+    @ofs == @end
+  end
+  
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  
+  def get_byte
+    get(1).unpack("C")[0]
+  end
+  
+  def get_str
+    get(2*get_u2).unpack("v*").pack("U*")
+  end
+
+  def get_ary(&blk)
+    (0...get_u4).map(&blk)
+  end
+
+  def get_asciiz
+    rv = ""
+    while true
+      c = get(1)
+      break  if c == "\x00"
+      rv << c
+    end
+    rv
+  end
+
+  # .sav specific
+  def lookahead_section_header
+    return nil if data_available < 8
+    start_ofs = @ofs
+    section_ofs, section_size  = get_u4, get_u4
+    @ofs = start_ofs
+    return nil unless section_ofs == start_ofs and section_size >= 8 and start_ofs + section_size <= @end
+    [start_ofs, section_size]
+  end
+  
+  def descend_section(section_end)
+    parent_end = @end
+    @end = section_end
+    yield
+  ensure
+    @end = parent_end    
+  end
+end
+
+class DirBuilder
+  attr_reader :path
+  
+  def initialize(path)
+    @path = path
+    if File.exist? @path
+      warn "Already exists: #{@path}, deleting"
+      FileUtils.rm_rf @path
+    end
+    @txtfh = nil
+    @txt_count = 0
+    @binout_count = 0
+    FileUtils.mkdir_p @path
+    FileUtils.mkdir_p "#{@path}/data"
+  end
+
+  def open_txt(name_hint=nil)
+    if name_hint
+      txt_path = "#{@path}/#{name_hint}.txt"
+    else
+      @txt_count += 1
+      txt_path = "%s/section-%06d.txt" % [@path, @txt_count]
+    end
+    oldfh = @txtfh
+    FileUtils.mkdir_p File.dirname(txt_path)
+    @txtfh = File.open(txt_path, 'wb')
+    @txtfh.sync = true
+    yield
+    return txt_path
+  ensure
+    @txtfh.close if @txtfh
+    @txtfh = oldfh
+  end
+  
+  def txt!(e)
+    @txtfh.puts e.inspect
+  end
+
+  def save_bin(x)
+    @binout_count += 1
+    binpath = "%s/data/%06d.bin" % [@path, @binout_count]
+    File.write(binpath, x)
+    binpath
+  end
+end
+
+class SavUnpacker < BinaryFileParser
+  def initialize(path_in, path_out)
+    @path_in = path_in
+    super(path_in)
+    @out = DirBuilder.new(path_out)
+  end
+  
+  def save_bytes! sz
+    return if sz == 0
+    start_ofs = @ofs
+    @out.txt! [:bytes, @out.save_bin(get(sz)), start_ofs, sz]
+  end
+  def save_bytes_backward!(sz)
+    @ofs -= sz
+    save_bytes! sz
+  end
+  
+  def run!
+    @out.open_txt("save_game"){
+      @out.txt! [:magic, get_byte, get_byte]
+      @out.txt! [:str, get_str]
+      save_bytes! 50
+      @out.txt! [:str, get_str]
+      save_bytes! 1710
+      @out.txt! [:versions, *get_ary{ [get_asciiz, get_u4]} ]
+      @out.txt! [:u2, get_u2]
+      scan_section_data!
+    }
+  end
+  def parse_section_data!(section_ofs, section_size)
+    # p [:psd_in, @ofs, section_ofs, section_ofs+section_size]
+    descend_section(section_ofs+section_size){
+      @ofs += 8
+      section_txt = @out.open_txt {
+        scan_section_data!
+      }
+      @out.txt! [:section, section_txt, section_ofs, section_size]
+    }
+    # p [:psd_out, section_ofs, section_ofs+section_size]
+  end
+  def scan_section_data!
+    raise "Section end #{@end} before ofs #{@ofs}" if @end < @ofs
+    # p [:ssd_in, @ofs, @end]
+    bstart = @ofs
+    until eos?
+      # p [:ssd_loop, @ofs]
+      sec = lookahead_section_header
+      if sec
+        save_bytes_backward! @ofs-bstart
+        parse_section_data!(*sec)
+        bstart = @ofs
+      else
+        @ofs += 1
+      end
+    end
+    save_bytes_backward! @ofs-bstart
+    # p [:ssd_out, @ofs, @end]
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} <file_in.sav> <dir_out>"
+  exit 1
+end
+
+path_in, path_out = ARGV
+
+SavUnpacker.new(path_in, path_out).run!
