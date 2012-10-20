@@ -5,10 +5,10 @@ require "fileutils"
 require "pp"
 require "esf_converter"
 
-verbose = true
-if ARGV[0] == "--quiet"
+verbose = false
+while ARGV[0] == "--verbose" or ARGV[0] == "--quiet"
+  verbose = (ARGV.shift == "--verbose")
   ARGV.shift
-  verbose = false
 end
 
 unless ARGV.size == 2
