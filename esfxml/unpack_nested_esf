@@ -5,14 +5,15 @@ ruby = "jruby"
 
 def windows?
   if RUBY_PLATFORM == 'java'
-    java.lang.System.getProperty("os.name") =~ /win/i
-  else
-    RUBY_PLATFORM =~ /win/i
+    require "java"
+    java.lang.System.getProperty("os.name") =~ /\bwin/i
+  else # not /darwin/
+    RUBY_PLATFORM =~ /\bwin/i
   end
 end
 
 quiet = nil
-if ARGV[0] == "--quiet"
+if ARGV[0] == "--quiet" or ARGV[0] == "--verbose"
   quiet = ARGV.shift
 end
 
@@ -32,7 +33,6 @@ if File.exist?(out_dir)
   STDERR.puts "#{out_dir} already exists"
   exit 1
 end
-
 
 system *[ruby, "esf2xml", quiet, in_file, out_dir].compact
 if File.exist?("#{out_dir}/compressed_data.esf.xz")
