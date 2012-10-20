@@ -392,7 +392,8 @@ class EsfConverter < EsfParser
       end
     }.compact.sort
     return if failures.empty?
-    STDERR.puts "Semantic conversion failures (low level conversion performed instead): "
+    STDERR.puts "Warning: Semantic conversion failures (low level conversion performed instead)"
+    STDERR.puts "(this is OK if converting ESFs for game newer than Empire):"
     failures.each do |key, all, quiet, fails|
        puts "* #{key}: (#{all} records, #{fails} failures, #{quiet} quiet failures)"
     end

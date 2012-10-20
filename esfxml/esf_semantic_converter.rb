@@ -846,7 +846,11 @@ end
     when [14, :s]
       out!(%Q[<campaign_bonus_14 subtype="#{subtype}" value="#{value}" unit_type="#{data[0].xml_escape}"/>])
     else
-      pp [:cbv, type, subtype, value, types, data]
+      # A lot of shogun 2 stuff here
+      # [:cbv, 13, 8, 50.0, [:s], ["cavalry_missile"]]
+      # [:cbv, 16, 7, 1.0, [:s], ["Genpei_Inf_Heavy_Naginata_Warrior_Monks"]]
+      # [:cbv, 15, 7, 1.0, [:s], ["samurai_hero"]]
+      # pp [:cbv, type, subtype, value, types, data]
       raise SemanticFail.new
     end
   end
