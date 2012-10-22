@@ -77,6 +77,7 @@ class Markers
   end
   
   def parse1
+    puts @path
     p get_str
     p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
     p [get_u4, get_str]
@@ -87,6 +88,7 @@ class Markers
   end
   
   def parse2
+    puts @path
     p get_str
     p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
     p [get_u4, get_str]
@@ -96,6 +98,7 @@ class Markers
   end
   
   def parse3
+    puts @path
     p get_str
     p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
     p [get_u4, get_str]
@@ -104,6 +107,20 @@ class Markers
       [get_u4, get_flt, get_flt, get_flt, get_u4_or_flt]
     }, $>, 150
     pp get_ary2{ [get_u2, get_str, get_ary{ get_u4 }] }
+    warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
+  end
+  
+  def parse4
+    puts @path
+    p get_str
+    p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
+    p [get_u4, get_str]
+    p get(20).unpack("V*")
+    PP.pp get_ary{ [get_u4, get_flt, get_flt, get_u4_or_flt] }, $>, 150
+    pp [get_u2, get_u2, get_str]
+    pp get_ary{ get_u4 }
+    p [get_u4, get_u4, get_u4, get_u4, get_str]
+  
     warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
   end
 end
@@ -121,6 +138,10 @@ Markers.new("samples/shogun2/campaign_display_overlay_marker.markers").parse2
 puts "----"
 
 Markers.new("samples/shogun2/campaign_display_emitter_marker.markers").parse3
+
+puts "----"
+
+Markers.new("samples/world.markers").parse4
 
 
 
