@@ -6,16 +6,25 @@ class Markers
     @ofs = 0
   end
 
-  def get(n)
-    rv, @ofs = @data[@ofs, n], @ofs + n
+  def get(sz)
+    raise "Requested reading past end of file (#{@path}:#{@ofs}) - #{sz}" if @ofs + sz > @data.size
+    rv = @data[@ofs, sz]
+    @ofs += sz
     rv
+  end
+  
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  
+  def get_str
+    get(get_u2*2).unpack("v*").pack("U*")
   end
   
   def parse
     parsed = []
     while @ofs < @data.size
-      strlen = get(2).unpack("v")[0]
-      str    = get(strlen*2).unpack("v*").pack("U*")
+      str    = get_str
       flts   = get(16*4).unpack("f*")
       parsed << [str, *flts]
     end
