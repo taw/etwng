@@ -17,13 +17,17 @@ end
 
 class Markers
   def initialize(path)
-    @path = @path
+    @path = path
     @data = File.open(path, 'rb', &:read)
     @ofs = 0
   end
 
   def bytes_left
     @data.size - @ofs
+  end
+
+  def eof?
+    @data.size == @ofs
   end
 
   def get(sz)
@@ -61,29 +65,49 @@ class Markers
     (0...get_u2).map(&blk)
   end
   
-  def parse
+  def parse1
     p get_str
     p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
-    p get_u4
+    p [get_u4, get_str]
+    p get(20).unpack("V*")
+    PP.pp get_ary{ [get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_u1, get_str]}, $>, 150
+    pp get_ary2{ [get_u2, get_str, get_ary{ get_u4 }] }
+    warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
+  end
+  
+  def parse2
     p get_str
-    p get(24).unpack("V*")
-    18.times {
-      p [get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_u1, get_str]
-    }
-    pp get_ary2{
-      [get_u2, get_str, get_ary{ get_u4 }]
-    }
-    warn "Still #{bytes_left} to go at #{@path}:#{@ofs}" unless bytes_left == 0
+    p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
+    p [get_u4, get_str]
+    p get(20).unpack("V*")
+    PP.pp get_ary{ [get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_u1, get_str]}, $>, 150
+    warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
   end
 end
 
-unless ARGV.size == 2
-  STDERR.puts "Usage: #{$0} input.markers output.txt"
-  exit 1
-end
+Markers.new("samples/shogun2/campaign_prop_marker.markers").parse1
 
-data = Markers.new(ARGV[0]).parse
- 
+puts "----"
+
+Markers.new("samples/shogun2/campaign_display_model_marker.markers").parse2
+
+puts "----"
+
+Markers.new("samples/shogun2/campaign_display_overlay_marker.markers").parse2
+
+puts "----"
+
+
+
+
+
+# unless ARGV.size == 2
+#   STDERR.puts "Usage: #{$0} input.markers output.txt"
+#   exit 1
+# end
+
+# data = Markers.new(ARGV[0]).parse2
+# 
 # File.open(ARGV[1], 'wb') do |fh|
 #   fh.puts data.map(&:inspect)
 # end
