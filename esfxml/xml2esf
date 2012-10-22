@@ -1442,7 +1442,9 @@ class Xml2Esf < Nokogiri::XML::SAX::Document
 
   def parse_file(rel_path)
     parser = Nokogiri::XML::SAX::Parser.new(self, 'UTF-8')
-    parser.parse_file(File.join(@in_dir, rel_path))
+    full_path = File.join(@in_dir, rel_path)
+    raise "No such file or directory: #{full_path}" unless File.exist?(full_path)
+    parser.parse_file(full_path)
   end
 
   def initialize(in_dir)
