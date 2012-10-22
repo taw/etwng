@@ -65,6 +65,17 @@ class Markers
     (0...get_u2).map(&blk)
   end
   
+  def get_u4_or_flt
+    v = get(4)
+    vi = v.unpack("V")[0]
+    vf = v.unpack("f")[0]
+    if vi >= 0 and vi <= 255
+      vi
+    else
+      vf
+    end
+  end
+  
   def parse1
     p get_str
     p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
@@ -83,6 +94,18 @@ class Markers
     PP.pp get_ary{ [get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_u1, get_str]}, $>, 150
     warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
   end
+  
+  def parse3
+    p get_str
+    p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
+    p [get_u4, get_str]
+    p get(20).unpack("V*")
+    PP.pp get_ary{
+      [get_u4, get_flt, get_flt, get_flt, get_u4_or_flt]
+    }, $>, 150
+    pp get_ary2{ [get_u2, get_str, get_ary{ get_u4 }] }
+    warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
+  end
 end
 
 Markers.new("samples/shogun2/campaign_prop_marker.markers").parse1
@@ -97,7 +120,7 @@ Markers.new("samples/shogun2/campaign_display_overlay_marker.markers").parse2
 
 puts "----"
 
-
+Markers.new("samples/shogun2/campaign_display_emitter_marker.markers").parse3
 
 
 
