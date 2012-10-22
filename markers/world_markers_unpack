@@ -1,0 +1,89 @@
+#!/usr/bin/env ruby
+
+require "pp"
+
+class Float
+  def pretty_single
+    return self if nan?
+    begin
+      rv = (100_000.0 * self).round / 100_000.0
+      return rv if self != rv and [self].pack("f") == [rv].pack("f")
+      self
+    rescue
+      self
+    end
+  end
+end
+
+class Markers
+  def initialize(path)
+    @path = @path
+    @data = File.open(path, 'rb', &:read)
+    @ofs = 0
+  end
+
+  def bytes_left
+    @data.size - @ofs
+  end
+
+  def get(sz)
+    raise "Requested reading past end of file (#{@path}:#{@ofs}) - #{sz}" if @ofs + sz > @data.size
+    rv = @data[@ofs, sz]
+    @ofs += sz
+    rv
+  end
+  
+  def get_u1
+    get(1).unpack("C")[0]
+  end
+  
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+  
+  def get_str
+    get(get_u2*2).unpack("v*").pack("U*")
+  end
+  
+  def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+  
+  def get_ary(&blk)
+    (0...get_u4).map(&blk)
+  end
+
+  def get_ary2(&blk)
+    (0...get_u2).map(&blk)
+  end
+  
+  def parse
+    p get_str
+    p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
+    p get_u4
+    p get_str
+    p get(24).unpack("V*")
+    18.times {
+      p [get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_u1, get_str]
+    }
+    pp get_ary2{
+      [get_u2, get_str, get_ary{ get_u4 }]
+    }
+    warn "Still #{bytes_left} to go at #{@path}:#{@ofs}" unless bytes_left == 0
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input.markers output.txt"
+  exit 1
+end
+
+data = Markers.new(ARGV[0]).parse
+ 
+# File.open(ARGV[1], 'wb') do |fh|
+#   fh.puts data.map(&:inspect)
+# end
