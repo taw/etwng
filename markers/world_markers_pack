@@ -1,0 +1,117 @@
+#!/usr/bin/env ruby
+
+require "pp"
+
+class File
+  def self.write(path, content)
+    File.open(path, 'wb'){|fh|
+      fh.write content
+    }
+  end
+end
+
+class Markers
+  def initialize(path)
+    @path = path
+    @data = eval(File.open(path, 'rb', &:read))
+    @rv = ""
+  end
+
+  def put_u1(v)
+    @rv << [v].pack("C")
+  end
+
+  def put_u2(v)
+    @rv << [v].pack("v")
+  end
+  
+  def put_u4(v)
+    @rv << [v].pack("V")
+  end
+  
+  def put_flt(v)
+    @rv << [v].pack("f")
+  end
+  
+  def put_str(s)
+    s = s.unpack("U*").pack("v*")
+    put_u2 s.size/2
+    @rv << s
+  end
+  
+  def shift
+    @data.shift
+  end
+  
+  def convert!
+    put_str shift
+    zz = shift
+    zz[0..7].each{|z| put_u4 z}
+    put_u2 zz[8]
+    a, s = shift
+    put_u4 a
+    put_str s
+    shift.each{|z| put_u4 z }
+    kind = shift
+    put_u4 kind
+    case kind
+    when 1
+      ar = shift
+      put_u4 ar.size
+      ar.each{|row|
+        row[0, 7].each{|x| put_flt x}
+        put_u1 row[7]
+        put_str row[8]
+      }
+      ar = shift
+      put_u2 ar.size
+      ar.each{|a,s,dd|
+        put_u2 a
+        put_str s
+        put_u4 dd.size
+        dd.each{|d| put_u4 d}
+      }
+    when 2, 5
+      put_u4 shift # empty only
+    when 3
+      ar = shift
+      put_u4 ar.size
+      ar.each{|row|
+        put_u4 row[0]
+        put_flt row[1]
+        put_flt row[2]
+        put_flt row[3]
+        # This will lead to stupid bugs if someone removes .0 from a float...
+        if row[4].is_a?(Float)
+          put_flt row[4]
+        else
+          put_u4 row[4]
+        end
+      }
+      ar = shift
+      put_u2 ar.size
+      ar.each{|a,s,dd|
+        put_u2 a
+        put_str s
+        put_u4 dd.size
+        dd.each{|d| put_u4 d}
+      }
+    else
+      raise "Unknown kind #{kind}"
+    end
+    raise "Data left after end of conversion" unless @data.empty?
+  end
+    
+  def save!(path_out)
+    convert!
+    File.write(path_out, @rv)
+  end
+end
+
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input.txt output.markers"
+  exit 1
+end
+
+Markers.new(ARGV[0]).save!(ARGV[1])

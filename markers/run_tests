@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+
+class MarkersConverterTest
+  attr_reader :path
+  def initialize(path)
+    @path = path
+  end
+  
+  def basename
+    @path.sub(%r[\Asamples/], "").gsub("/", "-").sub(/.markers\z/, "")
+  end
+  
+  def path_txt
+    "tmp/#{basename}.txt"
+  end
+
+  def path_recreated
+    "tmp/recreated_#{basename}.markers"
+  end
+  
+  def test!
+    unless system "./world_markers_unpack", path, path_txt
+      STDERR.puts "Unpacking failed: #{path}"
+      return false
+    end
+    unless system "./world_markers_pack", path_txt, path_recreated
+      STDERR.puts "Recreating failed: #{path}"
+      return false
+    end
+    if system "diff", path, path_recreated
+      STDERR.puts "OK: #{path}"
+    else
+      STDERR.puts "FAILED: #{path}"
+    end
+  end
+end
+
+samples_s2 = Dir["samples/*/*.markers"]
+
+samples_s2.each{|path|
+  mct = MarkersConverterTest.new(path)
+  mct.test!
+}

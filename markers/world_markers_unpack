@@ -76,41 +76,36 @@ class Markers
     end
   end
   
-  def parse1
-    puts @path
-    p get_str
-    p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
-    p [get_u4, get_str]
-    p get(20).unpack("V*")
-    PP.pp get_ary{ [get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_u1, get_str]}, $>, 150
-    pp get_ary2{ [get_u2, get_str, get_ary{ get_u4 }] }
-    warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
+  def parse
+    rv = []
+    rv << get_str
+    rv << [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
+    rv << [get_u4, get_str]
+    rv << get(16).unpack("V*")
+    kind = get_u4
+    rv << kind
+    
+    case kind
+    when 1
+      rv << get_ary{ [get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_u1, get_str]}
+      rv << get_ary2{ [get_u2, get_str, get_ary{ get_u4 }] }
+    when 2, 5
+      rv << get_u4 # empty only
+    when 3
+      rv << get_ary{[get_u4, get_flt, get_flt, get_flt, get_u4_or_flt] }
+      rv << get_ary2{ [get_u2, get_str, get_ary{ get_u4 }] }
+    else
+      raise "Unknown kind #{kind}"
+    end
+    
+    raise "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
+    rv
   end
   
-  def parse2
-    puts @path
-    p get_str
-    p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
-    p [get_u4, get_str]
-    p get(20).unpack("V*")
-    PP.pp get_ary{ [get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_u1, get_str]}, $>, 150
-    warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
-  end
   
-  def parse3
-    puts @path
-    p get_str
-    p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
-    p [get_u4, get_str]
-    p get(20).unpack("V*")
-    PP.pp get_ary{
-      [get_u4, get_flt, get_flt, get_flt, get_u4_or_flt]
-    }, $>, 150
-    pp get_ary2{ [get_u2, get_str, get_ary{ get_u4 }] }
-    warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
-  end
-  
-  def parse4
+  # Parser for world.markers for empire
+  # Does not work
+  def parse_etw
     puts @path
     p get_str
     p [get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u4, get_u2]
@@ -123,35 +118,18 @@ class Markers
   
     warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
   end
+  
+  def save!(path_out)
+    data = parse
+    File.open(path_out, 'wb'){|fh|
+      PP.pp data, fh, 150
+    }
+  end
 end
 
-Markers.new("samples/shogun2/campaign_prop_marker.markers").parse1
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input.markers output.txt"
+  exit 1
+end
 
-puts "----"
-
-Markers.new("samples/shogun2/campaign_display_model_marker.markers").parse2
-
-puts "----"
-
-Markers.new("samples/shogun2/campaign_display_overlay_marker.markers").parse2
-
-puts "----"
-
-Markers.new("samples/shogun2/campaign_display_emitter_marker.markers").parse3
-
-puts "----"
-
-Markers.new("samples/world.markers").parse4
-
-
-
-# unless ARGV.size == 2
-#   STDERR.puts "Usage: #{$0} input.markers output.txt"
-#   exit 1
-# end
-
-# data = Markers.new(ARGV[0]).parse2
-# 
-# File.open(ARGV[1], 'wb') do |fh|
-#   fh.puts data.map(&:inspect)
-# end
+Markers.new(ARGV[0]).save!(ARGV[1])
