@@ -46,3 +46,8 @@ These two commands should do it:
 
 $ jgem uninstall nokogiri
 $ jgem install nokogiri --pre
+
+== LZMA ==
+
+lzma.exe is from LZMA SDK [ http://www.7-zip.org/sdk.html ] and
+included here just for your convenience. It's Copyright (C) Igor Pavlov.

@@ -11,11 +11,13 @@ Install nokogiri gem.
 Double click on install_nokogiri.bat in this directory
 or from command line run: jgem install nokogiri --pre
 
-Step 3.
-Install lzma.exe from LZMA SDK.
-You can download it from http://www.7-zip.org/sdk.html
-(this is necessary only to mod new Shogun 2 Total War files,
+Step 3. [NO LONGER NEEDED]
+lzma.exe from LZMA SDK is included in the repository
+for your convenience now, so you don't need to do anything about that.
+(this is used only to mod new Shogun 2 Total War files,
 for Empire Total War and Napoleon Total War it's optional)
+If for any reason you need another version,
+you can download it from http://www.7-zip.org/sdk.html
 
 == Linux and OSX ==
 
