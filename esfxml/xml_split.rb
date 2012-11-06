@@ -1,3 +1,4 @@
+# Read XML_SPLIT.txt for explanation
 XmlSplit = {
   :ARMY_ARRAY                    => "army/%s-%d",
   :BATTLE_MAP_DEFINITION         => "battle_map_definition",

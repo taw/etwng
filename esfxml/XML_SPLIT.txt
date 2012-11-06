@@ -1,0 +1,40 @@
+Unpacking large esf (especially startpos.esf) can result in over 300MB of xml data,
+and that would be very difficult to view or edit, so it's split into multiple files instead.
+
+The root file is always called esf.xml, and binary files currently have hardcoded names.
+Everything else is controlled from xml_split.rb, which should be very easy to understand and edit.
+
+=== Rules ===
+
+xml_split.rb contains rules for handling individual records:
+
+  :CAI_WORLD_REGION_SLOTS        => "cai_region_slots/",
+
+This rule means whenever decoder encounters CAI_WORLD_REGION_SLOTS record,
+it creates a new file in "cai_region_slots/" directory.
+
+Name can contain various %-codes which will be expanded for saving:
+
+  :CHARACTER_ARRAY               => "character/%f-%s-%d",
+
+%f - current faction
+%s - first string within record
+%d - four digit sequential number
+
+If pattern would result in file which already exists,
+converter appends -0001, -0002 etc. to next files.
+So first file is called foo.xml, second foo-0001.xml,
+third foo-0002.xml etc.
+
+%d simply forces numbering from first file, so first would be
+foo-0001.xml, second foo-0002.xml and so on.
+
+If only directory is given and no file name converter checks
+if records starts with a string, and if so appends it as if
+pattern was "directory/%s", otherwise it just starts with a number.
+
+If some part of the path is empty converter may delete "-" character
+following that part's pattern. For example if faction is "austria",
+number is 5, but converter can find no string in record then
+"character/%f-%s-%d" pattern will be expanded to "character/austria-0005.xml",
+not "character/austria--0005.xml"
