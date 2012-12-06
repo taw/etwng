@@ -972,6 +972,21 @@ end
   end
 
   def convert_rec_OBSTACLE_BOUNDARIES
+    path_type_to_name = [
+      "passable area",
+      "sea boundary",
+      "transition area",
+      "river",
+      "land bridge area",
+      "land bridge transition area",
+      "road",
+      "slot",
+      "move area",
+      "unit",
+      "garrisoned unit",
+      "fort",
+    ]
+    
     data, = get_rec_contents(:bin8)
     data = data.unpack("V*")
     recs = []
@@ -997,10 +1012,11 @@ end
         grid_path = ((b >> 21) & 1) == 1
         index = b & 0x1FFFFF
 
-        out!(%Q[  <boundaries_passable_part passable_part="%d (%02x)" unknown2="%d (%05x)" path_type="%d" path_id="%d" grid_path="%s" index="%d"/>] % [
+        out!(%Q[  <boundaries_passable_part passable_part="%d (%02x)" unknown2="%d (%05x)" path_type="%d (%s)" path_id="%d" grid_path="%s" index="%d"/>] % [
           passable_part, passable_part,
           unknown2, unknown2,
           path_type,
+          path_type_to_name[path_type] || "unknown",
           path_id,
           grid_path ? 'yes' : 'no',
           index
