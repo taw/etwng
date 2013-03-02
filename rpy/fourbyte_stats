@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+class Stats
+  def initialize(path)
+    @data = File.read(path)
+  end
+  
+  def accumulate_stats!(ht)
+    (0..@data.size-4).each{|i|
+      d = @data[i,4]
+      next if d =~ /\xff/
+      next if d =~ /\x00/
+      ht[d] += 1
+    }
+  end
+end
+
+ht=Hash.new(0)
+Dir["data/*.rpy"].each{|x|
+  Stats.new(x).accumulate_stats!(ht)
+}
+ht.to_a.sort_by{|k,v| -v}.each{|k,v|
+  next if v == 1
+  next if k =~ /\xff/
+  next if k =~ /\x00/
+  puts "* %d %02x %02x %02x %02x" % [v, k[0], k[1], k[2], k[3]]
+}
