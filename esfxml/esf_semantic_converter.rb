@@ -645,11 +645,23 @@ end
   
 ## regions.esf records
   def lookahead_region_data_vertices
-    return nil if @abca # This is totally doable in ABCA, just a bit more complex
-    return nil unless @data[@ofs+4].ord == 0x80
-    return nil unless @data[@ofs+12].ord == 0x4c
-    ofs_end, = @data[@ofs+13, 4].unpack("V")
-    @data[@ofs+17..ofs_end].unpack("f*").map(&:pretty_single)
+    if @abca
+      save_ofs = @ofs
+      get_ofs_end
+      begin
+        return nil unless get_rec_header![0] == :vertices
+        get_ofs_end
+        return nil unless get_byte == 0x4c
+        @data[@ofs..get_ofs_end].unpack("f*").map(&:pretty_single)
+      ensure
+        @ofs = save_ofs
+      end
+    else
+      return nil unless @data[@ofs+4].ord == 0x80
+      return nil unless @data[@ofs+12].ord == 0x4c
+      ofs_end, = @data[@ofs+13, 4].unpack("V")
+      @data[@ofs+17..ofs_end].unpack("f*").map(&:pretty_single)
+    end
   end
   
   def lookahead_region_names
@@ -710,6 +722,7 @@ end
   end
   
   def convert_rec_outlines
+    # FIXME: ABCA support 0x57 type in place of 0x48
     raise SemanticFail.new unless @region_data_vertices
     each_rec_member("outlines") do |ofs_end, i|
       next unless @data[@ofs].ord == 0x48
