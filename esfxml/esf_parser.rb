@@ -486,7 +486,7 @@ module EsfGetData
     [:bin7, get_ofs_bytes]
   end
   def get_48!
-    [:bin8, get_ofs_bytes]
+    [:u_ary, get_ofs_bytes.unpack("V*")]
   end
   def get_4a!
     [:flt_ary, get_ofs_bytes]
@@ -522,13 +522,13 @@ module EsfGetData
     [:bin15, get_ofs_bytes]
   end
   def get_56!
-    [:bin16, get_ofs_bytes]
+    [:u_ary, get_ofs_bytes.unpack("C*")]
   end
   def get_57!
-    [:bin17, get_ofs_bytes]
+    [:u_ary, get_ofs_bytes.unpack("v*")]
   end
   def get_58!
-    [:bin18, get_ofs_bytes]
+    [:u_ary, unpack_u3be_ary(get_ofs_bytes)]
   end
   def get_59!
     [:bin19, get_ofs_bytes]

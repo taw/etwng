@@ -83,42 +83,17 @@ def annotate_value!(annotation)
     else
       out!("<flt_ary>#{data.join(" ")}</flt_ary>#{annotation}")
     end
-  # FAIL: lookahead_type returns :u_ary
-  #       get_value! gets :bin8
-  # This is performance hack for dealing with binary data, but yuck...
-  when :u_ary, :bin8
-    raise "FIXME: U4 arrays other than 048 not supported yet" unless low_level_tag == 0x48
-    data = v.unpack("V*")
-    if data.empty?
+  # Annotations are meant to work with all u_ary formats, but it's not tested properly yet
+  when :u_ary
+    if v.empty?
       out!("<u4_ary/>#{annotation}")
     else
-      out!("<u4_ary>#{data.join(" ")}</u4_ary>#{annotation}")
+      out!("<u4_ary>#{v.join(" ")}</u4_ary>#{annotation}")
     end
   when :v2
     out!("<v2 x=\"#{v[0]}\" y=\"#{v[1]}\"/>#{annotation}")
   when :v3
     out!("<v3 x=\"#{v[0]}\" y=\"#{v[1]}\" z=\"#{v[2]}\"/>#{annotation}")
-  when :bin16
-    data = v.unpack("C*")
-    if data.empty?
-      out!("<u4_ary/>#{annotation}")
-    else
-      out!("<u4_ary>#{data.join(" ")}</u4_ary>#{annotation}")
-    end
-  when :bin17
-    data = v.unpack("v*")
-    if data.empty?
-      out!("<u4_ary/>#{annotation}")
-    else
-      out!("<u4_ary>#{data.join(" ")}</u4_ary>#{annotation}")
-    end
-  when :bin18
-    data = unpack_u3be_ary(v)
-    if data.empty?
-      out!("<u4_ary/>#{annotation}")
-    else
-      out!("<u4_ary>#{data.join(" ")}</u4_ary>#{annotation}")
-    end
 
   else
     raise "Trying to annotate value of unknown type: #{t}"
@@ -308,9 +283,9 @@ end
   end
 
   def convert_rec_cell
-    (x,y), ab0, data = get_rec_contents(:v2, :u, :bin8)
-    raise SemanticFali.new if (data.size % 16) != 0
-    data = data.unpack("l*")
+    (x,y), ab0, data = get_rec_contents(:v2, :u, :u_ary)
+    raise SemanticFail.new if (data.size % 4) != 0
+    data = data.pack("V*").unpack("l*") # Why sint32?
 
     a0, b0 = ab0 >> 16, ab0 & 0xffff
     a0n = (a0 == -1 ? "invalid" : @regions_lookup_table[a0]) || "unknown"
@@ -586,7 +561,7 @@ end
   def convert_rec_pathfinding_areas
     each_rec_member("pathfinding_areas") do |ofs_end, i|
       next unless i == 1 and @data[@ofs].ord == 0x48
-      data = get_value![1].unpack("V*")
+      data = get_value![1]
       if data[0] >= data.size
         warn "Vertices count greater than data size, skipping annotations"
         out!("<u4_ary>")
@@ -647,12 +622,12 @@ end
   def lookahead_region_data_vertices
     if @abca
       save_ofs = @ofs
-      get_ofs_end
       begin
+        get_ofs_end
         return nil unless get_rec_header![0] == :vertices
         get_ofs_end
         return nil unless get_byte == 0x4c
-        @data[@ofs..get_ofs_end].unpack("f*").map(&:pretty_single)
+        get_ofs_bytes.unpack("f*").map(&:pretty_single)
       ensure
         @ofs = save_ofs
       end
@@ -660,7 +635,7 @@ end
       return nil unless @data[@ofs+4].ord == 0x80
       return nil unless @data[@ofs+12].ord == 0x4c
       ofs_end, = @data[@ofs+13, 4].unpack("V")
-      @data[@ofs+17..ofs_end].unpack("f*").map(&:pretty_single)
+      @data[@ofs+17...ofs_end].unpack("f*").map(&:pretty_single)
     end
   end
   
@@ -709,10 +684,10 @@ end
 
   def convert_rec_faces
     raise SemanticFail.new unless @region_data_vertices
-    data, = get_rec_contents(:bin8)
+    data, = get_rec_contents(:u_ary)
     tag!("rec", :type=>"faces") do
       out!("<u4_ary>")
-      data.unpack("V*").each do |i|
+      data.each do |i|
         x = @region_data_vertices[2*i]
         y = @region_data_vertices[2*i+1]
         out!(" #{i} <!-- #{x} #{y}-->")
@@ -722,13 +697,12 @@ end
   end
   
   def convert_rec_outlines
-    # FIXME: ABCA support 0x57 type in place of 0x48
     raise SemanticFail.new unless @region_data_vertices
     each_rec_member("outlines") do |ofs_end, i|
-      next unless @data[@ofs].ord == 0x48
+      next unless lookahead_type == :u_ary
       data = get_value![1]
       out!("<u4_ary>")
-      data.unpack("V*").each do |i|
+      data.each do |i|
         x = @region_data_vertices[2*i]
         y = @region_data_vertices[2*i+1]
         out!(" #{i} <!-- #{x} #{y}-->")
@@ -921,10 +895,10 @@ end
   
   def convert_rec_CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC_PATROL_POINTS
     data, = get_rec_contents([:rec, :CAI_BORDER_PATROL_POINT, nil])
-    x, y, a = ensure_types(data, :i, :i, :bin8)
+    x, y, a = ensure_types(data, :i, :i, :u_ary)
     x *= 0.5**20
     y *= 0.5**20
-    a = a.unpack("V*").join(" ")
+    a = a.join(" ")
     out!(%Q[<cai_border_patrol_point x="#{x}" y="#{y}" a="#{a}"/>])
   end
   
@@ -1001,8 +975,7 @@ end
       "fort",
     ]
     
-    data, = get_rec_contents(:bin8)
-    data = data.unpack("V*")
+    data, = get_rec_contents(:u_ary)
     recs = []
     until data.empty?
       n = data.shift
@@ -1042,8 +1015,8 @@ end
   end
 
   def convert_rec_BOUNDARIES
-    data, = get_rec_contents(:bin8)
-    data = data.unpack("V*").map{|x|
+    data, = get_rec_contents(:u_ary)
+    data = data.map{|x|
       [(x&0x8000_0000) != 0, x & 0x7FFF_FFFF]
     }
     if data.empty?
@@ -1064,7 +1037,8 @@ end
         v = get_value![1]
         out!("<u>#{v}</u><!-- grid_paths -->")
       elsif i == 1 and @data[@ofs].ord == 0x48
-        v = get_value![1].unpack("l*")
+        # Why is this int32, not uint32 again?
+        v = get_value![1].pack("V*").unpack("l*")
         parts = []
         until v.empty?
           sz = v.shift
@@ -1086,7 +1060,7 @@ end
         }
         out!("</grid_paths>")
       elsif i == 5 and @data[@ofs].ord == 0x48
-        v = get_value![1].unpack("V*")
+        v = get_value![1]
         out!("<cell_id_coords>")
         until v.empty?
           rc = v.shift
@@ -1251,10 +1225,10 @@ end
       elsif type == :i and i == cnt
         annotate_value!("route id")
       elsif @data[@ofs].ord == 0x48 and i == 0
-        data = get_value![1].unpack("V*")
+        data = get_value![1]
         out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- commodities quantity -->")
       elsif @data[@ofs].ord == 0x48 and i == 1
-        data = get_value![1].unpack("V*")
+        data = get_value![1]
         out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- resources quantity -->")
       end
     end
@@ -1280,7 +1254,7 @@ end
         val = get_value![1]
         out!("<u>#{val}</u><!-- end point (#{port_lookpup(val)}) -->")
       elsif @data[@ofs].ord == 0x48 and i == 0
-        data = get_value![1].unpack("V*")
+        data = get_value![1]
         out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- commodities quantity -->")
       end
     end
@@ -1695,10 +1669,10 @@ end
   end
 
   def convert_rec_CAI_REGION_HLCI
-    a, b, c, x, y = get_rec_contents(:u, :u, :bin8, :i, :i)
+    a, b, c, x, y = get_rec_contents(:u, :u, :u_ary, :i, :i)
     x *= 0.5**20
     y *= 0.5**20
-    c = c.unpack("V*").join(" ")
+    c = c.join(" ")
     out!(%Q[<cai_region_hlci region_id="#{a}" area_id="#{b}" area="#{c}" x="#{x}" y="#{y}"/><!-- area (0 = first area in this region, 1 = second area in this region) -->])
   end
 
@@ -1710,10 +1684,10 @@ end
   end
 
   def convert_rec_CAI_SITUATED
-    x, y, a, b, c = get_rec_contents(:i, :i, :u, :bin8, :u)
+    x, y, a, b, c = get_rec_contents(:i, :i, :u, :u_ary, :u)
     x *= 0.5**20
     y *= 0.5**20
-    b = b.unpack("V*").join(" ")
+    b = b.join(" ")
     out!(%Q[<cai_situated x="#{x}" y="#{y}" region_id="#{a}" theatre_id="#{b}" area_id="#{c}"/>])
   end
     
@@ -1846,10 +1820,10 @@ end
   
   def convert_rec_techs
     status_hint = {0 => " (done)", 2 => " (researchable)", 4 => " (not researchable)"}
-    data = get_rec_contents(:s, :u, :flt, :u, :bin8, :u)
+    data = get_rec_contents(:s, :u, :flt, :u, :u_ary, :u)
     name, status, research_points, school_slot_id, unknown1, unknown2 = *data
     status = "#{status}#{status_hint[status]}"
-    unknown1 = unknown1.unpack("V*").join(" ")
+    unknown1 = unknown1.join(" ")
     out!("<techs name=\"#{name.xml_escape}\" status=\"#{status}\" research_points=\"#{research_points}\" school_slot_id=\"#{school_slot_id}\" unknown1=\"#{unknown1}\" unknown2=\"#{unknown2}\"/>")
   end
 
@@ -1899,10 +1873,10 @@ end
   end
   
   def convert_rec_MAPS
-    name, x, y, unknown, data = get_rec_contents(:s, :u, :u, :i, :bin8)
+    name, x, y, unknown, data = get_rec_contents(:s, :u, :u, :i, :u_ary)
     raise SemanticFail.new if name =~ /\s/
     path, rel_path = dir_builder.alloc_new_path("map-%d", nil, ".pgm")
-    File.write_pgm(path, x*4, y, data)
+    File.write_pgm(path, x*4, y, data.pack("V*"))
     out!("<map name=\"#{name.xml_escape}\" unknown=\"#{unknown}\" pgm=\"#{rel_path.xml_escape}\"/>")
   end
 
@@ -1984,7 +1958,7 @@ end
         annotate_value!("Unit Number")
       else
         if i == 0 and @data[@ofs].ord == 0x48
-          data = get_value![1].unpack("l*").map{|u| u * (0.5**20) }
+          data = get_value![1].pack("V*").unpack("l*").map{|u| u * (0.5**20) }
           if data.empty?
             out!("<v2x_ary/>")
           else
@@ -2217,8 +2191,7 @@ end
   end
   
   def convert_rec_ID_LIST
-    data, = get_rec_contents(:bin8)
-    data = data.unpack("V*")
+    data, = get_rec_contents(:u_ary)
     if data.empty?
       out!("<id_list/>")
     else
