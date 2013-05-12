@@ -58,8 +58,10 @@ class SampleTest
 end
 
 sample_tests = [
-  # "startpos_boshin_nested.esf",
+  "startpos_boshin_nested.esf",
   "s2patched_regions.esf",
+  "s2patched_pathfinding.esf",
+  "s2patched_startpos.esf",
 ].map{|filename| SampleTest.new(filename)}.sort_by(&:size)
 
 FileUtils.mkdir_p "tmp"

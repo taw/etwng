@@ -20,8 +20,8 @@ class SampleTest
   end
   def ruby
     # %W[time jruby --server -J-Xmx2048m]
-    # %W[ruby]
-    %W[ruby1.9]
+    %W[ruby]
+    # %W[ruby1.9]
   end
   def convert!
     puts "Converting #{@filename}"
