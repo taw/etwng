@@ -56,11 +56,11 @@ sample_tests = [
 
   "pathfinding_spanish.esf",
 
-  # "campaign_sho_castle_1_fort.esf",
-  # "campaign_sho_castle_2_stronghold.esf",
-  # "campaign_sho_castle_3_fortress.esf",
-  # "campaign_sho_castle_4_castle.esf",
-  # "campaign_sho_castle_5_citadel.esf",
+  "campaign_sho_castle_1_fort.esf",
+  "campaign_sho_castle_2_stronghold.esf",
+  "campaign_sho_castle_3_fortress.esf",
+  "campaign_sho_castle_4_castle.esf",
+  "campaign_sho_castle_5_citadel.esf",
   "sho_sea_grids.esf",
   "sho_poi.esf",
   "sho_campaign.tree_list",
@@ -74,7 +74,7 @@ sample_tests = [
   "ntw_tut_startpos.esf",
   
   "startpos_boshin.esf",
-  "startpos_boshin_nested.esf",
+  # "startpos_boshin_nested.esf",
 ].map{|filename| SampleTest.new(filename)}.sort_by(&:size)
 
 FileUtils.mkdir_p "tmp"
