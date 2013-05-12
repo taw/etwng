@@ -645,6 +645,7 @@ end
   
 ## regions.esf records
   def lookahead_region_data_vertices
+    return nil if @abca # This is totally doable in ABCA, just a bit more complex
     return nil unless @data[@ofs+4].ord == 0x80
     return nil unless @data[@ofs+12].ord == 0x4c
     ofs_end, = @data[@ofs+13, 4].unpack("V")
@@ -690,7 +691,7 @@ end
     @region_data_num += 1
     dir_builder.region_data_num = @region_data_num
     tag!("rec", :type=>"region_data") do
-      convert_until_ofs!(get_u)
+      convert_until_ofs!(get_ofs_end)
     end
   end
 
