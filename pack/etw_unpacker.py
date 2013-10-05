@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.1
+#!/usr/bin/env python3
 import struct, os, sys
 
 # For easy file reading and writing interactions
@@ -37,13 +37,13 @@ def copy_data(source, dest, offset, length):
   j = (length%(2**20))
   if j:
     dest.write(source.read(j))
-  
+
 
 def saveFile(handle, outputdir, path, length, offset):
   path = path.replace("\\", "/")
   print('Exporting '+path+', length: '+str(length)+', at offset: '+str(offset))
-  
-  # create output directory 
+
+  # create output directory
   dir = os.path.split(os.path.join(outputdir, path))[0]
   if not os.path.isdir(dir):
     os.makedirs(dir)
@@ -60,17 +60,22 @@ def unpackPackArchive(pack_path, outputdir):
   deps_len    = read_long(handle)
   files_count = read_long(handle)
   files_len   = read_long(handle)
-  
+
   file_extra = (mod_type & 0x40 != 0)
+  file_extra_len = 8
   mod_type = mod_type & 0x3F
 
+  # PFH2/PFH3
   if magic == 843597392 or magic == 860374608:
     header_len = 32 + deps_len + files_len
     handle.seek(32 + deps_len)
+  elif magic == 877151824: # PFH4 (Rome 2)
+    header_len = 28 + deps_len + files_len
+    handle.seek(28 + deps_len)
+    file_extra_len = 4
   else:
     header_len = 24 + deps_len + files_len
     handle.seek(24 + deps_len)
-
 
   offset = header_len
   files = []
@@ -78,7 +83,7 @@ def unpackPackArchive(pack_path, outputdir):
     # read length of file
     data_len = read_long(handle)
     if file_extra:
-      handle.read(8)
+      handle.read(file_extra_len)
     fn, fn_len = read_cstr(handle)
     files.append((fn, data_len, offset))
     offset += data_len
