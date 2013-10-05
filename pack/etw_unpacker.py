@@ -54,7 +54,7 @@ def saveFile(handle, outputdir, path, length, offset):
 
 def unpackPackArchive(pack_path, outputdir):
   handle      = open(pack_path,"rb")
-  magic       = read_long(handle)
+  magic       = handle.read(4)
   mod_type    = read_long(handle)
   deps_count  = read_long(handle)
   deps_len    = read_long(handle)
@@ -65,17 +65,18 @@ def unpackPackArchive(pack_path, outputdir):
   file_extra_len = 8
   mod_type = mod_type & 0x3F
 
-  # PFH2/PFH3
-  if magic == 843597392 or magic == 860374608:
+  if magic == b"PFH2" or magic == b"PFH3":
     header_len = 32 + deps_len + files_len
     handle.seek(32 + deps_len)
-  elif magic == 877151824: # PFH4 (Rome 2)
+  elif magic == b"PFH4": # Rome 2
     header_len = 28 + deps_len + files_len
     handle.seek(28 + deps_len)
     file_extra_len = 4
-  else:
+  elif magic == b"PFH1":
     header_len = 24 + deps_len + files_len
     handle.seek(24 + deps_len)
+  else:
+    raise Exception("Unknown magic number %s" % magic)
 
   offset = header_len
   files = []

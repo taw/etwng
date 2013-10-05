@@ -39,6 +39,7 @@ db/f?
 cuf/font
 cuf/out
 pack/*.pack
+pack/unpacked
 rigid_splines/samples
 cs2parsed/out
 extras
