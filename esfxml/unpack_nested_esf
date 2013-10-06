@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-ruby = "jruby"
-# ruby = "ruby"
+ruby = RUBY_PLATFORM == 'java' ? "jruby" : "ruby"
 
 def windows?
   if RUBY_PLATFORM == 'java'
