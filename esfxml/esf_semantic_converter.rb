@@ -7,7 +7,7 @@ module EsfSemanticConverter
   ConvertSemanticAry = Hash.new{|ht,k| ht[k]={}}
   ConvertSemanticRec = Hash.new{|ht,k| ht[k]={}}
 
-## Utility functions  
+## Utility functions
   def convert_ary_contents_str(tag)
     data = get_ary_contents(:s).flatten
     raise SemanticFail.new if data.any?{|name| name =~ /\s/}
@@ -40,7 +40,7 @@ module EsfSemanticConverter
       "#{season} #{year}"
     end
   end
-  
+
   def ensure_unit_history(unit_history)
     date, a, b = ensure_types(unit_history, [:rec, :DATE, nil], :u, :u)
     date = ensure_date(date)
@@ -125,10 +125,10 @@ end
   def lookahead_faction_ids
     save_ofs = @ofs
     ofs_end, count = get_ofs_end_and_item_count
-    
+
     rv = {}
     id = nil
-    
+
     count.times do |i|
       rec_ofs_end = get_ofs_end
       node_type, version = get_rec_header!
@@ -154,6 +154,13 @@ end
             rv[id] = @str_lookup[get_u]
           else
             rv[id] = get_s
+          end
+          @ofs = rec_ofs_end
+        elsif t == 0x0f
+          if @abcf
+            rv[id] = @asc_lookup[get_u]
+          else
+            rv[id] = get_ascii
           end
           @ofs = rec_ofs_end
         else
@@ -184,13 +191,13 @@ end
       [:u, 1] => "Resource ID"
     )
   end
-  
+
   def convert_rec_CAI_WORLD_REGION_HLCIS
     annotate_rec("CAI_WORLD_REGION_HLCIS",
       [:u, 1] => "HLCIS ID"
     )
   end
-  
+
   def convert_rec_CAI_WORLD_RESOURCE_MOBILES
     annotate_rec("CAI_WORLD_RESOURCE_MOBILES",
       [:u, 3] => "Resource ID",
@@ -217,7 +224,7 @@ end
     }
     out_ary!("unit_class_names_list", "", data.map{|loc, used| " #{loc}=#{used ? 'yes' : 'no'}"})
   end
-  
+
   def convert_ary_REGION_OWNERSHIP
     data = get_ary_contents(:s, :s)
     raise SemanticFali.new if data.any?{|region, owner| region =~ /\s|=/ or owner =~ /\s|=/}
@@ -245,7 +252,7 @@ end
   def convert_ary_RESOURCES_ORDER
     convert_ary_contents_str("resources_order")
   end
-  
+
   def convert_ary_PORT_INDICES
     data = get_ary_contents(:s, :u)
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
@@ -259,21 +266,21 @@ end
     @settlement_indices = Hash[data.map{|name,value| [value, name]}]
     out_ary!("settlement_indices", "", data.map{|name,value| " #{name.xml_escape}=#{value}" })
   end
-  
+
   def convert_ary_AgentAttributes
     data = get_ary_contents(:s, :i)
     out_ary!("agent_attributes", "", data.map{|attribute,level| " #{attribute.xml_escape}=#{level}" })
   end
-  
+
   def convert_ary_AgentAttributeBonuses
     data = get_ary_contents(:s, :u)
     out_ary!("agent_attribute_bonuses", "", data.map{|attribute,level| " #{attribute.xml_escape}=#{level}" })
   end
-  
+
   def convert_ary_AgentAncillaries
     convert_ary_contents_str("agent_ancillaries")
   end
-  
+
 ## regions.esf arrays
 
   def convert_rec_query_info
@@ -289,7 +296,7 @@ end
 
     a0, b0 = ab0 >> 16, ab0 & 0xffff
     a0n = (a0 == -1 ? "invalid" : @regions_lookup_table[a0]) || "unknown"
-    
+
     out!(%Q[<cell x='#{x}' y='#{y}' region='#{a0} (#{a0n})' area='#{b0}'>])
     until data.empty?
       c1, c2, ab1, ab2 = data.shift(4)
@@ -307,7 +314,7 @@ end
     end
     out!(%Q[</cell>])
   end
-  
+
   def convert_rec_transition_links
     annotate_rec "transition_links",
       [:u, 1] => "turns needed",
@@ -359,7 +366,7 @@ end
     raise SemanticFali.new if data.any?{|name, value| name =~ /\s|=/}
     out_ary!("sea_indices", "", data.map{|name, value| " #{name.xml_escape}=#{value}" })
   end
-  
+
   def convert_ary_DIPLOMACY_RELATIONSHIP_ATTITUDES_ARRAY
     draa_labels = [
       "State gift received",
@@ -433,7 +440,7 @@ end
       end
     end
   end
-  
+
 ## trade_routes.esf arrays
 
   def convert_ary_SETTLEMENTS
@@ -454,15 +461,15 @@ end
 
   def convert_rec_grid_data
     region_names = nil
-    
+
     @path_ids_to_names = []
-    
+
     x0 = nil
     y0 = nil
     cell_dim = nil
     x1 = nil
     y1 = nil
-    
+
     each_rec_member("grid_data") do |ofs_end, i|
       tag = lookahead_type
       if i == 0 and lookahead_v2x?(ofs_end)
@@ -507,12 +514,12 @@ end
         out!(%Q[</i2_ary>])
       elsif i == 10 and @data[@ofs].ord == 0x47 and region_names
         v = get_value![1].unpack("v*")
-        
+
         if v.index(0)
           out!(%Q[<u2_ary>])
 
           idx_to_names = []
-          
+
           while v[0] != 0
             i    = v.shift
             name = region_names[i]
@@ -527,7 +534,7 @@ end
           out!("")
 
           @path_ids_to_names << "sea"
-          
+
           until v.empty?
             sz = v.shift
             elems = (0...sz).map{ v.shift }
@@ -536,7 +543,7 @@ end
             @path_ids_to_names << path
             out!(%Q[ #{sz} #{elems.join(", ")} <!-- #{path} -->])
           end
-           
+
           out!(%Q[</u2_ary>])
         else
           out!(%Q[<u2_ary>])
@@ -557,7 +564,7 @@ end
       " #{x*scale},#{y*scale}"
     })
   end
-  
+
   def convert_rec_pathfinding_areas
     each_rec_member("pathfinding_areas") do |ofs_end, i|
       next unless i == 1 and @data[@ofs].ord == 0x48
@@ -617,7 +624,7 @@ end
     end
     @pathfinding_vertices_ary = nil
   end
-  
+
 ## regions.esf records
   def lookahead_region_data_vertices
     if @abca
@@ -638,13 +645,13 @@ end
       @data[@ofs+17...ofs_end].unpack("f*").map(&:pretty_single)
     end
   end
-  
+
   def lookahead_region_names
     save_ofs = @ofs
     ofs_end, count = get_ofs_end_and_item_count
-    
+
     rv = []
-    
+
     count.times do
       rec_ofs_end = get_ofs_end
       while @ofs < rec_ofs_end
@@ -666,7 +673,7 @@ end
   ensure
     @ofs = save_ofs
   end
-  
+
   def convert_ary_regions
     @regions_lookup_table = lookahead_region_names
     raise QuietSemanticFail.new
@@ -695,7 +702,7 @@ end
       out!("</u4_ary>")
     end
   end
-  
+
   def convert_rec_outlines
     raise SemanticFail.new unless @region_data_vertices
     each_rec_member("outlines") do |ofs_end, i|
@@ -710,7 +717,7 @@ end
       out!("</u4_ary>")
     end
   end
-  
+
   def convert_rec_BOUNDS_BLOCK
     (xmin, ymin), (xmax, ymax) = get_rec_contents(:v2, :v2)
     out!("<bounds_block xmin=\"#{xmin}\" ymin=\"#{ymin}\" xmax=\"#{xmax}\" ymax=\"#{ymax}\"/>")
@@ -744,7 +751,7 @@ end
     File.write_pgm(path, xsz*2, ysz, data)
     out!("<wind_map sea_phillips_constant=\"#{sea_phillips_constant}\" pgm=\"#{rel_path.xml_escape}\"/>")
   end
-  
+
   def convert_rec_areas
     each_rec_member("areas") do |ofs_end, i|
       case [i, lookahead_type]
@@ -774,7 +781,7 @@ end
     File.write(path, meta + [sz].pack("Q") + cdata)
     out!("<compressed_data path=\"#{rel_path.xml_escape}\"/>")
   end
-  
+
   def convert_rec_CULTURE_PATHS
     agent, culture = get_rec_contents(:s, :s)
     out!(%Q[<culture_path agent="#{agent.xml_escape}" culture="#{culture.xml_escape}"/>])
@@ -792,13 +799,13 @@ end
       %Q[ year="#{year}" region_count="#{region_count}" prestige_victory="#{prestige_victory}" campaign_type="#{campaign_type}"],
       regions.map{|name| " #{name.xml_escape}"})
   end
-  
+
   # def convert_rec_BUILDING_CONSTRUCTION_ITEM
   #   pp :bci
   #   types, data = get_rec_contents_dynamic
   #   raise "Die in fire" unless types.shift(5) == [:u, :bool, :u, :u, :u]
   #   code, flag, turns_done, turns, cost = data.shift(5)
-  #   pp [:bci, code, flag, "#{turns_done}/#{turns}", cost, types, data] 
+  #   pp [:bci, code, flag, "#{turns_done}/#{turns}", cost, types, data]
   #   puts ""
   #   raise SemanticFail.new
   # end
@@ -842,7 +849,7 @@ end
       raise SemanticFail.new
     end
   end
-  
+
   def convert_rec_POPULATION__CLASSES
     data, = get_rec_contents([:rec, :POPULATION_CLASS, nil])
     data = ensure_types(data, :s, :bin4, :bin4, :i,:i,:i,:i,:i, :u,:u,:u, :i,:i)
@@ -865,18 +872,18 @@ end
       ["reform", a1.shift],
       ["bankrupcy", a1.shift],
       ["resistance", a1.shift],
-      
+
       ["gov_type", a2.shift],
       ["gov_buildings", a2.shift],
       ["characters", a2.shift],
       ["policing", a2.shift],
       ["garrison", a2.shift],
       ["crackdown", a2.shift],
-    
+
       ["happy_total", data.shift],
       ["unhappy_total", data.shift],
       ["repression_total", data.shift],
-      
+
       ["unknown_1", data.shift],    # rioting-related
       ["turns_rioting", data.shift],
       ["unknown_3", data.shift],    # (uint) rioting related
@@ -892,7 +899,7 @@ end
     }
     out!("/>")
   end
-  
+
   def convert_rec_CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC_PATROL_POINTS
     data, = get_rec_contents([:rec, :CAI_BORDER_PATROL_POINT, nil])
     x, y, a = ensure_types(data, :i, :i, :u_ary)
@@ -901,7 +908,7 @@ end
     a = a.join(" ")
     out!(%Q[<cai_border_patrol_point x="#{x}" y="#{y}" a="#{a}"/>])
   end
-  
+
   def convert_rec_QUAD_TREE_BIT_ARRAY_NODE
     ofs_end = get_ofs_end
     if ofs_end - @ofs == 10 and @data[@ofs].ord == 0x08 and @data[@ofs+5].ord == 0x08
@@ -915,7 +922,7 @@ end
       end
     end
   end
-  
+
   def lookahead_v2x?(ofs_end)
     # STDERR.puts "LOOKAHEAD v2x #{@ofs} #{@data[@ofs, 10].unpack("C*").map{|u| "%02x " % u}}"
     u4_encodings = {0x04 => 4, 0x19 => 0, 0x1a => 1, 0x1b => 2, 0x1c => 3}
@@ -924,14 +931,14 @@ end
     return false unless ofs2 < ofs_end and u4_encodings[@data[ofs2].ord]
     true
   end
-  
+
   # Call only if lookahead_v2x? says it's ok
   def convert_v2x!
     x = get_value![1] * 0.5**20
     y = get_value![1] * 0.5**20
     out!(%Q[<v2x x="#{x}" y="#{y}"/>])
   end
-  
+
   def each_rec_member(type)
     tag!("rec", :type => type) do
       ofs_end = get_ofs_end
@@ -944,7 +951,7 @@ end
       end
     end
   end
-  
+
   def each_rec_member_nth_by_type(tag)
     nth_by_type = Hash.new(0)
     each_rec_member(tag) do |ofs_end, i|
@@ -974,7 +981,7 @@ end
       "garrisoned unit",
       "fort",
     ]
-    
+
     data, = get_rec_contents(:u_ary)
     recs = []
     until data.empty?
@@ -989,11 +996,11 @@ end
       row, col = id >> 16, id & 0xFFFF
       out!(%Q[ <obstacle_boundaries_entry row="#{row}" col="#{col}">])
       pairs.each do |a,b|
-        
+
         passable_part = a >> 24
         unknown2      = (a >> 4) & 0xFFFFF
         path_type     = a & 0xF
-        
+
         path_id = b >> 22
         path_id -= 1024 if path_id >= 512
         grid_path = ((b >> 21) & 1) == 1
@@ -1087,7 +1094,7 @@ end
       end
     end
   end
-  
+
   def parse_path_boundary_data(a)
     u1 = a >> 24
     u2 = (a >> 4) & 0xFFFFF
@@ -1096,7 +1103,7 @@ end
       "land bridge transition area", "road", "slot"][u3] || "unknown"
     %Q[passable_part="%d (of 255)" unknown2="%d (%05x)" path_type="%d (%s)"] % [u1,u2,u2,u3,u3n]
   end
-  
+
   def parse_path_id(path_id)
     if path_id == 1023 or path_id == -1
       path_name = "transition"
@@ -1145,7 +1152,7 @@ end
     path_id = -1 if path_id == 1023
     attrs2 = parse_path_id(path_id)
     vertex_index = b & 0x3FFFFF
-    
+
     if @vertices_ary_lookup_table
       vertex_path = @vertices_ary_lookup_table[vertex_index]
       vertex_path = vertex_path ? vertex_path.join("; ") : "no such path"
@@ -1153,9 +1160,9 @@ end
     else
       out!(%Q[<boundaries %s %s vertex_index="%d"/>] % [attrs,attrs2,vertex_index])
     end
-    
+
   end
-  
+
   def convert_rec_FORT
     each_rec_member("FORT") do |ofs_end, i|
       if i == 0 and lookahead_v2x?(ofs_end)
@@ -1167,19 +1174,19 @@ end
       end
     end
   end
-  
+
   def convert_rec_CAI_BDI_COMPONENT_PROPERTY_SET
     autoconvert_v2x "CAI_BDI_COMPONENT_PROPERTY_SET", 10, 13
   end
-  
+
   def convert_rec_CAI_BDIM_WAIT_HERE
     autoconvert_v2x "CAI_BDIM_WAIT_HERE", 0
   end
-  
+
   def convert_rec_CAI_BDIM_MOVE_TO_POSITION
     autoconvert_v2x "CAI_BDIM_MOVE_TO_POSITION", 1, 5
   end
-  
+
   def convert_rec_CAI_BDI_RECRUITMENT_NEW_FORCE_OF_OR_REINFORCE_TO_STRENGTH
     autoconvert_v2x "CAI_BDI_RECRUITMENT_NEW_FORCE_OF_OR_REINFORCE_TO_STRENGTH", 4
   end
@@ -1259,7 +1266,7 @@ end
       end
     end
   end
-  
+
   def convert_rec_CAMPAIGN_TRADE_MANAGER
     annotate_rec_nth "CAMPAIGN_TRADE_MANAGER",
       [:u_ary, 0] => "commodities baseline price per unit",
@@ -1289,25 +1296,25 @@ end
     end
     @dir_builder.faction_name = nil
   end
-  
+
   def convert_rec_FACTION_TECHNOLOGY_MANAGER
     annotate_rec "FACTION_TECHNOLOGY_MANAGER",
       [:i, 1] => "technology number"
   end
-  
+
   def convert_rec_REBEL_SETUP
     unit_list, faction, religion, gov, unknown, social_class = get_rec_contents([:ary, :"UNIT LIST", nil], :s, :s, :s, :u, :s)
     attrs = %Q[ faction="#{faction.xml_escape}" religion="#{religion.xml_escape}" gov="#{gov.xml_escape}" unknown="#{unknown}" social_class="#{social_class.xml_escape}"]
     unit_list = unit_list.map{|unit| ensure_types(unit, :s)}.flatten
     out_ary!("rebel_setup", attrs, unit_list.map{|unit| " #{unit}"})
   end
-  
+
   def autoconvert_v2x(type, *positions)
     each_rec_member(type) do |ofs_end, i|
       convert_v2x! if positions.include?(i) and lookahead_v2x?(ofs_end)
     end
   end
-  
+
   def convert_rec_REGION
     annotate_rec("REGION",
       [:s, 0] => "name",
@@ -1316,7 +1323,7 @@ end
       [:u, 21] => "Governor Number"
     )
   end
-  
+
   def convert_rec_REGION_SLOT
     each_rec_member("REGION_SLOT") do |ofs_end, i|
       if i == 6 and lookahead_v2x?(ofs_end)
@@ -1335,16 +1342,16 @@ end
           annotate_value! "4294967295 == 0xFFFF_FFFF [?]"
         when [:u, 13]
           annotate_value! "Order towns/ports emerge in, 0 = first, 1 = second (town/ports only)"
-        end        
+        end
       end
     end
   end
-  
+
   def convert_rec_GOVERNMENT
     annotate_rec "GOVERNMENT",
       [:i, 0] => "government id"
   end
-  
+
   def convert_rec_CHARACTER_POST
     annotate_rec "CHARACTER_POST",
       [:i, 0] => "character id A [???]",
@@ -1353,16 +1360,16 @@ end
       [:i, 4] => "government id",
       [:i, 5] => "government id"
   end
-  
+
   def convert_rec_MILITARY_FORCE
-    annotate_rec("MILITARY_FORCE", 
+    annotate_rec("MILITARY_FORCE",
       [:u, 0] => "general character id [?]",
       [:u, 1] => "Character Number"
     )
   end
 
   def convert_rec_ARMY
-    annotate_rec("ARMY", 
+    annotate_rec("ARMY",
       [:i, 4] => "general character id [?]"
     )
   end
@@ -1377,39 +1384,39 @@ end
   end
 
   def convert_rec_CAI_UNIT
-    annotate_rec("CAI_UNIT", 
+    annotate_rec("CAI_UNIT",
       [:u, 0] => "Character ID",
       [:u, 1] => "Unit Number",
       [:u, 2] => "Resource ID"
     )
   end
-  
+
   def convert_rec_CAI_WORLD_TRADING_POSTS
     annotate_rec("CAI_WORLD_TRADING_POSTS",
       [:u, 1] => "Trade Post ID",
       [:u_ary, 20] => "BDI information"
     )
   end
-  
+
   def convert_rec_CAI_GARRISONABLE
     annotate_rec("CAI_GARRISONABLE",
       [:u, 0] => "Resource ID",
       [:u_ary, 2] => "Resource ID"
     )
   end
-  
+
   def convert_rec_CAI_FACTION_BDI_POOL
     annotate_rec("CAI_FACTION_BDI_POOL",
       [:u, 2] => "All these u records are BDI information"
     )
   end
-  
+
   def convert_rec_CAI_FACTION_MANAGER
     annotate_rec("CAI_FACTION_MANAGER",
       [:u, 0] => "Faction ID"
     )
   end
-  
+
   def convert_rec_CAI_REGION
     annotate_rec("CAI_REGION",
       [:u_ary, 0] => "Theatre ID",
@@ -1424,13 +1431,13 @@ end
       [:u_ary, 13] => "Faction ID"
     )
   end
-  
+
   def convert_rec_CAMPAIGN_PLAYER_SETUP
     annotate_rec("CAMPAIGN_PLAYER_SETUP",
       [:bool, 4] => "yes = playable, no = non-playable"
     )
   end
-  
+
   def convert_rec_CAI_RESOURCE_MOBILE
     annotate_rec("CAI_RESOURCE_MOBILE",
       [:u, 0] => "Character ID",
@@ -1440,7 +1447,7 @@ end
       [:u_ary, 15] => "Sea Grid ID"
     )
   end
-  
+
   def convert_rec_CAI_WORLD_REGIONS
     annotate_rec("CAI_WORLD_REGIONS",
       [:u, 2] => "Region ID",
@@ -1449,7 +1456,7 @@ end
       [:u_ary, 21] => "BDI information"
     )
   end
-  
+
   def convert_rec_CAI_REGION_BOUNDARY
     annotate_rec("CAI_REGION_BOUNDARY",
       [:u, 0] => "Region ID A",
@@ -1463,14 +1470,14 @@ end
       [:u, 1] => "Boundary ID"
     )
   end
-  
+
   def convert_rec_CAI_REGION_SLOT
     annotate_rec("CAI_REGION_SLOT",
       [:u, 1] => "Building ID",
       [:bool, 5] => "Yes = port, No = town (ports have extra set of coordinates for their sea part following)"
     )
   end
-  
+
   def convert_rec_CAI_SETTLEMENT
     annotate_rec("CAI_SETTLEMENT",
       [:u_ary, 0] => "Building_slot ID",
@@ -1490,7 +1497,7 @@ end
       end
     end
   end
-  
+
   def convert_rec_CAI_WORLD_BUILDING_SLOTS
     annotate_rec("CAI_WORLD_BUILDING_SLOTS",
       [:u, 1] => "Building ID",
@@ -1500,7 +1507,7 @@ end
       [:u_ary, 20] => "BDI information"
     )
   end
-  
+
   def convert_rec_CAI_CHARACTER
     annotate_rec("CAI_CHARACTER",
       [:u, 0] => "Resource ID",
@@ -1509,28 +1516,28 @@ end
       [:u, 3] => "Character Number"
     )
   end
-  
+
   def convert_rec_CAI_WORLD_CHARACTERS
     annotate_rec("CAI_WORLD_CHARACTERS",
       [:u, 2] => "Character ID"
     )
   end
-  
+
   def convert_rec_CAI_WORLD_TECHNOLOGY_TREES
     annotate_rec("CAI_WORLD_TECHNOLOGY_TREES",
       [:u, 1] => "Technology ID",
       [:u_ary, 20] => "BDI information"
     )
   end
-  
+
   def convert_rec_CAI_BUILDING_SLOT
     annotate_rec("CAI_BUILDING_SLOT",
       [:u, 0] => "Building Number",
-      [:u, 1] => "Bulding type: 0 = settlement, 1 = wall/road, 2 = town, 3 = port, 4 = mine, 5 = farm, 6 = trade resource, 7 = multiple trade resources", 
+      [:u, 1] => "Bulding type: 0 = settlement, 1 = wall/road, 2 = town, 3 = port, 4 = mine, 5 = farm, 6 = trade resource, 7 = multiple trade resources",
       [:u, 2] => "Settlement ID if building is part of the settlement. Region_slot ID if not part of the settlement"
     )
   end
-  
+
   def convert_rec_CAI_FACTION_LEARNT_PARAMETERS_INFO
     annotate_rec("CAI_FACTION_LEARNT_PARAMETERS_INFO",
       [:u, 0] => "Faction ID"
@@ -1545,7 +1552,7 @@ end
       [:u_ary, 22] => "BDI information"
     )
   end
-  
+
   def convert_rec_CAI_FACTION
     annotate_rec("CAI_FACTION",
       [:u_ary, 0] => "Region ID of regions owned by this faction",
@@ -1562,7 +1569,7 @@ end
       [:u_ary, 37] => "Region ID of faction's needed for victory conditions"
     )
   end
-  
+
   def convert_rec_CAI_WORLD_GOVERNORSHIPS
     annotate_rec("CAI_WORLD_GOVERNORSHIPS",
       [:u, 1] => "Governor ID",
@@ -1570,7 +1577,7 @@ end
       [:u_ary, 13] => "BDI information"
     )
   end
-  
+
   def convert_rec_CAI_GOVERNORSHIP
     annotate_rec("CAI_GOVERNORSHIP",
       [:u, 0] => "Governor Number",
@@ -1579,7 +1586,7 @@ end
       [:u_ary, 3] => "Region ID of regions controlled by this Governor"
     )
   end
-  
+
   def convert_rec_REGION_FACTORS
     annotate_rec("REGION_FACTORS",
       [:u, 2] => "Lower class population",
@@ -1587,13 +1594,13 @@ end
       [:u, 4] => "Upper class population"
     )
   end
-  
+
   def convert_rec_ORDINAL_PAIR
     name, number = get_rec_contents([:rec, :CAMPAIGN_LOCALISATION, nil], :i)
     name = ensure_loc(name)
     out!(%Q[<ordinal_pair name="#{name.xml_escape}" number="#{number}"/>])
   end
-  
+
   def convert_rec_PORTRAIT_DETAILS
     card, template, info, number = get_rec_contents(:s, :s, :s, :i)
     if [card, template, info, number] == ["", "", "", -1]
@@ -1604,7 +1611,7 @@ end
       out!(%Q[<portrait_details card="#{card.xml_escape}" template="#{template.xml_escape}" info="#{info.xml_escape}" number="#{number}"/>])
     end
   end
-  
+
   def convert_rec_GOVERNORSHIP_TAXES
     level_lower, level_upper, rate_lower, rate_upper = get_rec_contents(:u, :u, :byte, :byte)
     out!(%Q[<gov_taxes level_lower="#{level_lower}" level_upper="#{level_upper}" rate_lower="#{rate_lower}" rate_upper="#{rate_upper}"/>])
@@ -1634,7 +1641,7 @@ end
       raise SemanticFail.new
     end
   end
-  
+
   # This is somewhat dubious
   # Type seems to be:
   # * u, false, v2x
@@ -1643,23 +1650,23 @@ end
   def convert_rec_CAI_TRADE_ROUTE_POI_RAID_ANALYSIS
     autoconvert_v2x "CAI_TRADE_ROUTE_POI_RAID_ANALYSIS", 2, 3
   end
-  
+
   def convert_rec_CAI_BDIM_SIEGE_SH
     autoconvert_v2x "CAI_BDIM_SIEGE_SH", 5
   end
-  
+
   def convert_rec_CAI_HLPP_INFO
     autoconvert_v2x "CAI_HLPP_INFO", 1
   end
-  
+
   def convert_rec_CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC
     autoconvert_v2x "CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC", 3
   end
-  
+
   def convert_rec_CAI_BDI_UNIT_RECRUITMENT_NEW
     autoconvert_v2x "CAI_BDI_UNIT_RECRUITMENT_NEW", 0
   end
-  
+
   def convert_rec_FAMOUS_BATTLE_INFO
     x, y, name, a, b, c, d = get_rec_contents(:i, :i, :s, :i, :i, :i, :bool)
     x *= 0.5**20
@@ -1690,7 +1697,7 @@ end
     b = b.join(" ")
     out!(%Q[<cai_situated x="#{x}" y="#{y}" region_id="#{a}" theatre_id="#{b}" area_id="#{c}"/>])
   end
-    
+
   def convert_rec_THEATRE_TRANSITION_INFO
     link, a, b, c = get_rec_contents([:rec, :CAMPAIGN_MAP_TRANSITION_LINK, nil], :bool, :bool, :u)
     fl, time, dest, via = ensure_types(link, :flt, :u, :u, :u)
@@ -1725,7 +1732,7 @@ end
     data, = get_rec_contents(:u)
     out!("<cai_technology_tree>#{data}</cai_technology_tree><!-- technology number -->")
   end
-  
+
   def convert_rec_RandSeed
     data, = get_rec_contents(:u)
     out!("<rand_seed>#{data}</rand_seed>")
@@ -1735,10 +1742,10 @@ end
     unit_type, unit_data, zero = get_rec_contents([:rec, :LAND_RECORD_KEY, nil], [:rec, :UNIT, nil], :u)
     unit_type, = ensure_types(unit_type, :s)
     raise SemanticError.new unless zero == 0
-    
+
     unit_data = ensure_types(unit_data,
       [:rec, :UNIT_RECORD_KEY, nil],
-      [:rec, :UNIT_HISTORY, nil],    
+      [:rec, :UNIT_HISTORY, nil],
       [:rec, :COMMANDER_DETAILS, nil],
       [:rec, :TRAITS, nil],
       :i,
@@ -1755,14 +1762,14 @@ end
     )
     raise SemanticError.new unless unit_type == ensure_types(unit_data.shift, :s)[0]
     unit_history = ensure_unit_history(unit_data.shift)
-    
+
     fnam, lnam, faction = ensure_types(unit_data.shift, [:rec, :CAMPAIGN_LOCALISATION, nil], [:rec, :CAMPAIGN_LOCALISATION, nil], :s)
     commander = CommanderDetails.parse(ensure_loc(fnam), ensure_loc(lnam), faction)
     raise SemanticFail.new unless commander
-    
+
     traits, = ensure_types(unit_data.shift, [:ary, :TRAIT, nil])
     raise SemanticFail.new unless traits == []
-    
+
     unit_id = unit_data.shift
     current_size = unit_data.shift
     max_size = unit_data.shift
@@ -1771,13 +1778,13 @@ end
     deaths = unit_data.shift
     commander_id = unit_data.shift
     commander_id = nil if commander_id == 0
-    
+
     raise SemanticFail.new unless unit_data.shift == kills
     raise SemanticFail.new unless unit_data.shift == deaths
-    
+
     exp = unit_data.shift
     name = ensure_loc(unit_data.shift)
-    
+
     raise SemanticFail.new unless unit_data == []
 
     tag!("land_unit",
@@ -1794,22 +1801,22 @@ end
       :type => unit_type
     )
   end
-  
+
   def convert_rec_GARRISON_RESIDENCE
     data, = get_rec_contents(:u)
     out!("<garrison_residence>#{data}</garrison_residence>")
   end
-  
+
   def convert_rec_OWNED_INDIRECT
     data, = get_rec_contents(:u)
     out!("<owned_indirect>#{data}</owned_indirect>")
   end
-  
+
   def convert_rec_OWNED_DIRECT
     data, = get_rec_contents(:u)
     out!("<owned_direct>#{data}</owned_direct>")
   end
-  
+
   def convert_rec_FACTION_FLAG_AND_COLOURS
     path, r1,g1,b1, r2,g2,b2, r3,g3,b3 = get_rec_contents(:s, :byte,:byte,:byte, :byte,:byte,:byte, :byte,:byte,:byte)
     color1 = "#%02x%02x%02x" % [r1,g1,b1]
@@ -1817,7 +1824,7 @@ end
     color3 = "#%02x%02x%02x" % [r3,g3,b3]
     out!("<flag_and_colours path=\"#{path.xml_escape}\" color1=\"#{color1.xml_escape}\" color2=\"#{color2.xml_escape}\" color3=\"#{color3.xml_escape}\"/>")
   end
-  
+
   def convert_rec_techs
     status_hint = {0 => " (done)", 2 => " (researchable)", 4 => " (not researchable)"}
     data = get_rec_contents(:s, :u, :flt, :u, :u_ary, :u)
@@ -1843,7 +1850,7 @@ end
     ability, level, attribute = get_rec_contents(:s, :i, :s)
     out!("<agent_ability ability=\"#{ability.xml_escape}\" level=\"#{level}\" attribute=\"#{attribute.xml_escape}\"/>")
   end
-  
+
   def convert_rec_BUILDING
     health, name, faction, gov = get_rec_contents(:u, :s, :s, :s)
     out!("<building health=\"#{health}\" name=\"#{name.xml_escape}\" faction=\"#{faction.xml_escape}\" government=\"#{gov.xml_escape}\"/>")
@@ -1857,7 +1864,7 @@ end
       out!("<date2>#{d} #{c} #{b} #{a}</date2>")
     end
   end
-  
+
   def convert_rec_DATE
     date = ensure_date(get_rec_contents_dynamic)
     if date
@@ -1866,12 +1873,12 @@ end
       out!("<date/>")
     end
   end
-    
+
   def convert_rec_UNIT_HISTORY
     date = ensure_unit_history(get_rec_contents_dynamic)
     out!("<unit_history>#{date.xml_escape}</unit_history>")
   end
-  
+
   def convert_rec_MAPS
     name, x, y, unknown, data = get_rec_contents(:s, :u, :u, :i, :u_ary)
     raise SemanticFail.new if name =~ /\s/
@@ -1922,14 +1929,14 @@ end
     raise SemanticFail.new if entries.any?{|entry| entry =~ /\s|=/}
     out_ary!("ancillary_uniqueness_monitor", "", entries.map{|entry| " #{entry.xml_escape}" })
   end
-  
+
   def convert_rec_REGION_OWNERSHIPS_BY_THEATRE
     theatre, ownerships = get_rec_contents(:s, [:ary, :REGION_OWNERSHIPS, nil])
     ownerships = ownerships.map{|o| ensure_types(o, :s, :s)}
     raise SemanticFail.new if ownerships.any?{|region, owner| region =~ /\s|=/ or owner =~ /\s|=/}
     out_ary!("region_ownerships_by_theatre", " theatre=\"#{theatre.xml_escape}\"", ownerships.map{|region, owner| " #{region.xml_escape}=#{owner.xml_escape}" })
   end
-  
+
   def convert_rec_ALLIED_IN_WAR_AGAINST
     each_rec_member("ALLIED_IN_WAR_AGAINST") do |ofs_end, i|
       if i == 0 and lookahead_type == :u
@@ -1946,7 +1953,7 @@ end
       [:u, 10] => "Character Number"
     )
   end
-  
+
   def convert_rec_CHARACTER
     each_rec_member_nth_by_type("CHARACTER") do |ofs_end, i|
       case [i, lookahead_type]
@@ -1972,13 +1979,13 @@ end
       end
     end
   end
-  
+
   def convert_rec_DIPLOMACY_RELATIONSHIP
     each_rec_member("DIPLOMACY_RELATIONSHIP") do |ofs_end, i|
       case [i, lookahead_type]
       when [0, :i]
         id = get_value![1]
-        tag = "<i>#{id}</i>"        
+        tag = "<i>#{id}</i>"
         tag += "<!-- #{@faction_ids[id].xml_escape} -->" if @faction_ids and @faction_ids[id]
         out!(tag)
       when [2, :bool]
@@ -2052,14 +2059,14 @@ end
     File.write_pgm(path, 4*xi, yi, data)
     out!("<height_field xsz=\"#{xf}\" ysz=\"#{yf}\" pgm=\"#{rel_path.xml_escape}\" unknown=\"#{unknown}\" hmin=\"#{hmin}\" hmax=\"#{hmax}\"/>")
   end
-  
+
   def convert_rec_GROUND_TYPE_FIELD
     xi, yi, (xf, yf), data = get_rec_contents(:u, :u, :v2, :bin4)
     path, rel_path = dir_builder.alloc_new_path("group_type_field", nil, ".pgm")
     File.write_pgm(path, 4*xi, yi, data)
     out!("<ground_type_field xsz=\"#{xf}\" ysz=\"#{yf}\" pgm=\"#{rel_path.xml_escape}\"/>")
   end
-  
+
   def convert_rec_BMD_TEXTURES
     types, data = get_rec_contents_dynamic
     tag!("bmd_textures") do
@@ -2073,7 +2080,7 @@ end
         end
         t = types.shift
         v = data.shift
-        
+
         case t
         when :s
           out!("<s>#{v.xml_escape}</s>")
@@ -2101,7 +2108,7 @@ end
 ## poi.esf
   def convert_rec_CAI_POI_ROOT
     pois = PoiEsfParser.new(*get_rec_contents_dynamic).get_pois
-    
+
     tag!("pois") do
       pois.each do |poi|
         code1 = poi.shift
@@ -2143,11 +2150,11 @@ end
       end
     end
   end
-  
+
 ## sea_grids.esf
   def convert_rec_CAI_SEA_GRID_ROOT
     sea_grids = SeaGridsEsfParser.new(*get_rec_contents_dynamic).get_sea_grids
-    
+
     tag!("sea_grids") do
       sea_grids.each do |grid_name, (min_x, min_y), (max_x, max_y), factor, areas, connections|
         tag!("theatre_sea_grid",
@@ -2183,13 +2190,13 @@ end
     (x, y), (dx, dy) = ensure_types(data, :v2, :v2)
     out!(%Q[<wall_post x="#{x}" y="#{y}" dx="#{dx}" dy="#{dy}"/>])
   end
-  
+
   def convert_rec_FARM_TREE_LIST
     data, = get_rec_contents([:rec, :FARM_TREE, nil])
     type, (x, y) = ensure_types(data, :s, :v2)
     out!(%Q[<farm_tree type="#{type.xml_escape}" x="#{x}" y="#{y}"/>])
   end
-  
+
   def convert_rec_ID_LIST
     data, = get_rec_contents(:u_ary)
     if data.empty?
@@ -2198,7 +2205,7 @@ end
       out!("<id_list>#{data.join(" ")}</id_list>")
     end
   end
-  
+
 ## autoconfigure everything
 
   self.instance_methods.each do |m|
