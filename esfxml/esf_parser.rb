@@ -133,7 +133,7 @@ module EsfBasicBinaryOps
     nil, nil, nil, nil, nil, nil, nil, nil,       # 30 - 37
     nil, nil, nil, nil, nil, nil, nil, nil,       # 38 - 3f
 
-    # These don't necessarily convert well yet, especially 50+... 
+    # These don't necessarily convert well yet, especially 50+...
     nil, :bool_ary, :i1_ary, :i2_ary, :i_ary, :i8_ary, :byte_ary, :u2_ary,      # 40 - 47
     :u_ary, :u8_ary, :flt_ary, :double_ary, :v2_ary, :v3_ary, :s_ary, :asc_ary, # 48 - 4f
     :angle_ary, nil, :bool_ary, :bool_ary, :u_ary, :u_ary, :u_ary, :u_ary,      # 40 - 47
@@ -151,7 +151,7 @@ module EsfBasicBinaryOps
   def lookahead_str
     save_ofs = @ofs
     ofs_end = get_ofs_end
-  
+
     # Only single <rec> inside <rec>
     # Just ignore existence of container, and see what's inside
     if @ofs < ofs_end
@@ -167,7 +167,7 @@ module EsfBasicBinaryOps
         end
       end
     end
-    
+
     while @ofs < ofs_end
       tag = get_byte
       if tag == 0x0e
@@ -175,6 +175,18 @@ module EsfBasicBinaryOps
           return @str_lookup[get_u]
         else
           rv = get_s
+          return nil if rv == ""
+          if rv.size > 128
+            puts "Warning: Too long name suggested for file name at #{save_ofs}/#{@ofs}: #{rv.inspect}"
+            return nil
+          end
+          return rv
+        end
+      elsif tag == 0x0f
+        if @abcf
+          return @asc_lookup[get_u]
+        else
+          rv = get_ascii
           return nil if rv == ""
           if rv.size > 128
             puts "Warning: Too long name suggested for file name at #{save_ofs}/#{@ofs}: #{rv.inspect}"
@@ -192,7 +204,7 @@ module EsfBasicBinaryOps
         return nil unless sz
         @ofs += sz
       elsif tag >= 0x40 and tag <= 0x5f
-        @ofs = get_ofs_end 
+        @ofs = get_ofs_end
       elsif !@abca and (tag == 0x80 or tag == 0x81)
         @ofs += 3
         @ofs = get_ofs_end
@@ -238,7 +250,7 @@ module EsfBasicBinaryOps
     @ofs += 3
     rv
   end
-  
+
   def get_i3
     # "l>" "l<" only work in 1.9, not 1.8.7
     if @data[@ofs].ord >= 128
@@ -260,7 +272,7 @@ module EsfBasicBinaryOps
       warn "Weird boolean value: #{b}"
       true
     end
-  end    
+  end
 
   def parse_magic
     case magic = get_u
@@ -350,7 +362,7 @@ module EsfBasicBinaryOps
   def size
     @data.size
   end
-  
+
   ### May as well go to String#unpack
   def unpack_u3be_ary(str)
     rv = []
@@ -361,7 +373,7 @@ module EsfBasicBinaryOps
     end
     rv
   end
-   
+
   def unpack_i3be_ary(str)
     rv = []
     xofs = 0
@@ -565,11 +577,11 @@ module EsfParserSemantic
     end
     [types, data]
   end
-  
+
   def get_value!
     send(@esf_type_handlers_get[get_byte])
   end
-  
+
   def get_rec_contents(*expect_types)
     data    = []
     ofs_end = get_ofs_end
@@ -580,7 +592,7 @@ module EsfParserSemantic
     end
     data
   end
-  
+
   # Disabled in ABCA mode
   def get_81!
     raise "This code is supposed to be disabled in ABCA mode" if @abca
@@ -639,7 +651,7 @@ module EsfParserSemantic
     ofs_end, count = get_ofs_end_and_item_count
     [[:ary, node_type, version], (0...count).map{ get_rec_contents_dynamic }]
   end
-  
+
   def get_abca_rec!
     # Special case root node, since it follows the old style for some reason
     if @ofs == 0x11 or @data[@ofs-1].ord & 0x20 != 0
@@ -663,7 +675,7 @@ module EsfParserSemantic
     data.push get_rec_contents_dynamic while @ofs < ofs_end
     data
   end
-  
+
   def try_semantic(node_type)
     @semantic_stats[node_type][0] += 1
     begin
@@ -703,7 +715,7 @@ class EsfParser
   def percent_done
     (100.0 * @ofs.to_f / @data.size)
   end
-  
+
   def initialize(esf_fh)
     @data       = esf_fh.read
     @ofs        = 0
