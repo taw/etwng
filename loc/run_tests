@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+require "fileutils"
+require "pp"
+
+def round_trip_test!(source)
+  Pathname("tmp").mkpath
+  target    = Pathname("tmp") + source.basename.to_s.sub(/\.loc\z/, ".tsv")
+  recreated = Pathname("tmp") + source.basename
+  system *%W[./loc2tsv #{source} #{target}] or raise("Convertion of #{source} to #{target} failed")
+  system *%W[./tsv2loc #{target} #{recreated}] or raise("Convertion of #{target} back to #{recreated} failed")
+  system *%W[diff #{source} #{recreated}] or raise("Files #{source} and #{recreated} differ")
+end
+
+samples = Dir["samples/*"]
+
+samples.each do |path|
+  round_trip_test! Pathname(path)
+end
