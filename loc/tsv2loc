@@ -1,13 +1,12 @@
 #!/usr/bin/env ruby
 
 require "pp"
-require "rubygems"
-require "fastercsv"
+require "csv"
 require "pathname"
 require "fileutils"
 
 def tsv2loc(source, target)
-  data = FasterCSV.read(source, :encoding => 'U', :col_sep => "\t")
+  data = CSV.read(source, :col_sep => "\t")
   File.open(target, 'wb') do |fh|
     fh << "\xFF\xFELOC\x00\x01\x00\x00\x00"
     fh << [data.size].pack("V")

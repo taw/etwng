@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
 
 require "pp"
-require "rubygems"
-require "fastercsv"
+require "csv"
 require "pathname"
 require "fileutils"
 
@@ -38,8 +37,12 @@ class LocFile
     raise "Booleans must be 0 or 1, not #{rv} in #{@path}" if rv > 1
     rv == 1
   end
+  def get_magic!
+    magic = get(6)
+    raise "Not a LOC file: #{@path} [magic #{magic.inspect}]" unless magic.bytes == "\xFF\xFELOC\x00".bytes
+  end
   def parse!
-    raise "Not a LOC file: #{@path}" unless get(6) == "\xFF\xFELOC\x00"
+    get_magic!
     raise "Bad version of LOC file: #{@path}" unless get_u == 1
     rv = []
     get_u.times do
@@ -51,7 +54,7 @@ class LocFile
 end
 
 def loc2tsv(source, target)
-  FasterCSV.open(target, "wb", :encoding => 'U', :col_sep => "\t") do |tsv|
+  CSV.open(target, "wb", :col_sep => "\t") do |tsv|
     LocFile.new(source).parse! do |line|
       tsv << line
     end
