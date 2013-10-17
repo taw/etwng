@@ -1,0 +1,84 @@
+#!/usr/bin/env ruby
+
+require "pp"
+
+class Categorizer
+  attr_reader :path
+  def initialize(path)
+    @path = path
+  end
+  def empty?
+    File.size(path) == 0
+  end
+  def data
+    @data ||= File.open(path, 'rb'){|fh| fh.read(128)}
+  end
+  def ext
+    File.extname(path)
+  end
+  def ui_type
+    if data =~ /\A(Version\d\d\d)/
+      return "UI(#{$1})"
+    else
+      return "UI(#{data[0,8].inspect})"
+    end
+  end
+  def type
+    return nil if empty?
+    return "DB" if path =~ %r[/db/]
+    return ui_type if path =~ %r[/ui/] and ext == "" or ext == ".cml" or ext == ".fc"
+
+    case ext
+    # Known types
+    when *%W[.lua .jpg .tga .dds .png .xml .csv .bik]
+      nil # Standard formats
+    when *%W[.bat .db .xlsx]
+      nil # Random crap accidentally included
+    when *%W[.cindyscene .cindyscenemanager .lighting
+             .kfs .kfe .kfl .environment .variantmeshdefinition
+             .outlines .texture_array
+            ]
+      nil # XML
+    when ".loc"
+      nil # LOC - known format we can handle
+    when *%W[.txt .tai .rigging .gallant .battle_script]
+      nil # Plaintext
+    when ".wem", ".bnk"
+      nil # Sound files
+    when ".fxc", ".anim", ".meta", ".rigid_model_v2", ".markers", ".parsed",
+         ".cuf"
+      ext # Various formats we want to decode
+    when ".esf"
+      ".esf"
+    when ".data"
+      if data[0,4] === "CHMF"
+        ".data(CHMF)"
+      else
+        ".data(???)"
+      end
+    else
+      return "#{ext}(ESF)" if data[0,4].bytes == "\xCA\xAB\x00\x00".bytes
+      return "FACES" if data[0,5] == "FACES"
+      return "wind data" if data[0,4].bytes == "xV4\x12".bytes
+
+      if ext == ".tree_list" or ext == ".grass_list"
+        return "#{ext}(not ESF)"
+      end
+
+      # p [data[0,16], ext, path]
+      ext
+    end
+  end
+end
+
+ht = Hash.new{|ht,k| ht[k] = []}
+Dir["unpacked/**/*"].each do |path|
+  next if File.directory?(path)
+  type = Categorizer.new(path).type
+  ht[type] << path if type
+end
+
+ht.to_a.sort_by{|k,v| -v.size}.each{|k,v|
+  puts [k,v.size].join("\t")
+  # v[0,3].each{|pt| puts "  #{pt}"}
+}
