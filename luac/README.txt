@@ -9,6 +9,11 @@ Build script works on OSX and Linux.
 It should be possible to adapt it to other platforms supported by lua
 without too much modest effort.
 
+The build script currently expects 32-bit operating system.
+(since .luac for Total War files are 32-bit)
+It's possible to cross-compile it on 64-bit operating system,
+you just need to specify proper flags.
+
 == Requirements ==
 
 You need to have all basic libraries installed.

@@ -16,7 +16,7 @@ def disassemble(source, target)
   system "./luadec -dis '#{source}' >'#{target}'"
 end
 
-Dir["samples_*/**/*"].sort.each{|file_name|
+Dir["samples_*/**"].sort.each{|file_name|
   next unless File.file?(file_name) and file_name =~ /\.luac\z/
   target1 = "lua_decompiled/" + file_name.sub(/\Asamples_/, "").sub(/\.luac\z/, ".lua")
   target2 = "lua_decompiled/" + file_name.sub(/\Asamples_/, "").sub(/\.luac\z/, ".asm")
