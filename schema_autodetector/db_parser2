@@ -1,0 +1,901 @@
+#!/usr/bin/env ruby
+
+require "pp"
+require "magic_xml"
+require "find"
+
+class File
+  def self.write(path, content)
+    File.open(path, "w"){|fh|
+      fh.puts content
+    }
+  end
+end
+
+class DataParserException < Exception
+end
+
+module Binary
+  def self.uint32_to_int32(val)
+    if val >= 0x8000_0000
+      val - 0x1_0000_0000
+    else
+      val
+    end
+  end
+
+  def self.float_exp(val)
+    (val>>23) & 255
+  end
+  
+  def self.uint32_to_float(val)
+    [val].pack("V").unpack("f")[0]
+  end
+end
+
+class DataParser
+  attr_accessor :ofs
+  def initialize(data)
+    @data = data
+    @str_cache = {}
+    restart!
+  end
+  def restart!
+    @ofs = 0
+    @clock = 0
+    self
+  end
+  def get_string
+    key = @ofs
+    if @str_cache[key]
+      @ofs, str = @str_cache[key]
+      str
+    else
+      len = get_uint16
+      str = get_bytes(2 * len).unpack("v*")
+      bad = 0
+      str.each{|c|
+        # Ugly haxory...
+        next if (c <= 255 and c >= 32) or c == 9 or c == 10 or c == 13
+        bad += 100 if c < 31 # 0 and other binary garbage
+        ch = c >> 8
+        next if ch == 0x20 or ch == 0x01 or ch == 0x1e
+        bad += 1
+        # $failchar[c] += 1
+      }
+      error("Non-ASCII character") if bad > 1+len/20
+      str = str.pack("U*")
+      @str_cache[key] = [@ofs, str]
+      str
+    end
+  end
+  def get_opt_string
+    if get_bool
+      get_string
+    else
+      nil
+    end
+  end
+  def get_bool
+    b = get_byte
+    if b == 1
+      true
+    elsif b == 0
+      false
+    else
+      error("Boolean value not 0/1")
+    end
+  end
+  def get_bool_true
+    b = get_byte
+    if b == 1
+      true
+    else
+      error("Boolean/True value not 1")
+    end
+  end
+  def get_bool_false
+    b = get_byte
+    if b == 0
+      false
+    else
+      error("Boolean/False value not 0")
+    end
+  end
+  def get_byte
+    get_bytes(1).unpack("C")[0]
+  end
+  def get_uint16
+    get_bytes(2).unpack("v")[0]
+  end
+  def get_float
+    get_bytes(4).unpack("f")[0]
+  end
+  def get_uint32
+    get_bytes(4).unpack("V")[0]
+  end
+  def get_u4
+    get_uint32
+  end    
+  def get_bytes(cnt)
+    ensure_available!(cnt)
+    @ofs, rv = @ofs+cnt, @data[@ofs, cnt]
+    rv
+  end
+  def get_clock
+    "[#{@clock+=1}]"
+  end
+  def ensure_available!(cnt)
+    error("Reading past end of data") if @ofs + cnt > @data.size
+  end
+  def ensure_finished!
+    error("#Extra data past end of file") unless finished?
+  end
+  def finished?
+    @ofs == @data.size
+  end
+  def error(msg)
+    raise DataParserException.new("#{msg} at position #{@ofs}")
+  end
+  def get(type)
+    send(:"get_#{type}")
+  end
+  def get_debug(type)
+    return "" if type == :break
+    val = get(type)
+    rv = [:field, type, val]
+    rv << Binary.uint32_to_float(val) if type == :u4 and Binary.float_exp(val) != 0
+    rv << ("%04X"%val).gsub(/(..)(..)/){"#{$2} #{$1}"} if type == :uint16 # LE bytes
+    rv << val.chr if type == :uint16 and val.between?(32, 127)
+    rv.inspect
+  end
+  def self.types
+    @types ||= Hash.new{|ht,u| raise "Unknown type: #{u}"}.merge({
+      "s" => :string,
+      "b" => :bool,
+      "x" => :byte,
+      "z" => :uint16,
+      "u" => :u4,
+      "o" => :opt_string,
+      "f" => :float,
+      ";" => :break,
+      "1" => :bool_true,
+      "0" => :bool_false,
+      "Q" => :clock,
+    })
+  end
+  def self.expand_dsc(dsc)
+    dsc.scan(/\S/).map{|u| DataParser.types[u]}
+  end
+end
+
+class XSD
+  def initialize(path)
+    @doc = XML.load(path)
+    @tables = {}
+    @doc.children(:"xs:complexType").each{|c|
+      @tables[c[:name]] = c.children(:"xs:attribute").map{|x| parse_attr(x) }
+    }
+  end
+  def parse_attr(node)
+    @types ||= Hash.new{|ht,u|
+      raise "Unknown type: #{u.inspect}"
+    }.merge({
+      {:type=>"xs:string", :"msprop:Optional"=>"true"} => :opt_string,
+      {:type=>"xs:string", :"Optional"=>"true"} => :opt_string,
+      {:use=>"required", :type=>"xs:string"}  => :string,
+      {:use=>"required", :type=>'xs:float'}   => :float,
+      {:use=>"required", :type=>"xs:boolean"} => :bool,
+      {:use=>"required", :type=>"xs:short"}   => :uint16,
+      {:use=>"required", :type=>'xs:int'}     => :int32,
+      # special fails
+      {:type=>'xs:int'} => :int32,
+      {:type=>"xs:string"}  => :string,
+    })
+    t = node.attrs.dup
+    t.delete(:"msprop:VersionStart")
+    t.delete(:name)
+    if t[:"msprop:BlobLength"]
+      :blob
+    else
+      @types[t]
+    end
+  end
+  def [](path)
+    path = path.sub(/-.*/, "")
+    @tables[path]
+  end
+  def self.schema_to_xml_attr(a)
+    case a
+    when :float
+      {:use=>"required", :type=>'xs:float'}
+    when :int32
+      {:use=>"required", :type=>'xs:int'}
+    when :uint32
+      {:use=>"required", :type=>'xs:int'}
+    when :string
+      {:use=>"required", :type=>'xs:string'}
+    when :uint16
+      {:use=>"required", :type=>'xs:short'}
+    when :bool
+      {:use=>"required", :type=>'xs:boolean'}
+    when :opt_string
+      {:type=>"xs:string", :"msprop:Optional"=>"true"}
+    else
+      {:type => 'xs:FAIL'}
+    end
+  end
+  def self.build(name, schema)
+    a = XML.new(:"xs:complexType", :name => name) do
+      schema.each_with_index{|s,i|
+        xml!(:"xs:attribute", XSD.schema_to_xml_attr(s).merge({:name => "unknown#{i+1}"}))
+      }
+    end
+    a.add_pretty_printing!
+    b = XML.new(:"xs:element", :name=>name, :form=>"unqualified", :type=>"mstns:#{name}")
+		[a,  b]
+  end
+  def self.pkey(name, fields)
+    a = XML.new(:"xs:unique", :name => "#{name}_tables_Constraint1", :"msdata:PrimaryKey"=>true) do
+      xml!(:"xs:selector", :xpath => ".//#{name}")
+      fields.each{|field|
+        xml!(:"xs:field", :xpath => "@#{field}")
+      }
+    end
+    a.add_pretty_printing!
+    a
+  end
+  def self.ref(name, field, ref)
+    ref_pkey_name = 'PrimaryKey'
+    a = XML.new(:"xs:keyref", :name => "#{name}_#{field}__TO__#{ref}_#{ref_pkey_name}", :refer => "#{ref}_tables_Constraint1") do
+      xml!(:"xs:selector", :xpath => ".//#{name}")
+      xml!(:"xs:field", :xpath => "@#{field}")
+    end
+    a.add_pretty_printing!
+    a
+  end
+end
+
+class DataFile
+  attr_reader :rows_count, :rows, :parser, :version
+  
+  def initialize(path)
+    @path = path
+    data = File.read(path)
+    if data[0,4] == "\xFD\xFE\xFC\xFF"
+      data = data[(4+2+36*2)..-1]
+    end
+    byte0 = data[0, 1].unpack("C")[0]
+    if byte0 == 1
+      @version = 1
+      @rows_count, = data[1, 4].unpack("V")
+      @data = data[5..-1]
+    elsif byte0 == 252
+      @version = data[4, 1].unpack("C")[0] + 1
+      @rows_count, = data[9, 4].unpack("V")
+      @data = data[13..-1]
+    else
+      raise "Wrong version number #{byte0}"
+    end
+    
+    @parser = DataParser.new(@data)
+  end
+  
+  def bytes
+    @data.size
+  end
+  
+  def empty?
+    @rows_count == 0
+  end
+  
+  def column(j)
+    @rows.map{|row| row[j]}
+  end
+  
+  def columns_key?(*idxs)
+    cols = @rows.map{|row| idxs.map{|i| row[i] }}
+    cols.size == cols.uniq.size
+  end
+  
+  def self.basic_enums
+    return {}
+    unless @basic_enums
+      @basic_enums = {
+        :gender => %w[b f m],
+        :fore_sur_name => %w[forename surname],
+      }
+      [:abilities,
+       :advice_threads,
+       :agent_attributes,
+       :agents,
+       :ancillaries,
+       :ancillary_types,
+       :battle_entities,
+       :battle_personalities,
+       :battle_types,
+       :battle_weather_types,
+       :battlefield_building_categories,
+       :battlefield_buildings,
+       :battlefield_deployable_siege_items,
+       :bribe_actions,
+       :building_chains,
+       :building_description_texts,
+       :building_levels,
+       :campaign_ai_personalities,
+       :campaign_anim_sets,
+       :campaign_character_anim_sets,
+       :campaign_ground_types,
+       :character_trait_levels,
+       :character_traits,
+       :climates,
+       :commodities,
+       :commodities_demand_drivers,
+       :cultures,
+       :cultures_subcultures,
+       :effects,
+       :empires,
+       :entity_training_levels,
+       :events,
+       :factions,
+       :government_types,
+       :groupings,
+       :groupings_military,
+       :gun_types,
+       :historical_characters,
+       :ministerial_positions,
+       :mission_activities,
+       :missions,
+       :names_groups,
+       :particle_effects,
+       :projectile_shot_type_enum,
+       :projectiles,
+       :projectiles_missile_type_enum,
+       :quotes_people,
+       :regions,
+       :regions_continents,
+       :religions,
+       :resources,
+       :sea_surfaces,
+       :seasons,
+       :slots,
+       :special_edition_enums,
+       :technologies,
+       :technology_threads,
+       :trait_triggers,
+       :trees,
+       :trigger_events,
+       :unit_abilities,
+       :unit_category,
+       :unit_class,
+       :unit_stats_naval_crew,
+       :units,
+       :warscape_animated,
+       :warscape_categories,
+       :warscape_equipment_items,
+       :warscape_equipment_themes,
+       :warscape_rigid,
+       :warscape_underlay_textures
+      ].each{|rn|
+        paths = Dir["data/out/#{rn}_tables-*"]
+        raise "None found for #{rn.inspect}" if paths.empty?
+        lines = paths.map{|path| File.readlines("#{path}") }.flatten
+        @basic_enums[rn] = lines.map{|line| eval(line.split("\t")[0])}.uniq.sort
+      }
+      # pp @basic_enums
+    end
+    @basic_enums
+  end
+  
+  def guess_ref(j)
+    c = column(j) - [nil, ""]
+    return :empty if c.empty?
+    DataFile.basic_enums.each{|rname, els|
+      return rname if (c - els).empty?
+    }
+    nil
+  end
+
+  def schema_adjust_u4!(schema)
+    # Guess if u4 is uint32, int32, or single
+    schema.size.times{|j|
+      if schema[j] == :u4
+        # 0 is correct anytype
+        samples = @rows.map{|row| row[j] }.select{|d| d != 0}
+        negs   = samples.count{|s| (s >> 31) == 1}
+        floats = samples.count{|s|
+          s &= 0x7FFF_FFFF
+          s == 0 or (s >> 23).between?(128-32, 128+32)
+        }
+        #p [@rows.size, samples.size, negs, floats]
+        if samples.size == 0
+          schema[j] = :zero32
+        elsif floats >= 0.9 * samples.size
+          schema[j] = :float
+          @rows.each{|row| row[j] = Binary.uint32_to_float(row[j]) }
+        elsif negs > 0
+          schema[j] = :int32
+          @rows.each{|row| row[j] = Binary.uint32_to_int32(row[j]) }
+        else
+          #schema[j] = :uint32
+          schema[j] = :int32
+        end
+      elsif schema[j] == :bool
+        samples = @rows.map{|row| row[j] }.uniq
+        if samples == [true]
+          schema[j] = :bool_true
+        elsif samples == [false]
+          schema[j] = :bool_false
+        end
+      end
+    }
+  end
+
+  def guess_schema
+    return :empty if empty?
+
+    schemas = []
+    
+    # Worst ones first to speed things up
+    schemas += %w[
+      sbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      sbbobb
+      sbbsoosuuu
+      sffffffffffffffffffffffffffffff
+      sooooooooooooooos
+      ssbsobuubbb
+      sssffffffffffsffffffu
+      sssffffouoff
+      ssssooosuosuuuffffooozfuuoffssooo
+      sssssoou
+      sssssssssssosss
+      ssssubo
+      ssssuoo
+      ssssuuuuuubssssousbbbubu
+      ssssuuuuuuosssousbbuubb
+      ssssuuuuuubssssousbbbub
+      ssssuuuuubssssousbbbub
+      ssuusssuububbsbbbbbbs
+      ssuusuuuubbsu
+      ssuusuuuubbs
+      ssuusuuuussu
+      susssbsssssssss
+      susssbssssssssss
+      sussssssbbbbssoouuuuuuuuuuuuuuuuuusouuuosbbss
+      sussssssobbbssooffffffffffffffffffsofffosbbss
+      sussssssbbbssooffffffffffffffffffsofffosbbss
+      suuusoossssusuooossooooboouussouosuuuussssuufffffffubbbbbbbbbbbbbbfffbbbbbbbbbbbbbbb
+      suuusoossssusuooossooooboouussouosuuuussssuuffffuufubbbbbbbbbbbbbbfffbbbbbbbbbbbbbbb
+      suuusoossssusuooossooooboouussouosuuuussssuuffffuufubbbbbbbbbbbbbbfffbbbbbbbbbbbbbb
+      suuuusbusssssuuu
+      sfffffbffffffffffff
+      ssobobobbbbbboobbbb
+      suuuoooooooossooouuuuusfffufuuuufffuuuffffffffffffffffffffffbuufuufuufuufuufuufuufuufuufuufuufuufuufuufuufuufuufuufbbbsu
+      suuuoooooooossooouuuuusfffufuuuufffuuuffffffffffffffffffffffbuufuufuufuufuufuufuufuufuufuufuufuufuufuufuufuufuufuufbbbs
+      sfbbbb
+    ]
+    schemas << ("ssuu" + "uubfuffuffuf"*15)
+
+    # Most common kind is String+ Uint32* Bool*
+    (0..3).each{|b|
+      (0..12).each{|i|
+        (1..12).each{|s|
+          schemas << "s" * s + "u" * i + "b" * b
+        }
+      }
+    }
+    (1..6).each{|s1|
+      (1..4).each{|i|
+        (1..6).each{|s2|
+          schemas << "s1" * s1 + "u" * i + "s" * s2
+        }
+      }
+    }
+
+    (1..5).each{|s|
+      (1..5).each{|o|
+        schemas << "s" * s + "o" * o
+      }
+    }
+
+    # No pattern to see here...
+    schemas += File.read("schema_tests").sub(/-.*/m, "").scan(/\S+/)
+    
+    schemas.each{|dsc|
+      schema = DataParser.expand_dsc(dsc)
+      next unless try_schema(*schema)
+      schema_adjust_u4!(schema)      
+      return schema
+    }
+
+    return :unknown
+  end
+
+  def try_schema(*field_types)
+    begin
+      @parser.restart!
+      @rows = (0...@rows_count).map{
+        field_types.map{|type| @parser.get(type) }
+      }
+      @parser.ensure_finished!
+      true
+    rescue DataParserException
+      @rows = []
+      false
+    end
+  end
+  
+  def schema
+    @schema ||= guess_schema
+  end
+  
+  def print_rows
+    @rows.each{|row|
+      puts "- #{row.inspect}"
+    }
+  end
+  
+  def bytes_per_row
+    @data.size/@rows_count.to_f
+  end
+  
+  def name
+    File.basename(@path) + "_tables"
+  end
+
+  def table_name
+    #name.sub(/-.*/, "")
+    File.basename(File.dirname(@path))
+  end
+
+  def print_semiraw
+    ofs = 0
+    out = []
+    scnt, hxcnt = 0, 0
+    while ofs < @data.size
+      @parser.ofs = ofs
+      begin
+        str = @parser.get_string
+        raise DataParserException.new("ignore that") if str == ""
+        out << [:str, str.inspect]
+        ofs = @parser.ofs
+        scnt += 1
+      rescue DataParserException
+        hex = sprintf("%02X", @data[ofs])
+        if out[-1] and out[-1][0] == :hex
+          out[-1][1] += " #{hex}"
+        else
+          out << [:hex, hex]
+        end
+        ofs += 1
+        hxcnt += 1
+      end
+    end
+    puts "Stats: #{scnt/@rows_count.to_f} string + #{hxcnt/@rows_count.to_f} per row"
+    out.each{|type, str| puts "-  #{str}" }
+  end
+
+  def print_semiraw_fast
+    ofs = 0
+    hexbuf = []
+    hexbuf_flush = lambda{
+      unless hexbuf.empty?
+        puts "- #{hexbuf.size} bytes #{hexbuf.pack("C*").unpack("V*").inspect}"
+    #     raw = hexbuf.pack("v*")
+    #     ints = raw.unpack("V*")
+    #     flts = raw.unpack("f*")
+    #     bests = (0...ints.size).map{|j| ints[j].abs < 100_000 ? ints[j] : flts[j] }
+    #     puts "- ???(#{raw.size*2} bytes) #{bests.inspect}"
+        hexbuf = []
+      end
+    }
+
+    wdata0 = @data.unpack("v*")
+    wdata1 = @data[1..-1].unpack("v*")
+    wdata = wdata0.zip(wdata1).flatten
+
+    while ofs+2 <= wdata.size
+      u = wdata[ofs]
+      
+      if u == 0 or u < 0 or !(0...u).all?{|j| c=wdata[ofs+2+2*j]; !c.nil? && c <= 255 && c >= 32}
+        hexbuf << @data[ofs]
+        ofs += 1
+        next
+      end
+
+      hexbuf_flush[]
+
+      unistr = @data[ofs+2, 2*u].unpack("v*").pack("U*")
+      ofs += 2 + 2*u
+
+      case unistr
+      when /rigid_model_animation/
+        puts "- #{unistr.inspect}"
+        parser.ofs = ofs
+        cam_count = parser.get(:uint32)
+        cam_count.times{
+          cam = DataParser.expand_dsc("s ffff ffff ffff ffff").map{|type| parser.get(type) }
+          puts "CAM: #{cam.inspect}"
+        }
+        foo_count = parser.get(:uint32)
+        foo_count.times{
+          foo_block = DataParser.expand_dsc("u fff fff fff").map{|type| parser.get(type) }
+          foo_xtra_cnt = parser.get(:uint32)
+          foo_xtra = DataParser.expand_dsc("u" * foo_xtra_cnt).map{|type| parser.get(type) }
+          puts "FOO: #{(foo_block + foo_xtra).inspect}" 
+        }
+        deck_count = parser.get(:uint32)
+        deck_count.times{
+          deck_name = parser.get(:string)
+          cnt_a = parser.get(:uint32)
+          cnt_b = parser.get(:uint32)
+          puts "DECK: #{deck_name.inspect} #{cnt_a} #{cnt_b}"
+          cnt_b.times{
+            blah_no  =  parser.get(:uint32)
+            blah_cnt =  parser.get(:uint32)
+            puts " -"+ [blah_no, *DataParser.expand_dsc("fffb" * blah_cnt + "ffff").map{|type| parser.get(type) }].inspect
+          }
+        }
+
+        ofs = parser.ofs
+
+        
+        # foos = (0...foo_count).map{
+        #   DataParser.expand_dsc("u" * 15).map{|type| parser.get(type) }
+        # # }
+        # 
+        # x = 60
+        # 2640
+        # 
+        # ~ [44, 0, 1180198810, 1077432812]
+        # - 2360 bytes
+        # 
+        # ~ [42, 0, 1182777344, 1077286011]
+        # - 2240 bytes
+        # - "deck04"
+        
+
+        # puts "~ #{extra.inspect}"
+        
+
+      when /\Anavalcam/
+        emb = @data[ofs, 16*4].unpack("f"*16)
+        ofs += 16*4
+        puts "- #{unistr.inspect} #{emb.inspect}"
+      when /\Acannon/
+        emb = @data[ofs, 8*4].unpack("VVffffff")
+        ofs += 8*4
+        puts "- #{unistr.inspect} #{emb.inspect}"
+      when /\AEFLine/
+        emb = @data[ofs, 10*4].unpack("Vfffffffff")
+        ofs += 10*4
+        puts "- #{unistr.inspect} #{emb.inspect}"
+      when /\Alogic_collision3d/
+        emb = @data[ofs, 10*4].unpack("Vfffffffff")
+        ofs += 10*4
+        puts "- #{unistr.inspect} #{emb.inspect}"
+      else
+        puts "- #{unistr.inspect}"
+      end
+
+
+    end
+    
+    if ofs < wdata.size
+      hexbuf << @data[ofs]
+      ofs += 1
+    end
+
+      # vf9 = "V" + "f"*9
+      # vf12 = "V" + "f"*12
+      # 
+      # when /\Atop_sails/
+      #   emb = @data[2*ofs, 1*4].unpack("V")
+      #   ofs += 1*2
+      #   puts "- #{unistr.inspect} #{emb.inspect}"
+      # when /\Ahalf_sail/
+      #   emb = @data[2*ofs, 27*4].unpack("V"+vf12*2)
+      #   ofs += 27*2
+      #   puts "- #{unistr.inspect} #{emb.inspect}"
+      # when /\Aflag/
+      #   emb = @data[2*ofs, 5*4].unpack("Vfff")
+      #   ofs += 5*2
+      #   puts "- #{unistr.inspect} #{emb.inspect}"
+      # when /\Aside_panel_above_water/
+      #   emb = @data[2*ofs, 41*4].unpack("VV"+vf9+vf12*2+"z*")
+      #   ofs += 41*2
+      #   puts "- #{unistr.inspect} #{emb.inspect}"
+      # else
+      #   puts "- #{unistr.inspect}"
+      # end
+
+      #  48 - 348 bytes
+      #  58 - 164 bytes
+      #  60 - 112 bytes
+      #  60 - 476 bytes
+      #  65 - 320 bytes
+      #  86 - "half_sail"
+      # 100 - 108 bytes
+      # 176 - 4 bytes
+
+    hexbuf_flush[]
+  end
+
+  def to_txt
+    @rows.map{|row|
+      row.map(&:inspect).join("\t") + "\n"
+    }.join("")
+  end
+
+  def save_txt(dir="out")
+    system "mkdir", "-p", dir
+    File.write("#{dir}/#{name}.txt", to_txt)
+  end
+
+  class << self
+    def all(dir="db")
+      unless @all
+        @all = []
+        Find.find(dir){|fn|
+          next unless File.file?(fn) and File.size(fn) != 0
+          begin
+            @all << new(fn)
+          rescue Exception => e
+            warn "#{fn} - #{e}"
+          end
+        }
+      end
+      @all
+    end
+  
+    def print_schema_stats
+      stats = Hash.new(0)
+      unk = []
+      all.each{|df|
+        stats[df.schema] += 1
+      }    
+      stats.to_a.sort_by{|k,v| v}.each{|k,v| puts "#{k.inspect} => #{v.inspect}" }
+
+      all.select{|df| df.schema == :unknown}.map{|df| [df.bytes_per_row.to_i, df.name]}.sort.each{|b,n|
+        puts "#{b} #{n}"
+      }
+    end
+  end
+end
+
+## Various big functions
+
+def compare_against_xsd!
+  # xsd = XSD.new("/home/taw/etwng/db/DB.xsd")
+  xsd = XSD.new("DB.xsd")
+
+  # xfails = []
+  e = Hash.new(0)
+  xsd_ct  = []
+  xsd_tab = []
+  xsd_key = []
+  xsd_ref = []
+  DataFile.all("dbfull/ntw").sort_by(&:table_name).each{|df|
+    next unless df.table_name == "units_tables"
+    next if df.table_name == "models_building_tables"
+    next if df.table_name == "models_naval_tables"
+
+    available = %W[
+      agents_tables
+      avatar_campaign_maps_tables
+      avatar_units_tables
+      building_levels_tables
+      campaign_map_settlements_tables
+      campaign_map_slots_tables
+      campaign_map_towns_and_ports_tables
+      character_traits_tables
+      historical_characters_tables
+      ministerial_positions_by_gov_types_tables
+      missions_tables
+      models_building_tables
+      models_naval_tables
+      technologies_tables
+      uniforms_tables
+      uniform_to_faction_colours_tables
+      unit_stats_land_tables
+      unit_stats_naval_tables
+    ]
+    tryme = %W[
+    ]
+    
+    # next unless tryme.include?(df.table_name)
+    # next unless (win + tryme).include?(df.table_name)
+    
+    # name = "#{df.table_name}_tables"
+    # next unless name =~ /kv/
+    
+    puts "Testing #{df.table_name}"
+    
+    orig_asc  = xsd[df.table_name]
+    orig_bsc  = df.schema
+
+    asc  = orig_asc
+
+    bsc  = orig_bsc
+    bsc  = orig_bsc.map{|x| {:bool_true => :bool, :bool_false => :bool, :zero32 => :float}[x] || x } if bsc.is_a?(Array)
+
+    next if bsc == :empty
+
+    cls = if asc == bsc
+      "SAME"
+    elsif asc == nil and bsc == :unknown
+      "NONE"
+    elsif asc == nil
+      "DIFFER (only guess)"
+    elsif bsc == :unknown
+      "DIFFER (only xsd)"
+    elsif orig_asc.is_a?(Array) and
+          orig_bsc.is_a?(Array) and
+          orig_asc.size == orig_bsc.size and
+          orig_asc.zip(orig_bsc).all?{|a,b|
+            a == b or
+            (a == :opt_string and b == :bool_false) or
+            (a == :bool  and b == :bool_false) or
+            (a == :bool  and b == :bool_true) or
+            (a == :int   and b == :zero32) or
+            (a == :float and b == :zero32)
+          }
+      "DIFFER (minor)"
+    else
+      "DIFFER (major)"
+    end
+
+    e[cls] += 1
+    p df.name
+    puts cls
+
+    unless cls == "NONE" or cls == "SAME" or cls == "DIFFER (only guess)" or cls == "DIFFER (only xsd)"
+      p asc
+    end
+    unless cls == "NONE" or cls == "DIFFER (only xsd)" or cls == "SAME"
+      ct, tab = XSD.build(df.table_name, bsc)
+      if cls == "DIFFER (only guess)"
+        xsd_ct << "<!-- version #{df.version} -->"
+        xsd_ct << ct   
+        xsd_tab << tab
+      end
+      p bsc
+      puts "<!-- version #{df.version} -->", ct, tab
+
+      kcs = [[0], [0,1], [0,1,2]]
+      key = nil
+      kcs.each{|kc|
+        if kc.all?{|j| bsc[j]==:string} and df.columns_key?(*kc)
+          key = kc
+          p [:key, *key]
+          
+          xsd_key << XSD.pkey(df.table_name, kc.map{|i| "unknown#{i+1}"})  if cls == "DIFFER (only guess)"
+          
+          break
+        end
+      }
+      p [:unknown_key] unless key
+      
+      bsc.size.times{|j|
+        next if j == 0 and key == [0]
+        next unless bsc[j] == :string
+        r = df.guess_ref(j)
+        if r and r != :empty
+          xsd_ref << XSD.ref(df.table_name, "unknown#{j+1}", r)  if cls == "DIFFER (only guess)"
+        end
+      }
+      
+    end
+
+    puts ""
+  }
+  puts "\n----------\nChanges:\n\n"
+
+  puts "", xsd_ct.map(&:to_s).uniq, "",
+           xsd_tab.map(&:to_s).uniq, "",
+           xsd_key.map(&:to_s).uniq, "",
+           xsd_ref.map(&:to_s).uniq, ""
+  pp e
+end
+
+compare_against_xsd!

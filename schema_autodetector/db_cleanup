@@ -1,0 +1,109 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+class File
+  def self.write(path, content)
+    File.open(path, "w"){|fh|
+      fh.puts content
+    }
+  end
+end
+
+class DbFile
+  def initialize(source)
+    data = File.read(source)
+    if data[0,4] == "\xFD\xFE\xFC\xFF"
+      data = data[(4+2+36*2)..-1]
+    end
+    byte0 = data[0, 1].unpack("C")[0]
+    if byte0 == 1
+      @version = 1
+      @rows_count, = data[1, 4].unpack("V")
+      @data = data[5..-1]
+    elsif byte0 == 252
+      @version = data[4, 1].unpack("C")[0] + 1
+      @rows_count, = data[9, 4].unpack("V")
+      @data = data[13..-1]
+    else
+      raise "Wrong version number #{byte0}"
+    end
+    @ofs = 0
+  end
+  def get_bytes(sz)
+    rv = @data[@ofs, sz]
+    @ofs += sz
+    rv
+  end
+  def get_flt
+    get_bytes(4).unpack('f')[0]
+  end
+  def get_byte
+    get_bytes(1).unpack('C')[0]
+  end
+  def get_u2
+    get_bytes(2).unpack("v")[0]
+  end
+  def get_str
+    get_bytes(2*get_u2).unpack("v*").pack("U*")
+  end
+  def flt?(at=@ofs)
+    return false if bytes_available(at) < 4
+    v = @data[at, 4].unpack('f')[0].abs
+    return false if v == 0.0
+    return false unless v.finite?
+    return false if v > 10_000.0
+    return false if v < 0.001
+    true
+  end
+  def bytes_available(at=@ofs)
+    @data.size - at
+  end
+  def str?(at=@ofs)
+    return false if bytes_available(at) < 4
+    sz = @data[at, 2].unpack("v")[0]
+    return false if sz == 0 or sz > 1023
+    return false if bytes_available(at) < 2 + 2 * sz
+    str = @data[at+2, sz*2].unpack("v*")
+    return false if str.any?{|x| x > 127 or x < 10}
+    true
+  end
+  def cleanup
+    out = []
+    out << "Version #{@version}"
+    out << "#{@rows_count} rows"
+    while @ofs != @data.size
+      if str?
+        out << get_str.inspect
+      elsif flt? and not str?(@ofs+1) and not str?(@ofs+2) and not str?(@ofs+3)
+        bin = @data[@ofs, 4].unpack("C*").join(" ")
+        out << "#{get_flt.inspect} (#{bin})"
+      else
+        out << get_byte.inspect
+      end
+    end
+    out.map{|x| x + "\n"}.join
+  end
+  def cleanup_save(target)
+    FileUtils.mkdir_p File.dirname(target)
+    File.write(target, cleanup)
+  end
+end
+
+def convertible_source?(fn)
+  return false unless File.file?(fn)
+  return false if fn =~ %r[models_building_tables|models_naval_tables]
+  return true
+end
+
+Dir["db/s2tw/*/db/**/*"].sort.each{|source_fn|
+  next unless convertible_source?(source_fn)
+  target_fn = source_fn.sub(/\Adb\//, "clean/")
+  DbFile.new(source_fn).cleanup_save(target_fn)
+}
+
+#Dir["dbfull/*/*/db/**/*"].sort.each{|source_fn|
+#  next unless convertible_source?(source_fn)
+#  target_fn = source_fn.sub(/\Adbfull\//, "cleanfull/")
+#  DbFile.new(source_fn).cleanup_save(target_fn)
+#}
