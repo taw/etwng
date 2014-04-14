@@ -36,27 +36,27 @@ class Markers
     @ofs += sz
     rv
   end
-  
+
   def get_u1
     get(1).unpack("C")[0]
   end
-  
+
   def get_u2
     get(2).unpack("v")[0]
   end
-  
+
   def get_u4
     get(4).unpack("V")[0]
   end
-  
+
   def get_str
     get(get_u2*2).unpack("v*").pack("U*")
   end
-  
+
   def get_flt
     get(4).unpack("f")[0].pretty_single
   end
-  
+
   def get_ary(&blk)
     (0...get_u4).map(&blk)
   end
@@ -64,7 +64,7 @@ class Markers
   def get_ary2(&blk)
     (0...get_u2).map(&blk)
   end
-  
+
   def get_u4_or_flt
     v = get(4)
     vi = v.unpack("V")[0]
@@ -75,7 +75,7 @@ class Markers
       vf
     end
   end
-  
+
   def parse
     rv = []
     rv << get_str
@@ -84,7 +84,7 @@ class Markers
     rv << get(16).unpack("V*")
     kind = get_u4
     rv << kind
-    
+
     case kind
     when 1
       rv << get_ary{ [get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_flt, get_u1, get_str]}
@@ -95,14 +95,13 @@ class Markers
       rv << get_ary{[get_u4, get_flt, get_flt, get_flt, get_u4_or_flt] }
       rv << get_ary2{ [get_u2, get_str, get_ary{ get_u4 }] }
     else
-      raise "Unknown kind #{kind}"
+      raise "Unknown kind #{kind} at #{@path}:#{@ofs}"
     end
-    
+
     raise "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
     rv
   end
-  
-  
+
   # Parser for world.markers for empire
   # Does not work
   def parse_etw
@@ -115,10 +114,10 @@ class Markers
     pp [get_u2, get_u2, get_str]
     pp get_ary{ get_u4 }
     p [get_u4, get_u4, get_u4, get_u4, get_str]
-  
+
     warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
   end
-  
+
   def save!(path_out)
     data = parse
     File.open(path_out, 'wb'){|fh|
