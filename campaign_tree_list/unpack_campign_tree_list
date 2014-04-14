@@ -1,0 +1,98 @@
+#!/usr/bin/env ruby
+
+require "pp"
+
+class Float
+  def pretty_single
+    return self if nan?
+    begin
+      rv = (100_000.0 * self).round / 100_000.0
+      return rv if self != rv and [self].pack("f") == [rv].pack("f")
+      self
+    rescue
+      self
+    end
+  end
+end
+
+class CampaignTreeList
+  def initialize(path)
+    @path = path
+    @data = File.open(path, 'rb', &:read)
+    @ofs = 0
+  end
+
+  def bytes_left
+    @data.size - @ofs
+  end
+
+  def eof?
+    @data.size == @ofs
+  end
+
+  def get(sz)
+    raise "Requested reading past end of file (#{@path}:#{@ofs}) - #{sz}" if @ofs + sz > @data.size
+    rv = @data[@ofs, sz]
+    @ofs += sz
+    rv
+  end
+
+  def get_asc
+    get(get_u2)
+  end
+
+  def get_u1
+    get(1).unpack("C")[0]
+  end
+
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+
+  def get_str
+    get(get_u2*2).unpack("v*").pack("U*")
+  end
+
+  def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+
+  def get_ary(&blk)
+    (0...get_u4).map(&blk)
+  end
+
+  def parse
+    rv = []
+    rv << get_u4
+    rv << get_u4
+    rv << get_u4
+    rv << get_flt
+    rv << get_flt
+    rv << get_ary{
+      [
+        get_asc,
+        get_ary { [get_flt, get_flt, get_flt, get_u1, get_u1, get_u1] },
+      ]
+    }
+    warn "Still #{bytes_left} bytes to go at #{@path}:#{@ofs}" unless eof?
+    rv
+  end
+
+  def save!(path_out)
+    data = parse
+    File.open(path_out, 'wb'){|fh|
+      PP.pp data, fh, 150
+    }
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input.campaign_tree_list output.txt"
+  exit 1
+end
+
+CampaignTreeList.new(ARGV[0]).save!(ARGV[1])
