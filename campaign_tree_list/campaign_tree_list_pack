@@ -1,0 +1,76 @@
+#!/usr/bin/env ruby
+
+class File
+  def self.write(path, content)
+    File.open(path, 'wb'){|fh|
+      fh.write content
+    }
+  end
+end
+
+class CampaignTreeList
+  def initialize(path)
+    @path = path
+    @data = eval(File.open(path, 'rb', &:read))
+    @rv = ""
+  end
+
+  def put_u1(v)
+    @rv << [v].pack("C")
+  end
+
+  def put_u2(v)
+    @rv << [v].pack("v")
+  end
+
+  def put_u4(v)
+    @rv << [v].pack("V")
+  end
+
+  def put_flt(v)
+    @rv << [v].pack("f")
+  end
+
+  def put_asc(s)
+    put_u2 s.size
+    @rv << s
+  end
+
+  def shift
+    @data.shift
+  end
+
+  def convert!
+    put_u4 shift
+    put_u4 shift
+    put_u4 shift
+    put_flt shift
+    put_flt shift
+    ar = shift
+    put_u4 ar.size
+    ar.each do |model_path, model_data|
+      put_asc model_path
+      put_u4 model_data.size
+      model_data.each do |x,y,z,a,b,c|
+        put_flt x
+        put_flt y
+        put_flt z
+        put_u1 a
+        put_u1 b
+        put_u1 c
+      end
+    end
+  end
+
+  def save!(path_out)
+    convert!
+    File.write(path_out, @rv)
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} input.txt output.campaign_tree_list"
+  exit 1
+end
+
+CampaignTreeList.new(ARGV[0]).save!(ARGV[1])
