@@ -1,0 +1,98 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+require "pp"
+
+class Float
+  def pretty_single
+    return self if nan?
+    begin
+      rv = (100_000.0 * self).round / 100_000.0
+      return rv if self != rv and [self].pack("f") == [rv].pack("f")
+      self
+    rescue
+      self
+    end
+  end
+end
+
+class TileList
+  def initialize(file_path)
+    @file_path = file_path
+    @data = File.open(file_path, 'rb', &:read)
+    @ofs = 0
+  end
+  def bytes_left
+    @data.size - @ofs
+  end
+  def eof?
+    @data.size == @ofs
+  end
+  def get(size)
+    fail "Trying to read past end of file" if size+@ofs > @data.size
+    rv = @data[@ofs, size]
+    @ofs += size
+    rv
+  end
+  def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+  def get_i4
+    get(4).unpack("l")[0]
+  end
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+  def get_i2
+    get(2).unpack("s")[0]
+  end
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+  def get_u1
+    get(1).unpack("C")[0]
+  end
+  def get_asc
+    get(get_u2)
+  end
+  def get_ary(&blk)
+    (0...get_u4).map(&blk)
+  end
+  def parse
+    @version = get_u4
+    rv = []
+    unless @version == 8
+      fail "Only version 8 (Rome 2 battlemap tile lists) supported"
+    end
+    # All U4s here could be I4s for all I know
+    rv << get_u4
+    rv << (0...6).map{ get_flt }
+    rv << get_u4 # zero
+    rv << (0...4).map{ get_u4 }
+    rv << (0...2).map{ get_flt }
+    rv << (0...2).map{ get_i4 }
+    rv << (0...2).map{ get_u4 }
+    rv << get_u1 # zero
+    rv << get_ary { get_asc }
+    # rv << get(bytes_left).unpack("s*")
+    rv << get(6).unpack("s*")
+    while bytes_left >= 14
+      rv << [:record, *get(14).unpack("s*")]
+    end
+    rv << [:rest, *get(bytes_left).unpack("s*")] unless eof?
+    warn "Data left at the end of file #{@file_path}:#{@ofs}" unless eof?
+    rv
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} file.unit_variant file.txt"
+  exit 1
+end
+
+source = Pathname(ARGV[0])
+target = Pathname(ARGV[1])
+
+tl = TileList.new(source)
+
+pp tl.parse
