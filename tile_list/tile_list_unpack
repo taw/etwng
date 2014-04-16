@@ -64,22 +64,23 @@ class TileList
     unless @version == 8
       fail "Only version 8 (Rome 2 battlemap tile lists) supported"
     end
-    # All U4s here could be I4s for all I know
-    rv << get_u4
+    # All U* here could be I*s for all I know
+    tile_count = get_u4
+    rv << {:tile_count => tile_count}
     rv << (0...6).map{ get_flt }
     rv << get_u4 # zero
     rv << (0...4).map{ get_u4 }
     rv << (0...2).map{ get_flt }
     rv << (0...2).map{ get_i4 }
-    rv << (0...2).map{ get_u4 }
+    rv << {:xsize => get_u4, :ysize => get_u4}
     rv << get_u1 # zero
     rv << get_ary { get_asc }
     # rv << get(bytes_left).unpack("s*")
-    rv << get(6).unpack("s*")
-    while bytes_left >= 14
-      rv << [:record, *get(14).unpack("s*")]
+    rv << get_u4
+    tile_count.times do
+      rv << [:tile, *get(14).unpack("s*")]
     end
-    rv << [:rest, *get(bytes_left).unpack("s*")] unless eof?
+    rv << [get_i2, get_i2, get_i2, get_i2, get_u4, get_u4]
     warn "Data left at the end of file #{@file_path}:#{@ofs}" unless eof?
     rv
   end
