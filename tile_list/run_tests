@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+class TileListTest
+  attr_reader :fn
+  def initialize(fn)
+    @fn = fn
+  end
+  def out_path
+    "tmp/" + File.basename(fn).sub(/\.tile_list\z/, "") + ".txt"
+  end
+  def remade_fn
+    "tmp/recreated-" + File.basename(fn)
+  end
+  def run!
+    FileUtils.rm_rf "tmp"
+    FileUtils.mkdir_p "tmp"
+    system "./tile_list_unpack", fn, out_path
+  end
+end
+
+if ARGV.empty?
+  samples = Dir["samples_8/*.tile_list"]
+else
+  samples = ARGV
+end
+
+rv = Hash.new(0)
+samples.each do |fn|
+  res = TileListTest.new(fn).run!
+  rv[res] += 1
+end
+p rv
