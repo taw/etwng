@@ -96,4 +96,6 @@ target = Pathname(ARGV[1])
 
 tl = TileList.new(source)
 
-pp tl.parse
+File.open(target, 'wb') do |fh|
+  PP.pp(tl.parse, fh, 100)
+end
