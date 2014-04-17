@@ -28,6 +28,9 @@ class TileList
   def eof?
     @data.size == @ofs
   end
+  def fail(msg)
+    raise "#{msg} at #{@file_path}:#{@ofs}"
+  end
   def get(size)
     fail "Trying to read past end of file" if size+@ofs > @data.size
     rv = @data[@ofs, size]
@@ -59,13 +62,14 @@ class TileList
     (0...get_u4).map(&blk)
   end
   def parse
-    @version = get_u4
+    version = get_u4
     rv = []
-    unless @version == 8
+    unless version == 8
       fail "Only version 8 (Rome 2 battlemap tile lists) supported"
     end
     # All U* here could be I*s for all I know
     tile_count = get_u4
+    rv << {:version => version}
     rv << {:tile_count => tile_count}
     rv << (0...6).map{ get_flt }
     rv << get_u4 # zero
@@ -75,7 +79,6 @@ class TileList
     rv << {:xsize => get_u4, :ysize => get_u4}
     rv << get_u1 # zero
     rv << get_ary { get_asc }
-    # rv << get(bytes_left).unpack("s*")
     rv << get_u4
     tile_count.times do
       rv << [:tile, *get(14).unpack("s*")]

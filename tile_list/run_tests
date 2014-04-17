@@ -14,9 +14,18 @@ class TileListTest
     "tmp/recreated-" + File.basename(fn)
   end
   def run!
-    FileUtils.rm_rf "tmp"
-    FileUtils.mkdir_p "tmp"
     system "./tile_list_unpack", fn, out_path
+    unless File.exist?(out_path)
+      puts "UNPACK FAILURE: #{fn}"
+      return false
+    end
+    system "./tile_list_pack", out_path, remade_fn
+    unless system 'diff', fn, remade_fn
+      puts "DIFFER: #{fn}"
+      return false
+    else
+      return true
+    end
   end
 end
 
@@ -25,6 +34,9 @@ if ARGV.empty?
 else
   samples = ARGV
 end
+
+FileUtils.rm_rf "tmp"
+FileUtils.mkdir_p "tmp"
 
 rv = Hash.new(0)
 samples.each do |fn|

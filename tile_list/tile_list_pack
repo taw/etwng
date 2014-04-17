@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+
+class File
+  def self.write(path, content)
+    File.open(path, 'wb') do |fh|
+      fh.write(content)
+    end
+  end
+end
+
+class TileList
+  attr_reader :out
+  def initialize(path)
+    @data = eval(File.read(path))
+    @out = ""
+    convert!
+  end
+  def put(v)
+    @out << v
+  end
+  def put_flt(v)
+    put [v].pack("f")
+  end
+  def put_i4(v)
+    put [v].pack("l")
+  end
+  def put_u4(v)
+    put [v].pack("V")
+  end
+  def put_i2(v)
+    put [v].pack("s")
+  end
+  def put_u2(v)
+    put [v].pack("v")
+  end
+  def put_u1(v)
+    put [v].pack("C")
+  end
+  def put_asc(v)
+    put_u2 v.size
+    put v
+  end
+  def shift
+    raise "Trying to read past end of data" if @data.empty?
+    @data.shift
+  end
+  def convert!
+    version = shift[:version]
+    raise "Wrong version number" unless version == 8
+    put_u4 version
+    tile_count = shift[:tile_count]
+    put_u4 tile_count
+    put shift.pack("ffffff")
+    put_u4 shift
+    put shift.pack("VVVV")
+    put shift.pack("ff")
+    put shift.pack("ll")
+    sizes = shift
+    put_u4 sizes[:xsize]
+    put_u4 sizes[:ysize]
+    put_u1 shift
+    file_names = shift
+    put_u4 file_names.size
+    file_names.each do |fn|
+      put_asc fn
+    end
+    put_u4 shift
+    tile_count.times do
+      put shift[1..-1].pack("sssssss")
+    end
+    put shift.pack("ssssVV")
+    raise "Data remaining after end of conversion" unless @data.empty?
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} file.txt file.unit_variant"
+  exit 1
+end
+
+source = Pathname(ARGV[0])
+target = Pathname(ARGV[1])
+
+tl = TileList.new(source)
+File.write(target, tl.out)
