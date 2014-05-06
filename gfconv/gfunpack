@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require "pp"
-require "md5"
+require "digest"
 
 class File
   def self.save_as_new(base, ext, content)
@@ -43,16 +43,20 @@ class GroupFormationsUnpacker
     @ofs = 0
   end
   def md5
-    @md5 ||= MD5.hexdigest(@data)
+    @md5 ||= Digest::MD5.hexdigest(@data)
   end
   def to_s
     "Group Formations Unpacker for ETW/NTW (file: #{@path}, size:#{@data.size}, md5: #{md5})"
   end
+  def bytes_left
+    @data.size - @ofs
+  end
   def get(sz)
+    raise "Trying to read past end of file" if sz > bytes_left
     ofs0, @ofs = @ofs, @ofs+sz
     @data[ofs0...@ofs]
   end
-    def get_flt
+  def get_flt
     get(4).unpack("f")[0].pretty_single
   end
   def get_u4
@@ -247,11 +251,11 @@ if ARGV.empty?
 else
   files = ARGV
 end
-    
-files.each{|fn|
+
+files.each do |fn|
   conv = GroupFormationsUnpacker.new(fn)
   puts conv if verbose
   out = conv.unpack_to_string
   txt = File.save_as_new(fn.sub(/\.bin\z/i, ""), ".txt", out)
   puts "Saved as #{txt}" if verbose
-}
+end
