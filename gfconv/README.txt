@@ -1,13 +1,10 @@
 = Installation =
-You need Ruby.
-
-Any version should do, 1.8.7 or 1.9, CRuby or JRuby,
-but it's only really tested under CRuby 1.8.7.
+You need to install Ruby.
 
 OSX and Linux should have adequate version of Ruby out of the box.
-For Windows you'll need to install one yourself.
+For Windows you'll need to install one yourself, JRuby is easiest to install [ http://jruby.org/download ].
 
-= Usage = 
+= Usage =
 To unpack:
 * put all groupformations*.bin files you want to convert in this directory
 * run gfunpack from command line
