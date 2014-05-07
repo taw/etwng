@@ -1,0 +1,131 @@
+#!/usr/bin/env ruby
+
+require "pp"
+
+class File
+  def self.save_as_new(base, ext, content)
+    extra = 0
+    fn    = "#{base}#{ext}"
+    while true
+      begin
+        File.open(fn, (IO::BINARY rescue 0)|IO::CREAT|IO::EXCL|IO::WRONLY){|fh| fh.write content}
+        return
+      rescue Errno::EEXIST
+        extra += 1
+        fn    = "#{base}-#{extra}#{ext}"
+      end
+    end
+  end
+end
+
+class String
+  def utf16_to_utf8
+    unpack("v*").pack("U*")
+  end
+  def utf8_to_utf16
+    unpack("U*").pack("v*")
+  end
+end
+
+class GroupFormationsPacker
+  def initialize
+  end
+  def pack(formations)
+    @out = ""
+    pack_u4(formations.size)
+    formations.each{|formation|
+      pack_formation(formation)
+    }
+    @out
+  end
+  def pack_u4(val)
+    @out << [val].pack("V")
+  end
+  def pack_i4(val)
+    @out << [val].pack("i")
+  end
+  def pack_flt(val)
+    @out << [val].pack("f")
+  end
+  def pack_str(str)
+    @out << [str.size].pack("v")
+    @out << str
+  end
+  def pack_factions(factions)
+    pack_u4(factions.size)
+    factions.each{|faction| pack_str(faction)}
+  end
+  def pack_formation(formation)
+    pack_str(formation[:name])
+    pack_flt(formation[:priority])
+    pack_u4(formation[:purpose].to_i)
+    mins = formation[:minimum]
+    pack_u4(mins.size)
+    mins.each{|min|
+      pack_u4(min[:unit_class].to_i)
+      pack_u4(min[:percent].to_i)
+    }
+    pack_factions(formation[:factions])
+    pack_lines(formation[:lines])
+  end
+  def pack_lines(lines)
+    lines.each_with_index{|line, i|
+      pack_u4(i == 0 ? lines.size : i)
+      pack_line(line)
+    }
+  end
+  def pack_v2(v2)
+    pack_flt v2[:x]
+    pack_flt v2[:y]
+  end
+  def pack_pairs(pairs)
+    pack_u4 pairs.size
+    pairs.each{|pair|
+      @out << [pair[:priority], pair[:unit_class].to_i].pack("fi")
+    }
+  end
+  def pack_line(attrs)
+    case attrs[:type]
+    when :absolute
+      pack_u4 0
+      pack_flt 0.0
+      pack_flt attrs[:priority]
+      pack_u4  attrs[:shape].to_i
+      pack_flt attrs[:spacing]
+      pack_flt attrs[:crescent_yoffset]
+      pack_flt attrs[:x]
+      pack_flt attrs[:y]
+      pack_i4 attrs[:min_threshold]
+      pack_i4 attrs[:max_threshold]
+      pack_pairs attrs[:pairs]
+    when :relative
+      pack_u4 1
+      pack_flt attrs[:priority]
+      pack_u4  attrs[:relative_to]
+      pack_u4  attrs[:shape].to_i
+      pack_flt attrs[:spacing]
+      pack_flt attrs[:crescent_yoffset]
+      pack_flt attrs[:x]
+      pack_flt attrs[:y]
+      pack_i4 attrs[:min_threshold]
+      pack_i4 attrs[:max_threshold]
+      pack_pairs attrs[:pairs]
+    when :spanning
+      pack_u4 3
+      blocks = attrs[:blocks]
+      pack_u4(blocks.size)
+      blocks.each{|i| pack_u4(i)}
+    else
+      raise "No idea what line type is #{line_type}"
+    end
+  end
+end
+
+warn "Work in progress, doesn't work fully yet"
+
+Dir["groupformations*.txt"].each do |fn|
+  data = eval(File.open(fn, "rb").read)
+  gfp = GroupFormationsPacker.new
+  out = gfp.pack(data)
+  File.save_as_new(fn.sub(/\.txt\z/i, ""), ".bin", out)
+end
