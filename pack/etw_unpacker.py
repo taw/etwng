@@ -14,7 +14,7 @@ def read_cstr(handle):
     if (char != b'\x00'):
       filename += char
     flen += 1
-  return (filename.decode(), flen)
+  return (filename.decode("iso-8859-1"), flen)
 
 
 def removeDir(path):
@@ -72,7 +72,7 @@ def unpackPackArchive(pack_path, outputdir):
     header_len = 28 + deps_len + files_len
     handle.seek(28 + deps_len)
     file_extra_len = 4
-  elif magic == b"PFH1":
+  elif magic == b"PFH1" or magic == b"PFH0":
     header_len = 24 + deps_len + files_len
     handle.seek(24 + deps_len)
   else:
