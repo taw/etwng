@@ -1,0 +1,56 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+class SampleTest
+  def initialize(filename)
+    @filename = filename
+  end
+  def source
+    "samples/#{@filename}"
+  end
+  def xmldir
+    "tmp/" + @filename.gsub(".", "_") + "_dir"
+  end
+  def recreated
+    "tmp/recreated_#{@filename}"
+  end
+  def size
+    File.size(source)
+  end
+  def ruby
+    # %W[time jruby --server -J-Xmx2048m]
+    %W[ruby]
+    # %W[ruby1.9]
+  end
+  def extra_args
+    if File.basename(@filename) =~ /\Aetw/
+      ["--empire"]
+    else
+      []
+    end
+  end
+  def convert!
+    puts "Converting #{@filename}"
+    FileUtils.rm_rf xmldir
+    system(*ruby, "./models_naval_unpack", *extra_args, source, xmldir)
+  end
+  def convert_back!
+    puts "Recreating #{@filename}"
+    FileUtils.rm_rf recreated
+    system(*ruby, "./models_naval_pack", *extra_args, xmldir, recreated)
+  end
+  def compare!
+    system "diff", source, recreated
+  end
+  def run!
+    convert! or return 1
+    convert_back! or return 1
+    compare!
+  end
+end
+
+FileUtils.mkdir_p "tmp"
+Dir["data/*"].each do |path|
+  SampleTest.new(path).run!
+end
