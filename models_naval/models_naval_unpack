@@ -1,0 +1,317 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+
+class Float
+  def pretty_single
+    return self if nan?
+    begin
+      rv = (100_000.0 * self).round / 100_000.0
+      return rv if self != rv and [self].pack("f") == [rv].pack("f")
+      self
+    rescue
+      self
+    end
+  end
+end
+
+class ModelsNavalXmlDirBuilder
+  def initialize(path, model)
+    @path = Pathname(path)
+    @model = model
+  end
+
+  def run!
+    raise "#{@path} already exists" if @path.exist?
+    @model.parse!
+    @path.mkpath
+  end
+end
+
+class ModelsNavalDbTable
+  attr_reader :version, :empire, :path, :parsed
+
+  def initialize(path, empire)
+    @path = Pathname(path)
+    @empire = empire
+    @data = open(@path, "rb", &:read)
+    @ofs = 0
+  end
+
+  def bytes_left
+    @data.size - @ofs
+  end
+
+  def eof?
+    @data.size == @ofs
+  end
+
+  def get(n)
+    raise "Trying to read past end of file" if bytes_left < n
+    rv = @data[@ofs, n]
+    @ofs += n
+    rv
+  end
+
+  def get_u1
+    get(1).unpack("C")[0]
+  end
+
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+
+  def get_i4
+    get(4).unpack("l")[0]
+  end
+
+  def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+
+  def get_v3
+    {x: get_flt, y: get_flt, z: get_flt}
+  end
+
+  def get_ary(&blk)
+    get_u4.times.map(&blk)
+  end
+
+  def get_string
+    chars = get(2*get_u2).unpack("v*")
+    raise if chars.any?{|i| i == 0 or i >= 128}
+    chars.pack("U*")
+  end
+
+  def get_ascii
+    get(get_u2)
+  end
+
+  def get_db_header
+    if @data[@ofs, 4] == "\xFD\xFE\xFC\xFF".b
+      @ofs += 4
+      guid = get_string
+    else
+      guid = nil
+    end
+    if @data[@ofs, 4] == "\xFC\xFD\xFE\xFF".b
+      @ofs += 4
+      version = get_u1 + 1
+      raise "DB header not recognized" unless get(4) == "\x00\x00\x00\x01".b
+    elsif @data[@ofs, 1] == "\x01".b
+      @ofs += 1
+      version = 1
+    else
+      raise "DB header not recognized"
+    end
+    {version: version, guid: guid}
+  end
+
+  def get_collision
+    {name: get_string, index: get_u4, a: get_v3, b: get_v3, c: get_v3}
+  end
+
+  def get_efline
+    {name: get_string, action: get_u4, end_a: get_v3, end_b: get_v3, direction: get_v3}
+  end
+
+  def get_deck
+    {
+      name: get_string,
+      number: get_u4,
+      pieces: get_ary{{
+        id: get_u4,
+        corners: get_ary{ {x: get_flt, y: get_flt, z: get_flt, type: get_u1} },
+        something: 4.times.map{ get_flt }
+      }},
+    }
+  end
+
+  def get_navalcam
+    {
+      name: get_string,
+      matrix4x4: 16.times.map{ get_flt },
+    }
+  end
+
+  def get_navalcams
+     get_ary{ get_navalcam }
+  end
+
+  def get_bobby
+    {
+      bobby_id: get_u4,
+      mass: get_flt,
+      radius: get_flt,
+      x: get_flt,
+      y: get_flt,
+      z: get_flt,
+      breach: {radius: get_flt, x: get_flt, y: get_flt, z: get_flt},
+      connections: get_ary{ get_u4 },
+    }
+  end
+
+  def get_cannon
+    {type: get_string, a: get_u4, b: get_u4, c: get_v3, d: get_v3}
+  end
+
+  def get_damage_model_part
+    {
+      name: get_string,
+      something: get_ary{ get_string },
+      panels: get_ary{ get_ary{ get_v3 }},
+    }
+  end
+
+  def get_pipe
+    type = get_u4
+    id = get_u4
+    case type
+    when 2
+      [type, id, get_u4, get_u4, get_v3, get_u4, get_v3]
+    when 4
+      [type, id, get_u4, get_i4, get_v3, get_v3, get_v3, get_i4, get_v3]
+    when 5
+      [type, id, get_u4, get_i4, get_v3, get_v3, get_v3, get_v3, get_u4, get_v3]
+    else
+      require 'pry'; binding.pry
+    end
+  end
+
+  def get_custom_position_v7
+    {
+      name: get_string,
+      a: get_u4,
+      b: get_u4,
+      position: [get_v3, get_v3],
+    }
+  end
+
+  def get_custom_position_v1
+    {
+      name: get_string,
+      a: get_u4,
+      position: get_v3,
+    }
+  end
+
+  def get_steam_info_v7
+    [get_string, get_u4, get_string, get_v3, get_v3]
+  end
+
+  def get_steam_info_v1
+    [get_string, get_u4, get_v3, get_v3]
+  end
+
+  def get_model_v1_etw
+    {
+      name: get_string,
+      rigging_path: get_string,
+      path: get_string,
+      navalcams: get_navalcams,
+      buoyancy: get_ary{ get_bobby },
+      decks: get_ary{ get_deck },
+      pipes: get_ary{ get_pipe },
+      cannons: get_ary{ get_cannon },
+      damage_model: get_ary{ get_damage_model_part },
+      collisions: get_ary{ get_collision },
+      custom_positions: get_ary{ get_custom_position_v1 },
+      eflines: get_ary{ get_efline },
+    }
+  end
+
+  def get_model_v1_ntw
+    {
+      name: get_string,
+      rigging_path: get_string,
+      path: get_string,
+      navalcams: get_navalcams,
+      buoyancy: get_ary{ get_bobby },
+      decks: get_ary{ get_deck },
+      pipes: get_ary{ get_pipe },
+      cannons: get_ary{ get_cannon },
+      damage_model: get_ary{ get_damage_model_part },
+      collisions: get_ary{ get_collision },
+      eflines: get_ary{ get_efline },
+      custom_positions: get_ary{ get_custom_position_v1 },
+      steam_info: get_ary{ get_steam_info_v1 },
+    }
+  end
+
+  def get_model_v7
+    {
+      name: get_string,
+      rigging_path: get_string,
+      zero: get_u1,
+      path: get_string,
+      navalcams: get_navalcams,
+      buoyancy: get_ary{ get_bobby },
+      decks: get_ary{ get_deck },
+      pipes: get_ary{ get_pipe },
+      cannons: get_ary{ get_cannon },
+      damage_model: get_ary{ get_damage_model_part },
+      collisions: get_ary{ get_collision },
+      eflines: get_ary{ get_efline },
+      custom_positions: get_ary{ get_custom_position_v7 },
+      steam_info: get_ary{ get_steam_info_v7 },
+    }
+  end
+
+  def get_model_v12
+    {
+      name: get_ascii,
+      rigging_path: get_ascii,
+      destruction_paths: get_u1.times{ get_ascii },
+      path: get_ascii,
+      something: 4.times.map{ get_ascii },
+      navalcams: get_navalcams,
+      buoyancy: get_ary{ get_bobby },
+      decks: get_ary{ get_deck },
+      pipes: get_ary{ get_pipe },
+      cannons: get_ary{ get_cannon },
+      damage_model: get_ary{ get_damage_model_part },
+      collisions: get_ary{ get_collision },
+      eflines: get_ary{ get_efline },
+      custom_positions: get_ary{ get_custom_position_v7 },
+      steam_info: get_ary{ get_steam_info_v7 },
+    }
+  end
+
+  def parse!
+    @version = get_db_header
+    @parsed = case @version[:version]
+    when 1
+      if @empire
+        get_ary{ get_model_v1_etw }
+      else
+        get_ary{ get_model_v1_ntw }
+      end
+    when 7
+      get_ary{ get_model_v7 }
+    when 12
+      get_ary{ get_model_v12 }
+    else
+      raise "Unknown table version number #{version}"
+    end
+    raise "Bytes left at end of file" unless eof?
+  end
+end
+
+empire = false
+if ARGV[0] == "--empire"
+  empire = true
+  ARGV.shift
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} [--empire] models_naval_dbtable models_naval_dir"
+end
+
+model = ModelsNavalDbTable.new(ARGV[0], empire)
+xmldir = ModelsNavalXmlDirBuilder.new(ARGV[1], model)
+
+xmldir.run!

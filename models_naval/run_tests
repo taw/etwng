@@ -7,13 +7,13 @@ class SampleTest
     @filename = filename
   end
   def source
-    "samples/#{@filename}"
+    @filename
   end
   def xmldir
-    "tmp/" + @filename.gsub(".", "_") + "_dir"
+    "tmp/" + File.basename(@filename).gsub(".", "_") + "_dir"
   end
   def recreated
-    "tmp/recreated_#{@filename}"
+    "tmp/recreated_#{File.basename(@filename)}"
   end
   def size
     File.size(source)
@@ -38,19 +38,25 @@ class SampleTest
   def convert_back!
     puts "Recreating #{@filename}"
     FileUtils.rm_rf recreated
-    system(*ruby, "./models_naval_pack", *extra_args, xmldir, recreated)
+    system(*ruby, "./models_naval_pack", xmldir, recreated)
   end
   def compare!
     system "diff", source, recreated
   end
   def run!
     convert! or return 1
-    convert_back! or return 1
-    compare!
+    # convert_back! or return 1
+    # compare!
   end
 end
 
+if ARGV.empty?
+  test_files = Dir["data/*"]
+else
+  test_files = ARGV
+end
+
 FileUtils.mkdir_p "tmp"
-Dir["data/*"].each do |path|
+test_files.each do |path|
   SampleTest.new(path).run!
 end
