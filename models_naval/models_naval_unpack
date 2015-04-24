@@ -262,7 +262,7 @@ class ModelsNavalDbTable
     {
       name: get_ascii,
       rigging_path: get_ascii,
-      destruction_paths: get_u1.times{ get_ascii },
+      destruction_paths: get_u1.times.map{ get_ascii },
       path: get_ascii,
       something: 4.times.map{ get_ascii },
       navalcams: get_navalcams,
@@ -375,7 +375,15 @@ class ModelsNavalUnpacker
       end
       tag!("pipes") do
         ship[:pipes].each do |pipe|
-          # TODO <- get_pipe
+          tag!("pipe", "id"=>pipe[0], "type"=>pipe[1]) do
+            pipe[2..-1].each do |x|
+              if x.is_a?(Hash)
+                tag!("vertex", "x"=>x[:x], "y"=>x[:y], "z"=>x[:z])
+              else
+                out!("<i>#{x}</i>")
+              end
+            end
+          end
         end
       end
       tag!("cannons") do
@@ -394,7 +402,7 @@ class ModelsNavalUnpacker
             part[:panels].each do |panel|
               tag!("panel") do
                 panel.each do |vertex|
-                  tag!("vertex", "x"=>vertex["x"], "y"=>vertex["y"], "z"=>vertex["z"])
+                  tag!("vertex", "x"=>vertex[:x], "y"=>vertex[:y], "z"=>vertex[:z])
                 end
               end
             end
@@ -421,16 +429,30 @@ class ModelsNavalUnpacker
       end
 
       tag!("custom_positions") do
-        # TODO: custom_positions: get_ary{ get_custom_position_v1 },
-        # TODO: custom_positions: get_ary{ get_custom_position_v7 },
+        ship[:custom_positions].each do |position|
+          tag!("custom_position", "name" => position[:name], "a" => position[:a], "b" => position[:b]) do
+            [position[:position]].flatten.each do |pos|
+              tag!("position", "x"=>pos[:x], "y"=>pos[:y], "z"=>pos[:z])
+            end
+          end
+        end
       end
 
-      tag!("steam_info") do
-        # TODO: steam_info: get_ary{ get_steam_info_v1 },
-        # TODO: steam_info: get_ary{ get_steam_info_v7 },
-      end
+      tag!("steam_infos") do
+        ship[:steam_info].each do |steam_info|
+          if steam_info.size == 5
+            attrs={"name"=>steam_info[0], "a"=>steam_info[1], "b"=>steam_info[2]}
+          else
+            attrs={"name"=>steam_info[0], "a"=>steam_info[1]}
+          end
+          tag!("steam_info", attrs) do
+            tag!("vertex", "x"=>steam_info[-2][:x], "y"=>steam_info[-2][:y], "z"=>steam_info[-2][:z])
+            tag!("vertex", "x"=>steam_info[-1][:x], "y"=>steam_info[-1][:y], "z"=>steam_info[-1][:z])
+          end
+        end
+      end if ship[:steam_info]
     end
-    end
+  end
 
   def out!(*args)
     @out.xml_printer.out!(*args)
