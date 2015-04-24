@@ -32,7 +32,7 @@ class DirBuilder
   end
 
   def open_main_xml(&blk)
-    open_xml(XMLPrinter.new(File.join(@out_dir, 'esf.xml'), 'esf.xml'), &blk)
+    open_xml(XMLPrinter.new(File.join(@out_dir, 'dbtable.xml'), 'dbtable.xml'), &blk)
   end
 
   def open_nested_xml(base_name, semantic_name, &blk)

@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 
+require_relative "dir_builder"
+require_relative "xml_printer"
 require "pathname"
+require "fileutils"
 
 class Float
   def pretty_single
@@ -15,21 +18,16 @@ class Float
   end
 end
 
-class ModelsNavalXmlDirBuilder
-  def initialize(path, model)
-    @path = Pathname(path)
-    @model = model
-  end
-
-  def run!
-    raise "#{@path} already exists" if @path.exist?
-    @model.parse!
-    @path.mkpath
+class String
+  # Escape characters for output as XML attribute values (< > & ' ")
+  def xml_escape
+    replacements = {"<" => "&lt;", ">" => "&gt;", "&" => "&amp;", "\"" => "&quot;", "'" => "&apos;"}
+    gsub(/([<>&\'\"])/) { replacements[$1] }
   end
 end
 
 class ModelsNavalDbTable
-  attr_reader :version, :empire, :path, :parsed
+  attr_reader :version, :guid, :empire, :path, :parsed
 
   def initialize(path, empire)
     @path = Pathname(path)
@@ -91,24 +89,23 @@ class ModelsNavalDbTable
     get(get_u2)
   end
 
-  def get_db_header
+  def parse_db_header!
     if @data[@ofs, 4] == "\xFD\xFE\xFC\xFF".b
       @ofs += 4
-      guid = get_string
+      @guid = get_string
     else
-      guid = nil
+      @guid = nil
     end
     if @data[@ofs, 4] == "\xFC\xFD\xFE\xFF".b
       @ofs += 4
-      version = get_u1 + 1
+      @version = get_u1 + 1
       raise "DB header not recognized" unless get(4) == "\x00\x00\x00\x01".b
     elsif @data[@ofs, 1] == "\x01".b
       @ofs += 1
-      version = 1
+      @version = 1
     else
       raise "DB header not recognized"
     end
-    {version: version, guid: guid}
   end
 
   def get_collision
@@ -282,8 +279,8 @@ class ModelsNavalDbTable
   end
 
   def parse!
-    @version = get_db_header
-    @parsed = case @version[:version]
+    parse_db_header!
+    @parsed = case @version
     when 1
       if @empire
         get_ary{ get_model_v1_etw }
@@ -301,6 +298,36 @@ class ModelsNavalDbTable
   end
 end
 
+class ModelsNavalUnpacker
+  def initialize(path, model)
+    @path = Pathname(path)
+    @out = DirBuilder.new(@path)
+    @model = model
+  end
+
+  def run!
+    @model.parse!
+    @out.open_main_xml do
+      @out.xml_printer.tag!("dbtable", "version" => @model.version, "empire" => @model.empire, "guid" => @model.guid) do
+        @model.parsed.each do |ship|
+          rel_path = @out.open_nested_xml("ship", ship[:name]) do
+            out_model! ship
+          end
+          out!("<xml_include path=\"#{rel_path.xml_escape}\"/>")
+        end
+      end
+    end
+  end
+
+  def out_model!(ship)
+    out!(ship.inspect)
+  end
+
+  def out!(s)
+    @out.xml_printer.out!(s)
+  end
+end
+
 empire = false
 if ARGV[0] == "--empire"
   empire = true
@@ -312,6 +339,5 @@ unless ARGV.size == 2
 end
 
 model = ModelsNavalDbTable.new(ARGV[0], empire)
-xmldir = ModelsNavalXmlDirBuilder.new(ARGV[1], model)
-
-xmldir.run!
+unpacker = ModelsNavalUnpacker.new(ARGV[1], model)
+unpacker.run!
