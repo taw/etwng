@@ -320,70 +320,117 @@ class ModelsNavalUnpacker
   end
 
   def out_model!(ship)
-    tag!("name") { out! ship[:name].xml_escape }
-    tag!("rigging_path") { out! ship[:name].xml_escape }
-    tag!("zero") { out! ship[:zero].to_s } if ship[:zero]
-    if ship[:destruction_paths]
-      tag!("destruction_paths") do
-        ship[:destruction_paths].each do |destruction_path|
-          tag! "destruction_path" do
-            out! destruction_path.xml_escape
+    tag!("model_naval") do
+      out!("<name>#{ship[:name].xml_escape}</name>")
+      out!("<rigging_path>#{ship[:rigging_path].xml_escape}</rigging_path>")
+      out!("<zero>#{ship[:zero].to_s.xml_escape}</zero>") if ship[:zero]
+      if ship[:destruction_paths]
+        tag!("destruction_paths") do
+          ship[:destruction_paths].each do |destruction_path|
+            out!("<destruction_path>#{destruction_path.xml_escape}</destruction_path>")
           end
         end
       end
-    end
-    tag!("something", Hash[%W[a b c d].zip(ship[:something])]) if ship[:something]
-    tag!("navalcams") do
-      ship[:navalcams].each do |navalcam|
-        tag!("navalcam", "name" => navalcam[:name]) do
-          out! navalcam[:matrix4x4][0,4].join(" ")
-          out! navalcam[:matrix4x4][4,4].join(" ")
-          out! navalcam[:matrix4x4][8,4].join(" ")
-          out! navalcam[:matrix4x4][12,4].join(" ")
-        end
-      end
-    end
-    tag!("buoyancy") do
-      ship[:buoyancy].each do |bobby|
-        tag!("bobby",
-             "id" => bobby[:bobby_id],
-             "mass" => bobby[:mass],
-             "radius" => bobby[:radius],
-             "x" => bobby[:x],
-             "y" => bobby[:y],
-             "z" => bobby[:z],
-        ) do
-          # BREACH
-          bobby[:connections].each do |connection|
-            tag!("connection", "bobby" => connection)
+      tag!("something", Hash[%W[a b c d].zip(ship[:something])]) if ship[:something]
+      tag!("navalcams") do
+        ship[:navalcams].each do |navalcam|
+          tag!("navalcam", "name" => navalcam[:name]) do
+            out! navalcam[:matrix4x4][0,4].join(" ")
+            out! navalcam[:matrix4x4][4,4].join(" ")
+            out! navalcam[:matrix4x4][8,4].join(" ")
+            out! navalcam[:matrix4x4][12,4].join(" ")
           end
         end
       end
+      tag!("buoyancy") do
+        ship[:buoyancy].each do |bobby|
+          tag!("bobby",
+               "id" => bobby[:bobby_id],
+               "mass" => bobby[:mass],
+               "radius" => bobby[:radius],
+               "x" => bobby[:x],
+               "y" => bobby[:y],
+               "z" => bobby[:z],
+          ) do
+            breach = bobby[:breach]
+            tag!("breach", "radius" => breach[:radius], "x" => breach[:x], "y" => breach[:y], "z" => breach[:z])
+            bobby[:connections].each do |connection|
+              tag!("connection", "bobby" => connection)
+            end
+          end
+        end
+      end
+      tag!("decks") do
+        ship[:decks].each do |deck|
+          tag!("deck", "id" => deck[:name], "number" => deck[:number]) do
+            deck[:pieces].each do |piece|
+              tag!("piece", "id" => piece[:id], "something" => piece[:something].join(" ")) do
+                piece[:corners].each do |corner|
+                  tag!("corner", "x" => corner[:x], "y" => corner[:y], "z" => corner[:z], "type" => corner[:type])
+                end
+              end
+            end
+          end
+        end
+      end
+      tag!("pipes") do
+        ship[:pipes].each do |pipe|
+          # TODO <- get_pipe
+        end
+      end
+      tag!("cannons") do
+        ship[:cannons].each do |cannon|
+          tag!("cannon", "type"=>cannon[:type], "a"=>cannon[:a], "b"=>cannon[:b],
+                         "x1"=>cannon[:c][:x], "y1"=>cannon[:c][:y], "z1"=>cannon[:c][:x],
+                         "x2"=>cannon[:d][:x], "y2"=>cannon[:d][:y], "z2"=>cannon[:d][:x])
+        end
+      end
+      tag!("damage_model") do
+        ship[:damage_model].each do |part|
+          tag!("part", "name" => part[:name]) do
+            part[:something].each do |something|
+              out!("<something>#{something.xml_escape}</something>")
+            end
+            part[:panels].each do |panel|
+              tag!("panel") do
+                panel.each do |vertex|
+                  tag!("vertex", "x"=>vertex["x"], "y"=>vertex["y"], "z"=>vertex["z"])
+                end
+              end
+            end
+          end
+        end
+      end
+      tag!("collision") do
+        ship[:collisions].each do |face|
+          tag!("face", "name"=>face[:name], "index"=>face[:index]) do
+            tag!("vertex", "x"=>face[:a][:x], "y"=>face[:a][:y], "z"=>face[:a][:z])
+            tag!("vertex", "x"=>face[:b][:x], "y"=>face[:b][:y], "z"=>face[:b][:z])
+            tag!("vertex", "x"=>face[:c][:x], "y"=>face[:c][:y], "z"=>face[:c][:z])
+          end
+        end
+      end
+      tag!("ef_lines") do
+        ship[:eflines].each do |ef_line|
+          tag!("ef_line", "name" => ef_line[:name], "action" => ef_line[:action]) do
+            tag!("end", "x"=>ef_line[:end_a][:x], "y"=>ef_line[:end_a][:y], "z"=>ef_line[:end_a][:z])
+            tag!("end", "x"=>ef_line[:end_b][:x], "y"=>ef_line[:end_b][:y], "z"=>ef_line[:end_b][:z])
+            tag!("direction", "x"=>ef_line[:direction][:x], "y"=>ef_line[:direction][:y], "z"=>ef_line[:direction][:z])
+          end
+        end
+      end
+
+      tag!("custom_positions") do
+        # TODO: custom_positions: get_ary{ get_custom_position_v1 },
+        # TODO: custom_positions: get_ary{ get_custom_position_v7 },
+      end
+
+      tag!("steam_info") do
+        # TODO: steam_info: get_ary{ get_steam_info_v1 },
+        # TODO: steam_info: get_ary{ get_steam_info_v7 },
+      end
     end
-
-  # def get_bobby
-  #   {
-  #     breach: {radius: get_flt, x: get_flt, y: get_flt, z: get_flt},
-  #     connections: get_ary{ get_u4 },
-  #   }
-  # end
-
-
-      # buoyancy: get_ary{ get_bobby },
-      # cannons: get_ary{ get_cannon },
-      # collisions: get_ary{ get_collision },
-      # custom_positions: get_ary{ get_custom_position_v1 },
-      # custom_positions: get_ary{ get_custom_position_v7 },
-      # damage_model: get_ary{ get_damage_model_part },
-      # decks: get_ary{ get_deck },
-      # eflines: get_ary{ get_efline },
-      # pipes: get_ary{ get_pipe },
-      # something: 4.times.map{ get_ascii },
-      # steam_info: get_ary{ get_steam_info_v1 },
-      # steam_info: get_ary{ get_steam_info_v7 },
-
-
-  end
+    end
 
   def out!(*args)
     @out.xml_printer.out!(*args)
