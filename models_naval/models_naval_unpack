@@ -390,8 +390,8 @@ class ModelsNavalUnpacker
       tag!("cannons") do
         ship[:cannons].each do |cannon|
           tag!("cannon", "type"=>cannon[:type], "cannon_id"=>cannon[:cannon_id], "deck_id"=>cannon[:deck_id],
-                         "x1"=>cannon[:c][:x], "y1"=>cannon[:c][:y], "z1"=>cannon[:c][:x],
-                         "x2"=>cannon[:d][:x], "y2"=>cannon[:d][:y], "z2"=>cannon[:d][:x])
+                         "x1"=>cannon[:c][:x], "y1"=>cannon[:c][:y], "z1"=>cannon[:c][:z],
+                         "x2"=>cannon[:d][:x], "y2"=>cannon[:d][:y], "z2"=>cannon[:d][:z])
         end
       end
       tag!("damage_model") do

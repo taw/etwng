@@ -83,11 +83,10 @@ class ModelsNavalDbTable
   end
 
   def put_navalcam(navalcam)
-    # {
-    #   name: get_string,
-    #   matrix4x4: 16.times.map{ get_flt },
-    # }
-    require 'pry'; binding.pry
+    put_string navalcam[:name]
+    navalcam.text.split.map(&:to_f).each do |v|
+      put_flt v
+    end
   end
 
   def put_navalcams(xml)
