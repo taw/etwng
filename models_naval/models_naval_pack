@@ -53,7 +53,7 @@ class ModelsNavalDbTable
       put_string xmldir.guid
     end
     if xmldir.version == 1
-      puts "\x01".b
+      put "\x01".b
     else
       put "\xFC\xFD\xFE\xFF"
       put_u1(xmldir.version-1)
