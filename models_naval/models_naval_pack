@@ -312,11 +312,18 @@ class ModelsNavalDbTable
   end
 
   def put_model_r2tw(model)
-    put_string model[:@name]
-    put_string model[:@rigging_path]
-    raise "Not implemented yet"  # destruction_paths: get_u1.times.map{ get_ascii },
-    put_string model[:@path]
-    raise "Not implemented yet" # something: 4.times.map{ get_ascii },
+    put_ascii model[:@name]
+    put_ascii model[:@rigging_path]
+    destruction_paths = model.child(:destruction_paths).children(:destruction_path).map(&:text)
+    put_u1 destruction_paths.size
+    destruction_paths.each do |destruction_path|
+      put_ascii destruction_path
+    end
+    put_ascii model[:@path]
+    put_ascii model.child(:something)[:a]
+    put_ascii model.child(:something)[:b]
+    put_ascii model.child(:something)[:c]
+    put_ascii model.child(:something)[:d]
     put_navalcams model.child(:navalcams)
     put_buoyancy model.child(:buoyancy)
     put_decks model.child(:decks)
