@@ -376,7 +376,7 @@ class ModelsNavalUnpacker
       end
       tag!("pipes") do
         ship[:pipes].each do |pipe|
-          tag!("pipe", "id"=>pipe[0], "type"=>pipe[1]) do
+          tag!("pipe", "type"=>pipe[0], "id"=>pipe[1]) do
             pipe[2..-1].each do |x|
               if x.is_a?(Hash)
                 tag!("vertex", "x"=>x[:x], "y"=>x[:y], "z"=>x[:z])

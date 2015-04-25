@@ -45,8 +45,8 @@ class SampleTest
   end
   def run!
     convert! or return 1
-    # convert_back! or return 1
-    # compare!
+    convert_back! or return 1
+    compare!
   end
 end
 
