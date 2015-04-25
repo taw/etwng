@@ -10,19 +10,23 @@ class ModelsNavalDbTable
   end
 
   def put(s)
-    @data << s
+    @data << s.b
   end
 
   def put_u4(i)
-    @data << [i].pack("V")
+    @data << [i.to_i].pack("V")
   end
 
   def put_u2(i)
-    @data << [i].pack("v")
+    @data << [i.to_i].pack("v")
   end
 
   def put_u1(i)
-    @data << [i].pack("C")
+    @data << [i.to_i].pack("C")
+  end
+
+  def put_flt(v)
+    @data << [v.to_f].pack("f")
   end
 
   def put_string(s)
@@ -34,6 +38,13 @@ class ModelsNavalDbTable
   def put_ascii(s)
     put_u2(s.size)
     put(s)
+  end
+
+  def put_ary(type, elems)
+    put_u4 elems.size
+    elems.each do |elem|
+      send(:"put_#{type}", elem)
+    end
   end
 
   def put_db_header(xmldir)
@@ -63,6 +74,194 @@ class ModelsNavalDbTable
     else
       raise "Unknown mode (version=#{xmldir.version}, empire=#{xmldir.empire})"
     end
+  end
+
+  def put_vertex(vertex)
+    put_flt vertex[:x]
+    put_flt vertex[:y]
+    put_flt vertex[:z]
+  end
+
+  def put_navalcam(navalcam)
+    # {
+    #   name: get_string,
+    #   matrix4x4: 16.times.map{ get_flt },
+    # }
+    require 'pry'; binding.pry
+  end
+
+  def put_navalcams(xml)
+    put_ary :navalcam, xml.children(:navalcam)
+  end
+
+  def put_bobby(bobby)
+    put_u4 bobby[:id]
+    put_flt bobby[:mass]
+    put_flt bobby[:radius]
+    put_flt bobby[:x]
+    put_flt bobby[:y]
+    put_flt bobby[:z]
+
+    breach = bobby.child(:breach)
+    put_flt breach[:radius]
+    put_flt breach[:x]
+    put_flt breach[:y]
+    put_flt breach[:z]
+
+    connections = bobby.children(:connection).map{|c| c[:bobby].to_i}
+    put_u4 connections.size
+    connections.each do |connection|
+      put_u4 connection
+    end
+  end
+
+  def put_buoyancy(buoyancy)
+    put_ary :bobby, buoyancy.children(:bobby)
+  end
+
+  def put_corner(corner)
+    put_flt corner[:x]
+    put_flt corner[:y]
+    put_flt corner[:z]
+    put_u1  corner[:type]
+  end
+
+  def put_piece(piece)
+    put_u4 piece[:id]
+    put_ary :corner, piece.children(:corner)
+    something = piece[:something].split
+    put_flt something[0]
+    put_flt something[1]
+    put_flt something[2]
+    put_flt something[3]
+  end
+
+  def put_deck(deck)
+    put_string deck[:id]
+    put_u4 deck[:number]
+    put_ary :piece, deck.children(:piece)
+  end
+
+  def put_decks(decks)
+    put_ary :deck, decks.children(:deck)
+  end
+
+  def put_pipe(pipe)
+    put_u4 pipe[:type]
+    put_u4 pipe[:id]
+    pipe.children(XML).each do |e|
+      if e.name == :i
+        put_u4 e.text
+      elsif e.name  == :vertex
+        put_vertex e
+      else
+        raise "<pipe> tag parse error"
+      end
+    end
+  end
+
+  def put_pipes(pipes)
+    put_ary :pipe, pipes.children(:pipe)
+  end
+
+  def put_cannon(cannon)
+    put_string cannon[:type]
+    put_u4 cannon[:cannon_id]
+    put_u4 cannon[:deck_id]
+    put_flt cannon[:x1]
+    put_flt cannon[:y1]
+    put_flt cannon[:z1]
+    put_flt cannon[:x2]
+    put_flt cannon[:y2]
+    put_flt cannon[:z2]
+  end
+
+  def put_cannons(cannons)
+    put_ary :cannon, cannons.children(:cannon)
+  end
+
+  def put_damage_model_part_panel(panel)
+    put_ary :vertex, panel.children(:vertex)
+  end
+
+  def put_damage_model_part(part)
+    put_string part[:name]
+    put_ary :string, part.children(:something).map(&:text)
+    put_ary :damage_model_part_panel, part.children(:panel)
+  end
+
+  def put_damage_model(damage_model)
+    put_ary :damage_model_part, damage_model.children(:part)
+  end
+
+  def put_collision_face(face)
+    put_string face[:name]
+    put_u4 face[:index]
+    raise unless face.children(:vertex).size == 3
+    face.children(:vertex).each do |vertex|
+      put_vertex vertex
+    end
+  end
+
+  def put_collisions(collisions)
+    put_ary :collision_face, collisions.children(:face)
+  end
+
+  def put_efline(efline)
+    put_string efline[:name]
+    put_u4 efline[:action]
+    put_vertex efline.children(:end)[0]
+    put_vertex efline.children(:end)[1]
+    put_vertex efline.child(:direction)
+  end
+
+  def put_eflines(eflines)
+    put_ary :efline, eflines.children(:ef_line)
+  end
+
+  def put_custom_position_v1(pos)
+    put_string pos[:name]
+    put_u4 pos[:a]
+    put_vertex pos.child(:position)
+  end
+
+  def put_custom_positions_v1(pos)
+    put_ary :custom_position_v1, pos.children(:custom_position)
+  end
+
+  def put_custom_position_v7(pos)
+    put_string pos[:name]
+    put_u4 pos[:a]
+    put_u4 pos[:b]
+    put_vertex pos.children(:position)[0]
+    put_vertex pos.children(:position)[1]
+  end
+
+  def put_custom_positions_v7(pos)
+    put_ary :custom_position_v7, pos.children(:custom_position)
+  end
+
+  def put_steam_info_v1(steam_info)
+    put_string steam_info[:name]
+    put_u4 steam_info[:a]
+    put_vertex steam_info.children(:vertex)[0]
+    put_vertex steam_info.children(:vertex)[1]
+  end
+
+  def put_steam_infos_v1(steam_infos)
+    put_ary :steam_info_v1, steam_infos.children(:steam_info)
+  end
+
+  def put_steam_info_v7(steam_info)
+    put_string steam_info[:name]
+    put_u4 steam_info[:a]
+    put_string steam_info[:b]
+    put_vertex steam_info.children(:vertex)[0]
+    put_vertex steam_info.children(:vertex)[1]
+  end
+
+  def put_steam_infos_v7(steam_infos)
+    put_ary :steam_info_v7, steam_infos.children(:steam_info)
   end
 
   def put_model_etw(model)

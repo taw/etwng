@@ -136,7 +136,7 @@ class ModelsNavalDbTable
   end
 
   def get_navalcams
-     get_ary{ get_navalcam }
+    get_ary{ get_navalcam }
   end
 
   def get_bobby
@@ -153,7 +153,7 @@ class ModelsNavalDbTable
   end
 
   def get_cannon
-    {type: get_string, a: get_u4, b: get_u4, c: get_v3, d: get_v3}
+    {type: get_string, cannon_id: get_u4, deck_id: get_u4, c: get_v3, d: get_v3}
   end
 
   def get_damage_model_part
@@ -389,7 +389,7 @@ class ModelsNavalUnpacker
       end
       tag!("cannons") do
         ship[:cannons].each do |cannon|
-          tag!("cannon", "type"=>cannon[:type], "cannon_id"=>cannon[:a], "deck_id"=>cannon[:b],
+          tag!("cannon", "type"=>cannon[:type], "cannon_id"=>cannon[:cannon_id], "deck_id"=>cannon[:deck_id],
                          "x1"=>cannon[:c][:x], "y1"=>cannon[:c][:y], "z1"=>cannon[:c][:x],
                          "x2"=>cannon[:d][:x], "y2"=>cannon[:d][:y], "z2"=>cannon[:d][:x])
         end
