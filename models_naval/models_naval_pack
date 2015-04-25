@@ -66,19 +66,69 @@ class ModelsNavalDbTable
   end
 
   def put_model_etw(model)
-    raise "Not implemented yet"
+    put_string model[:@name]
+    put_string model[:@rigging_path]
+    put_string model[:@path]
+    put_navalcams model.child(:navalcams)
+    put_buoyancy model.child(:buoyancy)
+    put_decks model.child(:decks)
+    put_pipes model.child(:pipes)
+    put_cannons model.child(:cannons)
+    put_damage_model model.child(:damage_model)
+    put_collisions model.child(:collision)
+    put_custom_positions_v1 model.child(:custom_positions)
+    put_eflines model.child(:ef_lines)
   end
 
   def put_model_ntw(model)
-    raise "Not implemented yet"
+    put_string model[:@name]
+    put_string model[:@rigging_path]
+    put_string model[:@path]
+    put_navalcams model.child(:navalcams)
+    put_buoyancy model.child(:buoyancy)
+    put_decks model.child(:decks)
+    put_pipes model.child(:pipes)
+    put_cannons model.child(:cannons)
+    put_damage_model model.child(:damage_model)
+    put_collisions model.child(:collision)
+    put_eflines model.child(:ef_lines)
+    put_custom_positions_v1 model.child(:custom_positions)
+    put_steam_infos_v1 model.child(:steam_infos)
   end
 
   def put_model_s2tw(model)
-    raise "Not implemented yet"
+    put_string model[:@name]
+    put_string model[:@rigging_path]
+    put_u1 model[:@zero].to_i
+    put_string model[:@path]
+    put_navalcams model.child(:navalcams)
+    put_buoyancy model.child(:buoyancy)
+    put_decks model.child(:decks)
+    put_pipes model.child(:pipes)
+    put_cannons model.child(:cannons)
+    put_damage_model model.child(:damage_model)
+    put_collisions model.child(:collision)
+    put_eflines model.child(:ef_lines)
+    put_custom_positions_v7 model.child(:custom_positions)
+    put_steam_infos_v7 model.child(:steam_infos)
   end
 
   def put_model_r2tw(model)
-    raise "Not implemented yet"
+    put_string model[:@name]
+    put_string model[:@rigging_path]
+    raise "Not implemented yet"  # destruction_paths: get_u1.times.map{ get_ascii },
+    put_string model[:@path]
+    raise "Not implemented yet" # something: 4.times.map{ get_ascii },
+    put_navalcams model.child(:navalcams)
+    put_buoyancy model.child(:buoyancy)
+    put_decks model.child(:decks)
+    put_pipes model.child(:pipes)
+    put_cannons model.child(:cannons)
+    put_damage_model model.child(:damage_model)
+    put_collisions model.child(:collision)
+    put_eflines model.child(:ef_lines)
+    put_custom_positions_v7 model.child(:custom_positions)
+    put_steam_infos_v7 model.child(:steam_infos)
   end
 
   def put_db(xmldir)

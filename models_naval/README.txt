@@ -7,5 +7,3 @@ For Empire you need to specify `--empire` for unpacking:
 
     jruby models_naval_unpack --empire models_naval_dbtable models_naval_dir
     jruby models_naval_pack models_naval_dir models_naval_dbtable
-
-(at least that's the plan for when it's done)

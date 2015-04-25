@@ -324,6 +324,7 @@ class ModelsNavalUnpacker
       out!("<name>#{ship[:name].xml_escape}</name>")
       out!("<rigging_path>#{ship[:rigging_path].xml_escape}</rigging_path>")
       out!("<zero>#{ship[:zero].to_s.xml_escape}</zero>") if ship[:zero]
+      out!("<path>#{ship[:path].xml_escape}</path>")
       if ship[:destruction_paths]
         tag!("destruction_paths") do
           ship[:destruction_paths].each do |destruction_path|
