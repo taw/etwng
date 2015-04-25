@@ -1,0 +1,133 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+require_relative "magic_xml"
+
+class ModelsNavalDbTable
+  def initialize
+    @data = "".b
+    @mode = nil
+  end
+
+  def put(s)
+    @data << s
+  end
+
+  def put_u4(i)
+    @data << [i].pack("V")
+  end
+
+  def put_u2(i)
+    @data << [i].pack("v")
+  end
+
+  def put_u1(i)
+    @data << [i].pack("C")
+  end
+
+  def put_string(s)
+    chars = s.unpack("U*")
+    put_u2 chars.size
+    put chars.pack("v*")
+  end
+
+  def put_ascii(s)
+    put_u2(s.size)
+    put(s)
+  end
+
+  def put_db_header(xmldir)
+    if xmldir.guid
+      put "\xFD\xFE\xFC\xFF"
+      put_string xmldir[:guid]
+    end
+    if xmldir.version == 1
+      puts "\x01".b
+    else
+      put "\xFC\xFD\xFE\xFF"
+      put_u1(xmldir.version-1)
+      put "\x00\x00\x00\x01"
+    end
+  end
+
+  def set_mode(xmldir)
+    case [xmldir.version, xmldir.empire]
+    when [1, true]
+      @mode = :etw
+    when [1, false]
+      @mode = :ntw
+    when [7, false]
+      @mode = :s2tw
+    when [12, false]
+      @mode = :r2tw
+    else
+      raise "Unknown mode (version=#{xmldir.version}, empire=#{xmldir.empire})"
+    end
+  end
+
+  def put_model_etw(model)
+    raise "Not implemented yet"
+  end
+
+  def put_model_ntw(model)
+    raise "Not implemented yet"
+  end
+
+  def put_model_s2tw(model)
+    raise "Not implemented yet"
+  end
+
+  def put_model_r2tw(model)
+    raise "Not implemented yet"
+  end
+
+  def put_db(xmldir)
+    set_mode xmldir
+    put_db_header xmldir
+    put_u4 xmldir.models.size
+    xmldir.models.each do |model|
+      send(:"put_model_#{@mode}", model)
+    end
+  end
+
+  def save!(path)
+    open(path, "wb") do |fh|
+      fh.print @data
+    end
+  end
+end
+
+class ModelsNavalXmlDir
+  attr_reader :empire, :version, :guid, :models
+
+  def initialize(root_path)
+    @root_path = Pathname(root_path)
+  end
+
+  def parse!
+    root_xml = XML.parse((@root_path+"dbtable.xml").open)
+    @empire  = (root_xml[:empire] == "true")
+    @version = root_xml[:version].to_i
+    @guid    = root_xml[:guid]
+    @models  = []
+    root_xml.each(:xml_include) do |elem|
+      @models << XML.parse((@root_path+elem[:path]).open)
+    end
+  end
+end
+
+# Ignore this for compatibility with models_naval_unpack, use flag from the file
+if ARGV[0] == "--empire"
+  ARGV.shift
+end
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} [--empire] models_naval_dir models_naval_dbtable"
+end
+
+xmldir = ModelsNavalXmlDir.new(ARGV[0])
+xmldir.parse!
+
+dbtable = ModelsNavalDbTable.new
+dbtable.put_db xmldir
+dbtable.save!(ARGV[1])
