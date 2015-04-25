@@ -50,7 +50,7 @@ class ModelsNavalDbTable
   def put_db_header(xmldir)
     if xmldir.guid
       put "\xFD\xFE\xFC\xFF"
-      put_string xmldir[:guid]
+      put_string xmldir.guid
     end
     if xmldir.version == 1
       puts "\x01".b
