@@ -31,6 +31,7 @@ class ModelsNavalDbTable
 
   def initialize(path, empire)
     @path = Pathname(path)
+    raise "#{@path} is a directory, regular file expected" if @path.directory?
     @empire = empire
     @data = open(@path, "rb", &:read)
     @ofs = 0
@@ -468,6 +469,12 @@ empire = false
 if ARGV[0] == "--empire"
   empire = true
   ARGV.shift
+end
+
+unless RUBY_VERSION >= '2.0'
+  STDERR.puts "You're trying to run this with ruby #{RUBY_VERSION}, it requires 2.0 or newer"
+  STDERR.puts "If you're using old jruby version pass --2.0 argument"
+  exit 1
 end
 
 unless ARGV.size == 2
