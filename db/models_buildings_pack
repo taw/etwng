@@ -2,59 +2,84 @@
 
 class ModelsBuildings
   def initialize(file_name)
+    @out = "".b
     @data = eval(File.open(file_name, 'rb', &:read))
     @version = @data.shift
-    
-    raise "Only version 1 supported" unless @version[:version] == 1
-    if @version[:guid]
-      guid = @version[:guid].unpack("U*").pack("v*")
-      @out = "\xfd\xfe\xfc\xff" + [guid.size/2].pack("v") + guid
-    else
-      @out = ""
+
+    put_db_header
+    put_u4 @data.size
+
+    @data.each do |row|
+      case @version[:version]
+      when 1
+        put_row_v1(*row)
+      when 4
+        put_row_v4(*row)
+      else
+        raise "Only versions 1/4 supported"
+      end
     end
-    
-    @out << [1, @data.size].pack("CV")
-    @data.each{|row|
-      put_row(*row)
-    }
   end
 
+  def put(d)
+    @out << d
+  end
+  def put_u1(v)
+    @out << [v].pack("C")
+  end
+  def put_u2(v)
+    @out << [v].pack("v")
+  end
+  def put_u4(v)
+    @out << [v].pack("V")
+  end
+  def put_flt(v)
+    @out << [v].pack("f")
+  end
+  def put_v3(v)
+    @out << [v[:x], v[:y], v[:z]].pack("fff")
+  end
   def put_str(str)
     str = str.unpack("U*")
-    @out << [str.size].pack("v")
+    put_u2 str.size
     @out << str.pack("v*")
   end
-  
-  def put_row(name, path, x, *lines)
+  def put_ascii(str)
+    put_u2 str.size
+    @out << str
+  end
+  def put_db_header
+    if @version[:guid]
+      put "\xFD\xFE\xFC\xFF".b
+      put_str @version[:guid]
+    end
+    if @version[:version] == 1
+      put "\x01".b
+    else
+      put "\xFC\xFD\xFE\xFF".b
+      put_u1(@version[:version]-1)
+      put "\x00\x00\x00\x01".b
+    end
+  end
+  def put_row_v1(name, path, x, lines)
     put_str name
     put_str path
     put_u4 x
     put_u4 lines.size
-    lines.each{|line|
-      put_line(*line)
-    }
+    lines.each do |line|
+      put_line_v1(*line)
+    end
   end
-  
-  def put_line(name, x, v1, v2, v3)
+  def put_line_v1(name, x, v1, v2, v3)
     put_str name
     put_u4 x
-    put_v3 *v1
-    put_v3 *v2
-    put_v3 *v3
+    put_v3 v1
+    put_v3 v2
+    put_v3 v3
   end
 
-  def put_u4(x)
-    @out << [x].pack("V")
-  end
-  
-  def put_v3(x,y,z)
-    @out << [x,y,z].pack("fff")
-  end
-  
   attr_reader :out
 end
-
-
 
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} input.txt output"
