@@ -67,17 +67,33 @@ class ModelsBuildings
     put_u4 x
     put_u4 lines.size
     lines.each do |line|
-      put_line_v1(*line)
+      put_line(*line)
     end
   end
-  def put_line_v1(name, x, v1, v2, v3)
+  def put_row_v4(flag, s1, s2, s3, x, lines, lines2)
+    put_u1 flag
+    put_ascii s1
+    put_ascii s2
+    put_ascii s3
+    put_u4 x
+    put_u4 lines.size
+    lines.each do |line|
+      put_line(*line)
+    end
+    put_u4 lines2.size
+    lines2.each do |s,v1,v2|
+      put_str s
+      put_v3 v1
+      put_v3 v2
+    end
+  end
+  def put_line(name, x, v1, v2, v3)
     put_str name
     put_u4 x
     put_v3 v1
     put_v3 v2
     put_v3 v3
   end
-
   attr_reader :out
 end
 
