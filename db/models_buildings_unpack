@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require "pathname"
+
 class Float
   def pretty_single
     begin
@@ -14,18 +16,19 @@ end
 
 class ModelsBuildings
   def initialize(file_name)
-    @path = file_name
-    @data = File.open(file_name, 'rb', &:read)
+    @path = Pathname(file_name)
+    raise "#{@path}is a directory, regular file expected" if @path.directory?
+    @data = @path.open("rb", &:read)
     @ofs = 0
   end
-  
+
   def get(sz)
     raise "#{@path}: Not enough data available" if sz+@ofs > @data.size
     rv = @data[@ofs, sz]
     @ofs += sz
     rv
   end
-  
+
   def get_byte
     get(1).unpack("C")[0]
   end
@@ -43,7 +46,7 @@ class ModelsBuildings
   end
   def parse
     version = {:version => 1}
-    
+
     if @data[0, 4] == "\375\376\374\377"
       gsz, = @data[4, 2].unpack("v")
       version[:guid] = @data[6, gsz*2].unpack("v*").pack("U*")
@@ -51,14 +54,14 @@ class ModelsBuildings
     end
 
     raise "#{@path}: Only version 1 supported" unless get_byte == 1
-    
+
     [version] +
     (0...get_u4).map{
       [
         get_str,
         get_str,
         get_u4,
-        *(0...get_u4).map{ 
+        *(0...get_u4).map{
           [
             get_str,
             get_u4,
@@ -74,6 +77,7 @@ end
 
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} input output.txt"
+  exit 1
 end
 
 data = ModelsBuildings.new(ARGV[0]).parse
