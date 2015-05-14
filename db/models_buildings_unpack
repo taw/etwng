@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require "pp"
 require "pathname"
 
 class Float
@@ -29,7 +30,7 @@ class ModelsBuildings
     rv
   end
 
-  def get_byte
+  def get_u1
     get(1).unpack("C")[0]
   end
   def get_u2
@@ -41,37 +42,93 @@ class ModelsBuildings
   def get_flt
     get(4).unpack("f")[0].pretty_single
   end
+  def get_ascii
+    get(get_u2)
+  end
   def get_str
     get(2*get_u2).unpack("v*").pack("U*")
   end
-  def parse
-    version = {:version => 1}
 
-    if @data[0, 4] == "\375\376\374\377"
-      gsz, = @data[4, 2].unpack("v")
-      version[:guid] = @data[6, gsz*2].unpack("v*").pack("U*")
-      @data = @data[(6+gsz*2)..-1]
+  def parse_db_header!
+    if @data[@ofs, 4] == "\xFD\xFE\xFC\xFF".b
+      @ofs += 4
+      @guid = get_str
+    else
+      @guid = nil
     end
+    if @data[@ofs, 4] == "\xFC\xFD\xFE\xFF".b
+      @ofs += 4
+      @version = get_u1 + 1
+      raise "DB header not recognized" unless get(4) == "\x00\x00\x00\x01".b
+    elsif @data[@ofs, 1] == "\x01".b
+      @ofs += 1
+      @version = 1
+    else
+      raise "DB header not recognized"
+    end
+  end
 
-    raise "#{@path}: Only version 1 supported" unless get_byte == 1
+  def get_v3
+    {x: get_flt, y: get_flt, z: get_flt}
+  end
 
-    [version] +
-    (0...get_u4).map{
-      [
-        get_str,
-        get_str,
-        get_u4,
-        *(0...get_u4).map{
-          [
-            get_str,
-            get_u4,
-            (0..2).map{get_flt},
-            (0..2).map{get_flt},
-            (0..2).map{get_flt},
-          ]
-        }
-      ]
-    }
+  def get_ary(&blk)
+    get_u4.times.map(&blk)
+  end
+
+  def get_model_v1
+    [
+      get_str,
+      get_str,
+      get_u4,
+      get_ary.map{
+        [
+          get_str,
+          get_u4,
+          get_v3,
+          get_v3,
+          get_v3,
+        ]
+      }
+    ]
+  end
+
+  def get_model_v4
+    [
+      get_u1,
+      get_ascii,
+      get_ascii,
+      get_ascii,
+      get_u4,
+      get_ary.map{
+        [
+          get_str,
+          get_u4,
+          get_v3,
+          get_v3,
+          get_v3,
+        ]
+      },
+      get_ary{
+        [get_str, get_v3, get_v3]
+      },
+    ]
+  end
+
+  def parse
+    parse_db_header!
+    version_info = {:version => @version, :guid => @guid}
+
+    case @version
+    when 1
+      # Empire / Napoleon / Shogun 2
+      [version_info] + get_ary.map{ get_model_v1 }
+    when 4
+      # Rome 2
+      [version_info] + get_ary.map{ get_model_v4 }
+    else
+      raise "Version #{@version} not supported"
+    end
   end
 end
 
@@ -81,13 +138,7 @@ unless ARGV.size == 2
 end
 
 data = ModelsBuildings.new(ARGV[0]).parse
-File.open(ARGV[1], 'wb'){|fh|
-  fh.puts "["
-  fh.puts "  " + data[0].inspect + ","
-  data[1..-1].each{|row|
-    fh.puts "  ["
-    fh.puts row.map{|x| "    #{x.inspect}," }
-    fh.puts "  ],"
-  }
-  fh.puts "]"
-}
+
+File.open(ARGV[1], 'wb') do |fh|
+  PP.pp(data, fh)
+end
