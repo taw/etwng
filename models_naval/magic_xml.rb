@@ -9,12 +9,14 @@ require 'net/http'
 # In Ruby 2 Symbol will be a subclass of String, and
 # this won't be needed any more. Before then...
 class Symbol
-    include Comparable
-    def <=>(other)
-        raise ArgumentError.new("comparison of #{self.class} with #{other.class} failed") unless other.is_a? Symbol
-        to_s <=> other.to_s
+    if RUBY_VERSION < "2"
+        include Comparable
+        def <=>(other)
+            raise ArgumentError.new("comparison of #{self.class} with #{other.class} failed") unless other.is_a? Symbol
+            to_s <=> other.to_s
+        end
     end
-    
+
     alias_method :eqeqeq_before_magic_xml, :===
     def ===(*args, &blk)
         if args.size >= 1 and args[0].is_a? XML
@@ -430,7 +432,7 @@ end
 class XML
     # XML.foo! == xml!(:foo)
     # XML.foo  == xml(:foo)
-    def self.method_missing(meth, *args, &blk) 
+    def self.method_missing(meth, *args, &blk)
         if meth.to_s =~ /^(.*)!$/
             xml!($1.to_sym, *args, &blk)
         else
@@ -487,7 +489,7 @@ class XML
             else
                 http = Net::HTTP.new(u.host, u.port)
             end
-            
+
             res = http.start {|http| http.request(req) }
             # TODO: Throw a more meaningful exception
             parse(res.body)
@@ -546,7 +548,7 @@ class XML
                 attrs = {}
                 event[2].each{|k,v| attrs[k.to_sym] = v.xml_unescape}
                 node = XML.new(event[1].to_sym, attrs, *event[3..-1])
-                
+
                 # I can't say it's superelegant
                 class <<node
                     attr_accessor :do_complete
@@ -573,12 +575,12 @@ class XML
             else
                 # FIXME: Do the right thing.
                 # For now, ignore *everything* else
-                # This is totally incorrect, user might want to 
+                # This is totally incorrect, user might want to
                 # see text, comments and stuff like that anyway
             end
         end
     end
-    
+
     # Basically it's a copy of self.parse, ugly ...
     def self.parse_subtree(start_node, parser)
         stack = [start_node]
@@ -591,7 +593,7 @@ class XML
                 event[2].each{|k,v| attrs[k.to_sym] = v.xml_unescape}
                 stack << XML.new(event[1].to_sym, attrs, *event[3..-1])
                 if stack.size == 1
-                    res = stack[0] 
+                    res = stack[0]
                 else
                     stack[-2] << stack[-1]
                 end
@@ -657,7 +659,7 @@ class XML
 
         parser = REXML::Parsers::BaseParser.new stream
         stack = [[]]
-        
+
         while true
             event = parser.pull
             case event[0]
@@ -719,7 +721,7 @@ class XML
             end
         end
         roots = stack[0]
-        
+
         roots.each{|root| root.remove_pretty_printing!} if options[:remove_pretty_printing]
         # :remove_pretty_printing does :normalize anyway
         roots.each{|root| root.normalize!} if options[:normalize]
@@ -856,10 +858,10 @@ class XML
     #  self << xml(...)
     #  self << "foo"
     # Add nothing:
-    #  self << nil  
+    #  self << nil
     # Add multiple elements (also works recursively):
-    #  self << [a, b, c] 
-    #  self << [a, [b, c], d] 
+    #  self << [a, b, c]
+    #  self << [a, [b, c], d]
     def <<(cnt)
         if cnt.nil?
             # skip
@@ -949,8 +951,8 @@ class XML
 
     alias_method :real_method_missing, :method_missing
     # Define all foo!-methods for monadic interface, so you can write:
-    # 
-    def method_missing(meth, *args, &blk) 
+    #
+    def method_missing(meth, *args, &blk)
         if meth.to_s =~ /^(.*)!$/
             self << XML.new($1.to_sym, *args, &blk)
         else
@@ -1051,7 +1053,7 @@ class XML
         @contents.each{|c|
             if range_end and range_end.object_id == c.object_id
                 end_seen_cb.call if end_seen_cb
-                break 
+                break
             end
             if range_start and range_start.object_id == c.object_id
                 start_seen = true
@@ -1091,7 +1093,7 @@ class XML
             pattern === self
         end
     end
-    
+
     # Get rid of pretty-printing whitespace. Also normalizes the XML.
     def remove_pretty_printing!(exceptions=nil)
         normalize!
@@ -1123,7 +1125,7 @@ class XML
         real_add_pretty_printing!
         normalize!
     end
-    
+
     def real_add_pretty_printing!(indent = "")
         return if @contents.empty?
         each{|c|
@@ -1149,7 +1151,7 @@ class XML
         # Attr values stay shared - ugly
         new_obj.attrs = new_obj.attrs.dup
         new_obj.contents = new_obj.contents.map{|c| c.dup}
-        
+
         new_obj.instance_eval(&blk) if blk
         return new_obj
     end
@@ -1165,7 +1167,7 @@ class XML
     end
 
     alias_method :add!, :<<
-    
+
     # Normalization means joining strings
     # and getting rid of ""s, recursively
     def normalize!
@@ -1238,7 +1240,7 @@ class XML
         }
         res
     end
-    
+
     # * XML#descendants
     # * XML#descendants(pattern)
     # * XML#descendants(pattern, more_patterns)
@@ -1264,7 +1266,7 @@ class XML
         }
         res
     end
-    
+
     # Change elements based on pattern
     def deep_map(pat, &blk)
         if self =~ pat
