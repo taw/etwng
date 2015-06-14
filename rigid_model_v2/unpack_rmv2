@@ -1,0 +1,98 @@
+#!/usr/bin/env ruby
+
+# THIS IS JUST EXPERIMENTAL CODE, IT DECODES NOTHING
+
+require "pp"
+
+class Float
+  def pretty_single
+    return self if nan?
+    begin
+      rv = (100_000.0 * self).round / 100_000.0
+      return rv if self != rv and [self].pack("f") == [rv].pack("f")
+      self
+    rescue
+      self
+    end
+  end
+end
+
+class RMV2
+  def initialize(path)
+    @path = path
+    @data = open(path, "rb", &:read)
+    @ofs  = 0
+    @model = {}
+  end
+
+  def bytes_left
+    @data.size - @ofs
+  end
+
+  def eof?
+    @data.size == @ofs
+  end
+
+  def get(n)
+    raise "Trying to read past end of file" if bytes_left < n
+    rv = @data[@ofs, n]
+    @ofs += n
+    rv
+  end
+
+  def get_padded(n)
+    get(n).sub(/\x00*\z/, "")
+  end
+
+  def get_u1
+    get(1).unpack("C")[0]
+  end
+
+  def get_u2
+    get(2).unpack("v")[0]
+  end
+
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+
+  def get_i4
+    get(4).unpack("l")[0]
+  end
+
+  def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+
+  def parse!
+    raise "Wrong magic number" unless get(4) == "RMV2"
+    raise "Wrong version number, expected 6" unless get_u4 == 6
+
+    entries = get_u4
+    @model["base_skeleton"] = get_padded(128)
+
+    require 'pry'; binding.pry
+
+    puts "Bytes left: #{bytes_left}"
+  end
+
+  # def save!
+  # end
+end
+
+files = ARGV
+files = Dir["data/*"].shuffle[0,10] if files.empty?
+
+files.each do |path|
+  rmv2 = RMV2.new(path)
+  rmv2.parse!
+end
+
+# unless ARGV.size == 2
+#   STDERR.puts "Usage: #{$0} file.rigid_model_v2 file.txt"
+#   exit 2
+# end
+
+# rmv2 = RMV2.new(ARGV[0])
+# rmv2.parse!
+# # rmv2.save!(ARGV[1])
