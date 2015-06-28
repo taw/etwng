@@ -79,4 +79,5 @@ XmlSplit = {
   :EF_LINE_LIST                  => "eflines",
   :areas                         => "area-%R/%s-%D",
   :slot_descriptions             => "slot/%s",
+  :HERO_UNIT_NAME_ALLOCATOR      => "HERO_UNIT_NAME_ALLOCATOR/",
 }

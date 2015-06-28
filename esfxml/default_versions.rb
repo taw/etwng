@@ -158,7 +158,6 @@ DefaultVersions = Hash.new(0).merge({
   :FARM_TREE => 1,
   :FARM_TREE_LIST => 1,
   :FORT => 4,
-  :FORTIFICATION_DAMAGE_INFO => 1,
   :FORT_DATA => 1,
   :FORT_OBSTACLE => 1,
   :FORT_UPGRADE_MANAGER => 1,
@@ -264,5 +263,4 @@ DefaultVersions = Hash.new(0).merge({
   :CAMPAIGN_VIEW_SELECTION_VOLUME => 1,
   :FORTIFICATION_DAMAGE_INFO => 4,
   :AGENT_RECRUITMENT_DETAILS => 1,
-  
 })

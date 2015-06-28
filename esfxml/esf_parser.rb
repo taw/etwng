@@ -139,14 +139,8 @@ module EsfBasicBinaryOps
     :angle_ary, nil, :bool_ary, :bool_ary, :u_ary, :u_ary, :u_ary, :u_ary,      # 40 - 47
     :u_ary, :i_ary, :i_ary, :i_ary, :i_ary, :flt_ary, nil, nil,                 # 48 - 4f
   ]
-  if RUBY_VERSION > '1.9'
-    def lookahead_type
-      LookaheadTypeTable[@data[@ofs].ord] # 1.9
-    end
-  else
-    def lookahead_type
-      LookaheadTypeTable[@data[@ofs]] # 1.8
-    end
+  def lookahead_type
+    LookaheadTypeTable[@data[@ofs].ord] # 1.9
   end
   def lookahead_str
     save_ofs = @ofs
@@ -225,18 +219,10 @@ module EsfBasicBinaryOps
   ensure
     @ofs = save_ofs
   end
-  if RUBY_VERSION > '1.9'
-    def get_byte
-      rv = @data[@ofs].ord # 1.9
-      @ofs += 1
-      rv
-    end
-  else
-    def get_byte
-      rv = @data[@ofs] # 1.8
-      @ofs += 1
-      rv
-    end
+  def get_byte
+    rv = @data[@ofs].ord
+    @ofs += 1
+    rv
   end
   alias_method :get_u1, :get_byte
   def get_i1
@@ -252,11 +238,10 @@ module EsfBasicBinaryOps
   end
 
   def get_i3
-    # "l>" "l<" only work in 1.9, not 1.8.7
     if @data[@ofs].ord >= 128
-      rv = ("\xFF"+@data[@ofs,3]).unpack("N")[0] - 0x1_0000_0000
+      rv = ("\xFF".b+@data[@ofs,3]).unpack("l>")[0]
     else
-      rv = ("\x00"+@data[@ofs,3]).unpack("N")[0]
+      rv = ("\x00".b+@data[@ofs,3]).unpack("l>")[0]
     end
     @ofs += 3
     rv
@@ -379,9 +364,9 @@ module EsfBasicBinaryOps
     xofs = 0
     while xofs < str.size
       if str[xofs].ord >= 128
-        rv << ("\xFF"+str[xofs,3]).unpack("N")[0] - 0x1_0000_0000
+        rv << ("\xFF".b+str[xofs,3]).unpack("l>")[0]
       else
-        rv << ("\x00"+str[xofs,3]).unpack("N")[0]
+        rv << ("\x00".b+str[xofs,3]).unpack("l>")[0]
       end
       xofs += 3
     end
