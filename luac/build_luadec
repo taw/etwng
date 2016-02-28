@@ -4,7 +4,7 @@ require 'fileutils'
 
 class BuildLuadec
   include FileUtils
-  
+
   def download_sources
     mkdir_p "src"
     system "wget -nc http://www.lua.org/ftp/lua-5.1.4.tar.gz -O src/lua-5.1.4.tar.gz"
@@ -15,7 +15,7 @@ class BuildLuadec
     rm_rf "build"
     mkdir_p "build"
   end
-  
+
   def unpack_and_patch_sources
     system "tar -C build -xz <src/lua-5.1.4.tar.gz"
     system "tar -C build -xz <src/luadec51_2.0.tgz"
@@ -26,27 +26,31 @@ class BuildLuadec
     Dir.chdir("build/lua-5.1.4/src") do
       if osx?
         system "make macosx"
+      elsif cygwin?
+        system "make generic"
       else # Linux
         system "make all MYCFLAGS='-DLUA_USE_LINUX -m32' MYLIBS='-Wl,-E -ldl -lreadline -lhistory -lncurses' MYLDFLAGS='-m32'"
       end
     end
   end
-  
+
   def cflags
     if osx?
+      "-Wall -g"
+    elsif cygwin?
       "-Wall -g"
     else
       "-Wall -DLUA_USE_LINUX -g -m32"
     end
   end
-  
+
   def build_luadec
     Dir.chdir("build/luadec") do
       system "gcc #{cflags} -I../lua-5.1.4/src *.c -c"
       system "gcc #{cflags} -lm *.o ../lua-5.1.4/src/liblua.a -o ../../luadec"
     end
   end
-  
+
   def run
     download_sources
     prepare_build_area
@@ -54,9 +58,13 @@ class BuildLuadec
     build_lua
     build_luadec
   end
-  
+
   def osx?
     `uname`.chomp == 'Darwin'
+  end
+
+  def cygwin?
+    `uname` =~ /cygwin/i
   end
 end
 
