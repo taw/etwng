@@ -47,7 +47,7 @@ class BuildLuadec
   def build_luadec
     Dir.chdir("build/luadec") do
       system "gcc #{cflags} -I../lua-5.1.4/src *.c -c"
-      system "gcc #{cflags} -lm *.o ../lua-5.1.4/src/liblua.a -o ../../luadec"
+      system "gcc #{cflags} *.o ../lua-5.1.4/src/liblua.a -lm -o ../../luadec"
     end
   end
 

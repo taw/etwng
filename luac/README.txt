@@ -23,7 +23,7 @@ Build script handles all relevant build flags, but you still need to have
 32-bit versions of relevant libraries installed.
 
 For Ubuntu, this should do the trick:
-$ sudo apt-get install build-essential lib32readline6-dev libc6-dev-i386
+$ sudo apt-get install build-essential lib32readline6-dev libc6-dev-i386 lib32ncurses5-dev
 
 == Usage ==
 
