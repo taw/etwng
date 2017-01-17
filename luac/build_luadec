@@ -7,8 +7,8 @@ class BuildLuadec
 
   def download_sources
     mkdir_p "src"
-    system "wget -nc http://www.lua.org/ftp/lua-5.1.4.tar.gz -O src/lua-5.1.4.tar.gz"
-    system "wget -nc http://luaforge.net/frs/download.php/4008/luadec51_2.0.tgz -O src/luadec51_2.0.tgz"
+    system "wget -nv -nc http://www.lua.org/ftp/lua-5.1.4.tar.gz -O src/lua-5.1.4.tar.gz"
+    system "wget -nv -nc http://luaforge.net/frs/download.php/4008/luadec51_2.0.tgz -O src/luadec51_2.0.tgz"
   end
 
   def prepare_build_area
@@ -36,11 +36,11 @@ class BuildLuadec
 
   def cflags
     if osx?
-      "-Wall -g -m32"
+      "-w -g -m32"
     elsif cygwin?
-      "-Wall -g"
+      "-w -g"
     else
-      "-Wall -DLUA_USE_LINUX -g -m32"
+      "-w -DLUA_USE_LINUX -g -m32"
     end
   end
 
