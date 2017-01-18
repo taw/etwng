@@ -7,14 +7,14 @@ def trash(*paths)
 end
 
 file "luac/luadec" do
-  Dir.chdir("pack/fuse") do
-    sh "make"
+  Dir.chdir("luac") do
+    sh "./build_luadec"
   end
 end
 
 file "pack/fuse/packfs" do
-  Dir.chdir("luac") do
-    sh "./build_luadec"
+  Dir.chdir("pack/fuse") do
+    sh "make"
   end
 end
 
