@@ -4,7 +4,7 @@ I'd generally recommend using unluac.jar, as it can handle wider range of .luac 
 
 The older luadec is a hacked lua 5.0 decompiler, and since Total War games use lua 5.1, it can sadly can only handle simpler .luac files.
 
-== Usage of unluac.jar ==
+## Usage of unluac.jar
 
 Project page is https://sourceforge.net/projects/unluac/, but local copy is included here for convenience.
 
@@ -12,7 +12,7 @@ To use:
 
     $ java -jar unluac_2015_06_13.jar file.luac
 
-== Building luadec ==
+## Building luadec
 
 Just run `build_luadec` script to fetch, patch, and build luadec capable of dealing with ETW .luac
 
@@ -22,7 +22,7 @@ Build script works on OSX and Linux. It should be possible to adapt it to other 
 
 Total War lua engine is 32-bit, while all operating system nowadays are 64-bit, so build scripts passes appropriate flags to the compiler.
 
-== Requirements for building luadec ==
+## Requirements for building luadec
 
 You need to have all basic libraries installed.
 
@@ -34,12 +34,12 @@ For Ubuntu, this should do the trick:
 
     $ sudo apt-get install build-essential lib32readline6-dev libc6-dev-i386 lib32ncurses5-dev
 
-== Usage of luadec ==
+## Usage of luadec
 
 Use pack manager to extract .luac files, then decompile each one of them with:
 
     ./luadec -d xxx.luac >xxx.lua
 
-== luadec ==
+## luadec
 
 There's more recent version of luadec on https://github.com/sztupy/luadec51
