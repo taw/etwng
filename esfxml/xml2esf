@@ -155,8 +155,8 @@ module XmlTagHandlers
       @esf.put_asc name
     end
   end
-  
-  
+
+
   ## Semantic data types - pathfinding.esf
   def on_text_node_cell_id_coords(attributes, buf, ctx)
     data_in = buf.strip.split(/[\s=,]+/).map(&:to_i)
@@ -168,7 +168,7 @@ module XmlTagHandlers
     end
     @esf.put_u4_ary data
   end
-  
+
   def on_empty_node_boundaries(attributes, buf, ctx)
     path_id = attributes[:path_id].to_i
     vertex_index = attributes[:vertex_index].to_i
@@ -191,7 +191,7 @@ module XmlTagHandlers
     @esf.put_u(unknown)
     @esf.put_u2(path_id)
   end
-    
+
   def on_text_node_vertices(attributes, buf, ctx)
     semantic_put_ary("vertices", buf.strip.split(/[\s,]+/), 2) do |x, y|
       @esf.put_i((x.to_f * 1048576.0).round.to_i)
@@ -230,12 +230,12 @@ module XmlTagHandlers
       b = b.to_i
       ary_data << a+b
     }
-    
+
     put_rec "BOUNDARIES" do
       @esf.put_4x "\x48", ary_data.pack("V*")
     end
   end
-  
+
   def on_empty_node_culture_path(attributes, buf, ctx)
     put_rec "CULTURE_PATHS" do
       @esf.put_s attributes[:agent]
@@ -247,7 +247,7 @@ module XmlTagHandlers
     data = buf.strip.split(/[\s,]+/).map{|u| (1048576.0 * u.to_f).round.to_i}
     @esf.put_4x("\x48", data.pack("l*"))
   end
-  
+
   def on_empty_node_population_class(attributes, buf, ctx)
     a1 = [
       :gov_type_happy,
@@ -270,7 +270,7 @@ module XmlTagHandlers
       :garrison,
       :crackdown,
     ].map{|name| attributes[name].to_i}
-    
+
     put_rec "POPULATION CLASSES" do
       put_rec "POPULATION_CLASS" do
         @esf.put_s attributes[:social_class]
@@ -289,7 +289,7 @@ module XmlTagHandlers
       end
     end
   end
-  
+
   def on_text_node_grid_path(attributes, buf, ctx)
     type = attributes[:repetitions].to_i
     points = buf.strip.split(/[\s,]+/).map{|pt| (pt.to_f * 1048576.0).round.to_i}
@@ -307,7 +307,7 @@ module XmlTagHandlers
   def on_start_node_obstacle_boundaries(attributes)
      [true, nil, {:data => ""}]
   end
-  
+
   def on_end_node_obstacle_boundaries(attributes, buf, ctx)
     put_rec "OBSTACLE_BOUNDARIES" do
       @esf.put_4x "\x48", ctx[:data]
@@ -321,7 +321,7 @@ module XmlTagHandlers
   def on_end_node_obstacle_boundaries_entry(attributes, buf, ctx)
     row = attributes[:row].to_i
     col = attributes[:col].to_i
-    
+
     pairs = ctx[:pairs]
     @stack[-1][3][:data] << [pairs.size/2].pack("V") << pairs.pack("V*") << [(row<<16) + col, 0].pack("VV")
   end
@@ -330,14 +330,14 @@ module XmlTagHandlers
     passable_part = attributes[:passable_part].to_i
     unknown2      = attributes[:unknown2].to_i
     path_type     = attributes[:path_type].to_i
-    
+
     path_id       = attributes[:path_id].to_i & 1023
     grid_path     = (attributes[:grid_path] == 'yes') ? 1 : 0
     index         = attributes[:index].to_i
-    
-    a = (passable_part << 24) | (unknown2 << 4) | path_type 
+
+    a = (passable_part << 24) | (unknown2 << 4) | path_type
     b = (path_id << 22) | (grid_path << 21) | index
-    
+
     @stack[-1][3][:pairs] << a << b
   end
 
@@ -355,7 +355,7 @@ module XmlTagHandlers
       @esf.put_no
     end
   end
-  
+
   def put_campaign_bonus(type, attributes)
     put_rec "CAMPAIGN_BONUS_VALUE_BLOCK" do
       put_rec "CAMPAIGN_BONUS_VALUE" do
@@ -478,7 +478,7 @@ module XmlTagHandlers
       @esf.put_s attributes[:social_class]
     end
   end
-  
+
   def on_empty_node_land_unit(attributes, buf, ctx)
     put_rec "LAND_UNIT" do
       put_rec "LAND_RECORD_KEY" do
@@ -525,7 +525,7 @@ module XmlTagHandlers
       @esf.put_u 0
     end
   end
-  
+
   def on_empty_node_theatre_transition(attributes, buf, ctx)
     put_rec "THEATRE_TRANSITION_INFO" do
       put_rec "CAMPAIGN_MAP_TRANSITION_LINK" do
@@ -543,19 +543,19 @@ module XmlTagHandlers
       if attributes.empty?
         @esf.put_no
       else
-        @esf.put_yes        
+        @esf.put_yes
       end
       @esf.put_no
       @esf.put_u 0
     end
   end
-  
+
   def on_text_node_rand_seed(attributes, buf, ctx)
     put_rec "RandSeed" do
       @esf.put_u buf.to_i
     end
   end
-  
+
   def on_text_node_owned_direct(attributes, buf, ctx)
     put_rec "OWNED_DIRECT" do
       @esf.put_u buf.to_i
@@ -567,7 +567,7 @@ module XmlTagHandlers
       @esf.put_u buf.to_i
     end
   end
-  
+
   def on_text_node_garrison_residence(attributes, buf, ctx)
     put_rec "GARRISON_RESIDENCE" do
       @esf.put_u buf.to_i
@@ -604,7 +604,7 @@ module XmlTagHandlers
     @esf.end_rec
     @esf.end_ary
   end
-  
+
   def on_empty_node_gov_absolute_monarchy(attributes, buf, ctx)
     @esf.start_ary "GOV_IMP", nil
     @esf.start_elem
@@ -621,7 +621,7 @@ module XmlTagHandlers
       @esf.put_byte attributes[:rate_lower].to_i
       @esf.put_byte attributes[:rate_upper].to_i
     end
-  end  
+  end
 
   def on_empty_node_ordinal_pair(attributes, buf, ctx)
     put_rec "ORDINAL_PAIR" do
@@ -629,7 +629,7 @@ module XmlTagHandlers
       @esf.put_i attributes[:number].to_i
     end
   end
-  
+
   def on_empty_node_portrait_details(attributes, buf, ctx)
     put_rec "PORTRAIT_DETAILS" do
       @esf.put_s(attributes[:card] || "")
@@ -646,7 +646,7 @@ module XmlTagHandlers
   def on_end_node_quad_tree_node(attributes, buf, ctx)
     on_end_node_rec(attributes, buf, ctx)
   end
-  
+
   def on_text_node_quad_tree_leaf(attributes, buf, ctx)
     put_rec "QUAD_TREE_BIT_ARRAY_NODE" do
       ab = buf.to_i(16)
@@ -656,7 +656,7 @@ module XmlTagHandlers
       @esf.put_u a
     end
   end
-  
+
   def on_empty_node_famous_battle_info(attributes, buf, ctx)
     put_rec "FAMOUS_BATTLE_INFO" do
       @esf.put_fix attributes[:x].to_f
@@ -668,7 +668,7 @@ module XmlTagHandlers
       @esf.put_bool(attributes[:d] == "yes")
     end
   end
-  
+
   def on_empty_node_cai_border_patrol_point(attributes, buf, ctx)
     put_rec "CAI_BORDER_PATROL_ANALYSIS_AREA_SPECIFIC_PATROL_POINTS" do
       put_rec "CAI_BORDER_PATROL_POINT" do
@@ -691,7 +691,7 @@ module XmlTagHandlers
       end
     end
   end
-  
+
   def on_text_node_unit_class_names_list(attributes, buf, ctx)
     semantic_put_ary("UNIT_CLASS_NAMES_LIST", buf.strip.split(/[\s=]+/), 2) do |loc, used|
       put_loc loc
@@ -818,7 +818,7 @@ module XmlTagHandlers
   end
   def on_text_node_date(attributes, buf, ctx)
     if buf == ""
-      year, season = 0, 'summer' 
+      year, season = 0, 'summer'
     else
       date_fields = buf.strip.split(/\s+/)
       raise "Invalid date: `#{buf}'" unless date_fields.size == 2 and date_fields[1] =~ /\A\d+\z/
@@ -935,7 +935,7 @@ module XmlTagHandlers
         @esf.put_flt ta[:factor].to_f
         @esf.put_u xsize
         @esf.put_u ysize
-        
+
         rows.each_with_index do |row, yi|
           row.each_with_index do |(ca, cc), xi|
             @esf.put_u xi
@@ -944,7 +944,7 @@ module XmlTagHandlers
             @esf.put_v2 ca[:maxx].to_f, ca[:maxy].to_f
           end
         end
-        
+
         rows.each do |row|
           row.each do |ca, cc|
             @esf.put_u ca[:area_id].to_i
@@ -958,7 +958,7 @@ module XmlTagHandlers
             cc[:numbers].each{|v| @esf.put_u v.to_i}
           end
         end
-        
+
         @esf.put_u connections.size
         connections.each do |conn|
           @esf.put_u conn[:area1].to_i
@@ -1069,7 +1069,7 @@ module XmlTagHandlers
       end
     end
   end
-  
+
   def on_empty_node_farm_tree(attributes, buf, ctx)
     put_rec "FARM_TREE_LIST" do
       put_rec "FARM_TREE" do
@@ -1078,13 +1078,13 @@ module XmlTagHandlers
       end
     end
   end
-  
+
   def on_text_node_id_list(attributes, buf, ctx)
     put_rec "ID_LIST" do
       @esf.put_4x "\x48", buf.strip.split(/\s+/).map(&:to_i).pack("V*")
     end
   end
-  
+
   ## Basic data types
 
   def on_start_node_esf(attributes)
@@ -1100,7 +1100,7 @@ module XmlTagHandlers
     # puts "Parsing #{attributes[:path]}"
     parse_file(attributes[:path])
   end
-  
+
   def on_start_node_rec(attributes)
     if @stack[-1][3][:ary]
       @esf.start_elem
@@ -1112,7 +1112,7 @@ module XmlTagHandlers
   def on_end_node_rec(attributes, buf, ctx)
     @esf.end_rec
   end
-  
+
   def on_start_node_ary(attributes)
     @esf.start_ary attributes[:type], attributes[:version]
     [true, nil, {:ary => true}]
@@ -1189,6 +1189,9 @@ module XmlTagHandlers
   end
   def on_text_node_u2(attributes, buf, ctx)
     @esf.put_u2 buf.to_i
+  end
+  def on_text_node_i1(attributes, buf, ctx)
+    @esf.put_i1 buf.to_i
   end
   def on_text_node_i2(attributes, buf, ctx)
     @esf.put_i2 buf.to_i
@@ -1338,15 +1341,15 @@ module XmlTagHandlers
     put_bin_hex(0x5f, buf)
   end
 
-  ## Common node types  
+  ## Common node types
   def on_start_text_node(attributes)
     [false, "", {}]
   end
-  
+
   def on_start_empty_node(attributes)
     [false, nil, {}]
   end
-  
+
   ## Utilities (should move to esf builder ???)
 
   def put_rec(type, version=nil)
@@ -1362,7 +1365,7 @@ module XmlTagHandlers
     @esf.end_rec
     [false, nil, {}]
   end
-  
+
   def semantic_put_ary(type, data, n=1)
     @esf.start_ary type, nil
     until data.empty?
@@ -1372,7 +1375,7 @@ module XmlTagHandlers
     end
     @esf.end_ary
   end
-  
+
   def put_loc(loc)
     put_rec "CAMPAIGN_LOCALISATION" do
       if loc == ""
@@ -1387,7 +1390,7 @@ module XmlTagHandlers
   ## Autoconfigure
   OnStart = Hash.new{|ht,k| raise "Unknown tag open #{k.inspect}"}
   OnEnd = Hash.new{|ht,k| raise "Unknown tag close #{k.inspect}"}
-  
+
   self.instance_methods.each do |m|
     m = m.to_s
     case m
@@ -1407,7 +1410,7 @@ end
 
 class Xml2Esf < Nokogiri::XML::SAX::Document
   include XmlTagHandlers
-  
+
   ## Nokogiri callbacks
   def start_element_namespace(name, attributes, *namespace_stuff)
     raise "Cannot nest tags in this context" unless @stack[-1][0]
@@ -1428,14 +1431,14 @@ class Xml2Esf < Nokogiri::XML::SAX::Document
     if buf = @stack[-1][2]
       buf << chars
     elsif chars =~ /\S/
-      raise "Illegal place for non-whitespace characters: #{@stack.inspect} #{chars.inspect}" 
+      raise "Illegal place for non-whitespace characters: #{@stack.inspect} #{chars.inspect}"
     end
   end
 
-  ## Everything else  
-  
+  ## Everything else
+
   attr_reader :esf, :stack
-  
+
   def self.parse(in_dir)
     new(in_dir).esf.data
   end
