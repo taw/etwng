@@ -229,7 +229,10 @@ class GroupFormationsUnpacker
   end
   def unpack
     out = get_ary{ get_formation }
-    raise "EOF expected at #{@ofs}" unless @ofs == @data.size
+    unless bytes_left == 0
+      debug = @data[@ofs..-1].unpack("C*").map{|x| "%02x" % x}.join(" ")
+      warn "#{@path}: extra #{bytes_left} at end of file: #{debug}"
+    end
     out
   end
   def unpack_to_string
