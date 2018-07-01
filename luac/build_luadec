@@ -1,14 +1,15 @@
 #!/usr/bin/env ruby
 
-require 'fileutils'
+require "fileutils"
+require "rake"
 
 class BuildLuadec
   include FileUtils
 
   def download_sources
     mkdir_p "src"
-    system "wget -nv -nc http://www.lua.org/ftp/lua-5.1.4.tar.gz -O src/lua-5.1.4.tar.gz"
-    system "wget -nv -nc http://luaforge.net/frs/download.php/4008/luadec51_2.0.tgz -O src/luadec51_2.0.tgz"
+    sh "wget -nv -nc http://www.lua.org/ftp/lua-5.1.4.tar.gz -O src/lua-5.1.4.tar.gz"
+    sh "wget -nv -nc http://luaforge.net/frs/download.php/4008/luadec51_2.0.tgz -O src/luadec51_2.0.tgz"
   end
 
   def prepare_build_area
@@ -17,19 +18,19 @@ class BuildLuadec
   end
 
   def unpack_and_patch_sources
-    system "tar -C build -xz <src/lua-5.1.4.tar.gz"
-    system "tar -C build -xz <src/luadec51_2.0.tgz"
-    system "patch -p0 <lua_etw.diff"
+    sh "tar -C build -xz <src/lua-5.1.4.tar.gz"
+    sh "tar -C build -xz <src/luadec51_2.0.tgz"
+    sh "patch -p0 <lua_etw.diff"
   end
 
   def build_lua
     Dir.chdir("build/lua-5.1.4/src") do
       if osx?
-        system "make all MYCFLAGS='-m32 -DLUA_USE_LINUX' MYLIBS='-m32 -lreadline' MYLDFLAGS='-m32'"
+        sh "make all MYCFLAGS='-m32 -DLUA_USE_LINUX' MYLIBS='-m32 -lreadline' MYLDFLAGS='-m32'"
       elsif cygwin?
-        system "make generic"
+        sh "make generic"
       else # Linux
-        system "make all MYCFLAGS='-DLUA_USE_LINUX -m32' MYLIBS='-Wl,-E -ldl -lreadline -lhistory -lncurses' MYLDFLAGS='-m32'"
+        sh "make all MYCFLAGS='-DLUA_USE_LINUX -m32' MYLIBS='-Wl,-E -ldl -lreadline -lhistory -lncurses' MYLDFLAGS='-m32'"
       end
     end
   end
@@ -46,8 +47,8 @@ class BuildLuadec
 
   def build_luadec
     Dir.chdir("build/luadec") do
-      system "gcc #{cflags} -I../lua-5.1.4/src *.c -c"
-      system "gcc #{cflags} *.o ../lua-5.1.4/src/liblua.a -lm -o ../../luadec"
+      sh "gcc #{cflags} -I../lua-5.1.4/src *.c -c"
+      sh "gcc #{cflags} *.o ../lua-5.1.4/src/liblua.a -lm -o ../../luadec"
     end
   end
 
