@@ -14,7 +14,7 @@ module EsfConvertBasic
   end
   def convert_03!
     out!("<i2>#{get_u2}</i2>")
-  end  
+  end
   def convert_04!
     out!("<i>#{get_i}</i>")
   end
@@ -109,6 +109,12 @@ module EsfConvertBasic
   end
   def convert_1d!
     out!("<flt>0.0</flt>")
+  end
+  def convert_21!
+    out!("<x21>#{get_u}</x21>")
+  end
+  def convert_25!
+    out!("<x25>#{get_u}</x25>")
   end
   def convert_4x!(tag)
     data = get_ofs_bytes
@@ -263,7 +269,7 @@ class EsfConverter < EsfParser
   include EsfSemanticConverter
 
   attr_reader :dir_builder
-  
+
   def initialize(in_file, out_dir)
     @dir_builder = DirBuilder.new(out_dir)
     super(in_file)
@@ -286,7 +292,7 @@ class EsfConverter < EsfParser
     end
     out
   end
-  
+
   def convert_rec_basic!(node_type, version)
     csr = ConvertSemanticRec[version][node_type]
     try_semantic(node_type){ return send(csr) } if csr
@@ -299,7 +305,7 @@ class EsfConverter < EsfParser
       send(@esf_type_handlers[get_byte]) while @ofs < ofs_end
     end
   end
-  
+
   def convert_rec!(node_type, version)
     xmls = XmlSplit[node_type]
     if xmls
@@ -346,7 +352,7 @@ class EsfConverter < EsfParser
       end
     end
   end
-  
+
   def convert_abca_ary!
     if @data[@ofs-1].ord & 0x20 != 0
       node_type, version = get_node_type_and_version
@@ -382,7 +388,7 @@ class EsfConverter < EsfParser
       end
     end
   end
-  
+
   def report_semantic_failures!
     failures = @semantic_stats.to_a.map{|key, (all,quiet,fails)|
       if fails == 0
@@ -398,7 +404,7 @@ class EsfConverter < EsfParser
        puts "* #{key}: (#{all} records, #{fails} failures, #{quiet} quiet failures)"
     end
   end
-  
+
   def convert!
     @done = false
     @dir_builder.open_main_xml do

@@ -458,6 +458,12 @@ module EsfGetData
   def get_1d!
     [:flt, 0.0]
   end
+  def get_21!
+    [:x21, get_u]
+  end
+  def get_25!
+    [:x25, get_u]
+  end
   def get_40!
     [:bin0, get_ofs_bytes]
   end
