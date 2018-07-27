@@ -461,6 +461,9 @@ module EsfGetData
   def get_21!
     [:x21, get_u]
   end
+  def get_23!
+    [:x23, get_u1]
+  end
   def get_25!
     [:x25, get_u]
   end
