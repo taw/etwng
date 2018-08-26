@@ -3,12 +3,26 @@
 require "pathname"
 require "pathname-glob"
 
-Pathname("anim").glob("{etw,ntw}*.anim").each do |path|
+# base = Pathname("anim")
+base = Pathname("small")
+
+base.glob("{etw,ntw}*.anim").each do |path|
   next if path.to_s.include?("testdata")
-  rv = system "./unpack_anim_v1 #{path} >/dev/null"
+  rv = system "./unpack_anim_etw #{path} >/dev/null"
   if rv
     puts "OK   #{path}"
   else
     puts "FAIL #{path}"
   end
 end
+
+base.glob("s2tw*.anim").each do |path|
+  next if path.to_s.include?("testdata")
+  rv = system "./unpack_anim_s2tw #{path} >/dev/null"
+  if rv
+    puts "OK   #{path}"
+  else
+    puts "FAIL #{path}"
+  end
+end
+

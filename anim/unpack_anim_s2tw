@@ -4,18 +4,18 @@ require_relative "anim"
 
 class Anim < BaseAnim
   def parse
-    header = [get_flt, get_flt]
+    header = [get_u4, get_flt, get_flt]
+    raise unless header[0] == 1
 
     bone_count = get_u4
     bones = bone_count.times.map{ [get_str, get_i4] }
-
     frame_count = get_u4
+
+    # binding.pry
+
     frames = frame_count.times.map{
       bone_count.times.map{
-        [
-          4.times.map{get_fix2},
-          8.times.map{get_flt},
-        ]
+        14.times.map{get_fix2}
       }
     }
 
