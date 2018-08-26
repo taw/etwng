@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+
+require_relative "anim"
+
+class Anim < BaseAnim
+  def parse
+    result = {
+    }
+    result[:header] = [get_flt, get_flt]
+
+    bones_count = get_u4
+    result[:bones] = bones_count.times.map{ [get_str, get_i4] }
+
+    frame_count = get_u4
+    result[:frames] = frame_count.times.map{
+      bones_count.times.map{
+        [
+          4.times.map{get_fix2},
+          8.times.map{get_flt},
+        ]
+      }
+    }
+
+    result[:extras] =  get_u4.times.map{ get_u4.times.map{ get_str } }
+    raise unless eof?
+    result
+  end
+end
+
+unless ARGV.size == 1
+  STDERR.puts "#{$0} file.anim"
+  exit 1
+end
+
+ase = Anim.new(ARGV[0])
+pp ase.parse
