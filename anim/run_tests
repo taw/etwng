@@ -25,4 +25,3 @@ base.glob("s2tw*.anim").each do |path|
     puts "FAIL #{path}"
   end
 end
-

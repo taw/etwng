@@ -84,4 +84,4 @@ class BaseAnim
   def get_fix2
     (get_i2/0x7FFF.to_f)
   end
-  end
+end

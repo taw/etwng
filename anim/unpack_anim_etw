@@ -4,10 +4,13 @@ require_relative "anim"
 
 class Anim < BaseAnim
   def parse
-    header = [get_flt, get_flt]
+    header = {"fps" => get_flt, "duration" => get_flt}
 
     bone_count = get_u4
     bones = bone_count.times.map{ [get_str, get_i4] }
+    warn "Skeleton not -1" unless bones[0][1] == -1
+    # Possible to have other unattached bones
+    warn "Not valid bone attachments" unless bones[1..-1].map(&:last).grep_v(-1...bone_count).empty?
 
     frame_count = get_u4
     frames = frame_count.times.map{
