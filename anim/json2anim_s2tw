@@ -1,0 +1,67 @@
+#!/usr/bin/env ruby
+
+require_relative "anim"
+
+class Json2Anim < BaseJson2Anim
+  def bone_count
+    @data["bones"].size
+  end
+
+  def frame_count
+    @data["frames"].size
+  end
+
+  def put_bone_frame_data(v)
+    raise unless v.size == 7
+    v.each do |vi|
+      put_flt(vi)
+    end
+  end
+
+  def put_header
+    put_u4 @data["header"]["version"]
+    put_flt @data["header"]["fps"]
+    put_flt @data["header"]["duration"]
+  end
+
+  def put_bones
+    put_u4 bone_count
+    @data["bones"].each do |name, parent_id|
+      put_str name
+      put_i4 parent_id
+    end
+  end
+
+  def put_frames
+    put_u4 frame_count
+    @data["frames"].each do |frame|
+      frame.each do |bone_frame_data|
+        put_bone_frame_data bone_frame_data
+      end
+    end
+  end
+
+  def put_extras
+    put_u4 @data["extras"].size
+    @data["extras"].each do |extra|
+      put_u4 extra.size
+      extra.each do |s|
+        put_str s
+      end
+    end
+  end
+
+  def put_anim
+    put_header
+    put_bones
+    put_frames
+    put_extras
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "#{$0} file.json file.anim"
+  exit 1
+end
+
+Json2Anim.new(ARGV[0], ARGV[1]).call

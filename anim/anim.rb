@@ -1,5 +1,7 @@
 # Common functions for the format
 
+require "json"
+
 class Float
   def pretty_single
     rv = (((100_000.0 * self).round / 100_000.0) rescue self)
@@ -8,11 +10,58 @@ class Float
   end
 end
 
-class BaseAnim
-  def initialize(path)
-    @path = path
-    @data = File.open(path, "rb").read
+class BaseJson2Anim
+  def initialize(input_path, output_path)
+    @input_path = Pathname(input_path)
+    @data = JSON.parse(@input_path.open("rb", &:read))
+    @output_path = Pathname(output_path)
+  end
+
+  def call
+    @output = "".b
+    put_anim
+    @output_path.open("wb") do |fh|
+      fh.write @output
+    end
+  end
+
+  def put(v)
+    @output << v
+  end
+
+  def put_flt(v)
+    put [v].pack("f")
+  end
+
+  def put_i4(v)
+    put [v].pack("V")
+  end
+
+  def put_u4(v)
+    put [v].pack("V")
+  end
+
+  def put_u2(v)
+    put [v].pack("v")
+  end
+
+  def put_i2(v)
+    put [v].pack("v")
+  end
+
+  def put_str(v)
+    v = v.unpack("U*").pack("v*")
+    put_u2 v.size/2
+    put v
+  end
+end
+
+class BaseAnim2Json
+  def initialize(input_path, output_path)
+    @input_path = Pathname(input_path)
+    @data = @input_path.open("rb", &:read)
     @ofs = 0
+    @output_path = Pathname(output_path)
   end
 
   def get(sz)

@@ -2,9 +2,14 @@
 
 require_relative "anim"
 
-class Anim < BaseAnim
+class Anim2Json < BaseAnim2Json
+  def parse_bone_frame_data
+    7.times.map{ get_flt }
+  end
+
   def parse
-    header = {"fps" => get_flt, "duration" => get_flt}
+    header = {"version" => get_u4, "fps" => get_flt, "duration" => get_flt}
+    raise unless header["version"] == 1
 
     bone_count = get_u4
     bones = bone_count.times.map{ [get_str, get_i4] }
@@ -15,10 +20,7 @@ class Anim < BaseAnim
     frame_count = get_u4
     frames = frame_count.times.map{
       bone_count.times.map{
-        [
-          4.times.map{get_fix2},
-          8.times.map{get_flt},
-        ]
+        parse_bone_frame_data
       }
     }
 
@@ -33,12 +35,15 @@ class Anim < BaseAnim
       "extras" => extras,
     }
   end
+
+  def call
+    @output_path.write JSON.pretty_generate(parse)
+  end
 end
 
-unless ARGV.size == 1
-  STDERR.puts "#{$0} file.anim"
+unless ARGV.size == 2
+  STDERR.puts "#{$0} file.anim file.json"
   exit 1
 end
 
-ase = Anim.new(ARGV[0])
-pp ase.parse
+Anim2Json.new(ARGV[0], ARGV[1]).call

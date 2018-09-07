@@ -3,25 +3,41 @@
 require "pathname"
 require "pathname-glob"
 
+Pathname("tmp").mkpath
+
 # base = Pathname("anim")
 base = Pathname("small")
 
 base.glob("{etw,ntw}*.anim").each do |path|
   next if path.to_s.include?("testdata")
-  rv = system "./unpack_anim_etw #{path} >/dev/null"
-  if rv
+  unless system "./anim2json_etw #{path} tmp/tmp.json"
+    puts "FAIL #{path} [FORWARD]"
+    next
+  end
+  unless system "./json2anim_etw tmp/tmp.json tmp/tmp.anim"
+    puts "FAIL #{path} [REVERSE]"
+    next
+  end
+  if path.read == Pathname("tmp/tmp.anim").read
     puts "OK   #{path}"
   else
-    puts "FAIL #{path}"
+    puts "FAIL #{path} [MISMATCH]"
   end
 end
 
 base.glob("s2tw*.anim").each do |path|
   next if path.to_s.include?("testdata")
-  rv = system "./unpack_anim_s2tw #{path} >/dev/null"
-  if rv
+  unless system "./anim2json_s2tw #{path} tmp/tmp.json"
+    puts "FAIL #{path} [FORWARD]"
+    next
+  end
+  unless system "./json2anim_s2tw tmp/tmp.json tmp/tmp.anim"
+    puts "FAIL #{path} [REVERSE]"
+    next
+  end
+  if path.read == Pathname("tmp/tmp.anim").read
     puts "OK   #{path}"
   else
-    puts "FAIL #{path}"
+    puts "FAIL #{path} [MISMATCH]"
   end
 end
