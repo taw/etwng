@@ -14,8 +14,18 @@ end
 
 def save_ase(data, file_name)
   bindata = ""
-  bindata << data[0].pack("VVV")
-  data[1..-1].each do |sample|
+  version = data[0]
+  bindata << [version].pack("V")
+
+  if version == 2
+    samples = data[1..-1]
+  else
+    bindata << [data[1]].pack("V")
+    samples = data[2..-1]
+  end
+
+  bindata << [samples.size].pack("V")
+  samples.each do |sample|
     bindata << sample.pack("fVV")
   end
   File.write(file_name, bindata)

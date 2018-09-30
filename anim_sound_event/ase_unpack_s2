@@ -42,10 +42,12 @@ class AnimSoundEvent
   end
 
   def parse
-    raise "Wrong file size" unless @data.size % 12 == 0
     rv = []
-    rv << [get_u4, get_u4, get_u4]
-    until eof?
+    version = get_u4
+    raise unless version == 2 or version == 3
+    rv << version
+    rv << get_u4 if version == 3
+    get_u4.times do
       rv << [get_flt, get_u4, get_u4]
     end
     raise "Format Error, bytes left unprocessed" unless eof?
