@@ -1,0 +1,73 @@
+#!/usr/bin/env ruby
+
+class File
+  def self.write(file_name, data)
+    File.open(file_name, 'wb'){|fh|
+      fh.write data
+    }
+  end
+end
+
+class Float
+  def pretty_single
+    rv = (((100_000.0 * self).round / 100_000.0) rescue self)
+    return rv if [self].pack("f") == [rv].pack("f")
+    self
+  end
+end
+
+class AnimSoundEvent
+  def initialize(file_name)
+    @data = File.open(file_name, 'rb', &:read)
+    @ofs = 0
+  end
+
+  def get(sz)
+    raise "Format Error, trying to read past end of file" if @ofs+sz > @data.size
+    rv = @data[@ofs, sz]
+    @ofs += sz
+    rv
+  end
+
+  def get_flt
+    get(4).unpack("f")[0].pretty_single
+  end
+
+  def get_u4
+    get(4).unpack("V")[0]
+  end
+
+  def eof?
+    @data.size == @ofs
+  end
+
+  def parse
+    raise "Wrong file size" unless @data.size % 12 == 0
+    rv = []
+    rv << [get_u4, get_u4, get_u4]
+    until eof?
+      rv << [get_flt, get_u4, get_u4]
+    end
+    raise "Format Error, bytes left unprocessed" unless eof?
+    rv
+  end
+
+  def serialize(data)
+    "[\n" + data.map{|sample|
+      "  #{sample.inspect},\n"
+    }.join + "]\n"
+  end
+
+  def save_to_txt(file_name)
+    File.write(file_name, serialize(parse))
+  end
+end
+
+unless ARGV.size == 2
+  STDERR.puts "#{$0} file.anim_sound_event file.txt"
+  exit 1
+end
+
+ase = AnimSoundEvent.new(ARGV[0])
+ase.save_to_txt(ARGV[1])
+
