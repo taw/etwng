@@ -123,11 +123,14 @@ class UiEntry(DebuggableConverter):
         self.numEffects = 0
         self.effects = []
         self.numChildren = 0
+
         self.children = []
 
         # after the last child follows a template string
         self.template = "" #ascii
         self.flag5 = 0
+        self.flag5data = None
+        self.flag15 = 0
 
     def readFrom(self, handle):
         """
@@ -217,6 +220,19 @@ class UiEntry(DebuggableConverter):
 
         if self.version >= 44:
           self.flag5 = handle.readByte()
+          if self.flag5 != 0:
+            # This decoding works only sometimes
+            flag5_name = handle.readASCII()
+            flag5_count = handle.readInt()
+            self.flag5data = {
+                "name": flag5_name,
+                "data": map(int, list(handle.readInt() for i in range(flag5_count))),
+                "i1": handle.readInt(),
+                "i2": handle.readInt(),
+                "f1": handle.readByte(),
+                "i3": handle.readInt(),
+                "f2": handle.readByte(),
+            }
         if self.version >= 49:
           self.string10 = handle.readASCII()
 
@@ -299,6 +315,18 @@ class UiEntry(DebuggableConverter):
 
         if self.version >= 44:
           handle.writeByte(self.flag5)
+          if self.flag5 != 0:
+              flag5data = self.flag5data
+              handle.writeASCII(flag5data["name"])
+              handle.writeInt(len(flag5data["data"]))
+              for i in flag5data["data"]:
+                  handle.writeInt(i)
+              handle.writeInt(flag5data["i1"])
+              handle.writeInt(flag5data["i2"])
+              handle.writeByte(flag5data["f1"])
+              handle.writeInt(flag5data["i3"])
+              handle.writeByte(flag5data["f2"])
+
 
         if self.version >= 49:
           handle.writeASCII(self.string10)
@@ -373,9 +401,14 @@ class UiEntry(DebuggableConverter):
             child.writeToXML(handle)
 
         handle.write("""%(indent+1)s</children>
-%(indent+1)s<template>%(template)s</template>
-%(indent+1)s<flag5>%(flag5)i</flag5>
-%(indent)s</uiEntry>\n"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "flag5": self.flag5, "template": self.template})
+%(indent+1)s<template>%(template)s</template>"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "template": self.template})
+
+        if self.flag5 == 0:
+            handle.write("%(indent+1)s<flag5>%(flag5)i</flag5>\n"%{"indent+1": "  "*(self.indent + 1), "flag5": self.flag5})
+        else:
+            data = self.flag5data
+            handle.write("""%(indent+1)s<flag5 name="%(name)s" data="%(data)s" i1="%(i1)s" i2="%(i2)s" i3="%(i3)s" f1="%(f1)s" f2="%(f2)s">%(flag5)i</flag5>\n"""%{"indent+1": "  "*(self.indent + 1), "flag5": self.flag5, "i1": data["i1"], "i2": data["i2"], "i3": data["i3"], "f1": data["f1"], "f2": data["f2"], "name": data["name"], "data": " ".join(map(str, data["data"])) })
+        handle.write("%(indent)s</uiEntry>\n"%{"indent": "  "*self.indent})
 
     def constructFromNode(self, node):
         """
@@ -407,6 +440,16 @@ class UiEntry(DebuggableConverter):
                 self.flag3 = int(child.firstChild.data)
             elif child.nodeName == "flag5":
                 self.flag5 = int(child.firstChild.data)
+                if self.flag5 != 0:
+                    self.flag5data = {
+                        "name": child.attributes.getNamedItem("name").firstChild.data,
+                        "data": list(map(int, child.attributes.getNamedItem("data").firstChild.data.split())),
+                        "i1": int(child.attributes.getNamedItem("i1").firstChild.data),
+                        "i2": int(child.attributes.getNamedItem("i2").firstChild.data),
+                        "i3": int(child.attributes.getNamedItem("i3").firstChild.data),
+                        "f1": int(child.attributes.getNamedItem("f1").firstChild.data),
+                        "f2": int(child.attributes.getNamedItem("f2").firstChild.data),
+                    }
             elif child.nodeName == "flag11":
                 self.flag11 = int(child.firstChild.data)
             elif child.nodeName == "flag12":
@@ -1136,7 +1179,7 @@ def convertUIToXML(uiFilename, textFilename):
         return
     versionNumber = int(versionString[7:10])
 
-    if versionNumber not in [32, 33, 39, 43, 44, 46, 47, 49, 50, 51, 52]:
+    if versionNumber not in [32, 33, 39, 43, 44, 46, 47, 49, 50, 51, 52, 54]:
       print("Version %d not supported" % versionNumber)
       return
 
