@@ -37,8 +37,8 @@ If you really need to open one of the pre-Version032 files, contact taw.
 There's now a single script which handles Version032, Version033, and Version039.
 Depending on version of ui layout file you want to convert do one of the following:
 
-$ python3.1 convert_ui.py -u uifile uifile.xml
-$ python3.1 convert_ui.py -x uifile.xml uifile
+$ python3 convert_ui.py -u uifile uifile.xml
+$ python3 convert_ui.py -x uifile.xml uifile
 
 == S2TW Support ==
 

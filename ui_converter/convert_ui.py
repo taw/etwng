@@ -1,9 +1,8 @@
-#!/usr/bin/env python3.1
+#!/usr/bin/env python3
 
 # convert_ui.py version 1.1, 25th August 2010
 # written by alpaca (Stefan Reutter)
 # This file converts ui layout files to XML and vice-versa
-
 
 import io, struct, sys, os
 
@@ -39,7 +38,7 @@ class TypeCastReader(io.BufferedReader):
         encodedString = self.read(length)
         string = encodedString.decode("ascii")
         return(string.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\r", "&#x0D;"))
-        
+
 class TypeCastWriter(io.BufferedWriter):
     def writeByte(self,arg):
         self.write(struct.pack("B",arg))
@@ -86,7 +85,7 @@ class uiEntry(debuggable_converter):
         self.flag1 = 0
         self.flag2 = 0
         self.flag3 = 0
-        
+
         self.flag11 = 0
         self.flag12 = 0
         self.flag13 = 0
@@ -95,44 +94,44 @@ class uiEntry(debuggable_converter):
         self.flag7 = 0
         self.flag8 = 0
         self.flag9 = 0
-        
+
         self.parentName = "" #ascii
-        
+
         self.int1 = 0
-        
+
         self.tooltip = ""
         self.tooltipText = ""
-        
+
         self.int3 = 0
         self.int4 = 0
         self.flag4 = 0
         self.script = ""
-        
+
 
         self.numTGAs = 0
         self.TGAs = []
-    
+
         self.int5 = 0
         self.int6 = 0
         self.numStates = 0
-        
+
         self.states = []
-        
+
         self.int26 = 0
-        
+
         self.events = []
-        
+
         self.eventsEnd = "" #ascii
-        
+
         self.int27 = 0
         self.int28 = 0 # number of mysterious entries
         self.numChildren = 0
         self.children = []
-        
+
         # after the last child follows a template string
         self.template = "" #ascii
         self.flag5 = 0
-        
+
     def readFrom(self, handle):
         """
         Reads from a TypeCastReader handle
@@ -159,19 +158,19 @@ class uiEntry(debuggable_converter):
           self.flag9 = handle.readByte()
 
         self.parentName = handle.readASCII()
-        
+
         self.int1 = handle.readInt()
-        
+
         self.tooltip = handle.readUTF16()
         self.tooltipText = handle.readUTF16()
-        
+
         self.int3 = handle.readInt()
 
         if self.version >= 33:
           self.flag4 = handle.readByte()
         if self.version >= 39:
           self.int4 = handle.readInt()
-        
+
         self.script = handle.readASCII()
 
         self.numTGAs = handle.readInt()
@@ -200,7 +199,7 @@ class uiEntry(debuggable_converter):
         while ev != "events_end":
             self.events.append(ev)
             ev = handle.readASCII()
-        
+
         self.eventsEnd = ev
 
         self.int27 = handle.readInt()
@@ -215,19 +214,19 @@ class uiEntry(debuggable_converter):
               handle.readInt() # some of them are floats (second one especially)
 
         self.numChildren = handle.readInt()
-        
+
         for i in range(self.numChildren):
             child = uiEntry(self.version, self.indent + 2)
             child.readFrom(handle)
             self.children.append(child)
-        
+
         self.template = handle.readASCII()
-    
+
         if self.version >= 44:
           self.flag5 = handle.readByte()
         if self.version >= 49:
           self.string10 = handle.readASCII()
-    
+
     def writeTo(self, handle):
         """
         Writes to a TypeCastWriter handle
@@ -236,13 +235,13 @@ class uiEntry(debuggable_converter):
         handle.writeASCII(self.title)
         if self.version >= 43:
           handle.writeASCII(self.title2)
-        
+
         handle.writeInt(self.xOff)
         handle.writeInt(self.yOff)
         handle.writeByte(self.flag1)
         handle.writeByte(self.flag2)
         handle.writeByte(self.flag3)
-        
+
         handle.writeByte(self.flag11)
         handle.writeByte(self.flag12)
         handle.writeByte(self.flag13)
@@ -253,53 +252,53 @@ class uiEntry(debuggable_converter):
           handle.writeByte(self.flag7)
           handle.writeByte(self.flag8)
           handle.writeByte(self.flag9)
-        
+
         handle.writeASCII(self.parentName)
-        
+
         handle.writeInt(self.int1)
-        
+
         handle.writeUTF16(self.tooltip)
         handle.writeUTF16(self.tooltipText)
-        
+
         handle.writeInt(self.int3)
         if self.version >= 33:
           handle.writeByte(self.flag4)
         if self.version >= 39:
           handle.writeInt(self.int4)
-        
+
         handle.writeASCII(self.script)
-        
+
         handle.writeInt(self.numTGAs)
-        
+
         for tga in self.TGAs:
             tga.writeTo(handle)
-        
+
         handle.writeInt(self.int5)
         handle.writeInt(self.int6)
-        
+
         handle.writeInt(self.numStates)
-        
+
         for state in self.states:
             state.writeTo(handle)
-        
+
         handle.writeInt(self.int26)
-        
+
         for ev in self.events:
             handle.writeASCII(ev)
-        
+
         handle.writeASCII(self.eventsEnd)
-        
+
         handle.writeInt(self.int27)
         if self.version >= 39:
           handle.writeInt(self.int28)
-        
+
         handle.writeInt(self.numChildren)
-        
+
         for child in self.children:
             child.writeTo(handle)
-            
+
         handle.writeASCII(self.template)
-        
+
         if self.version >= 44:
           handle.writeByte(self.flag5)
 
@@ -340,7 +339,7 @@ class uiEntry(debuggable_converter):
 """%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "title2": self.title2, "string10" : self.string10, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "flag6": self.flag6, "flag7": self.flag7, "flag8": self.flag8, "flag9": self.flag9, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "script": self.script, "numTGAs": self.numTGAs})
         for tga in self.TGAs:
             tga.writeToXML(handle)
-        
+
         handle.write("""%(indent+1)s</tgas>
 %(indent+1)s<int5>%(int5)i</int5>
 %(indent+1)s<int6>%(int6)i</int6>
@@ -349,39 +348,39 @@ class uiEntry(debuggable_converter):
 
         for state in self.states:
             state.writeToXML(handle)
-        
+
         handle.write("""%(indent+1)s</states>
 %(indent+1)s<int26>%(int26)i</int26>
 %(indent+1)s<events>
 """%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "int26": self.int26})
-        
+
         for ev in self.events:
             handle.write("%(indent+2)s<event>%(ev)s</event>\n"%{"indent+2": "  "*(self.indent + 2), "ev": ev})
-        
+
         handle.write("""%(indent+1)s</events>
 %(indent+1)s<eventsEnd>%(eventsEnd)s</eventsEnd>
 %(indent+1)s<int27>%(int27)i</int27>
 %(indent+1)s<int28>%(int28)i</int28>
 %(indent+1)s<children num="%(numChildren)i">
 """%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "eventsEnd": self.eventsEnd, "int27": self.int27, "int28": self.int28, "numChildren": self.numChildren})
-        
+
         for child in self.children:
             child.writeToXML(handle)
-        
+
         handle.write("""%(indent+1)s</children>
 %(indent+1)s<template>%(template)s</template>
 %(indent+1)s<flag5>%(flag5)i</flag5>
 %(indent)s</uiEntry>\n"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "flag5": self.flag5, "template": self.template})
-        
+
     def constructFromNode(self, node):
         """
         Constructs a UI entry from a uiEntry XML node
         """
         if node.nodeName != "uiEntry":
             raise(Exception("Not a ui node"))
-            return 
-        
-        
+            return
+
+
         for child in node.childNodes:
             if child.nodeName == "id":
                 self.id = int(child.firstChild.data)
@@ -469,12 +468,12 @@ class uiEntry(debuggable_converter):
                         else:
                             self.events.append("")
             elif child.nodeName == "eventsEnd":
-                self.eventsEnd = child.firstChild.data      
+                self.eventsEnd = child.firstChild.data
             elif child.nodeName == "int27":
                 self.int27 = int(child.firstChild.data)
             elif child.nodeName == "int28":
-                self.int28 = int(child.firstChild.data)   
-            elif child.nodeName == "children":   
+                self.int28 = int(child.firstChild.data)
+            elif child.nodeName == "children":
                 self.numChildren = int(child.attributes.getNamedItem("num").firstChild.data)
                 for childNode in child.childNodes:
                     if childNode.nodeName == "uiEntry":
@@ -484,7 +483,7 @@ class uiEntry(debuggable_converter):
             elif child.nodeName == "template":
                 if len(child.childNodes) > 0:
                     self.template = child.firstChild.data
-                        
+
 class tgaEntry(debuggable_converter):
     def __init__(self, version, indent):
         self.version = version
@@ -494,7 +493,7 @@ class tgaEntry(debuggable_converter):
         self.width = 0 #int
         self.height = 0 #int
         self.int1 = 0 #int (i guess this could be a color overlay)
-        
+
     def readFrom(self, handle):
         """
         Reads from a TypeCastReader handle
@@ -504,7 +503,7 @@ class tgaEntry(debuggable_converter):
         self.width = handle.readInt()
         self.height = handle.readInt()
         self.int1 = handle.readInt()
-    
+
     def writeTo(self, handle):
         """
         Writes to a TypeCastWriter handle
@@ -514,21 +513,21 @@ class tgaEntry(debuggable_converter):
         handle.writeInt(self.width)
         handle.writeInt(self.height)
         handle.writeInt(self.int1)
-        
+
     def writeToXML(self, handle):
         """
         Writes to a text file handle
         """
         handle.write("%(indent)s<tga>\n%(indent+1)s<id>%(id)i</id>\n%(indent+1)s<path>%(path)s</path>\n%(indent+1)s<width>%(width)i</width>\n%(indent+1)s<height>%(height)i</height>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent)s</tga>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "id": self.id, "path": self.path, "width": self.width, "height": self.height, "int1": self.int1})
-        
+
     def constructFromNode(self, node):
         """
         Constructs a tga entry from a tga XML node
         """
         if node.nodeName != "tga":
             raise(Exception("Not a tga node"))
-            return 
-        
+            return
+
         for child in node.childNodes:
             if child.nodeName == "id":
                 self.id = int(child.firstChild.data)
@@ -568,7 +567,7 @@ class tgaUse(debuggable_converter):
         self.int1 = 0
         self.int2 = 0
         self.int3 = 0
-    
+
     def readFrom(self, handle):
         """
         Reads from a TypeCastReader handle
@@ -591,7 +590,7 @@ class tgaUse(debuggable_converter):
         self.int1 = handle.readInt()
         self.int2 = handle.readInt()
         self.int3 = handle.readInt()
-    
+
     def writeTo(self, handle):
         """
         Writes to a TypeCastWriter handle
@@ -615,7 +614,7 @@ class tgaUse(debuggable_converter):
         handle.writeInt(self.int2)
         handle.writeInt(self.int3)
 
-    
+
     def writeToXML(self, handle):
         """
         Writes to a text file handle
@@ -628,8 +627,8 @@ class tgaUse(debuggable_converter):
         """
         if node.nodeName != "tgaUse":
             raise(Exception("Not a tgaUse node"))
-            return 
-        
+            return
+
         for child in node.childNodes:
             if child.nodeName == "id":
                 self.id = int(child.firstChild.data)
@@ -678,15 +677,15 @@ class state(debuggable_converter):
         self.twui = ""
         self.TGAUses = []
         self.transitions = []
-        
+
         self.stateText = ""
         self.tooltip = ""
         self.localisationID = ""
         self.tooltipID = ""
-        
+
         self.stateDescription = ""
         self.eventText = ""
-        
+
     def readFrom(self, handle):
         """
         Reads from a TypeCastReader handle
@@ -695,7 +694,7 @@ class state(debuggable_converter):
         self.title = handle.readASCII()
         self.width = handle.readInt()
         self.height = handle.readInt()
-                                     
+
         self.stateText = handle.readUTF16()
         self.tooltip = handle.readUTF16()
         self.int7 = handle.readInt()
@@ -703,11 +702,11 @@ class state(debuggable_converter):
         self.int9 = handle.readInt()
         self.int10 = handle.readInt()
         self.int11 = handle.readInt()
-        
+
         self.flag7 = handle.readByte()
         self.localisationID = handle.readUTF16()
         self.tooltipID = handle.readUTF16()
-        
+
         self.font = handle.readASCII()
         self.int12 = handle.readInt()
         self.int13 = handle.readInt()
@@ -720,43 +719,41 @@ class state(debuggable_converter):
         self.flag8 = handle.readByte()
         self.flag9 = handle.readByte()
         self.flag10 = handle.readByte()
-        
+
         self.normalt0 = handle.readASCII()
-        
+
         self.int18 = handle.readInt()
         self.int19 = handle.readInt()
         self.int20 = handle.readInt()
         self.int21 = handle.readInt()
         self.stateDescription = handle.readASCII()
         self.eventText = handle.readASCII()
-        
+
         self.numTGAUses = handle.readInt()
         for i in range(self.numTGAUses):
             tga = tgaUse(self.version, self.indent + 2)
             tga.readFrom(handle)
             self.TGAUses.append(tga)
-        
+
         self.int23 = handle.readInt()
         self.int24 = handle.readInt()
-        
+
         self.numTransitions = handle.readInt()
         for i in range(self.numTransitions):
             trans = transition(self.version, self.indent + 2)
             trans.readFrom(handle)
             self.transitions.append(trans)
 
-
-    
     def writeTo(self, handle):
         """
         Writes to a TypeCastWriter handle
         """
-        
+
         handle.writeInt(self.id)
         handle.writeASCII(self.title)
         handle.writeInt(self.width)
         handle.writeInt(self.height)
-                                     
+
         handle.writeUTF16(self.stateText)
         handle.writeUTF16(self.tooltip)
         handle.writeInt(self.int7)
@@ -764,11 +761,11 @@ class state(debuggable_converter):
         handle.writeInt(self.int9)
         handle.writeInt(self.int10)
         handle.writeInt(self.int11)
-        
+
         handle.writeByte(self.flag7)
         handle.writeUTF16(self.localisationID)
         handle.writeUTF16(self.tooltipID)
-        
+
         handle.writeASCII(self.font)
         handle.writeInt(self.int12)
         handle.writeInt(self.int13)
@@ -781,30 +778,30 @@ class state(debuggable_converter):
         handle.writeByte(self.flag8)
         handle.writeByte(self.flag9)
         handle.writeByte(self.flag10)
-        
+
         handle.writeASCII(self.normalt0)
-        
+
         handle.writeInt(self.int18)
         handle.writeInt(self.int19)
         handle.writeInt(self.int20)
         handle.writeInt(self.int21)
-        
+
         handle.writeASCII(self.stateDescription)
         handle.writeASCII(self.eventText)
-        
+
         handle.writeInt(self.numTGAUses)
-        
+
         for tgaU in self.TGAUses:
             tgaU.writeTo(handle)
-        
+
         handle.writeInt(self.int23)
         handle.writeInt(self.int24)
-        
+
         handle.writeInt(self.numTransitions)
         for trans in self.transitions:
             trans.writeTo(handle)
-            
-    
+
+
     def writeToXML(self, handle):
         """
         Writes to a text file handle
@@ -844,29 +841,29 @@ class state(debuggable_converter):
 %(indent+1)s<eventText>%(eventText)s</eventText>
 %(indent+1)s<tgaUses num="%(numTGAUses)i">
 """%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "width": self.width, "height": self.height, "stateText": self.stateText, "tooltip": self.tooltip, "int7": self.int7, "int8": self.int8, "int9": self.int9, "int10": self.int10, "int11": self.int11, "flag7": self.flag7, "localisationID": self.localisationID, "tooltipID": self.tooltipID, "font": self.font, "int12": self.int12, "int13": self.int13, "int14": self.int14, "twui": self.twui, "int15": self.int15, "int16": self.int16, "int17": self.int17, "flag8": self.flag8, "flag9": self.flag9, "flag10": self.flag10, "normalt0": self.normalt0, "int18": self.int18, "int19": self.int19, "int20": self.int20, "int21": self.int21, "stateDescription": self.stateDescription, "eventText": self.eventText, "numTGAUses": self.numTGAUses})
-        
+
         for i in range(self.numTGAUses):
             self.TGAUses[i].writeToXML(handle)
-        
+
         handle.write("""%(indent+1)s</tgaUses>
 %(indent+1)s<int23>%(int23)i</int23>
 %(indent+1)s<int24>%(int24)i</int24>
 %(indent+1)s<transitions num="%(numTransitions)s">
 """%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "int23": self.int23, "int24": self.int24, "numTransitions": self.numTransitions})
-        
+
         for i in range(self.numTransitions):
             self.transitions[i].writeToXML(handle)
-        
+
         handle.write("%(indent+1)s</transitions>\n%(indent)s</state>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1)})
-        
+
     def constructFromNode(self, node):
         """
         Constructs a state entry from a state XML node
         """
         if node.nodeName != "state":
             raise(Exception("Not a state node"))
-            return 
-        
+            return
+
         for child in node.childNodes:
             if child.nodeName == "id":
                 self.id = int(child.firstChild.data)
@@ -892,7 +889,7 @@ class state(debuggable_converter):
             elif child.nodeName == "int10":
                 self.int10 = int(child.firstChild.data)
             elif child.nodeName == "int11":
-                self.int11 = int(child.firstChild.data)   
+                self.int11 = int(child.firstChild.data)
             elif child.nodeName == "flag7":
                 self.flag7 = int(child.firstChild.data)
             elif child.nodeName == "localisationID":
@@ -969,7 +966,7 @@ class transition(debuggable_converter):
         self.int2 = 0
         self.short2 = 0
         self.int3 = 0
-        
+
     def readFrom(self, handle):
         """
         Reads from a TypeCastReader handle
@@ -983,7 +980,7 @@ class transition(debuggable_converter):
         if self.version >= 43:
           self.short2 = handle.readShort()
           self.int3 = handle.readInt()
-    
+
     def writeTo(self, handle):
         """
         Writes to a TypeCastWriter handle
@@ -997,7 +994,7 @@ class transition(debuggable_converter):
         if self.version >= 43:
           handle.writeShort(self.short2)
           handle.writeInt(self.int3)
-        
+
     def writeToXML(self, handle):
         """
         Writes to a text file handle
@@ -1020,8 +1017,8 @@ class transition(debuggable_converter):
         """
         if node.nodeName != "transition":
             raise(Exception("Not a transition node"))
-            return 
-        
+            return
+
         for child in node.childNodes:
             if child.nodeName == "type":
                 self.type = int(child.firstChild.data)
@@ -1037,11 +1034,11 @@ class transition(debuggable_converter):
                 self.int2 = int(child.firstChild.data)
             elif child.nodeName == "int3":
                 self.int3 = int(child.firstChild.data)
-    
-        
+
+
 def convertUIToXML(uiFilename, textFilename):
     uiFile = TypeCastReader(open(uiFilename, "rb"))
-    
+
     versionString = uiFile.read(10)
     if versionString[0:7] != b"Version":
         print("Not a UI layout file or unknown file version: "+uiFilename)
@@ -1051,33 +1048,33 @@ def convertUIToXML(uiFilename, textFilename):
     if versionNumber not in [32, 33, 39, 43, 44, 46, 47, 49, 50]:
       print("Version %d not supported" % versionNumber)
       return
-    
+
     outFile = open(textFilename, "w")
     outFile.write("<ui>\n\t<version>%03d</version>\n" % versionNumber)
-    
+
     uiE = uiEntry(versionNumber, 1)
     uiE.readFrom(uiFile)
     uiE.writeToXML(outFile)
-    
+
     outFile.write("</ui>")
-    
+
     uiFile.close()
     outFile.close()
-    
+
 def convertXMLToUI(xmlFilename, uiFilename):
     dom = parse(xmlFilename)
     #outFile = TypeCastWriter(open(uiFilename, "wb"))
     versionNode = dom.getElementsByTagName("version")[0]
     version = versionNode.firstChild.nodeValue
-    
+
     rootNode = versionNode.nextSibling.nextSibling
     root = uiEntry(int(version), 0)
     root.constructFromNode(rootNode)
-    
+
     outFile = TypeCastWriter(open(uiFilename, "wb"))
     outFile.write(b'Version'+version.encode())
     root.writeTo(outFile)
-    
+
     outFile.close()
 
 if sys.argv[1] == "-x":
