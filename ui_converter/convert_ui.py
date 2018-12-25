@@ -1040,13 +1040,13 @@ def convertUIToXML(uiFilename, textFilename):
       return
 
     outFile = open(textFilename, "w")
-    outFile.write("<ui>\n\t<version>%03d</version>\n" % versionNumber)
+    outFile.write("<ui>\n  <version>%03d</version>\n" % versionNumber)
 
     uiE = UiEntry(versionNumber, 1)
     uiE.readFrom(uiFile)
     uiE.writeToXML(outFile)
 
-    outFile.write("</ui>")
+    outFile.write("</ui>\n")
 
     uiFile.close()
     outFile.close()
