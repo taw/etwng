@@ -4,67 +4,82 @@ require "pp"
 require "fileutils"
 
 class RunAllTests
-  def initialize
+  def initialize(dirs)
     @stats = {}
     @short_stats = {}
+    @dirs = dirs
+    if @dirs.empty?
+      @dirs = Dir["samples*/"]
+    end
   end
 
   def print_stats
     puts ""
-    @stats.to_a.sort.each{|v,ht|
+    @stats.to_a.sort.each do |v, ht|
       puts "#{v}: #{ht.inspect}"
-    }
+    end
     puts ""
-    @short_stats.to_a.sort.each{|v,ht|
+    @short_stats.to_a.sort.each do |v, ht|
       puts "#{v}: #{ht.inspect}"
-    }
+    end
     puts ""
   end
-    
+
+  def supported?(version)
+    case version
+    when "Version039", "Version033", "Version032"
+      true
+    else
+      true
+      # false
+    end
+  end
+
   def run_test(source, xml, out, version)
+    return "not supported" unless supported?(version)
+
     FileUtils.mkdir_p File.dirname(xml)
-    # case version
-    # when 'Version039', 'Version033', 'Version032'
-      puts "Conversion of #{source} to #{xml}"
-      return 'ui->xml fail' unless system "./convert_ui.py", "-u", source, xml
-      return 'ui->xml fail' unless File.exist?(xml)
-      
-      puts "Conversion of #{xml} back to #{out}"
-      return 'xml->ui fail' unless system "./convert_ui.py", "-x", xml, out
-      
-      return 'differ' unless system "diff", source, out
-      return 'ok'
-    # else
-    #   'not supported'
-    # end
+    puts "Conversion of #{source} to #{xml}"
+    return "ui->xml fail" unless system "./convert_ui.py", "-u", source, xml
+    return "ui->xml fail" unless File.exist?(xml)
+
+    puts "Conversion of #{xml} back to #{out}"
+    return "xml->ui fail" unless system "./convert_ui.py", "-x", xml, out
+
+    return "differ" unless system "diff", source, out
+    return "ok"
   end
-  
+
   def read_version(file_name)
-    version = File.open(file_name, 'rb'){|fh| fh.read(10)}
+    File.open(file_name, "rb") do |fh|
+      fh.read(10)
+    end
   end
-  
+
   def add_status(version, status, file_name)
-    @stats[version] ||= Hash.new{|ht,k| ht[k] = []}
+    @stats[version] ||= Hash.new { |ht, k| ht[k] = [] }
     @stats[version][status] << file_name
     @short_stats[version] ||= Hash.new(0)
     @short_stats[version][status] += 1
   end
-    
+
   def samples
-    Dir["samples*/**/*"].sort
+    @dirs
+      .flat_map { |dir| Dir["#{dir}/**/*"] }
+      .sort
   end
-  
-  def run!
+
+  def call
     FileUtils.mkdir_p "tmp"
-    samples.each{|file_name|
+    samples.each do |file_name|
       next unless File.file?(file_name)
       basename = "tmp/" + file_name.gsub(/\A\.\.\/ui\/samples_/, "").gsub(/[ \/]/, "_")
       version = read_version(file_name)
       status = run_test(file_name, "#{basename}.xml", "#{basename}.out", version)
       add_status version, status, file_name
-    }
+    end
     print_stats
   end
 end
 
-RunAllTests.new.run!
+RunAllTests.new(ARGV).call
