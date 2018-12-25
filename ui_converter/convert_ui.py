@@ -120,7 +120,8 @@ class UiEntry(DebuggableConverter):
         self.eventsEnd = "" #ascii
 
         self.int27 = 0
-        self.int28 = 0 # number of mysterious entries
+        self.numEffects = 0
+        self.effects = []
         self.numChildren = 0
         self.children = []
 
@@ -200,14 +201,12 @@ class UiEntry(DebuggableConverter):
 
         self.int27 = handle.readInt()
         if self.version >= 39:
-          self.int28 = handle.readInt()
+          self.numEffects = handle.readInt()
 
-          # Just throw out decoding and hope for the best
-          for i in range(self.int28):
-            handle.readASCII() # name
-            handle.readASCII() # or 00 00
-            for j in range(16):
-              handle.readInt() # some of them are floats (second one especially)
+          for i in range(self.numEffects):
+            effect = Effect(self.version, self.indent + 2)
+            effect.readFrom(handle)
+            self.effects.append(effect)
 
         self.numChildren = handle.readInt()
 
@@ -285,8 +284,11 @@ class UiEntry(DebuggableConverter):
         handle.writeASCII(self.eventsEnd)
 
         handle.writeInt(self.int27)
+
         if self.version >= 39:
-          handle.writeInt(self.int28)
+            handle.writeInt(self.numEffects)
+            for effect in self.effects:
+                effect.writeTo(handle)
 
         handle.writeInt(self.numChildren)
 
@@ -356,9 +358,15 @@ class UiEntry(DebuggableConverter):
         handle.write("""%(indent+1)s</events>
 %(indent+1)s<eventsEnd>%(eventsEnd)s</eventsEnd>
 %(indent+1)s<int27>%(int27)i</int27>
-%(indent+1)s<int28>%(int28)i</int28>
+%(indent+1)s<effects num="%(numEffects)i">
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "eventsEnd": self.eventsEnd, "int27": self.int27, "numEffects": self.numEffects})
+
+        for effect in self.effects:
+            effect.writeToXML(handle)
+
+        handle.write("""%(indent+1)s</effects>
 %(indent+1)s<children num="%(numChildren)i">
-"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "eventsEnd": self.eventsEnd, "int27": self.int27, "int28": self.int28, "numChildren": self.numChildren})
+""" % {"indent+1": "  "*(self.indent + 1), "numChildren": self.numChildren})
 
         for child in self.children:
             child.writeToXML(handle)
@@ -465,8 +473,13 @@ class UiEntry(DebuggableConverter):
                 self.eventsEnd = child.firstChild.data
             elif child.nodeName == "int27":
                 self.int27 = int(child.firstChild.data)
-            elif child.nodeName == "int28":
-                self.int28 = int(child.firstChild.data)
+            elif child.nodeName == "effects":
+                self.numEffects = int(child.attributes.getNamedItem("num").firstChild.data)
+                for effectNode in child.childNodes:
+                    if effectNode.nodeName == "effect":
+                        an_effect = Effect(self.version, self.indent)
+                        an_effect.constructFromNode(effectNode)
+                        self.effects.append(an_effect)
             elif child.nodeName == "children":
                 self.numChildren = int(child.attributes.getNamedItem("num").firstChild.data)
                 for childNode in child.childNodes:
@@ -477,6 +490,85 @@ class UiEntry(DebuggableConverter):
             elif child.nodeName == "template":
                 if len(child.childNodes) > 0:
                     self.template = child.firstChild.data
+
+class Effect(DebuggableConverter):
+    def __init__(self, version, indent):
+        self.version = version
+        self.indent = indent
+        self.name = None
+        self.flag = 0
+        self.phases = []
+
+    # Data is mix of ints and floats actually
+    def readFrom(self, handle):
+        """
+        Reads from a TypeCastReader handle
+        """
+        self.name = handle.readASCII()
+        self.flag = handle.readShort()
+        phase_count = handle.readInt()
+
+        for i in range(phase_count):
+            phase = []
+            phase.append(handle.readFloat())
+            phase.append(handle.readFloat())
+            # This changes between versions
+            # It also seems that some Version039 files have 15-size not 12-size phases ???s
+            if self.version >= 50:
+                for j in range(13):
+                    phase.append(handle.readInt())
+            else:
+                for j in range(10):
+                    phase.append(handle.readInt())
+
+            self.phases.append(phase)
+
+    def writeTo(self, handle):
+        """
+        Writes to a TypeCastWriter handle
+        """
+        handle.writeASCII(self.name)
+        handle.writeShort(self.flag)
+        handle.writeInt(len(self.phases))
+        # Size will differ depending on version
+        for phase in self.phases:
+            handle.writeFloat(phase[0])
+            handle.writeFloat(phase[1])
+            for num in phase[2:]:
+                handle.writeInt(num)
+
+    def writeToXML(self, handle):
+        """
+        Writes to a text file handle
+        """
+        handle.write("%(indent)s<effect>\n%(indent+1)s<name>%(name)s</name>\n%(indent+1)s<flag>%(flag)s</flag>\n" % {"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "name": self.name, "flag": self.flag})
+        for phase in self.phases:
+            handle.write("%(indent+1)s<phase>%(phase)s</phase>\n" % {"indent+1": "  "*(self.indent+1), "phase": " ".join(map(str, phase))})
+        handle.write("""%(indent)s</effect>\n""" % {"indent": "  "*self.indent})
+
+    def constructFromNode(self, node):
+        """
+        Constructs an Effect entry from an effect XML node
+        """
+        if node.nodeName != "effect":
+            raise(Exception("Not a effect node"))
+
+        for child in node.childNodes:
+            if child.nodeName == "name":
+                if child.firstChild:
+                    self.name = child.firstChild.data
+                else:
+                    self.name = ""
+            if child.nodeName == "flag":
+                self.flag = int(child.firstChild.data)
+            elif child.nodeName == "phase":
+                phaseData = child.firstChild.data.split()
+                phase = [
+                    float(phaseData[0]),
+                    float(phaseData[1]),
+                ] + list (map(int, phaseData[2:]))
+                self.phases.append(phase)
+
 
 class TgaEntry(DebuggableConverter):
     def __init__(self, version, indent):
