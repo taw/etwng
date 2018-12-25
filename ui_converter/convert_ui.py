@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# convert_ui.py version 1.1, 25th August 2010
-# written by alpaca (Stefan Reutter)
-# This file converts ui layout files to XML and vice-versa
-
 import io, struct, sys, os
 
 from xml.dom.minidom import parse
@@ -378,8 +374,6 @@ class uiEntry(debuggable_converter):
         """
         if node.nodeName != "uiEntry":
             raise(Exception("Not a ui node"))
-            return
-
 
         for child in node.childNodes:
             if child.nodeName == "id":
@@ -526,7 +520,6 @@ class tgaEntry(debuggable_converter):
         """
         if node.nodeName != "tga":
             raise(Exception("Not a tga node"))
-            return
 
         for child in node.childNodes:
             if child.nodeName == "id":
@@ -627,7 +620,6 @@ class tgaUse(debuggable_converter):
         """
         if node.nodeName != "tgaUse":
             raise(Exception("Not a tgaUse node"))
-            return
 
         for child in node.childNodes:
             if child.nodeName == "id":
@@ -862,7 +854,6 @@ class state(debuggable_converter):
         """
         if node.nodeName != "state":
             raise(Exception("Not a state node"))
-            return
 
         for child in node.childNodes:
             if child.nodeName == "id":
@@ -1017,7 +1008,6 @@ class transition(debuggable_converter):
         """
         if node.nodeName != "transition":
             raise(Exception("Not a transition node"))
-            return
 
         for child in node.childNodes:
             if child.nodeName == "type":
