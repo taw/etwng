@@ -11,7 +11,7 @@ It requires Python 3.
 
 UI files in ETW, NTW, and S2TW have different versions from `Version025` to `Version054`.
 
-This converter fully supports all versions from `Version032` to `Version049`, as well as some `Version050`+ files.
+This converter fully supports all versions from `Version032` to `Version052`. A few files don't convert for mysterious reasons, most likely converter bugs.
 
 ## CREDITS
 

@@ -26,13 +26,8 @@ class RunAllTests
   end
 
   def supported?(version)
-    case version
-    when "Version039", "Version033", "Version032"
-      true
-    else
-      true
-      # false
-    end
+    version = version[/\d+/].to_i
+    version >= 32
   end
 
   def run_test(source, xml, out, version)

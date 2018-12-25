@@ -153,6 +153,8 @@ class UiEntry(DebuggableConverter):
           self.flag7 = handle.readByte()
           self.flag8 = handle.readByte()
           self.flag9 = handle.readByte()
+        if self.version >= 52:
+          self.flag15 = handle.readByte()
 
         self.parentName = handle.readASCII()
 
@@ -243,6 +245,8 @@ class UiEntry(DebuggableConverter):
           handle.writeByte(self.flag7)
           handle.writeByte(self.flag8)
           handle.writeByte(self.flag9)
+        if self.version >= 52:
+          handle.writeByte(self.flag15)
 
         handle.writeASCII(self.parentName)
 
@@ -321,6 +325,7 @@ class UiEntry(DebuggableConverter):
 %(indent+1)s<flag7>%(flag7)i</flag7>
 %(indent+1)s<flag8>%(flag8)i</flag8>
 %(indent+1)s<flag9>%(flag9)i</flag9>
+%(indent+1)s<flag15>%(flag15)i</flag15>
 %(indent+1)s<parentName>%(parentName)s</parentName>
 %(indent+1)s<int1>%(int1)i</int1>
 %(indent+1)s<tooltip>%(tooltip)s</tooltip>
@@ -330,7 +335,7 @@ class UiEntry(DebuggableConverter):
 %(indent+1)s<flag4>%(flag4)i</flag4>
 %(indent+1)s<script>%(script)s</script>
 %(indent+1)s<tgas num="%(numTGAs)i">
-"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "title2": self.title2, "string10" : self.string10, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "flag6": self.flag6, "flag7": self.flag7, "flag8": self.flag8, "flag9": self.flag9, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "script": self.script, "numTGAs": self.numTGAs})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent + 1), "id": self.id, "title": self.title, "title2": self.title2, "string10" : self.string10, "xOff": self.xOff, "yOff": self.yOff, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "flag11": self.flag11, "flag12": self.flag12, "flag13": self.flag13, "flag14": self.flag14, "flag6": self.flag6, "flag7": self.flag7, "flag8": self.flag8, "flag9": self.flag9, "parentName": self.parentName, "int1": self.int1, "tooltip": self.tooltip, "tooltipText": self.tooltipText, "int3": self.int3, "int4": self.int4, "flag4": self.flag4, "flag15": self.flag15, "script": self.script, "numTGAs": self.numTGAs})
         for tga in self.TGAs:
             tga.writeToXML(handle)
 
@@ -410,6 +415,8 @@ class UiEntry(DebuggableConverter):
                 self.flag13 = int(child.firstChild.data)
             elif child.nodeName == "flag14":
                 self.flag14 = int(child.firstChild.data)
+            elif child.nodeName == "flag15":
+                self.flag15 = int(child.firstChild.data)
             elif child.nodeName == "flag6":
                 self.flag6 = int(child.firstChild.data)
             elif child.nodeName == "flag7":
@@ -1129,7 +1136,7 @@ def convertUIToXML(uiFilename, textFilename):
         return
     versionNumber = int(versionString[7:10])
 
-    if versionNumber not in [32, 33, 39, 43, 44, 46, 47, 49, 50, 51]:
+    if versionNumber not in [32, 33, 39, 43, 44, 46, 47, 49, 50, 51, 52]:
       print("Version %d not supported" % versionNumber)
       return
 
