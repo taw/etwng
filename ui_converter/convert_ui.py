@@ -188,10 +188,6 @@ class UiEntry(DebuggableConverter):
 
         self.int26 = handle.readInt()
 
-        # In version 51 there's sometimes a mystery byte 00 here,
-        # and sometimes there isn't.
-        # (as far as I can tell)
-
         ev = handle.readASCII()
         while ev != "events_end":
             self.events.append(ev)
@@ -652,6 +648,7 @@ class TgaUse(DebuggableConverter):
         self.int1 = 0
         self.int2 = 0
         self.int3 = 0
+        self.flag6 = 0
 
     def readFrom(self, handle):
         """
@@ -675,6 +672,8 @@ class TgaUse(DebuggableConverter):
         self.int1 = handle.readInt()
         self.int2 = handle.readInt()
         self.int3 = handle.readInt()
+        if self.version >= 51:
+            self.flag6 = handle.readByte()
 
     def writeTo(self, handle):
         """
@@ -698,13 +697,14 @@ class TgaUse(DebuggableConverter):
         handle.writeInt(self.int1)
         handle.writeInt(self.int2)
         handle.writeInt(self.int3)
-
+        if self.version >= 51:
+            handle.writeByte(self.flag6)
 
     def writeToXML(self, handle):
         """
         Writes to a text file handle
         """
-        handle.write("%(indent)s<tgaUse>\n%(indent+1)s<id>%(id)i</id>\n%(indent+1)s<xOff>%(xOff)i</xOff>\n%(indent+1)s<yOff>%(yOff)i</yOff>\n%(indent+1)s<width>%(width)i</width>\n%(indent+1)s<height>%(height)i</height>\n%(indent+1)s<blueMultiply>%(blueMultiply)i</blueMultiply>\n%(indent+1)s<greenMultiply>%(greenMultiply)i</greenMultiply>\n%(indent+1)s<redMultiply>%(redMultiply)i</redMultiply>\n%(indent+1)s<alphaMultiply>%(alphaMultiply)i</alphaMultiply>\n%(indent+1)s<flag1>%(flag1)i</flag1>\n%(indent+1)s<mirror_horizontally>%(flag2)i</mirror_horizontally>\n%(indent+1)s<mirror_vertically>%(flag3)i</mirror_vertically>\n%(indent+1)s<position>%(position)i</position>\n%(indent+1)s<stretches_horizontally>%(flag4)i</stretches_horizontally>\n%(indent+1)s<stretches_vertically>%(flag5)i</stretches_vertically>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent+1)s<int2>%(int2)i</int2>\n%(indent+1)s<int3>%(int3)i</int3>\n%(indent)s</tgaUse>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "id": self.id, "xOff": self.xOff, "yOff": self.yOff, "width": self.width, "height": self.height, "blueMultiply": self.blueMultiply, "greenMultiply": self.greenMultiply, "redMultiply": self.redMultiply, "alphaMultiply": self.alphaMultiply, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "position": self.position, "flag4": self.flag4, "flag5": self.flag5, "int1": self.int1, "int2": self.int2, "int3": self.int3})
+        handle.write("%(indent)s<tgaUse>\n%(indent+1)s<id>%(id)i</id>\n%(indent+1)s<xOff>%(xOff)i</xOff>\n%(indent+1)s<yOff>%(yOff)i</yOff>\n%(indent+1)s<width>%(width)i</width>\n%(indent+1)s<height>%(height)i</height>\n%(indent+1)s<blueMultiply>%(blueMultiply)i</blueMultiply>\n%(indent+1)s<greenMultiply>%(greenMultiply)i</greenMultiply>\n%(indent+1)s<redMultiply>%(redMultiply)i</redMultiply>\n%(indent+1)s<alphaMultiply>%(alphaMultiply)i</alphaMultiply>\n%(indent+1)s<flag1>%(flag1)i</flag1>\n%(indent+1)s<mirror_horizontally>%(flag2)i</mirror_horizontally>\n%(indent+1)s<mirror_vertically>%(flag3)i</mirror_vertically>\n%(indent+1)s<position>%(position)i</position>\n%(indent+1)s<stretches_horizontally>%(flag4)i</stretches_horizontally>\n%(indent+1)s<stretches_vertically>%(flag5)i</stretches_vertically>\n%(indent+1)s<int1>%(int1)i</int1>\n%(indent+1)s<int2>%(int2)i</int2>\n%(indent+1)s<int3>%(int3)i</int3>\n%(indent+1)s<flag6>%(flag6)i</flag6>\n%(indent)s</tgaUse>\n"%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "id": self.id, "xOff": self.xOff, "yOff": self.yOff, "width": self.width, "height": self.height, "blueMultiply": self.blueMultiply, "greenMultiply": self.greenMultiply, "redMultiply": self.redMultiply, "alphaMultiply": self.alphaMultiply, "flag1": self.flag1, "flag2": self.flag2, "flag3": self.flag3, "position": self.position, "flag4": self.flag4, "flag5": self.flag5, "int1": self.int1, "int2": self.int2, "int3": self.int3, "flag6": self.flag6})
 
     def constructFromNode(self, node):
         """
@@ -752,6 +752,8 @@ class TgaUse(DebuggableConverter):
                 self.int2 = int(child.firstChild.data)
             elif child.nodeName == "int3":
                 self.int3 = int(child.firstChild.data)
+            elif child.nodeName == "flag6":
+                self.flag6 = int(child.firstChild.data)
 
 class State(DebuggableConverter):
     def __init__(self, version, indent):
@@ -1127,7 +1129,7 @@ def convertUIToXML(uiFilename, textFilename):
         return
     versionNumber = int(versionString[7:10])
 
-    if versionNumber not in [32, 33, 39, 43, 44, 46, 47, 49, 50]:
+    if versionNumber not in [32, 33, 39, 43, 44, 46, 47, 49, 50, 51]:
       print("Version %d not supported" % versionNumber)
       return
 
