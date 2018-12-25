@@ -62,13 +62,13 @@ class TypeCastWriter(io.BufferedWriter):
         self.writeUShort(len(arg))
         self.write(arg.encode("ascii"))
 
-class debuggable_converter:
+class DebuggableConverter:
   def indented_print(self, str, handle):
     print("%s%s (%x)" % (" "*self.indent, str, handle.tell()))
   def debug(self, name, handle):
     print("%s%s.%s=%s (%x)" % (" "*self.indent, type(self).__name__, name, self.__dict__[name], handle.tell()))
 
-class uiEntry(debuggable_converter):
+class UiEntry(DebuggableConverter):
     def __init__(self, version, indent):
         self.version = version
         self.indent = indent
@@ -171,7 +171,7 @@ class uiEntry(debuggable_converter):
 
         self.numTGAs = handle.readInt()
         for i in range(self.numTGAs):
-            tga = tgaEntry(self.version, self.indent + 2)
+            tga = TgaEntry(self.version, self.indent + 2)
             tga.readFrom(handle)
             self.TGAs.append(tga)
 
@@ -181,7 +181,7 @@ class uiEntry(debuggable_converter):
         self.numStates = handle.readInt()
 
         for i in range(self.numStates):
-            newstate = state(self.version, self.indent + 2)
+            newstate = State(self.version, self.indent + 2)
             newstate.readFrom(handle)
             self.states.append(newstate)
 
@@ -212,7 +212,7 @@ class uiEntry(debuggable_converter):
         self.numChildren = handle.readInt()
 
         for i in range(self.numChildren):
-            child = uiEntry(self.version, self.indent + 2)
+            child = UiEntry(self.version, self.indent + 2)
             child.readFrom(handle)
             self.children.append(child)
 
@@ -438,7 +438,7 @@ class uiEntry(debuggable_converter):
                 self.numTGAs = int(child.attributes.getNamedItem("num").firstChild.data)
                 for tgaNode in child.childNodes:
                     if tgaNode.nodeName == "tga":
-                        tga = tgaEntry(self.version, self.indent)
+                        tga = TgaEntry(self.version, self.indent)
                         tga.constructFromNode(tgaNode)
                         self.TGAs.append(tga)
             elif child.nodeName == "int5":
@@ -449,7 +449,7 @@ class uiEntry(debuggable_converter):
                 self.numStates = int(child.attributes.getNamedItem("num").firstChild.data)
                 for stateNode in child.childNodes:
                     if stateNode.nodeName == "state":
-                        astate = state(self.version, self.indent)
+                        astate = State(self.version, self.indent)
                         astate.constructFromNode(stateNode)
                         self.states.append(astate)
             elif child.nodeName == "int26":
@@ -471,14 +471,14 @@ class uiEntry(debuggable_converter):
                 self.numChildren = int(child.attributes.getNamedItem("num").firstChild.data)
                 for childNode in child.childNodes:
                     if childNode.nodeName == "uiEntry":
-                        ui = uiEntry(self.version, self.indent)
+                        ui = UiEntry(self.version, self.indent)
                         ui.constructFromNode(childNode)
                         self.children.append(ui)
             elif child.nodeName == "template":
                 if len(child.childNodes) > 0:
                     self.template = child.firstChild.data
 
-class tgaEntry(debuggable_converter):
+class TgaEntry(DebuggableConverter):
     def __init__(self, version, indent):
         self.version = version
         self.indent = indent
@@ -534,7 +534,7 @@ class tgaEntry(debuggable_converter):
             elif child.nodeName == "int1":
                 self.int1 = int(child.firstChild.data)
 
-class tgaUse(debuggable_converter):
+class TgaUse(DebuggableConverter):
     def __init__(self, version, indent):
         self.version = version
         self.indent = indent
@@ -661,7 +661,7 @@ class tgaUse(debuggable_converter):
             elif child.nodeName == "int3":
                 self.int3 = int(child.firstChild.data)
 
-class state(debuggable_converter):
+class State(DebuggableConverter):
     def __init__(self, version, indent):
         self.version = version
         self.indent = indent
@@ -723,7 +723,7 @@ class state(debuggable_converter):
 
         self.numTGAUses = handle.readInt()
         for i in range(self.numTGAUses):
-            tga = tgaUse(self.version, self.indent + 2)
+            tga = TgaUse(self.version, self.indent + 2)
             tga.readFrom(handle)
             self.TGAUses.append(tga)
 
@@ -732,7 +732,7 @@ class state(debuggable_converter):
 
         self.numTransitions = handle.readInt()
         for i in range(self.numTransitions):
-            trans = transition(self.version, self.indent + 2)
+            trans = Transition(self.version, self.indent + 2)
             trans.readFrom(handle)
             self.transitions.append(trans)
 
@@ -933,7 +933,7 @@ class state(debuggable_converter):
                 self.numTGAUses = int(child.attributes.getNamedItem("num").firstChild.data)
                 for tgaUseNode in child.childNodes:
                     if tgaUseNode.nodeName == "tgaUse":
-                        atgaUse = tgaUse(self.version, self.indent)
+                        atgaUse = TgaUse(self.version, self.indent)
                         atgaUse.constructFromNode(tgaUseNode)
                         self.TGAUses.append(atgaUse)
             elif child.nodeName == "int23":
@@ -944,11 +944,11 @@ class state(debuggable_converter):
                 self.numTransitions = int(child.attributes.getNamedItem("num").firstChild.data)
                 for transitionNode in child.childNodes:
                     if transitionNode.nodeName == "transition":
-                        atransition = transition(self.version, self.indent)
+                        atransition = Transition(self.version, self.indent)
                         atransition.constructFromNode(transitionNode)
                         self.transitions.append(atransition)
 
-class transition(debuggable_converter):
+class Transition(DebuggableConverter):
     def __init__(self, version, indent):
         self.version = version
         self.indent = indent
@@ -1042,7 +1042,7 @@ def convertUIToXML(uiFilename, textFilename):
     outFile = open(textFilename, "w")
     outFile.write("<ui>\n\t<version>%03d</version>\n" % versionNumber)
 
-    uiE = uiEntry(versionNumber, 1)
+    uiE = UiEntry(versionNumber, 1)
     uiE.readFrom(uiFile)
     uiE.writeToXML(outFile)
 
@@ -1058,7 +1058,7 @@ def convertXMLToUI(xmlFilename, uiFilename):
     version = versionNode.firstChild.nodeValue
 
     rootNode = versionNode.nextSibling.nextSibling
-    root = uiEntry(int(version), 0)
+    root = UiEntry(int(version), 0)
     root.constructFromNode(rootNode)
 
     outFile = TypeCastWriter(open(uiFilename, "wb"))
