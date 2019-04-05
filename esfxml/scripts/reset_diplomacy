@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class ResetDiplomacy < EsfScript
   def get_faction_ids
@@ -11,9 +10,9 @@ class ResetDiplomacy < EsfScript
       factions[id] = faction_name
       false
     end
-    factions    
+    factions
   end
-  
+
   def run!
     faction_ids = get_faction_ids
     factions = []
@@ -32,7 +31,7 @@ class ResetDiplomacy < EsfScript
       true
     end
   end
-  
+
   def reset_diplomacy(faction1, faction2, dr)
     # Do not reset trade, as it leaves half-working trade routes
     return if !([faction1, faction2] & ["pirates"]).empty?

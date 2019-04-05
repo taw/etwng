@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class TurnsPerYear < EsfScript
   def run!(turns_per_year)
@@ -10,11 +9,11 @@ class TurnsPerYear < EsfScript
       true
     end
   end
-  
+
   def args
     %W[turns_per_year]
   end
-  
+
   def check_args(turns_per_year)
     turns_per_year =~ /\A\d+\z/
   end

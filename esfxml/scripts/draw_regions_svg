@@ -2,8 +2,7 @@
 
 require "fileutils"
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class File
   def self.write(path, contents)
@@ -79,18 +78,18 @@ class DragRegionsSVG < EsfScript
       false
     end
   end
-  
+
   def parse_vertices(region_data_node)
     vertices = []
     data = region_data_node.xpath("//rec[@type='vertices']/v2_ary")[0].content.strip.split(/[\s,]+/)
     vertices << [data.shift.to_f, -data.shift.to_f] until data.empty?
     vertices
   end
-  
+
   def rgb(r,g,b)
     "#%02X%02X%02X" % [r*255,g*255,b*255].map(&:round)
   end
-  
+
   def hsv(h, s, v)
     h %= 6.0
     i = h.floor.to_i
@@ -109,24 +108,24 @@ class DragRegionsSVG < EsfScript
       raise "FAIL #{i} / hsv(#{h},#{s},#{v})"
     end
   end
-  
+
   def random_land_color
     hsv(0.0+rand*2.0, 0.50+rand*0.50, 0.50+rand*0.25)
-  end  
+  end
   def random_sea_color
     hsv(2.5+rand*1.0, 0.50+rand*0.50, 0.75+rand*0.25)
   end
-  
+
   def draw_region(region, vertices)
     name = region.xpath("s")[0].content
     type = region.xpath("asc")[0].content
     svg = SVG.new
     xs=[]
     ys=[]
-    
+
     is_land = type == 'land'
     # region_color = is_land ? random_land_color : random_sea_color
-    
+
     area_nodes = region.xpath("//rec[@type='areas']")
     area_nodes.each do |area_node|
       area  = parse_area(area_node, vertices)
@@ -161,11 +160,11 @@ class DragRegionsSVG < EsfScript
       :outlines => area_node.xpath("ary/rec[@type='outlines']/u4_ary").map{|face| u4_ary_to_path(face.content, vertices)},
     }
   end
-  
+
   def u4_ary_to_path(u4_ary, vertices)
     u4_ary.strip.split(/\s+/).map{|x| vertices[x.to_i]}
   end
-  
+
   def target_dir
     "regions_svg"
   end

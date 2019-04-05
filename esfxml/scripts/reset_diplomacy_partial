@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class ResetDiplomacyPartial < EsfScript
   def get_faction_ids
@@ -13,7 +12,7 @@ class ResetDiplomacyPartial < EsfScript
     end
     factions
   end
-  
+
   def run!
     faction_ids = get_faction_ids
     factions = []
@@ -32,7 +31,7 @@ class ResetDiplomacyPartial < EsfScript
       true
     end
   end
-  
+
   def reset_diplomacy(faction1, faction2, dr)
     # Do not reset trade, as it leaves half-working trade routes
     return if !([faction1, faction2] & ["pirates"]).empty?
@@ -47,7 +46,7 @@ class ResetDiplomacyPartial < EsfScript
       # 18 sabotage
       # 19 espionage
       # 20 threats
-      next unless [2, 3, 12, 14, 15, 16, 17, 18, 19, 20].include?(i) 
+      next unless [2, 3, 12, 14, 15, 16, 17, 18, 19, 20].include?(i)
       draa.attributes.each do |name, attr|
         attr.remove
       end

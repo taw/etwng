@@ -1,13 +1,12 @@
 #!/usr/bin/env ruby
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class MakeFactionPlayable < EsfScript
   def run!(faction_to_change)
     make_faction_playable(faction_to_change)
   end
-  
+
   def args
     %W[faction]
   end

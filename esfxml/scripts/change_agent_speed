@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class TurnsPerYear < EsfScript
   def run!(type, speed)
@@ -32,15 +31,15 @@ class TurnsPerYear < EsfScript
       true
     end
   end
-  
+
   def args
     %W[type speed]
   end
-  
+
   def check_args(type, speed)
     type = type.downcase
     known_types = [
-      # No effect AFAIK 
+      # No effect AFAIK
       "admiral",
       "captain",
       "assassin",
@@ -48,7 +47,7 @@ class TurnsPerYear < EsfScript
       "General",
       # Cannot move, not even on the map
       "minister",
-      
+
       # Should work
       "catholic_missionary",
       "Eastern_Scholar",

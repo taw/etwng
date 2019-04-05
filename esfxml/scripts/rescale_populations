@@ -1,13 +1,12 @@
 #!/usr/bin/env ruby
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class RescalePopulations < EsfScript
   def each_population(&blk)
     update_each_xml("population/*", "//rec[@type='POPULATION']", &blk)
   end
-  
+
   def update_population(&blk)
     each_population do |pop|
       rf = pop.xpath("rec[@type='REGION_FACTORS']/u")
@@ -30,17 +29,17 @@ class RescalePopulations < EsfScript
       end
     end
   end
-  
+
   def run!(low, high)
     low = low.gsub('_', '').to_i
     high = high.gsub('_', '').to_i
     population_limits = []
-    
+
     update_population do |cur, min, max|
       population_limits << max
       nil
     end
-    
+
     smallest_region = population_limits.min
     largest_region  = population_limits.max
     range_full = Math.log(largest_region.to_f/smallest_region)
@@ -50,15 +49,15 @@ class RescalePopulations < EsfScript
       new_max = low * (high.to_f/low)**fact
       new_min = new_max / max * min
       new_cur = new_max / max * cur
-      
+
       [new_cur.round.to_i, new_min.round.to_i, new_max.round.to_i]
     end
   end
-  
+
   def args
     %W[smallest_region_population biggest_region_population]
   end
-  
+
   def check_args(low, high)
     low = low.gsub('_', '')
     high = high.gsub('_', '')

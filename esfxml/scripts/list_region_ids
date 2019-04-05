@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class ListRegionIds < EsfScript
   def run!
@@ -14,7 +13,7 @@ class ListRegionIds < EsfScript
       region_ids[name] = [id]
       false
     end
-    
+
     update_each_xml("cai_regions/*", "//rec[@type='CAI_REGION']") do |cai_region|
       cai_id = cai_region.xpath("u")[0].content.to_i
       name = cai_region.xpath("s")[0].content
@@ -26,7 +25,7 @@ class ListRegionIds < EsfScript
       region_ids[name] = [id, cai_id]
       false
     end
-    
+
     region_ids.to_a.sort.each do |name, id, cai_id|
       puts [name, id, cai_id].join("\t")
     end

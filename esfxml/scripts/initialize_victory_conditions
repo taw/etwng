@@ -1,12 +1,11 @@
 #!/usr/bin/env ruby
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class InitializeVictoryConditions < EsfScript
   def run!
     factions = %W[
-      bavaria                                                                
+      bavaria
       chechenya_dagestan
       cherokee
       denmark
@@ -29,7 +28,7 @@ class InitializeVictoryConditions < EsfScript
       venice
       westphalia
       wurttemberg
-      
+
       barbary_states
       courland
       crimean_khanate
@@ -43,7 +42,7 @@ class InitializeVictoryConditions < EsfScript
       initialize_victory_conditions!(faction_to_change)
     end
   end
-  
+
   def initialize_victory_conditions!(faction)
     path = "#{@xmldir}/victory_conditions/#{faction}.xml"
     create_new_file(path, victory_conditions_xml(faction))
@@ -52,7 +51,7 @@ class InitializeVictoryConditions < EsfScript
       true
     end
   end
-  
+
   def victory_conditions_xml(faction)
 %Q[<?xml version="1.0"?>
  <rec type="VICTORY_CONDITION_OPTIONS">

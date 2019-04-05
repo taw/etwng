@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class MakeMoreVanillaFactionsPlayable < EsfScript
   def run!
@@ -11,7 +10,7 @@ class MakeMoreVanillaFactionsPlayable < EsfScript
     # reset_diplomacy script will work here
 
     factions = %W[
-      bavaria                                                                
+      bavaria
       chechenya_dagestan
       cherokee
       denmark
@@ -34,7 +33,7 @@ class MakeMoreVanillaFactionsPlayable < EsfScript
       venice
       westphalia
       wurttemberg
-      
+
       barbary_states
       courland
       crimean_khanate
@@ -42,7 +41,7 @@ class MakeMoreVanillaFactionsPlayable < EsfScript
       new_spain
       saxony
       thirteen_colonies
-      
+
     ]
 
     factions.each do |faction_to_change|

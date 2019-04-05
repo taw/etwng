@@ -2,8 +2,7 @@
 
 require "fileutils"
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class File
   def self.write(path, contents)

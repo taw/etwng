@@ -2,8 +2,7 @@
 
 require "fileutils"
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class File
   def self.write(path, contents)
@@ -27,7 +26,7 @@ class AnalyzeRegions < EsfScript
     name = region.xpath("s")[0].content
     type = region.xpath("asc")[0].content
     i = region.xpath("i")[0].content
-    
+
     p [name, type, i]
 
     region.xpath("//rec[@type='areas']").each do |area|
@@ -35,10 +34,10 @@ class AnalyzeRegions < EsfScript
       ints  = area.xpath("u2").map{|x| x.content.to_i}
       p(bools + ints)
     end
-    
+
     # areas = region.xpath("//rec[@type='areas']")
     # areas = areas.map{|area_node| parse_area(area_node, vertices)}
-    # 
+    #
     # areas.each{|area|
     #   # area[:faces].each{|face|
     #   #   svg << %Q[<path d="#{face}" />\n]

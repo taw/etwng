@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class ResetAllTreasuries < EsfScript
   def run!(treasury)
@@ -10,11 +9,11 @@ class ResetAllTreasuries < EsfScript
       true
     end
   end
-  
+
   def args
     %W[treasury]
   end
-  
+
   def check_args(treasury)
     treasury =~ /\A\d+\z/
   end

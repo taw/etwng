@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-$: << File.dirname(__FILE__)
-require "esf_scripts"
+require_relative "./esf_scripts"
 
 class FactionReligion < EsfScript
   def run!(faction_to_change, religion)
@@ -11,7 +10,7 @@ class FactionReligion < EsfScript
       true
     end
   end
-  
+
   def args
     %W[faction religion]
   end
