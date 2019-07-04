@@ -33,7 +33,7 @@ class Templates
     @ofs == @data.size
   end
   
-  def parse!
+  def parse(output_dir_path)!
     record_count = get_u4
     
     record_count.times{|i|
@@ -46,7 +46,8 @@ class Templates
       raise "Initial offset incorrect: #{x} != #{init_ofs}" unless x == init_ofs
       data = get(sz)
 
-      path = "out/%08d-%s" % [i+1, name]
+      # path = "out/%08d-%s" % [i+1, name]
+      path = "%s/%08d-%s" % [output_dir_path, i+1, name]
       File.open(path, 'wb'){|fh|
         fh.write(data)
       }
@@ -55,10 +56,13 @@ class Templates
   end
 end
 
-FileUtils.rm_rf("out")
-FileUtils.mkdir_p("out")
 
+input_file_name = ARGV[0]
+output_dir_path = ARGV[1]
 
-file_name = "samples/uied.templates"
-
-Templates.new(file_name).parse!
+puts "Removing output directory before populating: %s" % [output_dir_path]
+FileUtils.rm_rf(output_dir_path)
+FileUtils.mkdir_p(output_dir_path)
+puts "Parsing file: %s" % [input_file_name]
+Templates.new(input_file_name).parse(output_dir_path)
+puts "Finished parsing file!"
