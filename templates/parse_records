@@ -68,7 +68,7 @@ class TRecord
     @data.size - @ofs
   end
   
-  def parse_embedded_tga!
+  def parse_embedded_tga(output_dir_path)!
     save_ofs = @ofs
     # The number of bytes that the image ID field consists of.
     # The image ID field can contain any information, but it is common for it to contain the date and time the image was created or a serial number.
@@ -87,19 +87,19 @@ class TRecord
     raise "Go to hell" unless [id_len, color_map, image_type, depth, imgdsc] == [0,0,2,32,8]
     
     $tga_cnt += 1
-    fname = "tgas/%08d.tga" % $tga_cnt
+    fname = "%s/%08d.tga" % [output_dir_path, $tga_cnt]
     sz = 4*xsize*ysize
     @ofs += sz
     File.write(fname, @data[@ofs-18-sz, 18+sz])
     fname
   end
   
-  def parse!
+  def parse(output_dir_path)!
     puts "Parsing #{path} of size #{size}"
     tgas = get_u4
     tgas.times{|i|
       name = get_str
-      fname = parse_embedded_tga!
+      fname = parse_embedded_tga(output_dir_path)
       puts "Tga(#{i+1}/#{tgas}) '#{name}' saved to '#{fname}'"
     }
 
@@ -133,12 +133,21 @@ class TRecord
   end
 end
 
-FileUtils.rm_rf "tgas"
-FileUtils.mkdir_p "tgas"
+
+input_dir_path = ARGV[0]
+output_dir_path = ARGV[1]
+
+puts "Removing output directory before populating: %s" % [output_dir_path]
+FileUtils.rm_rf(output_dir_path)
+FileUtils.mkdir_p(output_dir_path)
+puts "Parsing tga files in directory: %s" % [input_dir_path]
+# FileUtils.rm_rf "tgas"
+# FileUtils.mkdir_p "tgas"
 $tga_cnt = 0
 
-Dir["out/*"].each{|fn|
+Dir["%s/*" % [input_dir_path]].each{|fn|
   tr = TRecord.new(fn)
-  tr.parse!
+  tr.parse(output_dir_path)
   puts ""
 }
+puts "Finished parsing tga files!"
