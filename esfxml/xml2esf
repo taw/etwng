@@ -1220,6 +1220,9 @@ module XmlTagHandlers
   def on_text_node_x23(attributes, buf, ctx)
     @esf.put [0x23, buf.to_i].pack("CC")
   end
+  def on_text_node_x24(attributes, buf, ctx)
+    @esf.put [0x24, buf.to_i].pack("Cv")
+  end
   def on_text_node_x25(attributes, buf, ctx)
     @esf.put [0x25, buf.to_i].pack("CV")
   end

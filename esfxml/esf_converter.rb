@@ -116,6 +116,9 @@ module EsfConvertBasic
   def convert_23!
     out!("<x23>#{get_u1}</x23>")
   end
+  def convert_24!
+    out!("<x24>#{get_u2}</x24>")
+  end
   def convert_25!
     out!("<x25>#{get_u}</x25>")
   end

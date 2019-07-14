@@ -188,12 +188,13 @@ module EsfBasicBinaryOps
           end
           return rv
         end
-      elsif tag <= 0x20
+      elsif tag <= 0x25
         sz = [
           nil, 1, 0, 2, 4, 8, 1, 2,
           4, 8, 4, 8, 8, 12, nil, nil,
-          2, nil, 0, 0, 0, 0, 1, 2, 3,
-          0, 1, 2, 3, 0,
+          2, nil, 0, 0, 0, 0, 1, 2,
+          3, 0, 1, 2, 3, 0, nil, nil,
+          nil, 4, nil, 1, 2, 4,
         ][tag]
         return nil unless sz
         @ofs += sz
@@ -466,6 +467,9 @@ module EsfGetData
   end
   def get_23!
     [:x23, get_u1]
+  end
+  def get_24!
+    [:x24, get_u2]
   end
   def get_25!
     [:x25, get_u]
