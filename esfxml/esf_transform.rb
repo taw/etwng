@@ -3,7 +3,7 @@ require "esf_builder"
 
 class EsfTransform < EsfParser
   attr_reader :esfout
-  
+
   def initialize(file_in)
     super(file_in)
     @esfout = EsfBuilder.new
@@ -38,6 +38,9 @@ class EsfTransform < EsfParser
   end
   def copy_08!
     @esfout.data << get_bytes(4)
+  end
+  def copy_09!
+    @esfout.data << get_bytes(8)
   end
   def copy_0a!
     @esfout.data << get_bytes(4)

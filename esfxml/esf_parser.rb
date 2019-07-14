@@ -396,6 +396,9 @@ module EsfGetData
   def get_08!
     [:u, get_u]
   end
+  def get_09!
+    [:u8, get_u8]
+  end
   def get_0a!
     [:flt, get_flt]
   end
