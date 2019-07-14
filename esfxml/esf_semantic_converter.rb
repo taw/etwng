@@ -147,6 +147,8 @@ end
           id = get_u
         elsif t == 0x16
           id = get_u1
+        elsif t == 0x17
+          id = get_u2
         elsif t == 0x08
           @ofs += 4
         elsif t == 0x0e
