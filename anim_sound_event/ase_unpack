@@ -21,26 +21,26 @@ class AnimSoundEvent
     @data = File.open(file_name, 'rb', &:read)
     @ofs = 0
   end
-  
+
   def get(sz)
     raise "Format Error, trying to read past end of file" if @ofs+sz > @data.size
     rv = @data[@ofs, sz]
     @ofs += sz
     rv
   end
-  
+
   def get_flt
-    get(4).unpack("f")[0].pretty_single
+    get(4).unpack1("f").pretty_single
   end
-  
+
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
-  
+
   def eof?
     @data.size == @ofs
   end
-  
+
   def parse
     rv = (0...get_u4).map{
       (0...get_u4).map{ [get_flt, get_u4] }
@@ -56,7 +56,7 @@ class AnimSoundEvent
       "  ]\n"
     }.join + "]\n"
   end
-  
+
   def save_to_txt(file_name)
     File.write(file_name, serialize(parse))
   end

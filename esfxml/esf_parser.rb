@@ -65,38 +65,38 @@ module EsfBasicBinaryOps
     end
   end
   def get_u
-    rv = @data[@ofs,4].unpack("V")[0]
+    rv = @data[@ofs,4].unpack1("V")
     @ofs += 4
     rv
   end
   def get_i
-    rv = @data[@ofs,4].unpack("l")[0]
+    rv = @data[@ofs,4].unpack1("l")
     @ofs += 4
     rv
   end
   def get_i8
-    rv = @data[@ofs,8].unpack("q")[0]
+    rv = @data[@ofs,8].unpack1("q")
     @ofs += 8
     rv
   end
   def get_u8
-    rv = @data[@ofs,8].unpack("Q")[0]
+    rv = @data[@ofs,8].unpack1("Q")
     @ofs += 8
     rv
   end
   def get_i2
-    rv = @data[@ofs,2].unpack("s")[0]
+    rv = @data[@ofs,2].unpack1("s")
     @ofs += 2
     rv
   end
   def get_flt
-    rv = @data[@ofs,4].unpack("f")[0].pretty_single
+    rv = @data[@ofs,4].unpack1("f").pretty_single
     # p rv # this debug print makes poi.esf convert without infinite loop in JRuby
     @ofs += 4
     rv
   end
   def get_u2
-    rv = @data[@ofs,2].unpack("v")[0]
+    rv = @data[@ofs,2].unpack1("v")
     @ofs += 2
     rv
   end
@@ -156,7 +156,7 @@ module EsfBasicBinaryOps
           @ofs = save_ofs2 unless ofs_end == get_ofs_end
         end
       else
-        if @data[@ofs].ord == 0x80 and @data[@ofs+4, 4].unpack("V")[0] == ofs_end
+        if @data[@ofs].ord == 0x80 and @data[@ofs+4, 4].unpack1("V") == ofs_end
           @ofs += 8
         end
       end
@@ -227,12 +227,12 @@ module EsfBasicBinaryOps
   end
   alias_method :get_u1, :get_byte
   def get_i1
-    rv = @data[@ofs,1].unpack("c")[0]
+    rv = @data[@ofs,1].unpack1("c")
     @ofs += 1
     rv
   end
   def get_u3
-    rv = ("\x00"+@data[@ofs,3]).unpack("N")[0]
+    rv = ("\x00"+@data[@ofs,3]).unpack1("N")
     # warn "Not tested U:#{@data[@ofs,3].unpack("C*")*' '} U:#{rv}"
     @ofs += 3
     rv
@@ -240,9 +240,9 @@ module EsfBasicBinaryOps
 
   def get_i3
     if @data[@ofs].ord >= 128
-      rv = ("\xFF".b+@data[@ofs,3]).unpack("l>")[0]
+      rv = ("\xFF".b+@data[@ofs,3]).unpack1("l>")
     else
-      rv = ("\x00".b+@data[@ofs,3]).unpack("l>")[0]
+      rv = ("\x00".b+@data[@ofs,3]).unpack1("l>")
     end
     @ofs += 3
     rv
@@ -354,7 +354,7 @@ module EsfBasicBinaryOps
     rv = []
     xofs = 0
     while xofs < str.size
-      rv << ("\x00"+str[xofs,3]).unpack("N")[0]
+      rv << ("\x00"+str[xofs,3]).unpack1("N")
       xofs += 3
     end
     rv
@@ -365,9 +365,9 @@ module EsfBasicBinaryOps
     xofs = 0
     while xofs < str.size
       if str[xofs].ord >= 128
-        rv << ("\xFF".b+str[xofs,3]).unpack("l>")[0]
+        rv << ("\xFF".b+str[xofs,3]).unpack1("l>")
       else
-        rv << ("\x00".b+str[xofs,3]).unpack("l>")[0]
+        rv << ("\x00".b+str[xofs,3]).unpack1("l>")
       end
       xofs += 3
     end

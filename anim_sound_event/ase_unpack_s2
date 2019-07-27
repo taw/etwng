@@ -30,11 +30,11 @@ class AnimSoundEvent
   end
 
   def get_flt
-    get(4).unpack("f")[0].pretty_single
+    get(4).unpack1("f").pretty_single
   end
 
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
 
   def eof?

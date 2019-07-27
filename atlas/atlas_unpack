@@ -5,7 +5,7 @@ def parse_atlas(file_name)
 
   raise "Incorrect format of atlas file" unless data.unpack("VV") == [1, 0]
 
-  records_count = data[8,4].unpack("V")[0]
+  records_count = data[8,4].unpack1("V")
   record_size   = 512+512+4*6
   expected_file_size = 12 + records_count * record_size
   raise "Expected file size #{expected_file_size} but is #{data.size}" unless data.size == expected_file_size
@@ -18,7 +18,7 @@ def parse_atlas(file_name)
     nums = data[12 + record_size * i + 1024, 4*6].unpack("ffffff")
     out << [str1, str2, *nums]
   end
-  
+
   out
 end
 

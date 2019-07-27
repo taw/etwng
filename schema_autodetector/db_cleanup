@@ -16,13 +16,13 @@ class DbFile
     if data[0,4] == "\xFD\xFE\xFC\xFF"
       data = data[(4+2+36*2)..-1]
     end
-    byte0 = data[0, 1].unpack("C")[0]
+    byte0 = data[0, 1].unpack1("C")
     if byte0 == 1
       @version = 1
       @rows_count, = data[1, 4].unpack("V")
       @data = data[5..-1]
     elsif byte0 == 252
-      @version = data[4, 1].unpack("C")[0] + 1
+      @version = data[4, 1].unpack1("C") + 1
       @rows_count, = data[9, 4].unpack("V")
       @data = data[13..-1]
     else
@@ -36,20 +36,20 @@ class DbFile
     rv
   end
   def get_flt
-    get_bytes(4).unpack('f')[0]
+    get_bytes(4).unpack1("f")
   end
   def get_byte
-    get_bytes(1).unpack('C')[0]
+    get_bytes(1).unpack1("C")
   end
   def get_u2
-    get_bytes(2).unpack("v")[0]
+    get_bytes(2).unpack1("v")
   end
   def get_str
     get_bytes(2*get_u2).unpack("v*").pack("U*")
   end
   def flt?(at=@ofs)
     return false if bytes_available(at) < 4
-    v = @data[at, 4].unpack('f')[0].abs
+    v = @data[at, 4].unpack1("f").abs
     return false if v == 0.0
     return false unless v.finite?
     return false if v > 10_000.0
@@ -61,7 +61,7 @@ class DbFile
   end
   def str?(at=@ofs)
     return false if bytes_available(at) < 4
-    sz = @data[at, 2].unpack("v")[0]
+    sz = @data[at, 2].unpack1("v")
     return false if sz == 0 or sz > 1023
     return false if bytes_available(at) < 2 + 2 * sz
     str = @data[at+2, sz*2].unpack("v*")

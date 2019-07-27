@@ -5,7 +5,7 @@ require "pp"
 
 class CUF
   attr_reader :data, :ofs, :path
-  
+
   def initialize(path)
     @path = path
     @data = File.read(path)
@@ -15,30 +15,30 @@ class CUF
   def basename
     @basename ||= File.basename(path, ".cuf")
   end
-  
+
   def size
     @data.size
   end
-  
+
   def get(n)
     raise "Trying to read past end of file" unless @ofs+n <= size
     rv = @data[@ofs, n]
     @ofs += n
     rv
   end
-  
+
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
 
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
 
   def get_i2
-    get(2).unpack("s")[0]
+    get(2).unpack1("s")
   end
-  
+
   def get_header
     raise "Header failure" unless get(4) == "CUF0"
     rv = {
@@ -52,7 +52,7 @@ class CUF
     }
     #get(30).unpack("s*")
   end
-  
+
   def get_glyph_table
     rv = []
     get(0x20000).unpack("s*").each_with_index{|glyph, char|
@@ -62,7 +62,7 @@ class CUF
     }
     rv
   end
-  
+
   def unpack!
     @header      = get_header
     @glyph_table = get_glyph_table

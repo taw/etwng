@@ -30,7 +30,7 @@ class DbFile
     @table_name  = table_name
     @target_path = target_path
     @fail_path   = fail_path
-    
+
     @data = File.open(file_name, 'rb', &:read)
     @guid = nil
     if @data[0, 4] == "\375\376\374\377"
@@ -38,46 +38,46 @@ class DbFile
       @guid = @data[6, gsz*2].unpack("v*").pack("U*")
       @data = @data[(6+gsz*2)..-1]
     end
-    
+
     if @data[0, 1] == "\x01"
       @version = 1
       @data = @data[1..-1]
     elsif @data[0, 4] == "\374\375\376\377" and @data[5, 4] == "\000\000\000\001"
-      @version = @data[4, 1].unpack("C")[0] + 1
+      @version = @data[4, 1].unpack1("C") + 1
       @data = @data[9..-1]
     else
       raise "Unknown file, magic number: #{@data[0, 9].inspect}: #{file_name}"
     end
-    @rows = @data[0, 4].unpack("V")[0]
+    @rows = @data[0, 4].unpack1("V")
     @data = @data[4..-1]
     @schema = DbSchemata.instance.get_schema(@table_name, @version, @guid)
   end
-  
+
   def can_convert?
     @schema or empty?
   end
-  
+
   def empty?
     @rows == 0
   end
-  
+
   def get(sz)
     raise ConversionError.new("Trying to read past end of file") if sz+@ofs > @data.size
     rv = @data[@ofs, sz]
     @ofs += sz
     rv
   end
-  
+
   def get_float
-    rv = get(4).unpack("f")[0]
+    rv = get(4).unpack1("f")
     raise ConversionError.new("Floating point number not finite") unless rv.finite?
     rv.pretty_single
   end
-  
+
   def get_byte
-    get(1).unpack("C")[0]
+    get(1).unpack1("C")
   end
-  
+
   def get_bool
     case b = get_byte
     when 0
@@ -88,19 +88,19 @@ class DbFile
       raise ConversionError.new("Expected 0 or 1, got #{b}")
     end
   end
-  
+
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
 
   def get_i4
-    get(4).unpack("l")[0]
+    get(4).unpack1("l")
   end
-  
+
   def get_string
     get(2*get_u2).unpack('v*').pack("U*")
   end
-  
+
   def get_field(field_type)
     case field_type
     when "boolean"
@@ -125,14 +125,14 @@ class DbFile
       raise "Unknown type #{field_type}"
     end
   end
-  
+
   def parse_data
     @ofs = 0
     rv = (0...@rows).map{ @schema.map{|name, field_type| get_field(field_type) } }
     raise ConversionError.new("Not all data parsed") unless @ofs == @data.size
     rv
   end
-  
+
   def to_tsv
     header = "version #{@version}"
     header << ", schema #{@table_name}" if @schema
@@ -148,7 +148,7 @@ class DbFile
     data = parse_data
     data = data.map{|row| row.map{|f| f.is_a?(Float) ? float_to_tsv(f) : f.inspect }}
     schema_line = schema.map{|name, field_type| "#{name}(#{field_type})"}
-    
+
     if $strict
       rv = ""
       csv = FCSV.new(rv, :col_sep => ",")
@@ -164,22 +164,22 @@ class DbFile
       ].join("\n") + "\n"
     end
   end
-  
+
   def tsv
     @tsv ||= to_tsv
   end
-  
+
   def save_tsv!
     FileUtils.mkdir_p target_path.dirname
     File.write(target_path, tsv)
   end
-  
+
   def save_fail!
     return unless fail_path
     FileUtils.mkdir_p fail_path.dirname
     FileUtils.cp(file_name, fail_path)
   end
-  
+
   def try_convert!
     unless can_convert?
       warn "File #{file_name}(version #{version}) cannot be converted, skipping"
@@ -196,7 +196,7 @@ class DbFile
     end
     save_tsv!
   end
-  
+
   def float_to_tsv(f)
     return f.to_i.to_s if f.to_i == f
     if $comma_mode
@@ -226,11 +226,11 @@ def parse_argv
     end
     break
   end
-  
+
   unless ARGV.size == 2 or ARGV.size == 3
     STDERR.puts "Usage: #{$0} [--comma] [--tsv] input/ output/ [fail/]"
   end
-  
+
   [Pathname(ARGV[0]), Pathname(ARGV[1]), ARGV[2] && Pathname(ARGV[2]), comma_mode, strict]
 end
 

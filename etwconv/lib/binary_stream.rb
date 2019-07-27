@@ -5,7 +5,7 @@ end
 
 class BinaryStream
   attr_reader :data
-  
+
   def initialize(data="")
     @data     = data
     @ofs      = 0
@@ -14,7 +14,7 @@ class BinaryStream
   def size
     @data.size
   end
-  
+
   def eof?
     @data.size == @ofs
   end
@@ -24,11 +24,11 @@ class BinaryStream
   def error!(msg)
     raise BinaryStreamException.new(msg + " [ofs=#{@ofs}; next=#{@data[@ofs,16].unpack("H2"*16)}]")
   end
-  
+
   def ensure_available!(bytes)
     error!("#{bytes} bytes requested but only #{@data.size-@ofs} available") if @data.size-@ofs < bytes
   end
-  
+
   def ensure_file_size!(sz)
     error!("Expected file size #{sz} bytes, but actual is #{@data.size} bytes") unless sz == @data.size
   end
@@ -40,7 +40,7 @@ class BinaryStream
   def ensure_eof!
     error!("Expected file offset #{@data.size} (EOF), but actual is #{@ofs}") unless @data.size == @ofs
   end
-  
+
   ## Direct i/o
   def get(bytes)
     ensure_available!(bytes)
@@ -58,7 +58,7 @@ class BinaryStream
 end
 
 # It would be a good idea to move as much as possible into these subclasses,
-# and achieve more reader/writer symetry 
+# and achieve more reader/writer symetry
 
 class BinaryStreamWriter < BinaryStream
   def initialize
@@ -81,7 +81,7 @@ class BinaryStreamWriter < BinaryStream
   def esf_nodenames(nn)
     u2_ary(nn){|n| ascii(n)}
   end
-  FmtNames.each{|name,fmt| 
+  FmtNames.each{|name,fmt|
      eval %Q[def #{name}(arg); @data << [arg].pack(#{fmt.inspect}); end]
   }
   def ascii(s)
@@ -126,10 +126,10 @@ class BinaryStreamReader < BinaryStream
     (0...u2).map(&blk)
   end
   def u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
   def flt
-    get(4).unpack("f")[0].pretty_single
+    get(4).unpack1("f").pretty_single
   end
   def bool
     b = byte
@@ -158,8 +158,8 @@ class BinaryStreamReader < BinaryStream
   def str
     get(u2*2).from_utf16
   end
-  FmtNames.each{|name,fmt| 
-     eval %Q[def #{name}; get(#{FmtSizes[fmt]}).unpack(#{fmt.inspect})[0]; end]
+  FmtNames.each{|name,fmt|
+     eval %Q[def #{name}; get(#{FmtSizes[fmt]}).unpack1(#{fmt.inspect}); end]
   }
   def self.open(data)
     s = new(data)

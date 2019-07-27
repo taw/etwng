@@ -53,12 +53,12 @@ class EsfTransform < EsfParser
   end
   def copy_0e!
     szbuf = get_bytes(2)
-    sz = szbuf.unpack("v")[0]
+    sz = szbuf.unpack1("v")
     @esfout.data << szbuf << get_bytes(sz * 2)
   end
   def copy_0f!
     szbuf = get_bytes(2)
-    sz = szbuf.unpack("v")[0]
+    sz = szbuf.unpack1("v")
     @esfout.data << szbuf << get_bytes(sz)
   end
   def copy_10!
@@ -135,7 +135,7 @@ class EsfTransform < EsfParser
   def copy_value!
     tagbuf = get_bytes(1)
     @esfout.data << tagbuf
-    send(@esf_type_handlers_copy[tagbuf.unpack("C")[0]])
+    send(@esf_type_handlers_copy[tagbuf.unpack1("C")])
   end
   def transform!
     copy_value!

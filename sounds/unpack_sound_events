@@ -19,37 +19,37 @@ class SoundEvents
   def size
     @data.size
   end
-  
+
   def bytes_left
     size - @ofs
   end
-  
+
   def get(sz)
     rv = @data[@ofs, sz]
     @ofs += sz
     rv
   end
-  
+
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
-  
+
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
-  
+
   def get_flt
-    get(4).unpack("f")[0].pretty_single
+    get(4).unpack1("f").pretty_single
   end
-  
+
   def get_str
     get(get_u2*2).unpack("v*").pack("U*")
   end
-  
+
   def get_str_ary
     (0...get_u4).map{ get_str }
   end
-  
+
   def eof?
     @ofs >= @data.size
   end
@@ -61,7 +61,7 @@ class SoundEvents
     return false unless @data[ofs+2, sz*2].unpack("v").all?{|x| x >= 1 and x <= 127}
     return ofs+2+sz*2
   end
-  
+
   def str_ary?(ofs=@ofs)
     return false unless ofs + 4 <= @data.size
     cnt, = @data[ofs, 4].unpack("V")
@@ -73,13 +73,13 @@ class SoundEvents
     }
     return ofs
   end
-  
+
   # def iisa_ary?(ofs=@ofs)
   #   return false unless @ofs + 4 <= @data.size
   #   cnt, = @data[ofs, 4].unpack("V")
-  #   
+  #
   #   return unless cnt == 3579
-  #   
+  #
   #   return false unless cnt > 0 and cnt <= 0xFFFF
   #   ofs += 4
   #   cnt.times{|i|
@@ -93,20 +93,20 @@ class SoundEvents
   #   }
   #   return ofs
   # end
-  # 
+  #
   # def get_iisa
   #   (0...get_u4).map{
   #     [get_u4, get_u4, get_str_ary]
   #   }
   # end
-  
+
   def flt?(ofs=@ofs)
     return false unless ofs + 4 <= @data.size
     v, = @data[ofs, 4].unpack("f")
     return false unless v == 0.0 or v.abs.between?(1.0e-6, 1.0e+6)
     return ofs + 4
   end
-  
+
   def sf_ary?(ofs=@ofs)
     return false unless ofs + 4 <= @data.size
     cnt, = @data[ofs, 4].unpack("V")
@@ -120,7 +120,7 @@ class SoundEvents
     }
     return ofs
   end
-  
+
   def get_sf_ary
     (0...get_u4).map{ [get_str, get_flt] }
   end
@@ -130,7 +130,7 @@ class SoundEvents
       [get_u4, get_u4, get_flt, get_flt, get_flt, get_flt, get_flt, get_flt]
     }
   end
-  
+
   def uu_ffffff_ary?
     # Such a pile of fail ...
     @data[@ofs, 12].unpack("VVV") == [590, 14, 46]
@@ -140,7 +140,7 @@ class SoundEvents
     a, = @data[@ofs, 4].unpack("V")
     a <= 512 and str?(@ofs+4)
   end
-  
+
   def us_usa?
     a, = @data[@ofs, 4].unpack("V")
     return nil unless a <= 512
@@ -148,15 +148,15 @@ class SoundEvents
     return nil unless xofs
     b, = @data[xofs, 4].unpack("V")
     return nil unless b <= 512
-    xofs = str_ary?(xofs+4)    
+    xofs = str_ary?(xofs+4)
     return nil unless xofs
     true
   end
-  
+
   def get_us_usa
     [get_u4, get_str, get_u4, get_str_ary]
   end
-  
+
   def get_us
     [get_u4, get_str]
   end
@@ -180,7 +180,7 @@ class SoundEvents
   def get_uus
     [get_u4, get_u4, get_str]
   end
-  
+
   def get_uusa
     [get_u4, get_u4, get_str_ary]
   end
@@ -188,7 +188,7 @@ class SoundEvents
   def get_usa
     [get_u4, get_str_ary]
   end
-  
+
   def u_sa_sa?
     a, = @data[@ofs, 4].unpack("V")
     return nil unless a <= 512
@@ -196,11 +196,11 @@ class SoundEvents
     return nil unless xofs
     str_ary?(xofs)
   end
-  
+
   def get_u_sa_sa
     [get_u4, get_str_ary, get_str_ary]
   end
-  
+
   def parse
     b = 0
     until eof?
@@ -232,7 +232,7 @@ class SoundEvents
       elsif uu_ffffff_ary?
         p [:data, b, @data[@ofs-b, b].unpack("V*")] if b > 0
         b = 0
-        p [:uu_ffffff_ary, get_uu_ffffff_ary] 
+        p [:uu_ffffff_ary, get_uu_ffffff_ary]
       else
         b += 2
         @ofs += 2

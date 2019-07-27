@@ -12,15 +12,15 @@ class Markers
     @ofs += sz
     rv
   end
-  
+
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
-  
+
   def get_str
     get(get_u2*2).unpack("v*").pack("U*")
   end
-  
+
   def parse
     parsed = []
     while @ofs < @data.size

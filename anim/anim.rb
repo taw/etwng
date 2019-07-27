@@ -80,23 +80,23 @@ class BaseAnim2Json
   end
 
   def get_flt
-    get(4).unpack("f")[0].pretty_single
+    get(4).unpack1("f").pretty_single
   end
 
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
 
   def get_i4
-    get(4).unpack("i")[0]
+    get(4).unpack1("i")
   end
 
   def get_i2
-    get(2).unpack("s")[0]
+    get(2).unpack1("s")
   end
 
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
 
   def get_ascii

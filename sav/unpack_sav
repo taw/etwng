@@ -20,30 +20,30 @@ class BinaryFileParser
   def data_available
     @end - @ofs
   end
-  
+
   def get(sz)
     raise "Data requested more than size of section: #{sz} at #{@ofs}...#{@end}" if sz > data_available
     rv = @data[@ofs, sz]
     @ofs += sz
     rv
   end
-  
+
   def eos?
     @ofs == @end
   end
-  
+
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
 
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
-  
+
   def get_byte
-    get(1).unpack("C")[0]
+    get(1).unpack1("C")
   end
-  
+
   def get_str
     get(2*get_u2).unpack("v*").pack("U*")
   end
@@ -71,19 +71,19 @@ class BinaryFileParser
     return nil unless section_ofs == start_ofs and section_size >= 8 and start_ofs + section_size <= @end
     [start_ofs, section_size]
   end
-  
+
   def descend_section(section_end)
     parent_end = @end
     @end = section_end
     yield
   ensure
-    @end = parent_end    
+    @end = parent_end
   end
 end
 
 class DirBuilder
   attr_reader :path
-  
+
   def initialize(path)
     @path = path
     if File.exist? @path
@@ -115,7 +115,7 @@ class DirBuilder
     @txtfh.close if @txtfh
     @txtfh = oldfh
   end
-  
+
   def txt!(e)
     @txtfh.puts e.inspect
   end
@@ -135,7 +135,7 @@ class SavUnpacker < BinaryFileParser
     super(path_in)
     @out = DirBuilder.new(path_out)
   end
-  
+
   def save_bytes! sz
     return if sz == 0
     start_ofs = @ofs
@@ -145,7 +145,7 @@ class SavUnpacker < BinaryFileParser
     @ofs -= sz
     save_bytes! sz
   end
-  
+
   def run!
     @out.open_txt("save_game"){
       @out.txt! [:magic, get_byte, get_byte]

@@ -39,7 +39,7 @@ class CS2File
     rv
   end
   def get_flt
-    get(4).unpack("f")[0].pretty_single
+    get(4).unpack1("f").pretty_single
   end
   def get_v2
     [get_flt, get_flt]
@@ -53,13 +53,13 @@ class CS2File
     v
   end
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
   def get_i4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
   def get_str
     get(2*get_u2).unpack("v*").pack("U*")
@@ -81,7 +81,7 @@ class CS2File
     data = [get_str, get_v3a, get_primary_data_array]
     ["Collision(#{data[1].size}x/#{data[2].size}x)", data[0], data[1], data[2]]
   end
- 
+
   def unpack!
     txt = []
     success = false
@@ -98,7 +98,7 @@ class CS2File
       # Levels of destruction ???
       cnt = get_u4
       txt << [:cnt, cnt]
-      
+
       cnt.times{|i|
         txt << [:nth, i]
         txt << [:str_a, get_str]
@@ -127,7 +127,7 @@ class CS2File
         txt << [:ofs, ofs]
 
         txt << [:mystery3] + get(13*4).unpack("V*").map{|u|
-          if u > 256*256*256 then [u].pack("V").unpack("f")[0] else u end
+          if u > 256*256*256 then [u].pack("V").unpack1("f") else u end
         }
       }
       txt << [:ofs, ofs]
@@ -146,7 +146,7 @@ class CS2File
     txt << [:bytes_to_go, bytes_left, :total_size, size]
     txt << [:ofs, ofs]
     [txt, success]
-  end  
+  end
 end
 
 def cs2_unpack(path_in, path_out)

@@ -36,16 +36,16 @@ class BinaryFileParser
     rv
   end
   def get_flt
-    get(4).unpack("f")[0].pretty_single
+    get(4).unpack1("f").pretty_single
   end
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
   def get_i4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
   def get_str
     get(2*get_u2).unpack("v*").pack("U*")
@@ -66,7 +66,7 @@ end
 
 class AnalysisFormatter
   attr_reader :output_binary
-  
+
   def initialize(data)
     @output = []
     @output_binary = "" # All data except section headers and strings, to verify
@@ -75,11 +75,11 @@ class AnalysisFormatter
     @data = data
     @indent = 0
   end
-  
+
   def section_path
     @path_parts.join("/")
   end
-  
+
   def start_special_section!(label)
     new_section = [:section, label + " path=#{section_path}"]
     @stack[-1] << new_section
@@ -87,16 +87,16 @@ class AnalysisFormatter
     @path_parts[-1] += 1
     @path_parts << 0
   end
-  
+
   def start_section!(ofs, sz)
     start_special_section! "Section #{ofs}...#{ofs+sz} datasize=#{sz-8}"
   end
-  
+
   def end_section!
     @stack.pop
     @path_parts.pop
   end
-  
+
   # It assumes no gaps...
   def bytes!(ofs, sz)
     unless @stack[-1][-1] and @stack[-1][-1][0] == :bytes
@@ -105,7 +105,7 @@ class AnalysisFormatter
     @output_binary << @data[ofs, sz]
     @stack[-1][-1][2] += sz
   end
-  
+
   def string!(str)
     out! :str, str
   end
@@ -113,7 +113,7 @@ class AnalysisFormatter
   def unicode!(str)
     out! :unicode, str
   end
-  
+
   def out!(*token)
     @stack[-1] << token
   end
@@ -136,13 +136,13 @@ class AnalysisFormatter
     ofs = 0
     while ofs < raw.size and rv.size < 16
       if ofs+4 <= raw.size and ofs % 4 == 0 # assume 4byte-aligned
-        i4 = raw[ofs, 4].unpack("l")[0]
+        i4 = raw[ofs, 4].unpack1("l")
         if i4 >= -1 and i4 <= 0xFF_FF
           rv << "u:#{i4}"
           ofs += 4
           next
         end
-        f = raw[ofs, 4].unpack("f")[0]
+        f = raw[ofs, 4].unpack1("f")
         fa = f.abs
         if fa >= 0.001 and fa <= 1_000_000.0
           rv << "f:#{f}"
@@ -157,10 +157,10 @@ class AnalysisFormatter
     if ofs != raw.size
       rv << "..."
     end
-    
+
     return "[" + rv.join(" ") + "]"
 
-    # 
+    #
     # if raw.size <= 64 and raw.size % 4 == 0
     #   u4a = raw.unpack("l*")
     #   if u4a.all?{|u| u >=-1 and u <= 1024}
@@ -173,7 +173,7 @@ class AnalysisFormatter
     #     return " [float32s: #{flts.join(" ")}]"
     #   end
     # end
-    
+
     # if raw.size > 32
     #   " [hex: #{raw[0,32].to_hex}...]"
     # else
@@ -204,7 +204,7 @@ class AnalysisFormatter
       warn "Unknown token: #{token.inspect}"
     end
   end
-  
+
   def print!
     @output.each{|t|
       print_token! t
@@ -231,11 +231,11 @@ class SavFile < BinaryFileParser
 
   # throws on out of bound
   def lookahead_u4(start_ofs, end_ofs)
-    lookahead_data(start_ofs, end_ofs, 4).unpack("V")[0]
+    lookahead_data(start_ofs, end_ofs, 4).unpack1("V")
   end
 
   def lookahead_u2(start_ofs, end_ofs)
-    lookahead_data(start_ofs, end_ofs, 2).unpack("v")[0]
+    lookahead_data(start_ofs, end_ofs, 2).unpack1("v")
   end
 
   # nil on out of bound
@@ -252,7 +252,7 @@ class SavFile < BinaryFileParser
     # Pretty ridiculous regexp, but we need to be fast:
     return nil unless str =~ /\A(?:[\x09\x0a\x0d\x20-\x7e]\x00)*\z/
     str = str.unpack("v*").pack("U*")
-    
+
     return [sz*2+2, str]
   rescue LookaheadFailure
     nil
@@ -261,7 +261,7 @@ class SavFile < BinaryFileParser
   # nil on out of bound
   # String format: [uint16 size in bytes (inclusive of \x00)], ASCII characters, last \x00
   # There might be "legal", but ignore them due to false positives:
-  # * 00 00 
+  # * 00 00
   # * 01 00 00
   # * 02 00 xx 00
   # This is accepted:
@@ -273,12 +273,12 @@ class SavFile < BinaryFileParser
     return nil unless str[-1,1] == "\x00"
     str = str[0..-2]
     return nil unless str =~ /\A[\x09\x0a\x0d\x20-\x7e]*\z/
-    
+
     return [sz+2, str]
   rescue LookaheadFailure
     nil
   end
-  
+
   # nil on out of bound
   # Rome seems to have ton more false positives wrt offset match
   def lookahead_section_header(start_ofs, end_ofs)
@@ -304,7 +304,7 @@ class SavFile < BinaryFileParser
         @fmt.end_section!
         next
       end
-      
+
       strx = lookahead_asciiz(ofs, end_ofs)
       if strx
         sz, str = *strx
@@ -312,7 +312,7 @@ class SavFile < BinaryFileParser
         @ofs += sz
         next
       end
-      
+
       strx = lookahead_unicode(ofs, end_ofs)
       if strx
         sz, str = *strx
@@ -320,7 +320,7 @@ class SavFile < BinaryFileParser
         @ofs += sz
         next
       end
-      
+
       @fmt.bytes! @ofs, 1
       @ofs += 1
     end
@@ -338,7 +338,7 @@ class SavFile < BinaryFileParser
 
     @fmt.bytes! @ofs, 50
     @ofs += 50
-    
+
     @fmt.unicode! get_str
 
     if magic == "\x04\07" # Rome
@@ -350,7 +350,7 @@ class SavFile < BinaryFileParser
     @ofs += header_data_sz
 
     big_table_sz = get_u4
-    
+
     @fmt.start_special_section! "Header Strings Table (size=#{big_table_sz})"
     big_table_sz.times{|i|
       s = get_asciiz

@@ -1,12 +1,18 @@
 #!/usr/bin/env ruby
 
 $: << "."
-require 'rubygems'
+require "rubygems"
 require "nokogiri"
 require "esf_builder"
 require "pp"
 require "pgm"
 require "commander_details"
+
+class String
+  def unpack1(*args)
+    unpack(*args).first
+  end unless method_defined? :unpack1
+end
 
 module XmlTagHandlers
   ## Semantic data types - bmd.dat
@@ -203,7 +209,7 @@ module XmlTagHandlers
   def on_empty_node_compressed_data(attributes, buf, ctx)
     cdata = File.open(File.join(@in_dir, attributes[:path]), 'rb', &:read)
     meta = cdata[0,5]
-    size = cdata[5, 8].unpack("q")[0]
+    size = cdata[5, 8].unpack1("q")
     cdata = cdata[5+8..-1]
     put_rec "COMPRESSED_DATA" do
       @esf.put_4x "\x46", cdata
@@ -1206,7 +1212,7 @@ module XmlTagHandlers
     @esf.put_flt buf.to_f
   end
   def on_text_node_fltnan(attributes, buf, ctx)
-    @esf.put_flt [buf.to_i(16)].pack("V").unpack("f")[0]
+    @esf.put_flt [buf.to_i(16)].pack("V").unpack1("f")
   end
   def on_text_node_uint64(attributes, buf, ctx)
     @esf.put_u8(buf.to_i)

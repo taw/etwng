@@ -38,15 +38,15 @@ class Markers
   end
 
   def get_u1
-    get(1).unpack("C")[0]
+    get(1).unpack1("C")
   end
 
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
 
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
 
   def get_str
@@ -54,7 +54,7 @@ class Markers
   end
 
   def get_flt
-    get(4).unpack("f")[0].pretty_single
+    get(4).unpack1("f").pretty_single
   end
 
   def get_ary(&blk)
@@ -67,8 +67,8 @@ class Markers
 
   def get_u4_or_flt
     v = get(4)
-    vi = v.unpack("V")[0]
-    vf = v.unpack("f")[0]
+    vi = v.unpack1("V")
+    vf = v.unpack1("f")
     if vi >= 0 and vi <= 255
       vi
     else

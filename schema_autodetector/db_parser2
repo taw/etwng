@@ -27,9 +27,9 @@ module Binary
   def self.float_exp(val)
     (val>>23) & 255
   end
-  
+
   def self.uint32_to_float(val)
-    [val].pack("V").unpack("f")[0]
+    [val].pack("V").unpack1("f")
   end
 end
 
@@ -103,20 +103,20 @@ class DataParser
     end
   end
   def get_byte
-    get_bytes(1).unpack("C")[0]
+    get_bytes(1).unpack1("C")
   end
   def get_uint16
-    get_bytes(2).unpack("v")[0]
+    get_bytes(2).unpack1("v")
   end
   def get_float
-    get_bytes(4).unpack("f")[0]
+    get_bytes(4).unpack1("f")
   end
   def get_uint32
-    get_bytes(4).unpack("V")[0]
+    get_bytes(4).unpack1("V")
   end
   def get_u4
     get_uint32
-  end    
+  end
   def get_bytes(cnt)
     ensure_available!(cnt)
     @ofs, rv = @ofs+cnt, @data[@ofs, cnt]
@@ -258,46 +258,46 @@ end
 
 class DataFile
   attr_reader :rows_count, :rows, :parser, :version
-  
+
   def initialize(path)
     @path = path
     data = File.read(path)
     if data[0,4] == "\xFD\xFE\xFC\xFF"
       data = data[(4+2+36*2)..-1]
     end
-    byte0 = data[0, 1].unpack("C")[0]
+    byte0 = data[0, 1].unpack1("C")
     if byte0 == 1
       @version = 1
       @rows_count, = data[1, 4].unpack("V")
       @data = data[5..-1]
     elsif byte0 == 252
-      @version = data[4, 1].unpack("C")[0] + 1
+      @version = data[4, 1].unpack1("C") + 1
       @rows_count, = data[9, 4].unpack("V")
       @data = data[13..-1]
     else
       raise "Wrong version number #{byte0}"
     end
-    
+
     @parser = DataParser.new(@data)
   end
-  
+
   def bytes
     @data.size
   end
-  
+
   def empty?
     @rows_count == 0
   end
-  
+
   def column(j)
     @rows.map{|row| row[j]}
   end
-  
+
   def columns_key?(*idxs)
     cols = @rows.map{|row| idxs.map{|i| row[i] }}
     cols.size == cols.uniq.size
   end
-  
+
   def self.basic_enums
     return {}
     unless @basic_enums
@@ -386,7 +386,7 @@ class DataFile
     end
     @basic_enums
   end
-  
+
   def guess_ref(j)
     c = column(j) - [nil, ""]
     return :empty if c.empty?
@@ -435,7 +435,7 @@ class DataFile
     return :empty if empty?
 
     schemas = []
-    
+
     # Worst ones first to speed things up
     schemas += %w[
       sbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -500,11 +500,11 @@ class DataFile
 
     # No pattern to see here...
     schemas += File.read("schema_tests").sub(/-.*/m, "").scan(/\S+/)
-    
+
     schemas.each{|dsc|
       schema = DataParser.expand_dsc(dsc)
       next unless try_schema(*schema)
-      schema_adjust_u4!(schema)      
+      schema_adjust_u4!(schema)
       return schema
     }
 
@@ -524,21 +524,21 @@ class DataFile
       false
     end
   end
-  
+
   def schema
     @schema ||= guess_schema
   end
-  
+
   def print_rows
     @rows.each{|row|
       puts "- #{row.inspect}"
     }
   end
-  
+
   def bytes_per_row
     @data.size/@rows_count.to_f
   end
-  
+
   def name
     File.basename(@path) + "_tables"
   end
@@ -596,7 +596,7 @@ class DataFile
 
     while ofs+2 <= wdata.size
       u = wdata[ofs]
-      
+
       if u == 0 or u < 0 or !(0...u).all?{|j| c=wdata[ofs+2+2*j]; !c.nil? && c <= 255 && c >= 32}
         hexbuf << @data[ofs]
         ofs += 1
@@ -622,7 +622,7 @@ class DataFile
           foo_block = DataParser.expand_dsc("u fff fff fff").map{|type| parser.get(type) }
           foo_xtra_cnt = parser.get(:uint32)
           foo_xtra = DataParser.expand_dsc("u" * foo_xtra_cnt).map{|type| parser.get(type) }
-          puts "FOO: #{(foo_block + foo_xtra).inspect}" 
+          puts "FOO: #{(foo_block + foo_xtra).inspect}"
         }
         deck_count = parser.get(:uint32)
         deck_count.times{
@@ -639,24 +639,24 @@ class DataFile
 
         ofs = parser.ofs
 
-        
+
         # foos = (0...foo_count).map{
         #   DataParser.expand_dsc("u" * 15).map{|type| parser.get(type) }
         # # }
-        # 
+        #
         # x = 60
         # 2640
-        # 
+        #
         # ~ [44, 0, 1180198810, 1077432812]
         # - 2360 bytes
-        # 
+        #
         # ~ [42, 0, 1182777344, 1077286011]
         # - 2240 bytes
         # - "deck04"
-        
+
 
         # puts "~ #{extra.inspect}"
-        
+
 
       when /\Anavalcam/
         emb = @data[ofs, 16*4].unpack("f"*16)
@@ -680,7 +680,7 @@ class DataFile
 
 
     end
-    
+
     if ofs < wdata.size
       hexbuf << @data[ofs]
       ofs += 1
@@ -688,7 +688,7 @@ class DataFile
 
       # vf9 = "V" + "f"*9
       # vf12 = "V" + "f"*12
-      # 
+      #
       # when /\Atop_sails/
       #   emb = @data[2*ofs, 1*4].unpack("V")
       #   ofs += 1*2
@@ -747,13 +747,13 @@ class DataFile
       end
       @all
     end
-  
+
     def print_schema_stats
       stats = Hash.new(0)
       unk = []
       all.each{|df|
         stats[df.schema] += 1
-      }    
+      }
       stats.to_a.sort_by{|k,v| v}.each{|k,v| puts "#{k.inspect} => #{v.inspect}" }
 
       all.select{|df| df.schema == :unknown}.map{|df| [df.bytes_per_row.to_i, df.name]}.sort.each{|b,n|
@@ -802,15 +802,15 @@ def compare_against_xsd!
     ]
     tryme = %W[
     ]
-    
+
     # next unless tryme.include?(df.table_name)
     # next unless (win + tryme).include?(df.table_name)
-    
+
     # name = "#{df.table_name}_tables"
     # next unless name =~ /kv/
-    
+
     puts "Testing #{df.table_name}"
-    
+
     orig_asc  = xsd[df.table_name]
     orig_bsc  = df.schema
 
@@ -856,7 +856,7 @@ def compare_against_xsd!
       ct, tab = XSD.build(df.table_name, bsc)
       if cls == "DIFFER (only guess)"
         xsd_ct << "<!-- version #{df.version} -->"
-        xsd_ct << ct   
+        xsd_ct << ct
         xsd_tab << tab
       end
       p bsc
@@ -868,14 +868,14 @@ def compare_against_xsd!
         if kc.all?{|j| bsc[j]==:string} and df.columns_key?(*kc)
           key = kc
           p [:key, *key]
-          
+
           xsd_key << XSD.pkey(df.table_name, kc.map{|i| "unknown#{i+1}"})  if cls == "DIFFER (only guess)"
-          
+
           break
         end
       }
       p [:unknown_key] unless key
-      
+
       bsc.size.times{|j|
         next if j == 0 and key == [0]
         next unless bsc[j] == :string
@@ -884,7 +884,7 @@ def compare_against_xsd!
           xsd_ref << XSD.ref(df.table_name, "unknown#{j+1}", r)  if cls == "DIFFER (only guess)"
         end
       }
-      
+
     end
 
     puts ""

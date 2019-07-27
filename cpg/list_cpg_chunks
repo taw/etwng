@@ -5,7 +5,7 @@ class CpgFile
     @data = File.open(path, 'rb', &:read)
     @ofs = 0
   end
-  
+
   def get(sz)
     raise "Trying to read past end of file" if @ofs + sz > @data.size
     rv = @data[@ofs, sz]
@@ -14,9 +14,9 @@ class CpgFile
   end
 
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
-  
+
   def eof?
     @ofs == @data.size
   end

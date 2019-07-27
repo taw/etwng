@@ -16,38 +16,38 @@ class TRecord
     @data = File.open(path, 'rb', &:read)
     @ofs = 0
   end
-  
+
   def size
     @data.size
   end
-  
+
   def get(sz)
     raise "Trying to read past end of file" if @ofs + sz > @data.size
     rv = @data[@ofs, sz]
-    @ofs += sz 
+    @ofs += sz
     rv
   end
-  
+
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
 
   def get_i4
-    get(4).unpack("l")[0]
+    get(4).unpack1("l")
   end
 
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
-  
+
   def get_byte
-    get(1).unpack("C")[0]
+    get(1).unpack1("C")
   end
-  
+
   def get_str
     get(get_u2)
   end
-  
+
   def get_bool
     v = get_byte
     if v == 0
@@ -63,11 +63,11 @@ class TRecord
   def eof?
     @ofs == @data.size
   end
-  
+
   def bytes_left
     @data.size - @ofs
   end
-  
+
   def parse_embedded_tga(output_dir_path)!
     save_ofs = @ofs
     # The number of bytes that the image ID field consists of.
@@ -85,7 +85,7 @@ class TRecord
     depth = get_byte
     imgdsc = get_byte
     raise "Go to hell" unless [id_len, color_map, image_type, depth, imgdsc] == [0,0,2,32,8]
-    
+
     $tga_cnt += 1
     fname = "%s/%08d.tga" % [output_dir_path, $tga_cnt]
     sz = 4*xsize*ysize
@@ -93,7 +93,7 @@ class TRecord
     File.write(fname, @data[@ofs-18-sz, 18+sz])
     fname
   end
-  
+
   def parse(output_dir_path)!
     puts "Parsing #{path} of size #{size}"
     tgas = get_u4
@@ -114,7 +114,7 @@ class TRecord
       p [:parent_name, get_str]
     end
     ## This is the last point where we have some clue what's going on, everything after that is a guess
-    
+
     p [:short0, s0 = get_u2]
     @ofs -= 2
     p [:str0, (get_str rescue nil)]

@@ -9,22 +9,22 @@ class Templates
     @data = File.open(path, 'rb', &:read)
     @ofs = 0
   end
-  
+
   def size
     @data.size
   end
-  
+
   def get(sz)
     raise "Trying to read past end of file" if @ofs + sz > @data.size
     rv = @data[@ofs, sz]
-    @ofs += sz 
+    @ofs += sz
     rv
   end
-  
+
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
-  
+
   def get_ascii(n)
     get(n)[/\A[^\x00]+/]
   end
@@ -32,10 +32,10 @@ class Templates
   def eof?
     @ofs == @data.size
   end
-  
+
   def parse(output_dir_path)!
     record_count = get_u4
-    
+
     record_count.times{|i|
       init_ofs = @ofs
       # individual records

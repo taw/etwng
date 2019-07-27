@@ -21,16 +21,16 @@ class LocFile
     rv
   end
   def get_u
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
   def get_s
     get(get_u2*2).unpack("v*").pack("U*")
   end
   def get_byte
-    get(1).unpack("C")[0]
+    get(1).unpack1("C")
   end
   def get_bool
     rv = get_byte

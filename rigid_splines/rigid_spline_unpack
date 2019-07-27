@@ -41,17 +41,17 @@ class RigidSpline
     rv
   end
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
   def get_s
     get(get_u2*2).unpack("v*").pack("U*")
   end
   def get_f
-    get(4).unpack("f")[0] # .pretty_single
-  end  
+    get(4).unpack1("f") # .pretty_single
+  end
 
   def to_txt
     u1 = get_u4

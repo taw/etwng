@@ -25,10 +25,10 @@ class UnitVariant
     rv
   end
   def get_u
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
   def get_s
     get(get_u2*2).unpack("v*").pack("U*")
@@ -62,7 +62,7 @@ class UnitVariant
 
     cat_count = get_u
     fail "Wrong header size" unless get_u == (@version == 0 ? 20 : 24)
-    
+
     divider = get_u
     if @version == 2
       @extra = get_u

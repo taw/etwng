@@ -31,16 +31,16 @@ class ModelsBuildings
   end
 
   def get_u1
-    get(1).unpack("C")[0]
+    get(1).unpack1("C")
   end
   def get_u2
-    get(2).unpack("v")[0]
+    get(2).unpack1("v")
   end
   def get_u4
-    get(4).unpack("V")[0]
+    get(4).unpack1("V")
   end
   def get_flt
-    get(4).unpack("f")[0].pretty_single
+    get(4).unpack1("f").pretty_single
   end
   def get_ascii
     get(get_u2)
