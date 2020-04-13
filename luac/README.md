@@ -1,4 +1,6 @@
-There are 2 .luac decompilers here.
+I'd recommend just using LUA decompiler at http://www.decompiler.com/ - it seems to handle all the files, and it's fully online and very easy to use.
+
+If that doesn't work for you, there are 2 .luac decompilers here.
 
 I'd generally recommend using unluac.jar, as it can handle wider range of .luac files, and doesn't require compilation.
 
