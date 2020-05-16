@@ -1,12 +1,6 @@
 #!/usr/bin/env ruby
 
-require "db_schemata"
-
-class File
-  def self.write(path, content)
-    File.open(path, "wb", 0777){|fh| fh.write content}
-  end
-end
+require_relative "./db_schemata"
 
 class Float
   def pretty_single
@@ -33,20 +27,20 @@ class DbFile
 
     @data = File.open(file_name, 'rb', &:read)
     @guid = nil
-    if @data[0, 4] == "\375\376\374\377"
+    if @data[0, 4] == "\375\376\374\377".b
       gsz, = @data[4, 2].unpack("v")
       @guid = @data[6, gsz*2].unpack("v*").pack("U*")
       @data = @data[(6+gsz*2)..-1]
     end
 
-    if @data[0, 1] == "\x01"
+    if @data[0, 1] == "\x01".b
       @version = 1
       @data = @data[1..-1]
-    elsif @data[0, 4] == "\374\375\376\377" and @data[5, 4] == "\000\000\000\001"
+    elsif @data[0, 4] == "\374\375\376\377".b and @data[5, 4] == "\000\000\000\001".b
       @version = @data[4, 1].unpack1("C") + 1
       @data = @data[9..-1]
     else
-      raise "Unknown file, magic number: #{@data[0, 9].inspect}: #{file_name}"
+      raise "Unknown file #{file_name}, magic number: #{@data[0, 9].inspect}: #{file_name}"
     end
     @rows = @data[0, 4].unpack1("V")
     @data = @data[4..-1]

@@ -14,7 +14,7 @@ class DbSchemata
       @schema[ct['name']] = parse_complex_type_node(ct)
     }
   end
-  
+
   def get_schema(table_name, version, guid)
     return nil unless @schema[table_name]
     # max_version_known = @schema[table_name].map{|name, min_version, type| min_version}.max
@@ -26,7 +26,7 @@ class DbSchemata
       version >= min_version ? [name, type] : nil
     }.compact
   end
-  
+
   class <<self
     def instance
       @instance ||= new

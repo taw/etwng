@@ -1,12 +1,6 @@
 #!/usr/bin/env ruby
 
-require "db_schemata"
-
-class File
-  def self.write(path, content)
-    File.open(path, "wb"){|fh| fh.write content}
-  end
-end
+require_relative "./db_schemata"
 
 class DbTsvFile
   attr_reader :schema
@@ -29,14 +23,14 @@ class DbTsvFile
     else
       @guid = nil
     end
-    
+
     if metadata[0] == "strict"
       @strict = true
       metadata.shift
     else
       @strict = false
     end
-    
+
     if metadata == ["empty", "no schema"]
       @schema = nil
       @empty = true
@@ -46,7 +40,7 @@ class DbTsvFile
       raise "Metadata line unrecognized: #{metadata_line.inspect}"
     end
   end
-  
+
   def initialize(file_name, table_name_from_dir)
     @file_name = file_name
     @fh = File.open(file_name, 'rb')
@@ -63,22 +57,22 @@ class DbTsvFile
       }
     end
     @fh.close
-    
+
     labels = @data.shift
     @schema = DbSchemata.instance.get_schema(@table_name, @version, @guid)
   end
-  
+
   def empty?
     @empty
   end
-  
+
   def field_to_binary(field_type, field_value)
     case field_type
     when "boolean"
       if field_value == "true"
-        "\x01"
+        "\x01".b
       elsif field_value == "false"
-        "\x00"
+        "\x00".b
       else
         raise "Expected true/false, got #{field_value}"
       end
@@ -110,7 +104,7 @@ class DbTsvFile
       "x"
     end
   end
-  
+
   def row_to_binary(row)
     raise "Expected #{@schema.size} elements in row, got #{row.size}" unless @schema.size == row.size
     out = ""
@@ -119,24 +113,24 @@ class DbTsvFile
     }
     out
   end
-  
+
   def guid_to_binary
     if @guid
       guid_str = @guid.unpack("U*")
-      "\375\376\374\377" + [guid_str.size].pack("v") + guid_str.pack("v*")
+      "\375\376\374\377".b + [guid_str.size].pack("v") + guid_str.pack("v*")
     else
       ""
     end
   end
-  
+
   def version_to_binary
     if @version == 1
       "\x01"
     else
-      "\374\375\376\377" + [@version-1].pack("C") + "\000\000\000\001"
+      "\374\375\376\377".b + [@version-1].pack("C") + "\000\000\000\001".b
     end
   end
-  
+
   def to_binary
     out = guid_to_binary + version_to_binary
     out << [@data.size].pack("V")
@@ -152,11 +146,11 @@ def parse_argv
   # Comma mode doesn't actually do anything here, it works either way
   # Strict doesn't do anything either, it's encoded in first line of metadata
   ARGV.shift while ARGV[0] == '--strict' or ARGV[0] == '--comma'
-  
+
   unless ARGV.size == 2
     STDERR.puts "Usage: #{$0} [--comma] [--strict] input/ output/"
   end
-  
+
   [Pathname(ARGV[0]), Pathname(ARGV[1])]
 end
 
@@ -170,7 +164,7 @@ sources.sort.each do |file_name|
   next unless file_name.to_s =~ /\.[tc]sv\z/ # .DS_Store and other nonsense
   table_name = file_name.dirname.basename.to_s
   current_target = Pathname((target+file_name.relative_path_from(source)).to_s.sub(/\.[tc]sv\z/, ""))
-  
+
   file = DbTsvFile.new(file_name, table_name)
   unless file.schema or file.empty?
     STDERR.puts "No schema known for #{file_name}, skipping"

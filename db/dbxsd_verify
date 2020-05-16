@@ -26,7 +26,7 @@ class DbxsdVerify
       raise "xpath not a field reference: #{xp}"
     end
   end
-  
+
   def complex_types
     unless @complex_types
       @complex_types = {}
@@ -63,7 +63,7 @@ class DbxsdVerify
       [name, refer, sel, fields]
     }
   end
-  
+
   def dbdataset
     @dbdataset ||= @doc.xpath("/schema/element[@name='DBDataSet']/complexType/choice/element").map{|el|
       warn "Form other than 'unqualified', no idea what to do with it" unless el["form"] == "unqualified"
@@ -73,7 +73,7 @@ class DbxsdVerify
       type
     }.sort
   end
-  
+
   def verify
     only_ct  = complex_types.keys.sort - dbdataset.sort
     warn "complexTypes defined without correspending DBDataSet entry: #{only_ct.inspect}" unless only_ct.empty?
@@ -94,7 +94,7 @@ class DbxsdVerify
       }
     }
     uht = Hash[uniques.map{|name, sel, fields| [name, fields]}]
-    
+
     keyrefs.each{|name, refer, sel, fields|
       if fields.size != 1
         warn "Multi-field foreign key for constraint #{name} from #{sel}(#{fields.join(" ")}) to #{refer}"

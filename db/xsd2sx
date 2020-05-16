@@ -19,12 +19,12 @@ class XSD2SX
     x = sel["xpath"]
     x =~ /\A\.\/\/(.*)/ ? $1 : raise("Wrong table reference #{x}")
   end
-  
+
   def parse_fieldref(fieldref)
     x = fieldref["xpath"]
     x =~ /\A@(.*)/ ? $1 : raise("Wrong field reference #{x}")
   end
-  
+
   def uniques
     @uniques ||= xsd_doc.xpath("/xs:schema/xs:element/xs:unique").map{|uq|
       raise "Only primary key unique keys supported" unless uq["PrimaryKey"] == "true"
@@ -65,7 +65,7 @@ class XSD2SX
     end
     {:name => name, :type => type, :version_start => version_start}
   end
-  
+
   def types
     @types ||= xsd_doc.xpath("/xs:schema/xs:complexType").map{|ct|
       name = ct["name"]
@@ -98,7 +98,7 @@ class XSD2SX
     end
     @schema
   end
-  
+
   # Gather schema info
   def run!
     File.open(path_out, "wb"){|fh|
