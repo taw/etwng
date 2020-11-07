@@ -189,8 +189,8 @@ end
 
   def convert_rec_CAI_BDI_COMPONENT_BLOCK_OWNS
     annotate_rec("CAI_BDI_COMPONENT_BLOCK_OWNS",
-      [:u, 0] => "BDI information",
-      [:u, 1] => "Resource ID"
+      [:u, 0] => "BDI Information",
+      [:u, 1] => "Army ID"
     )
   end
 
@@ -202,12 +202,12 @@ end
 
   def convert_rec_CAI_WORLD_RESOURCE_MOBILES
     annotate_rec("CAI_WORLD_RESOURCE_MOBILES",
-      [:u, 3] => "Resource ID",
-      [:u_ary, 11] => "BDI information",
+      [:u, 3] => "Army ID",
+      [:u_ary, 11] => "BDI Information",
       [:u, 13] => "HLCIS ID",
-      [:u_ary, 15] => "BDI information",
-      [:u_ary, 19] => "BDI information",
-      [:u_ary, 22] => "BDI information"
+      [:u_ary, 15] => "BDI Information",
+      [:u_ary, 19] => "BDI Information",
+      [:u_ary, 22] => "BDI Information"
     )
   end
 
@@ -790,7 +790,7 @@ end
   end
 
   def convert_rec_CAMPAIGN_VICTORY_CONDITIONS
-    campaign_type_labels = [" (short)", " (long)", " (prestige)", " (global domination)", " (unplayable)"]
+    campaign_type_labels = [" (Short)", " (Long)", " (Prestige)", " (Global Domination)", " (Unplayable)"]
     data = get_rec_contents([:ary, :REGION_KEYS, nil], :bool, :u, :u, :bool, :u, :bool, :bool)
     regions, flag1, year, region_count, prestige_victory, campaign_type, flag2, flag3 = *data
     regions = regions.map{|region| ensure_types(region, :s)}.flatten
@@ -1089,10 +1089,14 @@ end
       if i == 0 or i == 1
         raise "Something is wrong here" unless lookahead_v2x?(ofs_end)
         convert_v2x!
+      elsif i == 2 and type == :flt
+        annotate_value!("Character Facing Direction")
+      elsif i == 3 and type == :flt
+        annotate_value!("Character Facing Direction")
       elsif i == 6 and type == :i
-        annotate_value!("Movement Points total")
+        annotate_value!("Movement Points Total")
       elsif i == 7 and type == :i
-        annotate_value!("Movement Points left")
+        annotate_value!("Movement Points Left")
       end
     end
   end
@@ -1170,9 +1174,9 @@ end
       if i == 0 and lookahead_v2x?(ofs_end)
         convert_v2x!
       elsif i == 4 and lookahead_type == :i
-        annotate_value!("Fort Number")
+        annotate_value!("Fort Building Slot ID")
       elsif i == 5 and lookahead_type == :i
-        annotate_value!("Faction Number")
+        annotate_value!("Faction ID")
       end
     end
   end
@@ -1195,16 +1199,16 @@ end
 
   def convert_rec_FACTION_INTERNATIONAL_TRADE_ROUTES_ARRAY
     annotate_rec_nth "FACTION_INTERNATIONAL_TRADE_ROUTES_ARRAY",
-      [:u, 0] => "route id"
+      [:u, 0] => "Route ID"
   end
 
   def convert_rec_CAI_WORLD_FACTIONS
     annotate_rec("CAI_WORLD_FACTIONS",
       [:u, 2] => "Faction ID",
-      [:u_ary, 10] => "BDI information",
+      [:u_ary, 10] => "BDI Information",
       [:u, 12] => "HLCIS ID",
-      [:u_ary, 14] => "BDI information",
-      [:u_ary, 21] => "BDI information"
+      [:u_ary, 14] => "BDI Information",
+      [:u_ary, 21] => "BDI Information"
     )
   end
 
@@ -1214,80 +1218,89 @@ end
     each_rec_member_nth_by_type("INTERNATIONAL_TRADE_ROUTE") do |ofs_end, i, type|
       if i == 0 and type == :u
         cnt = val = get_value![1]
-        out!("<u>#{val}</u><!-- number of connections -->")
+        out!("<u>#{val}</u><!-- Number Of Connections -->")
       elsif type == :u and (i-1)%2 == 0 and (i-1)/2 < cnt-1
         val = get_value![1]
-        out!("<u>#{val}</u><!-- start point (#{port_lookpup(val)}) -->")
+        out!("<u>#{val}</u><!-- Start Point (#{port_lookpup(val)}) -->")
       elsif type == :u and (i-1)%2 == 1 and (i-1)/2 < cnt-1
         val = get_value![1]
-        out!("<u>#{val}</u><!-- end point (#{port_lookpup(val)}) -->")
+        out!("<u>#{val}</u><!-- End Point (#{port_lookpup(val)}) -->")
       elsif type == :bool and i < cnt
         is_sea = val = get_value![1]
         tag = val ? "<yes/>" : "<no/>"
-        out!("#{tag}<!-- is sea -->")
+        out!("#{tag}<!-- Trading Over Sea -->")
       elsif type == :i and i < cnt
         if is_sea == nil or is_sea == true
-          annotate_value!("faction id")
+          annotate_value!("Region ID Of Home Factions")
         else
-          annotate_value!("region id")
+          annotate_value!("Region ID Of Trading Factions")
         end
       elsif type == :i and i == cnt
-        annotate_value!("route id")
+        annotate_value!("Route ID")
       elsif @data[@ofs].ord == 0x48 and i == 0
         data = get_value![1]
-        out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- commodities quantity -->")
+        out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- Commodities Quantity -->")
       elsif @data[@ofs].ord == 0x48 and i == 1
         data = get_value![1]
-        out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- resources quantity -->")
+        out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- Resources Quantity -->")
       end
     end
   end
 
   def convert_rec_FACTION_DOMESTIC_TRADE_ROUTES_ARRAY
     annotate_rec_nth "FACTION_DOMESTIC_TRADE_ROUTES_ARRAY",
-      [:u, 0] => "route id"
+      [:u, 0] => "Route ID"
   end
 
   def convert_rec_DOMESTIC_TRADE_ROUTE
     cnt = nil
     each_rec_member_nth_by_type("DOMESTIC_TRADE_ROUTE") do |ofs_end, i, type|
       if type == :s and i == 0
-        annotate_value!("theatre id")
+        annotate_value!("Theatre ID")
       elsif type == :u and i == 0
         cnt = val = get_value![1]
-        out!("<u>#{val}</u><!-- number of connections -->")
+        out!("<u>#{val}</u><!-- Number Of Connections -->")
       elsif type == :u and (i-1)%2 == 0 and (i-1)/2 < cnt-1
         val = get_value![1]
-        out!("<u>#{val}</u><!-- start point (#{port_lookpup(val)}) -->")
+        out!("<u>#{val}</u><!-- Start Point (#{port_lookpup(val)}) -->")
       elsif type == :u and (i-1)%2 == 1 and (i-1)/2 < cnt-1
         val = get_value![1]
-        out!("<u>#{val}</u><!-- end point (#{port_lookpup(val)}) -->")
+        out!("<u>#{val}</u><!-- End Point (#{port_lookpup(val)}) -->")
       elsif @data[@ofs].ord == 0x48 and i == 0
         data = get_value![1]
-        out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- commodities quantity -->")
+        out!("<u4_ary>#{data.join(" ")}</u4_ary><!-- Commodities Quantity -->")
       end
     end
   end
 
   def convert_rec_CAMPAIGN_TRADE_MANAGER
     annotate_rec_nth "CAMPAIGN_TRADE_MANAGER",
-      [:u_ary, 0] => "commodities baseline price per unit",
-      [:u_ary, 1] => "commodities current price per unit",
-      [:u_ary, 5] => "resources trade value",
-      [:flt_ary, 0] => "demand"
+      [:u_ary, 0] => "Commodities Baseline Price Per Unit",
+      [:u_ary, 1] => "Commodities Current Price Per Unit",
+      [:u_ary, 5] => "Resources Trade Value",
+      [:flt_ary, 0] => "Demand"
   end
 
   def convert_rec_TEATHRES
     annotate_rec_nth "THEATRES",
-      [:s, 0] => "theatre id"
+      [:s, 0] => "Theatre ID"
   end
 
   def convert_rec_FACTION
     @dir_builder.faction_name = lookahead_str
     annotate_rec_nth "FACTION",
-      [:i, 0] => "faction id",
-      [:s, 0] => "faction label",
-      [:s, 1] => "on screen label"
+      [:i, 0] => "Faction ID",
+      [:s, 0] => "Faction Name",
+      [:s, 1] => "On Screen Name",
+      [:bool, 2] => "True - Major, False - Minor",
+      [:u_ary, 0] => "Governor ID For Each Theatre",
+      [:s, 2] => "Religion",
+      [:i, 1] => "Capital ID Else 0 If You Lose Your Capital",
+      [:i, 2] => "Capital ID",
+      [:bool, 6] => "Emergent",
+      [:s, 3] => "Campaign AI Manager Behaviour (patch.pack)",
+      [:s, 4] => "Campaign AI Personalities (patch.pack)",
+      [:i, 5] => "Protectorate ID"
     @dir_builder.faction_name = nil
   end
 
@@ -1301,7 +1314,7 @@ end
 
   def convert_rec_FACTION_TECHNOLOGY_MANAGER
     annotate_rec "FACTION_TECHNOLOGY_MANAGER",
-      [:i, 1] => "technology number"
+      [:i, 1] => "Technology ID"
   end
 
   def convert_rec_REBEL_SETUP
@@ -1319,10 +1332,23 @@ end
 
   def convert_rec_REGION
     annotate_rec("REGION",
-      [:s, 0] => "name",
-      [:i, 4] => "Region Number",
-      [:u, 19] => "Faction Number",
-      [:u, 21] => "Governor Number"
+      [:s, 0] => "Region Name",
+      [:i, 4] => "Region ID",
+      [:u, 9] => "Subsistence Agricultural (SA)",
+      [:u, 10] => "Industrial Wealth Plus (SA)",
+      [:u, 11] => "Industrial Wealth Plus (SA) Minus Trading Losses",
+      [:u, 12] => "Town Wealth",
+      [:u, 13] => "Minimum Town Wealth",
+      [:u, 14] => "Town Wealth",
+      [:i, 15] => "Town Monetary Growth",
+      [:u, 19] => "Controlling Faction ID",
+      [:u, 21] => "Governor ID",
+      [:s, 22] => "Theatre",
+      [:s, 23] => "Emerging Nation",
+      [:s, 24] => "Region Rebels",
+      [:s, 25] => "Region Tribes",
+      [:s, 37] => "Latest Constuction",
+      [:u, 39] => "Region Array. From Top To Bottom. 1st 62 Regions 881206575. 2nd 15 Regions 1771634741. 3rd 32 Regions 1928099569. 4th 28 Regions 688200897. Why????"
     )
   end
 
@@ -1333,17 +1359,23 @@ end
       else
         case [lookahead_type, i]
         when [:u, 2]
-          annotate_value! "Building slot Number"
+          annotate_value! "Building Slot ID"
         when [:s, 3]
-          annotate_value! "slot name"
+          annotate_value! "Slot Name"
+        when [:i, 7]
+          annotate_value! "Something To Do With Commodities"
+        when [:i, 8]
+          annotate_value! "Something To Do With Town/Port/Road/Wall"
         when [:bool, 9]
-          annotate_value! "no=unemerged, yes=emerged (town/ports only)"
+          annotate_value! "Town or Port Emerged"
         when [:i, 10]
-          annotate_value! "building level (-1=unbuilt, 0=first level, 1=second level etc.)"
+          annotate_value! "Commodities = 0; Town/Port/Road/Wall = 1"
+        when [:i, 11]
+          annotate_value! "Commodities = 2; Town/Port/Road/Wall = 1"
         when [:u, 12]
-          annotate_value! "4294967295 == 0xFFFF_FFFF [?]"
+          annotate_value! "4294967295 Trade/Finance ID ??"
         when [:u, 13]
-          annotate_value! "Order towns/ports emerge in, 0 = first, 1 = second (town/ports only)"
+          annotate_value! "Town Or Port Emergence Order"
         end
       end
     end
@@ -1351,65 +1383,83 @@ end
 
   def convert_rec_GOVERNMENT
     annotate_rec "GOVERNMENT",
-      [:i, 0] => "government id"
+      [:i, 0] => "Government ID",
+      [:i, 2] => "Government Popularity"
   end
 
   def convert_rec_CHARACTER_POST
     annotate_rec "CHARACTER_POST",
-      [:i, 0] => "character id A [???]",
-      [:s, 1] => "seat",
-      [:u, 2] => "character id B [???]",
-      [:i, 4] => "government id",
-      [:i, 5] => "government id"
+      [:i, 0] => "Cabinet ID",
+      [:s, 1] => "Cabinet Title",
+      [:u, 2] => "Character ID",
+      [:bool, 3] => "Governor",
+      [:i, 4] => "Government ID",
+      [:i, 5] => "Government ID"
+  end
+
+  def convert_rec_GOVERNORSHIP
+    annotate_rec "GOVERNORSHIP",
+      [:i, 1] => "Governor ID",
+      [:u_ary, 2] => "Region ID",
+      [:u, 3] => "Faction ID"
   end
 
   def convert_rec_MILITARY_FORCE
     annotate_rec("MILITARY_FORCE",
-      [:u, 0] => "general character id [?]",
-      [:u, 1] => "Character Number"
+      [:u, 0] => "Army ID",
+      [:u, 1] => "Character ID"
     )
   end
 
   def convert_rec_ARMY
     annotate_rec("ARMY",
-      [:i, 4] => "general character id [?]"
+      [:i, 4] => "Army ID",
+      [:u, 5] => "Army In Building Slot ID",
+      [:bool, 6] => "Under Seige",
+      [:u, 7] => "Army ID Of Ship Escorting"
+    )
+  end
+
+  def convert_rec_NAVY
+    annotate_rec("NAVY",
+      [:u, 4] => "Army ID In Ship"
     )
   end
 
   def convert_rec_CAI_WORLD_UNITS
     annotate_rec("CAI_WORLD_UNITS",
       [:u, 1] => "Unit ID",
-      [:u_ary, 9] => "BDI information",
-      [:u_ary, 13] => "BDI information",
-      [:u_ary, 20] => "BDI information"
+      [:u_ary, 9] => "BDI Information",
+      [:u_ary, 13] => "BDI Information",
+      [:u_ary, 20] => "BDI Information"
     )
   end
 
   def convert_rec_CAI_UNIT
     annotate_rec("CAI_UNIT",
       [:u, 0] => "Character ID",
-      [:u, 1] => "Unit Number",
-      [:u, 2] => "Resource ID"
+      [:u, 1] => "Army Unit ID",
+      [:u, 2] => "Army ID"
     )
   end
 
   def convert_rec_CAI_WORLD_TRADING_POSTS
     annotate_rec("CAI_WORLD_TRADING_POSTS",
       [:u, 1] => "Trade Post ID",
-      [:u_ary, 20] => "BDI information"
+      [:u_ary, 20] => "BDI Information"
     )
   end
 
   def convert_rec_CAI_GARRISONABLE
     annotate_rec("CAI_GARRISONABLE",
-      [:u, 0] => "Resource ID",
-      [:u_ary, 2] => "Resource ID"
+      [:u, 0] => "Army ID",
+      [:u_ary, 2] => "Army ID"
     )
   end
 
   def convert_rec_CAI_FACTION_BDI_POOL
     annotate_rec("CAI_FACTION_BDI_POOL",
-      [:u, 2] => "All these u records are BDI information"
+      [:u, 2] => "All these u records are BDI Information"
     )
   end
 
@@ -1424,28 +1474,29 @@ end
       [:u_ary, 0] => "Theatre ID",
       [:u_ary, 1] => "HLCIS ID",
       [:u, 2] => "Settlement ID",
-      [:u_ary, 3] => "Region Slot IDs of region_slots in this region",
-      [:flt, 4] => "X coordinate",
-      [:flt, 5] => "Y coordinate",
+      [:u_ary, 3] => "Region Slot IDs Of Region_Slots In This Region",
+      [:flt, 4] => "X Coordinate",
+      [:flt, 5] => "Y Coordinate",
       [:u_ary, 7] => "Boundary ID",
-      [:s, 10] => "name",
-      [:u, 11] => "Region Number",
+      [:s, 10] => "Name",
+      [:u, 11] => "Region ID",
+      [:u, 12] => "Governor ID",
       [:u_ary, 13] => "Faction ID"
     )
   end
 
   def convert_rec_CAMPAIGN_PLAYER_SETUP
     annotate_rec("CAMPAIGN_PLAYER_SETUP",
-      [:bool, 4] => "yes = playable, no = non-playable"
+      [:bool, 4] => "Playable"
     )
   end
 
   def convert_rec_CAI_RESOURCE_MOBILE
     annotate_rec("CAI_RESOURCE_MOBILE",
       [:u, 0] => "Character ID",
-      [:u_ary, 4] => "Character ID",
-      [:u_ary, 5] => "Unit ID",
-      [:u, 10] => "Resource Number",
+      [:u_ary, 4] => "Character IDs",
+      [:u_ary, 5] => "Army Unit IDs",
+      [:u, 10] => "Army ID",
       [:u_ary, 15] => "Sea Grid ID"
     )
   end
@@ -1453,9 +1504,9 @@ end
   def convert_rec_CAI_WORLD_REGIONS
     annotate_rec("CAI_WORLD_REGIONS",
       [:u, 2] => "Region ID",
-      [:u_ary, 10] => "BDI information",
-      [:u_ary, 14] => "BDI information",
-      [:u_ary, 21] => "BDI information"
+      [:u_ary, 10] => "BDI Information",
+      [:u_ary, 14] => "BDI Information",
+      [:u_ary, 21] => "BDI Information"
     )
   end
 
@@ -1475,7 +1526,7 @@ end
 
   def convert_rec_CAI_REGION_SLOT
     annotate_rec("CAI_REGION_SLOT",
-      [:u, 1] => "Building ID",
+      [:u, 1] => "Building Slot ID",
       [:bool, 5] => "Yes = port, No = town (ports have extra set of coordinates for their sea part following)"
     )
   end
@@ -1484,38 +1535,40 @@ end
     annotate_rec("CAI_SETTLEMENT",
       [:u_ary, 0] => "Building_slot ID",
       [:u, 1] => "Faction ID",
-      [:u, 2] => "Settlement Number"
+      [:u, 2] => "Settlement ID"
     )
   end
 
   def convert_rec_SIEGEABLE_GARRISON_RESIDENCE
     each_rec_member("SIEGEABLE_GARRISON_RESIDENCE") do |ofs_end, i|
       if i == 1 and lookahead_type == :u
-        annotate_value!("slot number")
+        annotate_value!("Building Slot ID")
       elsif i == 10 and lookahead_v2x?(ofs_end)
         convert_v2x!
+      elsif i == 11 and lookahead_type == :u
+        annotate_value!("Army ID")
       elsif i == 13 and lookahead_type == :u_ary
-        annotate_value!("Character Number of garrison")
+        annotate_value!("Character ID Of Garrison")
       end
     end
   end
 
   def convert_rec_CAI_WORLD_BUILDING_SLOTS
     annotate_rec("CAI_WORLD_BUILDING_SLOTS",
-      [:u, 1] => "Building ID",
-      [:u_ary, 9] => "BDI information",
-      [:u, 11] => "0 = unemerged, 1 = emerged",
-      [:u_ary, 13] => "BDI information",
-      [:u_ary, 20] => "BDI information"
+      [:u, 1] => "Building Slot ID",
+      [:u_ary, 9] => "BDI Information",
+      [:u, 11] => "0 = Unemerged, 1 = Emerged",
+      [:u_ary, 13] => "BDI Information",
+      [:u_ary, 20] => "BDI Information"
     )
   end
 
   def convert_rec_CAI_CHARACTER
     annotate_rec("CAI_CHARACTER",
-      [:u, 0] => "Resource ID",
+      [:u, 0] => "Army ID",
       [:u, 1] => "Unit ID",
-      [:u, 2] => "Resource ID",
-      [:u, 3] => "Character Number"
+      [:u, 2] => "Army ID",
+      [:u, 3] => "Army Character ID"
     )
   end
 
@@ -1528,15 +1581,15 @@ end
   def convert_rec_CAI_WORLD_TECHNOLOGY_TREES
     annotate_rec("CAI_WORLD_TECHNOLOGY_TREES",
       [:u, 1] => "Technology ID",
-      [:u_ary, 20] => "BDI information"
+      [:u_ary, 20] => "BDI Information"
     )
   end
 
   def convert_rec_CAI_BUILDING_SLOT
     annotate_rec("CAI_BUILDING_SLOT",
-      [:u, 0] => "Building Number",
-      [:u, 1] => "Bulding type: 0 = settlement, 1 = wall/road, 2 = town, 3 = port, 4 = mine, 5 = farm, 6 = trade resource, 7 = multiple trade resources",
-      [:u, 2] => "Settlement ID if building is part of the settlement. Region_slot ID if not part of the settlement"
+      [:u, 0] => "Building Slot ID",
+      [:u, 1] => "Bulding type: 0 = Settlement, 1 = Wall/Road, 2 = Town, 3 = Port, 4 = Mine, 5 = Farm, 6 = Trade Resource, 7 = Multiple Trade Resources",
+      [:u, 2] => "Settlement ID If Building Is part Of The Settlement. Region Slot ID If Not Part Of The Settlement"
     )
   end
 
@@ -1549,51 +1602,59 @@ end
   def convert_rec_CAI_WORLD_REGION_SLOTS
     annotate_rec("CAI_WORLD_REGION_SLOTS",
       [:u, 3] => "Region Slot ID",
-      [:u_ary, 11] => "BDI information",
-      [:u_ary, 15] => "BDI information",
-      [:u_ary, 22] => "BDI information"
+      [:u_ary, 11] => "BDI Information",
+      [:u_ary, 15] => "BDI Information",
+      [:u_ary, 22] => "BDI Information"
     )
   end
 
   def convert_rec_CAI_FACTION
     annotate_rec("CAI_FACTION",
-      [:u_ary, 0] => "Region ID of regions owned by this faction",
+      [:u_ary, 0] => "Region ID Of Regions Owned By This Faction",
       [:u_ary, 1] => "Theatre ID",
       [:u_ary, 2] => "HLCIS ID",
-      [:u_ary, 3] => "Resource ID",
+      [:u_ary, 3] => "Army ID",
       [:u_ary, 4] => "Character ID",
-      [:u, 5] => "Region ID of capital",
-      [:u, 6] => "faction id",
+      [:u, 5] => "Region ID Of Capital",
+      [:u, 6] => "Faction ID",
       [:u, 9] => "Technology ID",
       [:u_ary, 10] => "Governor ID",
-      [:u_ary, 31] => "BDI information",
-      [:u, 36] => "Region ID of capital",
-      [:u_ary, 37] => "Region ID of faction's needed for victory conditions"
+      [:u_ary, 31] => "BDI Information",
+      [:u, 36] => "Region ID Of Capital",
+      [:u_ary, 37] => "Region ID Of Faction's Needed For Victory Conditions"
     )
   end
 
   def convert_rec_CAI_WORLD_GOVERNORSHIPS
     annotate_rec("CAI_WORLD_GOVERNORSHIPS",
       [:u, 1] => "Governor ID",
-      [:u_ary, 9] => "BDI information",
-      [:u_ary, 13] => "BDI information"
+      [:u_ary, 9] => "BDI Information",
+      [:u_ary, 13] => "BDI Information"
     )
   end
 
   def convert_rec_CAI_GOVERNORSHIP
     annotate_rec("CAI_GOVERNORSHIP",
-      [:u, 0] => "Governor Number",
+      [:u, 0] => "Governor ID",
       [:u, 1] => "Theatre ID",
       [:u, 2] => "Character ID",
-      [:u_ary, 3] => "Region ID of regions controlled by this Governor"
+      [:u_ary, 3] => "Region ID Of Regions Controlled By This Governor"
     )
   end
 
+  def convert_rec_POPULATION
+    annotate_rec("POPULATION",
+      [:u, 1] => "Constant Over Game ?",
+      [:u, 2] => "Constant Over Game ?",
+      [:u, 3] => "New Minimum When New Settlement Emerged ?"
+    )
+  end
   def convert_rec_REGION_FACTORS
     annotate_rec("REGION_FACTORS",
-      [:u, 2] => "Lower class population",
-      [:u, 3] => "Middle class population",
-      [:u, 4] => "Upper class population"
+      [:u, 2] => "Current Population",
+      [:u, 3] => "Max Supported Population ?",
+      [:u, 4] => "Constant Over Game ?",
+      [:flt, 5] => "Population Growth"
     )
   end
 
@@ -1700,7 +1761,7 @@ end
     out!(%Q[<cai_situated x="#{x}" y="#{y}" region_id="#{a}" theatre_id="#{b}" area_id="#{c}"/>])
   end
 
-  def convert_rec_THEATRE_TRANSITION_INFO
+  def convert_rec_THEATRE_TRANSITION__INFO
     link, a, b, c = get_rec_contents([:rec, :CAMPAIGN_MAP_TRANSITION_LINK, nil], :bool, :bool, :u)
     fl, time, dest, via = ensure_types(link, :flt, :u, :u, :u)
     raise SemanticFail.new if fl != 0.0 or b != false or c != 0
@@ -1715,24 +1776,24 @@ end
 
   def convert_rec_SETTLEMENT
     annotate_rec("SETTLEMENT",
-      [:s, 3] => "DB table campaign_map_settlements",
-      [:i, 4] => "Settlement Number",
-      [:s, 5] => "DB table campaign_map_settlements"
+      [:s, 3] => "DB Table Campaign_map_settlements",
+      [:i, 4] => "Settlement ID",
+      [:s, 5] => "DB Table Campaign_map_settlements"
     )
   end
 
   def convert_rec_CAI_WORLD_SETTLEMENTS
     annotate_rec("CAI_WORLD_SETTLEMENTS",
       [:u, 3] => "Settlement ID",
-      [:u_ary, 11] => "BDI information",
-      [:u_ary, 15] => "BDI information",
-      [:u_ary, 22] => "BDI information"
+      [:u_ary, 11] => "BDI Information",
+      [:u_ary, 15] => "BDI Information",
+      [:u_ary, 22] => "BDI Information"
     )
   end
 
   def convert_rec_CAI_TECHNOLOGY_TREE
     data, = get_rec_contents(:u)
-    out!("<cai_technology_tree>#{data}</cai_technology_tree><!-- technology number -->")
+    out!("<cai_technology_tree>#{data}</cai_technology_tree><!-- Technology ID -->")
   end
 
   def convert_rec_RandSeed
@@ -1806,17 +1867,17 @@ end
 
   def convert_rec_GARRISON_RESIDENCE
     data, = get_rec_contents(:u)
-    out!("<garrison_residence>#{data}</garrison_residence>")
+    out!("<garrison_residence>#{data}</garrison_residence><!-- Faction ID -->")
   end
 
   def convert_rec_OWNED_INDIRECT
     data, = get_rec_contents(:u)
-    out!("<owned_indirect>#{data}</owned_indirect>")
+    out!("<owned_indirect>#{data}</owned_indirect><!-- Faction ID -->")
   end
 
   def convert_rec_OWNED_DIRECT
     data, = get_rec_contents(:u)
-    out!("<owned_direct>#{data}</owned_direct>")
+    out!("<owned_direct>#{data}</owned_direct><!-- Faction ID -->")
   end
 
   def convert_rec_FACTION_FLAG_AND_COLOURS
@@ -1827,16 +1888,20 @@ end
     out!("<flag_and_colours path=\"#{path.xml_escape}\" color1=\"#{color1.xml_escape}\" color2=\"#{color2.xml_escape}\" color3=\"#{color3.xml_escape}\"/>")
   end
 
+## Tried to insert research_points_hint = "<!-- Research Points Invested (patch.pack) -->" school_slot_id_hint = "<!-- Researching By School ID -->" and failed.
+
   def convert_rec_techs
-    status_hint = {0 => " (done)", 2 => " (researchable)", 4 => " (not researchable)"}
+    status_hint = {0 => " (Researched)", 2 => " (Researchable)", 4 => " (Not Researchable)"}
+    unknown2_hint = {0 => " (??)", 1 => " (??)", 2 => " (??)", 3 => " (??)", 4 => " (??)", 5 => " (??)"}
     data = get_rec_contents(:s, :u, :flt, :u, :u_ary, :u)
     name, status, research_points, school_slot_id, unknown1, unknown2 = *data
     status = "#{status}#{status_hint[status]}"
     unknown1 = unknown1.join(" ")
+    unknown2 = "#{unknown2}#{unknown2_hint[unknown2]}"
     out!("<techs name=\"#{name.xml_escape}\" status=\"#{status}\" research_points=\"#{research_points}\" school_slot_id=\"#{school_slot_id}\" unknown1=\"#{unknown1}\" unknown2=\"#{unknown2}\"/>")
   end
 
-  def convert_rec_COMMANDER_DETAILS
+  def convert_rec_COMMANDER__DETAILS
     fnam, lnam, faction = get_rec_contents([:rec, :CAMPAIGN_LOCALISATION, nil], [:rec, :CAMPAIGN_LOCALISATION, nil], :s)
     fnam = ensure_loc(fnam)
     lnam = ensure_loc(lnam)
@@ -1952,7 +2017,8 @@ end
 
   def convert_rec_CHARACTER_DETAILS
     annotate_rec("CHARACTER_DETAILS",
-      [:u, 10] => "Character Number"
+      [:s, 4] => "Head Of State",
+      [:u, 10] => "Character ID"
     )
   end
 
@@ -1960,11 +2026,19 @@ end
     each_rec_member_nth_by_type("CHARACTER") do |ofs_end, i|
       case [i, lookahead_type]
       when [0, :i]
-        annotate_value!("Character Number")
+        annotate_value!("Character ID")
       when [0, :u]
-        annotate_value!("Resource Number")
+        annotate_value!("Army ID")
       when [1, :u]
-        annotate_value!("Unit Number")
+        annotate_value!("Unit ID")
+      when [3, :u]
+        annotate_value!("Character In Building Slot ID")
+      when [4, :u]
+        annotate_value!("Cabinet ID")
+      when [1, :bool]
+        annotate_value!("Government Opposition")
+      when [0, :flt]
+        annotate_value!("10 - Land Leader / 15 - Navy Leader")
       else
         if i == 0 and @data[@ofs].ord == 0x48
           data = get_value![1].pack("V*").unpack("l*").map{|u| u * (0.5**20) }
@@ -1991,13 +2065,17 @@ end
         tag += "<!-- #{@faction_ids[id].xml_escape} -->" if @faction_ids and @faction_ids[id]
         out!(tag)
       when [2, :bool]
-        annotate_value!("trade agreement")
+        annotate_value!("Trade Agreement")
       when [3, :i]
-        annotate_value!("military access turns (-1 = unlimited)")
+        annotate_value!("Military Access (-1 = Infinite)")
       when [4, :s]
-        annotate_value!("relationship")
+        annotate_value!("Protectorate/Patron Standing")
+      when [6, :u]
+        annotate_value!("20 If Allied")
+      when [13, :u]
+        annotate_value!("10 If Allied")
       when [20, :s]
-        annotate_value!("this is NOT relationship")
+        annotate_value!("Diplomatic Standing")
       end
     end
   end
@@ -2005,24 +2083,24 @@ end
   def convert_rec_TRADE_SEGMENTS
     each_rec_member_nth_by_type("TRADE_SEGMENTS") do |ofs_end, j, type|
       if type == :bool and j == 0
-        annotate_value!("is land")
+        annotate_value!("Is Land")
       elsif type == :u and j == 0
-        annotate_value!("number of sub-segments")
+        annotate_value!("Number Of Sub-segments")
       elsif type == :v2 and j % 4 == 0
-        annotate_value!("sub-segment ##{j / 4}")
+        annotate_value!("Sub-segment ##{j / 4}")
       elsif type == :flt and j == 0
-        annotate_value!("length of segment")
+        annotate_value!("Length Of Segment")
       elsif @data[@ofs].ord == 0x4a and j == 0
-        out!("<!-- lengths of sub-segments -->")
+        out!("<!-- Lengths Of Sub-segments -->")
         # pass through
       elsif @data[@ofs].ord == 0x4a and j == 1
-        out!("<!-- cummulative lengths of sub-segments -->")
+        out!("<!-- Cummulative Lengths Of Sub-segments -->")
         # pass through
       elsif @data[@ofs].ord == 0x48 and j == 0
-        out!("<!-- domestic trade route ids -->")
+        out!("<!-- Domestic Trade Route IDs -->")
         # pass through
       elsif @data[@ofs].ord == 0x48 and j == 1
-        out!("<!-- international trade route ids -->")
+        out!("<!-- International Trade Route IDs -->")
         # pass through
       end
     end
@@ -2041,14 +2119,14 @@ end
       if type == :u and j == 0
         val = get_value![1]
         name = pi[val] || si[val] || "unknown"
-        out!("<u>#{val}</u><!-- start point (#{name}) -->")
+        out!("<u>#{val}</u><!-- Start Point (#{name}) -->")
       elsif type == :u and j == 1
         val = get_value![1]
         name = pi[val] || si[val] || "unknown"
-        out!("<u>#{val}</u><!-- end point (#{name}) -->")
+        out!("<u>#{val}</u><!-- End Point (#{name}) -->")
       elsif type == :flt and j == 0
         val = get_value![1]
-        out!("<flt>#{val}</flt><!-- length of route -->")
+        out!("<flt>#{val}</flt><!-- Length Of Route -->")
       end
     end
   end
