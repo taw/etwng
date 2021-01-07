@@ -256,42 +256,42 @@ module XmlTagHandlers
 
   def on_empty_node_population_class(attributes, buf, ctx)
     a1 = [
-      :gov_type_happy,
-      :taxes,
-      :religion,
-      :events,
-      :culture,
-      :industry,
-      :characters_happy,
-      :war,
-      :reform,
-      :bankrupcy,
-      :resistance,
+      :Gov_Type_Happy,
+      :Taxes,
+      :Religion,
+      :Events,
+      :Culture,
+      :Industry,
+      :People_In_Gov_Happy,
+      :War,
+      :Reform,
+      :Bankrupcy,
+      :Resistance,
     ].map{|name| attributes[name].to_i}
     a2 = [
-      :gov_type,
-      :gov_buildings,
-      :characters,
-      :policing,
-      :garrison,
-      :crackdown,
+      :Gov_Type_Repression,
+      :Gov_Buildings_Repression,
+      :People_In_Gov_Repression,
+      :Town_Watch,
+      :Garrisoned_Forces,
+      :Military_Crackdown,
     ].map{|name| attributes[name].to_i}
 
     put_rec "POPULATION CLASSES" do
       put_rec "POPULATION_CLASS" do
-        @esf.put_s attributes[:social_class]
+        @esf.put_s attributes[:Social_Class]
         @esf.put_4x("\x44", a1.pack("l*"))
         @esf.put_4x("\x44", a2.pack("l*"))
-        @esf.put_i attributes[:happy_total].to_i
-        @esf.put_i attributes[:unhappy_total].to_i
-        @esf.put_i attributes[:repression_total].to_i
-        @esf.put_i attributes[:unknown_1].to_i
-        @esf.put_i attributes[:turns_rioting].to_i
-        @esf.put_u attributes[:unknown_3].to_i
-        @esf.put_u attributes[:unknown_4].to_i
-        @esf.put_u attributes[:unknown_5].to_i
-        @esf.put_i attributes[:unknown_zero].to_i
-        @esf.put_i attributes[:foreign].to_i
+        @esf.put_i attributes[:Total_Happy].to_i
+        @esf.put_i attributes[:Total_Unhappy].to_i
+        @esf.put_i attributes[:Total_Repression].to_i
+        @esf.put_i attributes[:Unknown_1].to_i
+        @esf.put_i attributes[:Turns_Rioting].to_i
+        @esf.put_u attributes[:Unknown_3].to_i
+        @esf.put_u attributes[:Unknown_4].to_i
+        @esf.put_u attributes[:Unknown_5].to_i
+        @esf.put_i attributes[:Unknown_zero].to_i
+        @esf.put_i attributes[:Resistance_To_Foreign_Occupation].to_i
       end
     end
   end
