@@ -181,7 +181,7 @@ end
     raise QuietSemanticFail.new
   end
 
-  def convert_ary_UNIT__LIST
+  def convert_ary_UNIT_LIST
     data = get_ary_contents(:s).flatten
     raise SemanticFail.new if data.any?{|name| name =~ /\s/}
     out_ary!("unit_list", "", data.map{|name| " #{name.xml_escape}" })
@@ -287,8 +287,8 @@ end
 
   def convert_rec_query_info
     annotate_rec "query_info",
-      [:u, 0] => "number of quads",
-      [:u, 1] => "number of cells (cell = quad not empty)"
+      [:u, 0] => "Number Of Quads",
+      [:u, 1] => "Number Of Cells (cell = quad not empty)"
   end
 
   def convert_rec_cell
@@ -319,16 +319,16 @@ end
 
   def convert_rec_transition_links
     annotate_rec "transition_links",
-      [:u, 1] => "turns needed",
-      [:u, 2] => "destination theatre #",
-      [:u, 3] => "area # inside destination theatre"
+      [:u, 1] => "Turns Needed",
+      [:u, 2] => "Destination Theatre",
+      [:u, 3] => "Area Inside Destination Theatre"
   end
 
   def convert_rec_slot_descriptions
     v2a_annotations = [
-      "land area",
-      "sea area (present only for ports)",
-      "total area (different from land area only in ports)",
+      "Land Area",
+      "Sea Area (present only for ports)",
+      "Total Area (different from land area only in ports)",
     ]
     each_rec_member("slot_descriptions") do |ofs_end, i|
       next unless @data[@ofs].ord == 0x4c
@@ -479,31 +479,31 @@ end
         y = get_value![1] * 0.5**20
         x0 = x
         y0 = y
-        out!(%Q[<v2x x="#{x}" y="#{y}"/><!-- starting point -->])
+        out!(%Q[<v2x x="#{x}" y="#{y}"/><!-- Starting Point -->])
       elsif i == 1 and tag == :u2
-        annotate_value!("starting x cell")
+        annotate_value!("Starting X Cell")
       elsif i == 2 and tag == :u2
-        annotate_value!("starting y cell")
+        annotate_value!("Starting Y Cell")
       elsif i == 3 and tag == :i
         v = get_value![1]
         vs = v * 0.5**20
         cell_dim = vs
-        out!(%Q[<i>#{v}</i><!-- dimension of cells (#{vs}) -->])
+        out!(%Q[<i>#{v}</i><!-- Dimension Of Cells (#{vs}) -->])
       elsif i == 4 and tag == :u
         val = get_value![1]
         x1 = x0 + val*cell_dim
-        out!("<u>#{val}</u><!-- columns -->")
+        out!("<u>#{val}</u><!-- Columns -->")
       elsif i == 5 and tag == :u
         val = get_value![1]
         y1 = y0 + val*cell_dim
-        out!("<u>#{val}</u><!-- rows -->")
-        out!("<!-- boundingbox(#{x0},#{y0},#{x1},#{y1}) -->")
+        out!("<u>#{val}</u><!-- Rows -->")
+        out!("<!-- Boundingbox(#{x0},#{y0},#{x1},#{y1}) -->")
       elsif i == 6 and tag == :u
-        annotate_value!("number of traits + number of empty cells")
+        annotate_value!("Number Of Traits + Number Of Empty Cells")
       elsif i == 7 and tag == :u2
-        annotate_value!("number of passable regions")
+        annotate_value!("Number Of Passable Regions")
       elsif i == 8 and tag == :u2
-        annotate_value!("number of listed regions (generally equals to the previous number, but not compulsory)")
+        annotate_value!("Number Of Listed Regions (generally equals to the previous number, but not compulsory)")
       elsif i == 9 and @data[@ofs].ord == 0x43
         v = get_value![1].unpack("s*")
         region_names = {}
@@ -532,7 +532,7 @@ end
 
           v.shift
           out!("")
-          out!(" 0 <!-- sea -->")
+          out!(" 0 <!-- Sea -->")
           out!("")
 
           @path_ids_to_names << "sea"
@@ -595,12 +595,12 @@ end
             else
               out!("") unless start
               start = false
-              out!(" #{i} <!-- vertices count -->")
+              out!(" #{i} <!-- Vertices Count -->")
               nx_has_0123 = !(data[0, i] & [0,1,2,3]).empty?
               if nx_has_0123
-                # out!(" <!-- open line -->")
+                # out!(" <!-- Open Line -->")
               else
-                out!(" <!-- closed line -->")
+                out!(" <!-- Closed Line -->")
               end
             end
           else
@@ -760,7 +760,7 @@ end
       when [0, :bool]
         annotate_value!("Land Bridge")
       when [1, :bool]
-        annotate_value!("English Channel Coast ?")
+        annotate_value!("English Channel Coast")
       when [2, :bool]
         annotate_value!("Passable")
       when [5, :u2]
@@ -852,7 +852,7 @@ end
     end
   end
 
-  def convert_rec_POPULATION__CLASSES
+  def convert_rec_POPULATION_CLASSES
     data, = get_rec_contents([:rec, :POPULATION_CLASS, nil])
     data = ensure_types(data, :s, :bin4, :bin4, :i,:i,:i,:i,:i, :u,:u,:u, :i,:i)
     cls = data.shift
@@ -1044,7 +1044,7 @@ end
     each_rec_member("PATHFINDING_GRID") do |ofs_end, i|
       if i == 0 and @data[@ofs].ord == 0x08
         v = get_value![1]
-        out!("<u>#{v}</u><!-- grid_paths -->")
+        out!("<u>#{v}</u><!-- Grid Paths -->")
       elsif i == 1 and @data[@ofs].ord == 0x48
         # Why is this int32, not uint32 again?
         v = get_value![1].pack("V*").unpack("l*")
@@ -1130,7 +1130,7 @@ end
         out!("<bin6>#{str.join(' ; ')}</bin6>")
       elsif i == 1 and @data[@ofs].ord == 0x46
         v = get_value![1].unpack("C*")
-        out!("<bin6><!-- #{v.size/12} empty cells -->")
+        out!("<bin6><!-- #{v.size/12} Empty Cells -->")
         until v.empty?
           line = v.shift(12).map{|x| "%02x" % x}
           part0 = line[0,4].join(" ")
@@ -1774,7 +1774,7 @@ end
     out!(%Q[<cai_situated x="#{x}" y="#{y}" region_id="#{a}" theatre_id="#{b}" area_id="#{c}"/>])
   end
 
-  def convert_rec_THEATRE_TRANSITION__INFO
+  def convert_rec_THEATRE_TRANSITION_INFO
     link, a, b, c = get_rec_contents([:rec, :CAMPAIGN_MAP_TRANSITION_LINK, nil], :bool, :bool, :u)
     fl, time, dest, via = ensure_types(link, :flt, :u, :u, :u)
     raise SemanticFail.new if fl != 0.0 or b != false or c != 0
@@ -1903,13 +1903,11 @@ end
 
   def convert_rec_techs
     status_hint = {0 => " (Researched)", 2 => " (Researchable)", 4 => " (Not Researchable)"}
-    unknown2_hint = {0 => " (??)", 1 => " (??)", 2 => " (??)", 3 => " (??)", 4 => " (??)", 5 => " (??)"}
     data = get_rec_contents(:s, :u, :flt, :u, :u_ary, :u)
-    name, status, research_points, school_slot_id, unknown1, unknown2 = *data
+    name, status, research_points, school_slot_id, unknown1, times_exchanged = *data
     status = "#{status}#{status_hint[status]}"
     unknown1 = unknown1.join(" ")
-    unknown2 = "#{unknown2}#{unknown2_hint[unknown2]}"
-    out!("<techs name=\"#{name.xml_escape}\" status=\"#{status}\" research_points=\"#{research_points}\" school_slot_id=\"#{school_slot_id}\" unknown1=\"#{unknown1}\" unknown2=\"#{unknown2}\"/>")
+    out!("<techs name=\"#{name.xml_escape}\" status=\"#{status}\" research_points=\"#{research_points}\" school_slot_id=\"#{school_slot_id}\" unknown1=\"#{unknown1}\" times_exchanged=\"#{times_exchanged}\"/>")
   end
 
   def convert_rec_COMMANDER_DETAILS
@@ -2104,7 +2102,7 @@ end
       when [15, :u]
         annotate_value!("10 If Allied Then Countdown To 0 When No Longer Allied")
       when [20, :s]
-        annotate_value!("Current Relationship With ??")
+        annotate_value!("Current Relationship With Protectorate ??")
       end
     end
   end
