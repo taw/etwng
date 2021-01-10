@@ -23,8 +23,10 @@ class ListDiplomacy < EsfScript
       update_xml(path, "//rec[@type='DIPLOMACY_RELATIONSHIP']") do |dr|
         second_faction_id = dr.xpath("i")[0].content
         second_faction_name = faction_ids[second_faction_id]
-        p dr.xpath("*")[2..-1].map(&:to_s).join.gsub(%r[<!-- .*? -->], "").gsub(/\s+/, " ")
-        # puts ""
+
+        relation = dr.xpath("s")[0].text
+        puts [faction_name, second_faction_name, relation].join("\t")
+        # data = dr.xpath("*")[2..-1].map(&:to_s).join.gsub(%r[<!-- .*? -->], "").gsub(/\s+/, " ")
         false
       end
       false
