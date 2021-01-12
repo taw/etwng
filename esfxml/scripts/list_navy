@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+require_relative "./esf_scripts"
+
+class ListNavy < EsfScript
+  # could regexp name as well
+  def army_file_to_faction_map
+    @army_file_to_faction_map ||= begin
+      result = {}
+      each_faction do |faction, faction_name|
+        faction.xpath("ary[@type='ARMY_ARRAY']/xml_include").map{|c| c['path'] }.each do |path|
+          result[path] = faction_name
+        end
+        false
+      end
+      result
+    end
+  end
+
+  def each_unit
+    army_file_to_faction_map.each do |path, faction_name|
+      update_xml(xmldir+"/"+path, "//rec[@type='NAVAL_UNIT']") do |unit|
+        yield(unit, faction_name)
+        false
+      end
+    end
+  end
+
+  def run!
+    units = {}
+    each_unit do |unit, faction_name|
+      type = unit.xpath("naval_key")[0].text
+      units[faction_name] ||= Hash.new(0)
+      units[faction_name][type] += 1
+    end
+    units.sort.each do |faction_name, counts|
+      puts "#{faction_name} - #{ counts.values.sum }"
+      counts.sort.each do |name, subcount|
+        puts "- #{subcount} #{name}"
+      end
+    end
+  end
+end
+
+ListNavy.new
