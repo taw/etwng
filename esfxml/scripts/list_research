@@ -1,0 +1,66 @@
+#!/usr/bin/env ruby
+
+require_relative "./esf_scripts"
+require "paint"
+
+class ListResearch < EsfScript
+  def run!
+    tech_data = {}
+
+    each_faction do |faction, faction_name|
+      tech_includes = faction.xpath("xml_include").map{|node| node['path']}.grep(/\Atechnology\//)
+      # Rebel faction ("") has no technologies and it's ok
+      # Other factions having no technologies are weird
+      if tech_includes.empty? and faction_name != ""
+        warn "No technology found for faction #{faction_name.inspect}"
+        next
+      end
+      tech_includes.each do |tech_include|
+        update_xml(xmldir+"/"+tech_include, "//ary[@type='techs']/techs") do |tech|
+          name = tech["name"]
+          status = tech["status"]
+          binding.pry unless [0,2,4].include?(status.to_i)
+          tech_data[name] ||= {}
+          tech_data[name][faction_name] = status.to_i
+          false
+        end
+      end
+      false
+    end
+
+    tech_data.each do |name, data|
+      human_status_i = data[human_player].to_i
+      researched = data.select{|k,v| v == 0}.keys.sort
+      available = data.select{|k,v| v == 2}.keys.sort
+      if human_status_i == 0
+        human_status = "research"
+      elsif human_status_i == 2
+        human_status = "available"
+      elsif human_status_i == 4
+        human_status = "not available"
+      end
+      # No point showing if nobody's anywhere near it
+      next if researched.empty? and available.empty?
+      puts "#{name} - #{human_status}:"
+      puts "  have: #{ researched.join(", ") }"
+      puts "  can research: #{ available.join(", ") }"
+    end
+
+    # Invert
+    faction_data = {}
+    tech_data.each do |name, data|
+      data.each do |faction_name, status|
+        next unless status == 0
+        faction_data[faction_name] ||= []
+        faction_data[faction_name] << name
+      end
+    end
+
+    puts ""
+    faction_data.map{|fn,d| [d.size, fn]}.sort.reverse.each do |score, faction_name|
+      puts "#{score} #{faction_name}: #{ faction_data[faction_name].sort.map{|tn| faction_data[human_player].include?(tn) ? tn : Paint[tn.upcase, "green"]}.join(", ") }"
+    end
+  end
+end
+
+ListResearch.new

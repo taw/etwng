@@ -156,4 +156,15 @@ class EsfScript
     patterns = patterns.map{|pattern| Regexp.escape(pattern).gsub("\\*", ".*")}
     Regexp.compile("\\A(?:" + patterns.join("|") + ")\\z")
   end
+
+  def human_player
+    @human_player ||= begin
+      result = nil
+      update_each_xml('save_game_header/*.xml', "//rec[@type='SAVE_GAME_HEADER']") do |header|
+        raise "Already found one human player" if result
+        result = header.xpath("s")[0].text
+      end
+      result
+    end
+  end
 end

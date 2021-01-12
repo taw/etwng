@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require_relative "./esf_scripts"
-require "pry"
 
 class ListMilitary < EsfScript
   # could regexp name as well
