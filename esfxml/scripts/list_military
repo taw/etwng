@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+
+require_relative "./esf_scripts"
+require "pry"
+
+class ListMilitary < EsfScript
+  # could regexp name as well
+  def army_file_to_faction_map
+    @army_file_to_faction_map ||= begin
+      result = {}
+      each_faction do |faction, faction_name|
+        faction.xpath("ary[@type='ARMY_ARRAY']/xml_include").map{|c| c['path'] }.each do |path|
+          result[path] = faction_name
+        end
+        false
+      end
+      result
+    end
+  end
+
+  def each_unit
+    army_file_to_faction_map.each do |path, faction_name|
+      update_xml(xmldir+"/"+path, '//land_unit') do |unit|
+        yield(unit, faction_name)
+        false
+      end
+    end
+  end
+
+  def run!
+    units = {}
+    each_unit do |unit, faction_name|
+      type = unit['type']
+      num, den = unit['size'].split("/").map(&:to_i)
+      units[faction_name] ||= {}
+      units[faction_name][type] ||= { total: 0, num: 0, den: 0 }
+      units[faction_name][type][:total] += 1
+      units[faction_name][type][:num] += num
+      units[faction_name][type][:den] += den
+    end
+    units.sort.each do |faction_name, counts|
+      total_units =  counts.values.map{|c| c[:total] }.sum
+      total_num =  counts.values.map{|c| c[:num] }.sum
+      total_den =  counts.values.map{|c| c[:den] }.sum
+
+      puts "#{faction_name} - #{total_units} (#{total_num}/#{total_den}):"
+      counts.sort.each do |name, subcount|
+        puts "- #{subcount[:total]} #{name} (#{subcount[:num]}/#{subcount[:den]})"
+      end
+    end
+  end
+end
+
+ListMilitary.new
