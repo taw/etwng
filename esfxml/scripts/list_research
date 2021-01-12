@@ -47,18 +47,34 @@ class ListResearch < EsfScript
     end
 
     # Invert
-    faction_data = {}
+    researched_by = {}
+    available_to = { }
     tech_data.each do |name, data|
       data.each do |faction_name, status|
-        next unless status == 0
-        faction_data[faction_name] ||= []
-        faction_data[faction_name] << name
+        if status == 0
+          researched_by[faction_name] ||= []
+          researched_by[faction_name] << name
+        elsif status == 2
+          available_to[faction_name] ||= []
+          available_to[faction_name] << name
+        end
       end
     end
 
     puts ""
-    faction_data.map{|fn,d| [d.size, fn]}.sort.reverse.each do |score, faction_name|
-      puts "#{score} #{faction_name}: #{ faction_data[faction_name].sort.map{|tn| faction_data[human_player].include?(tn) ? tn : Paint[tn.upcase, "green"]}.join(", ") }"
+    researched_by.map{|fn,d| [d.size, fn]}.sort.reverse.each do |score, faction_name|
+      puts "#{score} #{faction_name}: #{ researched_by[faction_name].sort.map{|tn| researched_by[human_player].include?(tn) ? tn : Paint[tn.upcase, "green"]}.join(", ") }"
+    end
+
+    # Trades
+    puts ""
+    researched_by.map{|fn,d| [d.size, fn]}.sort.reverse.each do |score, faction_name|
+      to_sell = (researched_by[faction_name] - researched_by[human_player]) & available_to[human_player]
+      to_buy = (researched_by[human_player] - researched_by[faction_name]) & available_to[faction_name]
+      next if to_sell.empty? and to_buy.empty?
+      puts "#{faction_name}"
+      puts "SELL: #{to_sell.join(", ")}" unless to_sell.empty?
+      puts "BUY: #{to_buy.join(", ")}" unless to_buy.empty?
     end
   end
 end
