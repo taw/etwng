@@ -1,0 +1,100 @@
+#!/usr/bin/env ruby
+
+require_relative "./esf_scripts"
+require "csv"
+require "pry"
+
+class AnalyzeGovernment < EsfScript
+  def load_tsv(path)
+    CSV.read("#{__dir__}/data/#{path}", { col_sep: "\t" })
+  end
+
+  def trait_effects
+    unless @trait_effects
+      @trait_effects = {}
+      aa = load_tsv("ancillary_to_attribute_effects.tsv")
+      ae = load_tsv("ancillary_to_effects.tsv")
+      ta = load_tsv("trait_attribute_effects.tsv")
+      te = load_tsv("trait_level_effects.tsv")
+      (aa[2..-1] + ae[2..-1] + ta[2..-1] + te[2..-1]).each do |trait, bonus, value|
+        @trait_effects[trait] ||= Hash.new(0)
+        @trait_effects[trait][bonus] += Integer(value)
+      end
+    end
+    @trait_effects
+  end
+
+  def human_government_xml
+    each_faction do |faction, faction_name|
+      next unless faction_name == human_player
+      return faction.xpath("xml_include").map{|node| node['path']}.grep(/\bgovernment\//)[0]
+    end
+    raise "Cannot find"
+  end
+
+
+
+  def characters
+    unless @characters
+      @characters = {}
+      update_each_xml("character/*.xml", "/rec[@type='CHARACTER_ARRAY']") do |char|
+        traits = char.xpath("//rec[@type='CHARACTER_DETAILS']/traits").text.gsub("=", "_").strip.split(/\s+/)
+        anc = char.xpath("//rec[@type='CHARACTER_DETAILS']/agent_ancillaries").text.strip.split(/\s+/)
+        names = char.xpath("//rec[@type='CHARACTER_DETAILS']/loc")[0,2].map(&:text).map{|t| t.sub(/\Anames_name_names_(dutch|)/, "")}
+        character_id = char.xpath("//rec[@type='CHARACTER_DETAILS']/u")[0].text
+        raise "Already exists: #{character_id}" if @characters[character_id]
+        @characters[character_id] = {
+          anc: anc,
+          traits: traits,
+          names: names,
+        }
+        false
+      end
+    end
+    @characters
+  end
+
+  def find_minister_ids
+    @minister_ids = []
+    update_xml(xmldir+"/"+human_government_xml, "/rec[@type='GOVERNMENT']") do |gov|
+      @gov_type = gov.xpath("s")[0].text
+      gov.xpath("//rec[@type='CHARACTER_POST']").each do |post|
+        position = post.xpath("s")[0].text
+        characted_id = post.xpath("u")[0].text
+        @minister_ids << [position, characted_id]
+      end
+      false
+    end
+  end
+
+  def run!
+    find_minister_ids
+
+    trait_effects
+
+    @minister_ids.each do |pos,i|
+      char = characters[i]
+      name = char[:names].join(" ")
+      bonus = Hash.new(0)
+
+      puts name
+
+      (char[:anc] + char[:traits]).each do |t|
+        # There is another mwhole level here :-/
+        if trait_effects[t] 
+          trait_effects[t].each do |b,v|
+            bonus[b] += v
+          end
+          warn "Found bonuses for #{t} - #{trait_effects[t] }"
+        else
+          warn "Cannot find bonuses for: #{t}"
+        end
+      end
+
+      p [pos, characters[i], bonus]
+      puts ""
+    end
+  end
+end
+
+AnalyzeGovernment.new
