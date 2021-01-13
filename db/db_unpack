@@ -223,6 +223,7 @@ def parse_argv
 
   unless ARGV.size == 2 or ARGV.size == 3
     STDERR.puts "Usage: #{$0} [--comma] [--tsv] input/ output/ [fail/]"
+    exit 1
   end
 
   [Pathname(ARGV[0]), Pathname(ARGV[1]), ARGV[2] && Pathname(ARGV[2]), comma_mode, strict]
