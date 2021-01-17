@@ -167,4 +167,16 @@ class EsfScript
       result
     end
   end
+
+  def faction_ids
+    unless @faction_ids
+      @faction_ids = {}
+      each_faction do |faction, faction_name|
+        id = faction.xpath("i")[0].content
+        @faction_ids[id] = faction_name
+        false
+      end
+    end
+    @faction_ids
+  end
 end
