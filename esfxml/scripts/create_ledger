@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+
+class CreateLedger
+  def initialize(save_path)
+    @save_path = Pathname(save_path)
+  end
+
+  def unpacked_path
+    @unpacked_path ||= Pathname(@save_path.to_s.sub(/\.empire_save\z/, ""))
+  end
+
+  def ledger_root
+    @unpacked_path + "ledger"
+  end
+  
+  def ledger_scripts
+    {
+      navy: "list_navy",
+      army: "list_military",
+      government: "analyze_government",
+      research: "list_research",
+      regions: "list_region_ownership",
+    }
+  end
+
+  def unpack_save!
+    return if unpacked_path.exist?
+    raise unless @save_path.extname == ".empire_save"
+    system "#{__dir__}/../esf2xml", @save_path.to_s, unpacked_path.to_s
+  end
+
+  def call_script!(page, script)
+    output_path = ledger_root + "#{page}.txt"
+    return if output_path.exist?
+    system "#{__dir__}/#{script} '#{unpacked_path.to_s}' >'#{output_path.to_s}'"
+  end
+
+  def call
+    unpack_save!
+    ledger_root.mkpath
+    ledger_scripts.each do |page, script|
+      call_script! page, script
+    end
+  end
+end
+
+unless ARGV.size == 1
+  STDERR.puts "Usage: #{$0} file.empire_save"
+  exit 1
+end
+
+CreateLedger.new(ARGV[0]).call
