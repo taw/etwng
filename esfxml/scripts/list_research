@@ -63,7 +63,16 @@ class ListResearch < EsfScript
 
     puts ""
     researched_by.map{|fn,d| [d.size, fn]}.sort.reverse.each do |score, faction_name|
-      puts "#{score} #{faction_name}: #{ researched_by[faction_name].sort.map{|tn| researched_by[human_player].include?(tn) ? tn : Paint[tn.upcase, "green"]}.join(", ") }"
+      researched_list = researched_by[faction_name].sort.map{|tn|
+        if researched_by[human_player].include?(tn)
+          tn
+        elsif STDOUT.tty?
+          Paint[tn.upcase, "green"]
+        else
+          tn
+        end
+      }
+      puts "#{score} #{faction_name}: #{ researched_list.join(", ") }"
     end
 
     # Trades
