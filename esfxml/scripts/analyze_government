@@ -9,6 +9,31 @@ class AnalyzeGovernment < EsfScript
     CSV.read("#{__dir__}/data/#{path}", { col_sep: "\t" })
   end
 
+  def trait_level_to_character_trait_table
+    unless @trait_level_to_character_trait_table
+      @trait_level_to_character_trait_table = {}
+      data = load_tsv("character_trait_levels.tsv")
+      data[2..-1].each do |ct,ctl,t,tl|
+        @trait_level_to_character_trait_table[t] ||= []
+        @trait_level_to_character_trait_table[t] << [Integer(tl), Integer(ctl), ct]
+      end
+    end
+    @trait_level_to_character_trait_table
+  end
+
+  def trait_level_to_character_trait(trait_str)
+    trait, level = trait_str.split("=")
+    level = level.to_i
+    levels = trait_level_to_character_trait_table[trait] or raise "No such trait #{trait}"
+    best_level = levels.select{|tl,ctl,t| level >= tl}.max_by{|tl,ctl,t| ctl}
+    if best_level.nil?
+      # Might not have enough points to get a trait
+      nil
+    else
+      best_level.last
+    end
+  end
+
   def trait_effects
     unless @trait_effects
       @trait_effects = {}
@@ -32,15 +57,17 @@ class AnalyzeGovernment < EsfScript
     raise "Cannot find"
   end
 
-
+  def cleanup_name(name)
+    name.sub(/\Anames_name_names_(dutch|)/, "")
+  end
 
   def characters
     unless @characters
       @characters = {}
       update_each_xml("character/*.xml", "/rec[@type='CHARACTER_ARRAY']") do |char|
-        traits = char.xpath("//rec[@type='CHARACTER_DETAILS']/traits").text.gsub("=", "_").strip.split(/\s+/)
+        traits = char.xpath("//rec[@type='CHARACTER_DETAILS']/traits").text.strip.split(/\s+/).map{|t| trait_level_to_character_trait(t)}.compact
         anc = char.xpath("//rec[@type='CHARACTER_DETAILS']/agent_ancillaries").text.strip.split(/\s+/)
-        names = char.xpath("//rec[@type='CHARACTER_DETAILS']/loc")[0,2].map(&:text).map{|t| t.sub(/\Anames_name_names_(dutch|)/, "")}
+        names = char.xpath("//rec[@type='CHARACTER_DETAILS']/loc")[0,2].map(&:text).map{|t| cleanup_name(t)}
         character_id = char.xpath("//rec[@type='CHARACTER_DETAILS']/u")[0].text
         raise "Already exists: #{character_id}" if @characters[character_id]
         @characters[character_id] = {
@@ -77,7 +104,7 @@ class AnalyzeGovernment < EsfScript
       name = char[:names].join(" ")
       bonus = Hash.new(0)
 
-      puts name
+      puts "#{name} - #{pos}"
 
       (char[:anc] + char[:traits]).each do |t|
         # There is another mwhole level here :-/
@@ -85,13 +112,20 @@ class AnalyzeGovernment < EsfScript
           trait_effects[t].each do |b,v|
             bonus[b] += v
           end
-          warn "Found bonuses for #{t} - #{trait_effects[t] }"
+          # warn "Found bonuses for #{t} - #{trait_effects[t] }"
         else
           warn "Cannot find bonuses for: #{t}"
         end
       end
 
-      p [pos, characters[i], bonus]
+      bonus.each do |k,v|
+        bonus.delete(k) if v == 0
+        bonus.delete("happy_character_upper") if @gov_type == "gov_republic"
+        bonus.delete("happy_character_middle") if @gov_type == "gov_absolute_monarchy"
+        bonus.delete("happy_character_lower") if @gov_type == "gov_constitutional_monarchy"
+      end
+
+      p bonus
       puts ""
     end
   end
