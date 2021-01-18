@@ -18,10 +18,10 @@ file "pack/fuse/packfs" do
   end
 end
 
+# No point building luadec anymore
 desc "Run tests"
-task "test" => ["pack/fuse/packfs", "luac/luadec"] do
+task "test" => ["pack/fuse/packfs"] do
   raise "Can't see packfs" unless Pathname("pack/fuse/packfs").exist?
-  raise "Can't see luadec" unless Pathname("luac/luadec").exist?
 end
 
 desc "clean up build files"
