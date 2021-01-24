@@ -14,6 +14,10 @@ db/t?
 esfxml/esf
 esfxml/out
 esfxml/output
+esfxml/startpos*
+esfxml/*Summer*
+esfxml/*Winter*
+esfxml/etwsave
 etw
 extras
 gfconv/groupformations*.bin

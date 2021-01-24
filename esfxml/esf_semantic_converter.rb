@@ -852,7 +852,7 @@ end
     end
   end
 
-  def convert_rec_POPULATION_CLASSES
+  def convert_rec_POPULATION__CLASSES
     data, = get_rec_contents([:rec, :POPULATION_CLASS, nil])
     data = ensure_types(data, :s, :bin4, :bin4, :i,:i,:i,:i,:i, :u,:u,:u, :i,:i)
     cls = data.shift
@@ -1279,7 +1279,7 @@ end
       [:flt_ary, 0] => "Demand"
   end
 
-  def convert_rec_THEATHRES
+  def convert_rec_THEATRES
     annotate_rec_nth "THEATRES",
       [:s, 0] => "Theatre ID"
   end
