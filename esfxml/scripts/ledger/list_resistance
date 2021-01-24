@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+
+require_relative "../esf_script"
+
+class ListResistance < EsfScript
+  def call
+    owner = {}
+    each_region do |region|
+      name = region.xpath("s")[0].content
+      faction_name = faction_ids[region.xpath("u")[9].text]
+      owner[name] = faction_name
+    end
+
+    by_region = {}
+    each_file("population/*.xml") do |path|
+      values = []
+      iter_xml(path, "//population_class") do |pc|
+        values << Integer(pc["Resistance_To_Foreign_Occupation"])
+      end
+      if values.empty?
+        warn "Empty values for #{path}"
+      end
+      if values.uniq.size > 1
+        raise "Inconsistent values for #{path}"
+      end
+      resistance = -values[0]
+      next if resistance == 0
+      name = File.basename(path, ".xml")
+      by_region[name] = resistance
+    end
+
+    by_region.sort_by(&:last).each do |name, resistance|
+      puts "#{name} (#{owner[name]}) - #{resistance}"
+    end
+  end
+end
+
+ListResistance.new

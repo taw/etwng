@@ -17,16 +17,17 @@ class CreateLedger
   
   def ledger_scripts
     {
-      government: "analyze_government",
       buildings: "list_buildings",
       diplomacy: "list_diplomacy",
       faction_ids: "list_faction_ids",
       factions: "list_factions",
+      government: "analyze_government",
       military: "list_military",
       navy: "list_navy",
       region_ids: "list_region_ids",
       region_ownership: "list_region_ownership",
       research: "list_research",
+      resistance: "list_resistance",
       treasury: "list_treasury",
     }
   end
