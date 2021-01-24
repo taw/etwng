@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class ListNavy < EsfScript
   # could regexp name as well
@@ -26,7 +26,7 @@ class ListNavy < EsfScript
     end
   end
 
-  def run!
+  def call
     units = {}
     each_unit do |unit, faction_name|
       type = unit.xpath("naval_key")[0].text

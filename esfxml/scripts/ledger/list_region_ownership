@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class ListRegionOwnership < EsfScript
   def each_region
@@ -10,7 +10,7 @@ class ListRegionOwnership < EsfScript
     end
   end
 
-  def run!
+  def call
     by_faction = {}
     each_region do |region|
       name = region.xpath("s")[0].content

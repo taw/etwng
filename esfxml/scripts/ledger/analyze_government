@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 require "csv"
-require "pry"
 
 class AnalyzeGovernment < EsfScript
   def load_tsv(path)
@@ -94,9 +93,8 @@ class AnalyzeGovernment < EsfScript
     end
   end
 
-  def run!
+  def call
     find_minister_ids
-
     trait_effects
 
     @minister_ids.each do |pos,i|

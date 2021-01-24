@@ -1,13 +1,12 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class ListFactions < EsfScript
-  def run!
+  def call
     factions = []
     each_faction do |faction, faction_name|
       factions << faction_name
-      false
     end
     puts factions.sort
   end

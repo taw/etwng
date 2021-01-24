@@ -8,7 +8,7 @@ class CreateLedger
   end
 
   def unpacked_path
-    @unpacked_path ||= Pathname(@save_path.to_s.sub(/\.empire_save\z/, ""))
+    @unpacked_path ||= Pathname(@save_path.to_s.sub(/\.(empire_save|esf)\z/, ""))
   end
 
   def ledger_root
@@ -17,18 +17,24 @@ class CreateLedger
   
   def ledger_scripts
     {
-      navy: "list_navy",
-      army: "list_military",
       government: "analyze_government",
+      buildings: "list_buildings",
+      diplomacy: "list_diplomacy",
+      faction_ids: "list_faction_ids",
+      factions: "list_factions",
+      military: "list_military",
+      navy: "list_navy",
+      region_ids: "list_region_ids",
+      region_ownership: "list_region_ownership",
       research: "list_research",
-      regions: "list_region_ownership",
+      treasury: "list_treasury",
     }
   end
 
   def unpack_save!
     return if unpacked_path.exist?
     raise unless @save_path.extname == ".empire_save"
-    system "#{__dir__}/../esf2xml", @save_path.to_s, unpacked_path.to_s
+    system "#{__dir__}/../../esf2xml", @save_path.to_s, unpacked_path.to_s
   end
 
   def call_script!(page, script)
@@ -46,8 +52,10 @@ class CreateLedger
   end
 end
 
+# This accidentally works both ways
 unless ARGV.size == 1
   STDERR.puts "Usage: #{$0} file.empire_save"
+  STDERR.puts "   or: #{$0} unpacked_esf_dir"
   exit 1
 end
 

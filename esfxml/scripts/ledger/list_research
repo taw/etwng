@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 require "paint"
 
 class ListResearch < EsfScript
-  def run!
+  def call
     tech_data = {}
 
     each_faction do |faction, faction_name|
@@ -69,7 +69,7 @@ class ListResearch < EsfScript
         elsif STDOUT.tty?
           Paint[tn.upcase, "green"]
         else
-          tn
+          tn.upcase
         end
       }
       puts "#{score} #{faction_name}: #{ researched_list.join(", ") }"

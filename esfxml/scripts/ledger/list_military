@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class ListMilitary < EsfScript
   # could regexp name as well
@@ -11,7 +11,6 @@ class ListMilitary < EsfScript
         faction.xpath("ary[@type='ARMY_ARRAY']/xml_include").map{|c| c['path'] }.each do |path|
           result[path] = faction_name
         end
-        false
       end
       result
     end
@@ -19,14 +18,13 @@ class ListMilitary < EsfScript
 
   def each_unit
     army_file_to_faction_map.each do |path, faction_name|
-      update_xml(xmldir+"/"+path, '//land_unit') do |unit|
+      iter_xml(xmldir+"/"+path, '//land_unit') do |unit|
         yield(unit, faction_name)
-        false
       end
     end
   end
 
-  def run!
+  def call
     units = {}
     each_unit do |unit, faction_name|
       type = unit['type']

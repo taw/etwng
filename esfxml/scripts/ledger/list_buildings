@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
-require "pry"
+require_relative "../esf_script"
+require "json"
 
 class ListBuildings < EsfScript
   def region_ownership
@@ -65,9 +65,9 @@ class ListBuildings < EsfScript
     end
   end
 
-  def run!
+  def call
     each_building_slot do |data|
-      p data
+      puts data.to_json
     end
   end
 end

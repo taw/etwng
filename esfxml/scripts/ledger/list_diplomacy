@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class ListDiplomacy < EsfScript
   def get_faction_ids
@@ -8,28 +8,26 @@ class ListDiplomacy < EsfScript
     each_faction do |faction, faction_name|
       id = faction.xpath("i")[0].content
       factions[id] = faction_name
-      false
     end
     factions
   end
 
-  def run!
+  def call
     faction_ids = get_faction_ids
     factions = []
     each_faction do |faction, faction_name|
       diplomacy_include = faction.xpath("xml_include").map{|xi| xi["path"]}.grep(/\Adiplomacy/)[0]
       next unless diplomacy_include
       path = "#{@xmldir}/#{diplomacy_include}"
-      update_xml(path, "//rec[@type='DIPLOMACY_RELATIONSHIP']") do |dr|
+      iter_xml(path, "//rec[@type='DIPLOMACY_RELATIONSHIP']") do |dr|
         second_faction_id = dr.xpath("i")[0].content
         second_faction_name = faction_ids[second_faction_id]
 
         relation = dr.xpath("s")[0].text
+        next if relation == "neutral"
         puts [faction_name, second_faction_name, relation].join("\t")
         # data = dr.xpath("*")[2..-1].map(&:to_s).join.gsub(%r[<!-- .*? -->], "").gsub(/\s+/, " ")
-        false
       end
-      false
     end
   end
 end
