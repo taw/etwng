@@ -3,12 +3,6 @@
 require "rubygems"
 require "nokogiri"
 
-class File
-  def self.write(path, contents)
-    File.open(path, 'wb'){|fh| fh.write contents}
-  end
-end
-
 def parse_splines(xml_path)
   contents = File.open(xml_path, 'rb', &:read)
   doc = Nokogiri.parse(contents)

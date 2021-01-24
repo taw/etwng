@@ -2,14 +2,6 @@ require "rubygems"
 require "nokogiri"
 require "pp"
 
-class File
-  def self.write(path, content)
-    File.open(path, 'wb') do |fh|
-      fh.write(content)
-    end
-  end
-end
-
 class EsfScript
   attr_reader :xmldir
   

@@ -4,12 +4,6 @@ require "fileutils"
 
 require_relative "./esf_scripts"
 
-class File
-  def self.write(path, contents)
-    File.open(path, 'wb'){|fh| fh.write contents}
-  end
-end
-
 Etw_region_names = Hash[[
  [0, "atlantic_ocean_se"],
  [1, "indian_ocean"],

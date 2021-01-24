@@ -4,12 +4,6 @@ require "rubygems"
 require "fileutils"
 require "pp"
 
-class File
-  def self.write(path, contents)
-    File.open(path, 'wb'){|fh| fh.write contents}
-  end
-end
-
 class SVG
   attr_accessor :width, :height, :transform
   def initialize
