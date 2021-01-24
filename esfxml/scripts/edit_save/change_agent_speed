@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
-class TurnsPerYear < EsfScript
-  def run!(type, speed)
+class ChangeAgentSpeed < EsfScript
+  def call(type, speed)
     type = type.downcase
     update_each_xml("character/*.xml", "//rec[@type='CHARACTER']") do |chara|
       chara_type = chara.xpath("s")[0].text
@@ -21,7 +21,6 @@ class TurnsPerYear < EsfScript
       new_mp_avail = 0 if new_mp_avail < 0
 
       name = chara.xpath("rec[@type='CHARACTER_DETAILS']/loc").map(&:text)[0,2].map{|x| x.sub("names_name_names_", "")}.join(" ")
-
 
       puts "Updating #{chara_type} #{name}: #{mp_avail.text}/#{mp_total.text} to #{new_mp_avail}/#{speed}"
 
@@ -69,10 +68,8 @@ class TurnsPerYear < EsfScript
       STDERR.puts "Admirals/Captains/Generals/Colonel follow their units, and are not affected by this (AFAIK)"
     end
 
-
-
     speed =~ /\A\d+\z/
   end
 end
 
-TurnsPerYear.new
+ChangeAgentSpeed.new

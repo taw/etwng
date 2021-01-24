@@ -1,5 +1,10 @@
 #!/usr/bin/env ruby
 
+unless ARGV.size == 1
+  STDERR.puts "Usage: #{$0} target"
+  exit 1
+end
+
 orig = 'output/dmuc_cstartpos_orig'
 target = ARGV[0]
 

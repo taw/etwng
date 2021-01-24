@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class PathsUnExpand < EsfScript
-  def run!
+  def call
     update_each_file("pathfinding_areas*.xml") do |file|
       file.gsub(%r[</u4_ary>\s*<u4_ary>]m, "")
     end

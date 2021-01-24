@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class MakeAllFactionsMajor < EsfScript
-  def run!
-    each_faction do |faction, faction_name|
+  def call
+    update_each_faction do |faction, faction_name|
       faction.xpath("yes|no")[2].name = 'yes'
       true
     end

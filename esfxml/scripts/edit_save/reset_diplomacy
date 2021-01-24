@@ -1,20 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
-class ResetDiplomacyPartial < EsfScript
-  def get_faction_ids
-    factions = {}
-    each_faction do |faction, faction_name|
-      id = faction.xpath("i")[0].content
-      factions[id] = faction_name
-      false
-    end
-    factions
-  end
-
-  def run!
-    faction_ids = get_faction_ids
+class ResetDiplomacy < EsfScript
+  def call
     factions = []
     each_faction do |faction, faction_name|
       diplomacy_include = faction.xpath("xml_include").map{|xi| xi["path"]}.grep(/\Adiplomacy/)[0]
@@ -36,22 +25,28 @@ class ResetDiplomacyPartial < EsfScript
     # Do not reset trade, as it leaves half-working trade routes
     return if !([faction1, faction2] & ["pirates"]).empty?
     dr.xpath("*/draa").each_with_index do |draa, i|
-      # 2 alliance broken
-      # 3 alliances not honored
-      # 12 territorial expansion
-      # 14 assassinations
-      # 15 religion
-      # 16 government
-      # 17 historical
-      # 18 sabotage
-      # 19 espionage
-      # 20 threats
-      next unless [2, 3, 12, 14, 15, 16, 17, 18, 19, 20].include?(i)
+      next if [5, 6, 15, 16].include?(i) # trade, trade broken, religion, gov type
       draa.attributes.each do |name, attr|
         attr.remove
+      end
+    end
+    # dr[2] is trade agreement
+    dr.xpath("*")[3..-1].each do |node|
+      if node.name == 'yes' or node.name == 'no'
+        node.name = 'no'
+      elsif node.name == 'i' or node.name == 'u'
+        node.content = '0'
+      elsif node.name == 's'
+        node.content = 'neutral'
+      elsif node.name == 'ary'
+        node.content = ""
+      elsif node.name == "u4_ary"
+        node.content = "0 0 0 0 0 0 0 0 0 0 0"
+      else
+        raise "Unexpected node: #{node.name}"
       end
     end
   end
 end
 
-ResetDiplomacyPartial.new
+ResetDiplomacy.new

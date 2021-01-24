@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class MakeMoreVanillaFactionsPlayable < EsfScript
-  def run!
+  def call
     # Make default vanilla states playable *including* protectorates
     # Not every one of them has sensible gameplay options
     # If you want to play protectorates you'll need to fix diplomacy options
@@ -41,7 +41,6 @@ class MakeMoreVanillaFactionsPlayable < EsfScript
       new_spain
       saxony
       thirteen_colonies
-
     ]
 
     factions.each do |faction_to_change|

@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class StartingTreasury < EsfScript
-  def run!(faction_to_change, treasury)
+  def call(faction_to_change, treasury)
     update_faction(faction_to_change) do |faction|
       faction.xpath("rec[@type='FACTION_ECONOMICS']/i")[0].content = treasury
       true

@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class RemoveAllFortifications < EsfScript
-  def run!
+  def call
     buildings_to_remove = [
       'settlement_fortifications', 'improved_settlement_fortifications'
     ]

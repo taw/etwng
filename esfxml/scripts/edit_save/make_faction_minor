@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class MakeFactionMinor < EsfScript
-  def run!(faction_to_change)
+  def call(faction_to_change)
     update_faction(faction_to_change) do |faction|
       faction.xpath("yes|no")[2].name = 'no'
       true

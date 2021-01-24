@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class RemoveResistanceToOccupation < EsfScript
-  def run!
+  def call
     update_each_xml("population/*.xml", "//population_class") do |pc|
       # Do not remove positive resistance (against raids by enemy armies)
       pc['resistance'] = '0' if pc['resistance'].to_i < 0

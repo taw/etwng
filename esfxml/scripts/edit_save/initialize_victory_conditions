@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class InitializeVictoryConditions < EsfScript
-  def run!
+  def call
     factions = %W[
       bavaria
       chechenya_dagestan

@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class GiveAllTechnologies < EsfScript
-  def run!(faction_to_change)
+  def call(faction_to_change)
     update_factions_technologies(faction_to_change) do |techs|
       techs.xpath("techs").each do |tech_node|
         tech_node['status'] = '0'

@@ -90,9 +90,40 @@ class EsfScript
     end
   end
 
+  def update_each_faction
+    update_each_xml("factions/*.xml", "//rec[@type='FACTION']") do |faction|
+      faction_name = faction.xpath("rec[@type='CAMPAIGN_PLAYER_SETUP']/s")[0].text
+      yield(faction, faction_name)
+    end
+  end
+
+  def update_faction(faction_to_change)
+    update_each_faction do |faction, faction_name|
+      next unless faction_to_change == "*" or faction_to_change == faction_name
+      yield(faction)
+    end
+  end
+
   def each_region
     each_xml('region/*.xml', "//rec[@type='REGION']") do |region|
       yield(region)
+    end
+  end
+
+  def update_factions_technologies(faction_to_change, &blk)
+    update_each_faction do |faction, faction_name|
+      next unless faction_to_change == "*" or faction_to_change == faction_name
+      tech_includes = faction.xpath("xml_include").map{|node| node['path']}.grep(/\Atechnology\//)
+      # Rebel faction ("") has no technologies and it's ok
+      # Other factions having no technologies are weird
+      if tech_includes.empty? and faction_name != ""
+        warn "No technology found for faction #{faction_name.inspect}"
+        next
+      end
+      tech_includes.each do |tech_include|
+        update_xml(xmldir+"/"+tech_include, "//ary[@type='techs']", &blk)
+      end
+      false
     end
   end
 
@@ -124,5 +155,39 @@ class EsfScript
       end
     end
     @faction_ids
+  end
+
+  def make_faction_playable(faction_to_change)
+    update_each_xml("preopen_map_info/info*.xml", "//rec[@type='FACTION_INFOS']") do |fi|
+      next unless fi.xpath("s")[0].content == faction_to_change
+      fi.xpath("yes|no")[0].name = 'yes'
+      fi.xpath("yes|no")[1].name = 'yes'
+      true
+    end
+    update_each_xml("preopen_map_info/info*.xml", "//rec[@type='CAMPAIGN_PLAYER_SETUP']") do |pa|
+      next unless pa.xpath("s")[0].content == faction_to_change
+      pa.xpath('yes|no')[1].name = 'yes'
+      true
+    end
+    update_each_xml("campaign_env/campaign_setup*.xml", "//rec[@type='CAMPAIGN_PLAYER_SETUP']") do |pa|
+      next unless pa.xpath("s")[0].content == faction_to_change
+      pa.xpath('yes|no')[1].name = 'yes'
+      true
+    end
+    update_faction(faction_to_change) do |faction|
+      cps = faction.xpath("//rec[@type='CAMPAIGN_PLAYER_SETUP']")[0]
+      cps.xpath('yes|no')[1].name = 'yes'
+      true
+    end
+  end
+
+  def region_name_to_id
+    unless @region_name_to_id
+      @region_name_to_id = {}
+      each_region do |region|
+        @region_name_to_id[region.xpath("s")[0].content] = region.xpath("i")[0].content
+      end
+    end
+    @region_name_to_id
   end
 end

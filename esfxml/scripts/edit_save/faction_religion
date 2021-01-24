@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class FactionReligion < EsfScript
-  def run!(faction_to_change, religion)
+  def call(faction_to_change, religion)
     religion = "rel_#{religion}" unless religion =~ /\Arel_/
     update_faction(faction_to_change) do |faction|
       faction.xpath("s")[2].content = religion

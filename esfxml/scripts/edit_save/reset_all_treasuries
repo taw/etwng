@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class ResetAllTreasuries < EsfScript
-  def run!(treasury)
-    each_faction do |faction, faction_name|
+  def call(treasury)
+    update_each_faction do |faction, faction_name|
       faction.xpath("rec[@type='FACTION_ECONOMICS']/i")[0].content = treasury
       true
     end

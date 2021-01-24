@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class TurnsPerYear < EsfScript
-  def run!(turns_per_year)
+  def call(turns_per_year)
     update_each_xml("campaign_env/campaign_model*.xml", "//rec[@type='CAMPAIGN_CALENDAR']") do |calendar|
       calendar.xpath('*')[0].content = turns_per_year
       true

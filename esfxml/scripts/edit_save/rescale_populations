@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class RescalePopulations < EsfScript
-  def each_population(&blk)
+  def update_each_population(&blk)
     update_each_xml("population/*", "//rec[@type='POPULATION']", &blk)
   end
 
   def update_population(&blk)
-    each_population do |pop|
+    update_each_population do |pop|
       rf = pop.xpath("rec[@type='REGION_FACTORS']/u")
       populations = [rf[0], rf[2], *pop.xpath("u")]
       pop = populations.map(&:inner_text).map(&:to_i)
@@ -30,7 +30,7 @@ class RescalePopulations < EsfScript
     end
   end
 
-  def run!(low, high)
+  def call(low, high)
     low = low.gsub('_', '').to_i
     high = high.gsub('_', '').to_i
     population_limits = []
@@ -66,4 +66,3 @@ class RescalePopulations < EsfScript
 end
 
 RescalePopulations.new
-

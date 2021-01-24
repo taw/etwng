@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative "./esf_scripts"
+require_relative "../esf_script"
 
 class GiveTechnology < EsfScript
-  def run!(faction_to_change, *techs)
+  def call(faction_to_change, *techs)
     tech_regexp = build_regexp_from_globs(techs)
     update_factions_technologies(faction_to_change) do |tech_nodes|
       tech_nodes.xpath("techs").each do |tech_node|
@@ -25,7 +25,7 @@ class GiveTechnology < EsfScript
   def initialize
     self.xmldir, *argv = *ARGV
     usage_error("faction tech1 tech2 tech_* ...") unless argv.size >= 2
-    run!(*argv)
+    call(*argv)
   end
 end
 
