@@ -4,67 +4,6 @@ require_relative "../esf_script"
 require "json"
 
 class ListBuildings < EsfScript
-  def region_ownership
-    unless @region_ownership
-      @region_ownership = {}
-      each_region do |region|
-        name = region.xpath("s")[0].content
-        faction_name = faction_ids[region.xpath("u")[9].text]
-        theater = region.xpath("s")[1].text
-        @region_ownership[name] = faction_name
-      end
-    end
-    @region_ownership
-  end
-
-  def each_building_slot_xml
-    each_file("region_slot/*.xml") do |file_name|
-      update_xml(file_name, "/rec") do |node|
-        yield(file_name, node)
-        false
-      end
-    end
-  end
-
-  def each_building_slot
-    each_building_slot_xml do |file_name, node|
-      case node["type"]
-      when "FORT_ARRAY"
-        next
-      when "SETTLEMENT"
-        next
-      when "REGION_SLOT_ARRAY"
-        type = "slot"
-      when "ROAD_SLOT"
-        type = "road"
-      when "FORTIFICATION_SLOT"
-        type = "fort"
-      else
-        raise "Unknown node type #{node["type"]}"
-      end
-      id = node.xpath("//rec[@type='REGION_SLOT']/s").text
-      resource_yield = Integer(node.xpath("//rec[@type='REGION_SLOT']/i")[2].text)
-      wealth = Integer(node.xpath("//rec[@type='REGION_SLOT']/i")[3].text)
-      building = node.xpath("//building")[0]
-      emerged = (node.xpath("//rec[@type='REGION_SLOT']/*")[9].name == "yes")
-      emergence_order = Integer(node.xpath("//rec[@type='REGION_SLOT']/u")[2].text)
-      owner = region_ownership[id.split(":")[1]]
-      not_yet = (emergence_order > 0) && (!emerged)
-      constructing = !!node.xpath("//rec[@type='BUILDING_CONSTRUCTION_ITEM']")[0]
-
-      yield({
-        type: type,
-        id: id,
-        resource_yield: resource_yield > 0 ? resource_yield : nil,
-        wealth: wealth > 0 ? wealth : nil,
-        building: (building && building["name"]),
-        not_yet: not_yet ? true : nil,
-        owner: owner,
-        constructing: constructing ? true : nil,
-      }.compact)
-    end
-  end
-
   def call
     output = []
     each_building_slot do |data|

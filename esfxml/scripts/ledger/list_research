@@ -48,15 +48,13 @@ class ListResearch < EsfScript
     end
 
     # Invert
-    researched_by = {}
-    available_to = { }
+    researched_by = Hash.new{|k,v| k[v] = []}
+    available_to = Hash.new{|k,v| k[v] = []}
     tech_data.each do |name, data|
       data.each do |faction_name, status|
         if status == 0
-          researched_by[faction_name] ||= []
           researched_by[faction_name] << name
         elsif status == 2
-          available_to[faction_name] ||= []
           available_to[faction_name] << name
         end
       end
