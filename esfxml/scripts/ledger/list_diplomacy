@@ -22,6 +22,7 @@ class ListDiplomacy < EsfScript
       iter_xml(path, "//rec[@type='DIPLOMACY_RELATIONSHIP']") do |dr|
         second_faction_id = dr.xpath("i")[0].content
         second_faction_name = faction_ids[second_faction_id]
+        next unless faction_active?(second_faction_name)
 
         relation = dr.xpath("s")[0].text
         next if relation == "neutral"

@@ -3,25 +3,8 @@
 require_relative "../esf_script"
 
 class ListRegionOwnership < EsfScript
-  def each_region
-    update_each_xml("region/*", "rec[@type='REGION']") do |region|
-      yield(region)
-      false
-    end
-  end
-
   def call
-    by_faction = {}
-    each_region do |region|
-      name = region.xpath("s")[0].content
-      faction_name = faction_ids[region.xpath("u")[9].text]
-      theater = region.xpath("s")[1].text
-
-      by_faction[faction_name] ||= []
-      by_faction[faction_name] << name
-    end
-    
-    by_faction.sort_by{|k,v| [-v.size, k]}.each do |faction_name, regions|
+    regions_by_faction.sort_by{|k,v| [-v.size, k]}.each do |faction_name, regions|
       puts "#{faction_name} (#{regions.size}):"
       puts regions.map{|r| "* #{r}"}
     end

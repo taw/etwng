@@ -190,4 +190,24 @@ class EsfScript
     end
     @region_name_to_id
   end
+
+
+  def regions_by_faction
+    unless @regions_by_faction
+      @regions_by_faction = {}
+      each_region do |region|
+        name = region.xpath("s")[0].content
+        faction_name = faction_ids[region.xpath("u")[9].text]
+        theater = region.xpath("s")[1].text
+
+        @regions_by_faction[faction_name] ||= []
+        @regions_by_faction[faction_name] << name
+      end
+      end
+    @regions_by_faction
+  end
+
+  def faction_active?(name)
+    !!regions_by_faction[name]
+  end
 end
