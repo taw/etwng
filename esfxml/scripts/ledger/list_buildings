@@ -9,7 +9,7 @@ class ListBuildings < EsfScript
     each_building_slot do |data|
       output << data
     end
-    output.sort_by!{|x| x[:id].sub(/.*?:/, "")}
+    output.sort_by!{|x| x[:loc]}
     puts output.map(&:to_json)
   end
 end

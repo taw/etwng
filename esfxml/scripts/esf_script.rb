@@ -265,25 +265,43 @@ class EsfScript
       else
         raise "Unknown node type #{node["type"]}"
       end
-      id = node.xpath("//rec[@type='REGION_SLOT']/s").text
+      loc = node.xpath("//rec[@type='REGION_SLOT']/s").text.split(":")
+      loc.push loc.shift
       resource_yield = Integer(node.xpath("//rec[@type='REGION_SLOT']/i")[2].text)
       wealth = Integer(node.xpath("//rec[@type='REGION_SLOT']/i")[3].text)
       building = node.xpath("//building")[0]
+      building = building["name"] if building
       emerged = (node.xpath("//rec[@type='REGION_SLOT']/*")[9].name == "yes")
       emergence_order = Integer(node.xpath("//rec[@type='REGION_SLOT']/u")[2].text)
-      owner = region_ownership[id.split(":")[1]]
+      owner = region_ownership[loc[0]]
       not_yet = (emergence_order > 0) && (!emerged)
       constructing = !!node.xpath("//rec[@type='BUILDING_CONSTRUCTION_ITEM']")[0]
 
+      raise "Building in town that did not emerge yet" if not_yet and building
+
+      # building mapping is a lot of fun here
+      if not_yet
+        building = "not yet"
+      elsif building == nil
+        case type
+        when "fort"
+          building = "no fort (0)"
+        when "road"
+          building = "no road (0)"
+        when "slot"
+          building = "no building (0)"
+        else
+          raise
+        end
+      end
+
       yield({
-        type: type,
-        id: id,
-        resource_yield: resource_yield > 0 ? resource_yield : nil,
-        wealth: wealth > 0 ? wealth : nil,
-        building: (building && building["name"]),
-        not_yet: not_yet ? true : nil,
+        loc: loc.join(":"),
+        building: building,
         owner: owner,
         constructing: constructing ? true : nil,
+        resource_yield: resource_yield > 0 ? resource_yield : nil,
+        wealth: wealth > 0 ? wealth : nil,
       }.compact)
     end
   end
