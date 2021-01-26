@@ -210,4 +210,20 @@ class EsfScript
   def faction_active?(name)
     !!regions_by_faction[name]
   end
+
+  def each_faction_diplomatic_relation
+    each_faction do |faction, faction_name|
+      diplomacy_include = faction.xpath("xml_include").map{|xi| xi["path"]}.grep(/\Adiplomacy/)[0]
+      next unless diplomacy_include
+      path = "#{@xmldir}/#{diplomacy_include}"
+      iter_xml(path, "//rec[@type='DIPLOMACY_RELATIONSHIP']") do |dr|
+        second_faction_id = dr.xpath("i")[0].content
+        second_faction_name = faction_ids[second_faction_id]
+        next unless faction_active?(second_faction_name)
+        relation = dr.xpath("s")[0].text
+        next if relation == "neutral"
+        yield(faction_name, second_faction_name, relation)
+      end
+    end
+  end
 end

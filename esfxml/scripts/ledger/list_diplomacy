@@ -3,24 +3,7 @@
 require_relative "../esf_script"
 
 class ListDiplomacy < EsfScript
-  def each_faction_diplomatic_relation
-    each_faction do |faction, faction_name|
-      diplomacy_include = faction.xpath("xml_include").map{|xi| xi["path"]}.grep(/\Adiplomacy/)[0]
-      next unless diplomacy_include
-      path = "#{@xmldir}/#{diplomacy_include}"
-      iter_xml(path, "//rec[@type='DIPLOMACY_RELATIONSHIP']") do |dr|
-        second_faction_id = dr.xpath("i")[0].content
-        second_faction_name = faction_ids[second_faction_id]
-        next unless faction_active?(second_faction_name)
-        relation = dr.xpath("s")[0].text
-        next if relation == "neutral"
-        yield(faction_name, second_faction_name, relation)
-      end
-    end
-  end
-
   def call
-    factions = []
     each_faction_diplomatic_relation do |faction1, faction2, rel|
       puts [faction1, faction2, rel].join("\t")
     end

@@ -1,0 +1,73 @@
+#!/usr/bin/env ruby
+
+require_relative "../esf_script"
+
+class ListAllianceClusters < EsfScript
+  def active_factions
+    unless @active_factions
+      @active_factions = []
+      each_faction do |faction, faction_name|
+        next unless faction_active?(faction_name)
+        @active_factions << faction_name
+      end
+    end
+    @active_factions
+  end
+
+  def relations
+    unless @relations
+      @relations = {}
+      each_faction_diplomatic_relation do |faction1, faction2, rel|
+        next if rel == "war"
+        @relations[faction1] ||= {}
+        @relations[faction1][faction2] = rel
+      end
+    end
+    @relations
+  end
+
+  def assign_to_cluster(name, id)
+    if @clusters[name]
+      if @clusters[name] != id
+        raise "Conflicting assignment" 
+      else
+        return
+      end
+    end
+    @clusters[name] = id
+    if relations[name]
+      relations[name].each do |name2, rel|
+        assign_to_cluster name2, id
+      end
+    end
+  end
+
+  def clusters
+    unless @clusters
+      @clusters = {}
+      active_factions.each do |name|
+        next if @clusters[name]
+        assign_to_cluster name, @clusters.size
+      end
+    end
+    @clusters
+  end
+
+  def relationships_of(name)
+    if relations[name]
+      "#{name} - #{relations[name].map{|n,r| r == "allied" ? n : "#{n} (#{r})"}.join(", ")}"
+    else
+      name
+    end
+  end
+
+  def call
+    puts active_factions.group_by(&clusters).values.sort_by{|nn| [-nn.size, nn.min]}.map{|nn|
+      nn.sort.map{|n|
+        relationships_of(n)
+      }.join("\n")
+    }.join("\n\n")
+  end
+end
+
+ListAllianceClusters.new
