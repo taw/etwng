@@ -8,6 +8,7 @@ class ListResearch < EsfScript
     tech_data = {}
 
     each_faction do |faction, faction_name|
+      next unless faction_active?(faction_name)
       tech_includes = faction.xpath("xml_include").map{|node| node['path']}.grep(/\Atechnology\//)
       # Rebel faction ("") has no technologies and it's ok
       # Other factions having no technologies are weird
