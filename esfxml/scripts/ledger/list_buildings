@@ -50,25 +50,28 @@ class ListBuildings < EsfScript
       emergence_order = Integer(node.xpath("//rec[@type='REGION_SLOT']/u")[2].text)
       owner = region_ownership[id.split(":")[1]]
       not_yet = (emergence_order > 0) && (!emerged)
+      constructing = !!node.xpath("//rec[@type='BUILDING_CONSTRUCTION_ITEM']")[0]
 
       yield({
         type: type,
-        # path: file_name,
         id: id,
-        resource_yield: resource_yield,
-        wealth: wealth,
+        resource_yield: resource_yield > 0 ? resource_yield : nil,
+        wealth: wealth > 0 ? wealth : nil,
         building: (building && building["name"]),
-        not_yet: not_yet,
+        not_yet: not_yet ? true : nil,
         owner: owner,
-        constructing: !!node.xpath("//rec[@type='BUILDING_CONSTRUCTION_ITEM']")[0],
-      })
+        constructing: constructing ? true : nil,
+      }.compact)
     end
   end
 
   def call
+    output = []
     each_building_slot do |data|
-      puts data.to_json
+      output << data
     end
+    output.sort_by!{|x| x[:id].sub(/.*?:/, "")}
+    puts output.map(&:to_json)
   end
 end
 
