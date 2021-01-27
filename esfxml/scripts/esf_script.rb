@@ -4,7 +4,7 @@ require "pp"
 
 class EsfScript
   attr_reader :xmldir
-  
+
   def initialize
     self.xmldir, *argv = *ARGV
     usage_error(args) unless argv.size == args.size and check_args(*argv)
@@ -15,13 +15,13 @@ class EsfScript
     STDERR.puts "Usage: #{$0} extracted_esf_directory #{args_spec}"
     exit 1
   end
-  
+
   def xmldir=(xmldir)
     raise "#{xmldir} doesn't exist" unless File.directory?(xmldir)
     raise "#{xmldir} doesn't look like unpacked esf file" unless File.exist?(xmldir + "/esf.xml")
     @xmldir = xmldir
   end
-  
+
   def args
     []
   end
@@ -33,7 +33,7 @@ class EsfScript
   def each_file(glob, &blk)
     Dir[xmldir + "/" + glob].sort.select{|file_name| File.file?(file_name)}.each(&blk)
   end
-  
+
   def update_file(file_name)
     content = File.open(file_name, 'rb', &:read)
     new_content = yield(content)
@@ -41,7 +41,7 @@ class EsfScript
       File.write(file_name, new_content)
     end
   end
-  
+
   def create_new_file(file_name, doc)
     warn "File already exists: #{file_name}" if File.exist?(file_name)
     File.write(file_name, doc.to_s)
@@ -56,7 +56,7 @@ class EsfScript
     end
     File.write(file_name, doc.to_s) if changed
   end
-    
+
   def update_each_xml(glob, xpath, &blk)
     each_file(glob) do |path|
       update_xml(path, xpath, &blk)
@@ -249,6 +249,204 @@ class EsfScript
     end
   end
 
+  BuildingNames = {
+    "school" => "school (1)",
+    "college" => "school (2)",
+    "university" => "school (3)",
+    "enlightened_university" => "school (4)",
+
+    "conservatorium" => "culture (1)",
+    "opera_house" => "culture (2)",
+    "grand_opera_house" => "culture (3; fun)",
+    "royal_observatory" => "culture (3; science)",
+    "great_museum" => "culture (4; fun)",
+    "prest_austria_albertina" => "culture (5; fun; austria)",
+    "prest_britain_british_museum" => "culture (5; fun; britain)",
+    "prest_ottomans_nur-u_osmaniye_mosque" => "culture (5; fun; ottomans)",
+    "prest_poland_lazienki_park" => "culture (5; fun; poland)",
+    "prest_russia_kunstkamara" => "culture (5; fun; russia)",
+    "prest_sweden_konglig_museum" => "culture (5; fun; sweden)",
+    "prest_unitedprovinces_teylers_museum" => "culture (5; fun; netherlands)",
+    "prest_usa_smithsonian" => "culture (5; fun; usa)",
+    "royal_academy" => "culture (4; science)",
+    "prest_prussia_berlin_academy" => "culture (5; science; prussia)",
+    "prest_spain_academia" => "culture (5; science; spain)",
+
+    "magistrate" => "government (1)",
+    "governors_residence" => "government (2)",
+    "governors_mansion" => "government (3)",
+    "governors_palace" => "government (4)",
+    "royal_palace" => "government (5)",
+    "imperial_palace" => "government (6)",
+    "prest_austria_hofburg" => "government (7; austria)",
+    "prest_britain_somerset_house" => "government (7; britain)",
+    "prest_france_palais_bourbon" => "government (7; france)",
+    "prest_maratha_shaniwarwada" => "government (7; maratha)",
+    "prest_russia_winter_palace" => "government (7; russia)",
+    "prest_spain_palacio_real_de_madrid" => "government (7; spain)",
+    "prest_sweden_slott" => "government (7; sweden)",
+    "prest_usa_independence_hall" => "government (7; usa)",
+
+    "minor_magistrate" => "minor government (1)",
+    "minor_governors_residence" => "minor government (2)",
+    "minor_governors_encampment" => "minor government (3; military)",
+    "minor_governors_barracks" => "minor government (4; military)",
+    "minor_governors_mansion" => "minor government (3; civ)",
+    "minor_governors_palace" => "minor government (4; civ)",
+    "minor_royal_palace" => "minor government (5; civ)",
+
+    "army_encampment" => "army (1)",
+    "army_barracks" => "army (2)",
+    "drill_school" => "army (3)",
+    "military_academy" => "army (4)",
+    "army_board" => "army (5)",
+    "army_staff_college" => "army (6)",
+    "prest_france_arc_de_triomphe" => "army (7; france)",
+    "prest_maratha_ajinkyatara" => "army (7; marathas)",
+    "prest_poland_akademia" => "army (7; poland)",
+    "prest_prussia_brandenburg_gate" => "army (7; prussia)",
+
+    "cannon_foundry" => "artillery (1)",
+    "ordnance_factory" => "artillery (2)",
+    "great_arsenal" => "artillery (3)",
+    "gunnery_school" => "artillery (4)",
+    "ordnance_board" => "artillery (5)",
+    "engineer_school" => "artillery (6)",
+
+    "admiralty" => "admirality (1)",
+    "naval_board" => "admirality (2)",
+    "naval_college" => "admirality (3)",
+    "prest_ottomans_naval_engineering_school" => "admirality (4; ottoman)",
+    "prest_unitedprovinces_kweekschool" => "admirality (4; netherlands)",
+
+    "coaching_inn" => "inn (1)",
+    "bawdy_house" => "inn (2)",
+    "theatre" => "inn (3)",
+    "pleasure_gardens" => "inn (4)",
+
+    "local_fishery" => "fish (1)",
+    "fishing_fleet" => "fish (2)",
+    "major_fishery" => "fish (3)",
+
+    "fur_merchant" => "fur (1)",
+    "fur_market" => "fur (2)",
+    "fur_exchange" => "fur (3)",
+
+    "shipyard" => "dock (1)",
+    "dockyard" => "dock (2)",
+    "drydock" => "dock (3)",
+
+    "open_gem_pit" => "gems (1)",
+    "deep_gem_shaft" => "gems (2)",
+
+    "timber_logging_camp" => "timber (1)",
+    "timber_lumber_mill" => "timber (2)",
+
+    "craft_workshops_textiles" => "textiles (1)",
+    "weavers_cottages" => "textiles (2)",
+    "water-powered_cloth_mill" => "textiles (3)",
+    "steam-powered_cloth_mill" => "textiles (4)",
+
+    "craft_workshops_metal" => "iron (1)",
+    "iron_workshops" => "iron (2)",
+    "ironmasters_works" => "iron (3)",
+    "steam_engine_factory" => "iron (4)",
+
+    "basic_roads" => "road (1)",
+    "improved_roads" => "road (2)",
+    "tarmac_roads" => "road (3)",
+
+    "trading_port" => "port (1)",
+    "commercial_port" => "port (2)",
+    "commercial_basin" => "port (3)",
+    "trading_company" => "port (4)",
+
+    "corn_peasant_farms" => "corn (1)",
+    "corn_tenanted_farms" => "corn (2)",
+    "corn_clearances" => "corn (3)",
+    "corn_great_estates" => "corn (4)",
+    "corn_great_royal_palace" => "corn (5)",
+
+    "wheat_peasant_farms" => "wheat (1)",
+    "wheat_tenanted_farms" => "wheat (2)",
+    "wheat_clearances" => "wheat (3)",
+    "wheat_great_estates" => "wheat (4)",
+    "wheat_great_royal_palace" => "wheat (5)",
+
+    "sheep_peasant_farms" => "sheep (1)",
+    "sheep_tenanted_farms" => "sheep (2)",
+    "sheep_clearances" => "sheep (3)",
+    "sheep_great_estates" => "sheep (4)",
+    "sheep_great_royal_palace" => "sheep (5)",
+
+    "small_spices_plantation" => "spices (1)",
+    "large_spices_plantation" => "spices (2)",
+    "spices_warehouse" => "spices (3)",
+
+    "small_tea_plantation" => "tea (1)",
+    "large_tea_plantation" => "tea (2)",
+    "tea_warehouse" => "tea (3)",
+
+    "small_cotton_plantation" => "cotton (1)",
+    "large_cotton_plantation" => "cotton (2)",
+    "cotton_warehouse" => "cotton (3)",
+
+    "small_tobacco_plantation" => "tobacco (1)",
+    "large_tobacco_plantation" => "tobacco (2)",
+    "tobacco_warehouse" => "tobacco (3)",
+
+    "small_coffee_plantation" => "coffee (1)",
+    "large_coffee_plantation" => "coffee (2)",
+    "coffee_warehouse" => "coffee (3)",
+
+    "small_sugar_plantation" => "sugar (1)",
+    "large_sugar_plantation" => "sugar (2)",
+    "sugar_warehouse" => "sugar (3)",
+
+    "rel_protestant_0" => "church protestant (1)",
+    "rel_protestant_1" => "church protestant (2)",
+    "rel_protestant_2" => "church protestant (3)",
+
+    "rel_catholic_0" => "church catholic (1)",
+    "rel_catholic_1" => "church catholic (2)",
+    "rel_catholic_2" => "church catholic (3)",
+
+    "rel_islam_0" => "church islam (1)",
+    "rel_islam_1" => "church islam (2)",
+    "rel_islam_2" => "church islam (3)",
+
+    "rel_orthodox_0" => "church orthodox (1)",
+    "rel_orthodox_1" => "church orthodox (2)",
+    "rel_orthodox_2" => "church orthodox (3)",
+
+    "rel_hindu_0" => "church hindu (1)",
+    "rel_hindu_1" => "church hindu (2)",
+    "rel_hindu_2" => "church hindu (3)",
+
+    "vineyards" => "wine (1)",
+    "wineries" => "wine (2)",
+    "wine_estates" => "wine (3)",
+
+    "rice_paddies" => "rice (1)",
+    "rice_farms" => "rice (2)",
+    "rice_farming_commune" => "rice (3)",
+
+    "settlement_fortifications" => "fort (1)",
+    "improved_settlement_fortifications" => "fort (2)",
+
+    "iron_mine" => "iron mine (1)",
+    "steam-pumped_iron_mine" => "iron mine (2)",
+    "industrial_iron_mining_complex" => "iron mine (3)",
+
+    "gold_mine" => "gold mine (1)",
+    "steam-pumped_gold_mine" => "gold mine (2)",
+    "industrial_gold_mining_complex" => "gold mine (3)",
+
+    "silver_mine" => "silver mine (1)",
+    "steam-pumped_silver_mine" => "silver mine (2)",
+    "industrial_silver_mining_complex" => "silver mine (3)",
+  }
+
   def each_building_slot
     each_building_slot_xml do |file_name, node|
       case node["type"]
@@ -293,6 +491,9 @@ class EsfScript
         else
           raise
         end
+      else
+        building = BuildingNames[building] || "#{building}"
+        # Give all buildings systematic names
       end
 
       yield({

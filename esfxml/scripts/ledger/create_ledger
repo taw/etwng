@@ -14,11 +14,12 @@ class CreateLedger
   def ledger_root
     @unpacked_path + "ledger"
   end
-  
+
   def ledger_scripts
     {
       alliance_clusters: "list_alliance_clusters",
       buildings: "list_buildings",
+      building_upgrades: "list_building_upgrades",
       diplomacy: "list_diplomacy",
       faction_ids: "list_faction_ids",
       factions: "list_factions",

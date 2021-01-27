@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+require_relative "../esf_script"
+require "json"
+
+class ListBuildingUpgrades < EsfScript
+  def each_human_building_slot
+    each_building_slot do |data|
+      next unless data.delete(:owner) == human_player
+      yield(data)
+    end
+  end
+
+  def call
+    output = {}
+    each_human_building_slot do |data|
+      output[data[:building]] ||= []
+      output[data[:building]] << data
+    end
+    output.sort.each do |type, entries|
+      puts type
+      puts entries.map{|e| e.merge(building: nil).compact.to_json}
+      puts ""
+    end
+  end
+end
+
+ListBuildingUpgrades.new
