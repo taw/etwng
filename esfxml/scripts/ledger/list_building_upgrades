@@ -2,11 +2,50 @@
 
 require_relative "../esf_script"
 require "json"
+require "set"
 
 class ListBuildingUpgrades < EsfScript
+  AlreadyMaxLevel = [
+    "church protestant (3)",
+    "farm corn (5)",
+    "farm sheep (5)",
+    "farm wheat (5)",
+    "government (7; france)",
+    "government (7; maratha)",
+    "inn (4)",
+    "mine gold (3)",
+    "mine iron (3)",
+    "mine silver (3)",
+    "minor government (4; civ)",
+    "minor government (4; military)",
+    "minor government (5; civ)", # 5 is only for captured minor capital
+    "plantation coffee (3)",
+    "plantation cotton (3)",
+    "plantation fur (3)", # not completely plantation, but close enough
+    "plantation spices (3)",
+    "plantation sugar (3)",
+    "plantation tea (3)",
+    "plantation tobacco (3)",
+    "rice (3)",
+    "road (3)",
+    "school (4)",
+    "wine (3)",
+  ].to_set
+
+  PointlessUpgrades = [
+    "farm corn (4)",
+    "farm sheep (4)",
+    "farm wheat (4)",
+    "no fort (0)",
+    "not yet",
+  ].to_set
+
   def each_human_building_slot
     each_building_slot do |data|
       next unless data.delete(:owner) == human_player
+      next if data[:constructing]
+      next if AlreadyMaxLevel.include?(data[:building])
+      next if PointlessUpgrades.include?(data[:building])
       yield(data)
     end
   end
