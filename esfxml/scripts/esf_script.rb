@@ -467,8 +467,11 @@ class EsfScript
       loc.push loc.shift
       resource_yield = Integer(node.xpath("//rec[@type='REGION_SLOT']/i")[2].text)
       wealth = Integer(node.xpath("//rec[@type='REGION_SLOT']/i")[3].text)
-      building = node.xpath("//building")[0]
-      building = building["name"] if building
+      building_node = node.xpath("//building")[0]
+      if building_node
+        building = building_node["name"]
+        building_health = Integer(building_node["health"])
+      end
       emerged = (node.xpath("//rec[@type='REGION_SLOT']/*")[9].name == "yes")
       emergence_order = Integer(node.xpath("//rec[@type='REGION_SLOT']/u")[2].text)
       owner = region_ownership[loc[0]]
@@ -503,6 +506,7 @@ class EsfScript
         constructing: constructing ? true : nil,
         resource_yield: resource_yield > 0 ? resource_yield : nil,
         wealth: wealth > 0 ? wealth : nil,
+        health: (building_health && building_health != 100) ? building_health : nil,
       }.compact)
     end
   end
