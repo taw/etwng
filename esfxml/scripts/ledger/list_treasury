@@ -6,7 +6,8 @@ class ListTreasuryByFaction < EsfScript
   def call
     factions = []
     each_faction do |faction, faction_name|
-      starting_treasury = faction.xpath("rec[@type='FACTION_ECONOMICS']/i")[0].content.to_i
+      next unless faction_active?(faction_name)
+      starting_treasury = Integer(faction.xpath("rec[@type='FACTION_ECONOMICS']/i")[0].content)
       factions << [faction_name, starting_treasury]
     end
     puts factions.sort.map{|faction, treasury| "#{faction}: #{treasury}"}
