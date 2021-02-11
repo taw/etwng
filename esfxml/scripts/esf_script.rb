@@ -213,6 +213,7 @@ class EsfScript
 
   def each_faction_diplomatic_relation
     each_faction do |faction, faction_name|
+      next unless faction_active?(faction_name)
       diplomacy_include = faction.xpath("xml_include").map{|xi| xi["path"]}.grep(/\Adiplomacy/)[0]
       next unless diplomacy_include
       path = "#{@xmldir}/#{diplomacy_include}"
@@ -352,6 +353,10 @@ class EsfScript
     "ironmasters_works" => "factory iron (3)",
     "steam_engine_factory" => "factory iron (4)",
 
+    "craft_workshops_pottery" => "factory pottery (1)",
+    # ???
+    "kilns" => "factory pottery (3)",
+
     "basic_roads" => "road (1)",
     "improved_roads" => "road (2)",
     "tarmac_roads" => "road (3)",
@@ -402,6 +407,7 @@ class EsfScript
     "small_sugar_plantation" => "plantation sugar (1)",
     "large_sugar_plantation" => "plantation sugar (2)",
     "sugar_warehouse" => "plantation sugar (3)",
+    "steam-powered_sugar_mill" => "plantation sugar (4)",
 
     "rel_protestant_0" => "church protestant (1)",
     "rel_protestant_1" => "church protestant (2)",
