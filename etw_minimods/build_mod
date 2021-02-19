@@ -4,7 +4,7 @@ require "csv"
 require "pathname"
 require "pry"
 
-class BuildMod
+class EmpireMod
   # data -> output -> output_packed -> .pack
 
   def initialize(input, output)
@@ -45,16 +45,23 @@ class BuildMod
     end
   end
 
-  # Actual mod code
-
   def call
-    load "building_effects", "building_effects_junction_tables/building_effects_junction.tsv"
-    load "nowall-1", "building_levels_tables/no_walls.tsv"
-    load "nowall-2", "building_level_required_technology_junctions_tables/no_walls.tsv"
-    fix_economy
+    build_mod
     save_all_db_data
     pack_all_dbs
     create_pack
+  end
+end
+
+class EmpireMod::Economy < EmpireMod
+  # Actual mod code
+  def build_mod
+    load "building_effects", "building_effects_junction_tables/building_effects_junction.tsv"
+    load "tech", "technology_effects_junction_tables/technology_effects_junction.tsv"
+    load "nowall-1", "building_levels_tables/no_walls.tsv"
+    load "nowall-2", "building_level_required_technology_junctions_tables/no_walls.tsv"
+    fix_economy
+    rebalance_artillery
   end
 
   GdpFixes = [
@@ -166,9 +173,18 @@ class BuildMod
       row[2] = new_value
     end
   end
+
+  # swap canister and shrapnel effects
+  def rebalance_artillery
+    tech = @data["tech"][:data]
+    tech.delete ["military_ordnance_canister_shot", "enable_canister_shot", "1"]
+    tech.delete ["military_ordnance_shrapnel_shot", "enable_shrapnel_shot", "1"]
+    tech << ["military_ordnance_canister_shot", "enable_shrapnel_shot", "1"]
+    tech << ["military_ordnance_shrapnel_shot", "enable_canister_shot", "1"]
+  end
 end
 
-BuildMod.new(
+EmpireMod::Economy.new(
   "data",
   "mod_economy.pack",
 ).call
