@@ -8,7 +8,7 @@ require "fileutils"
 
 class DbSchemata
   def initialize
-    @doc = Nokogiri::XML.parse(File.open('DB.xsd', 'rb', &:read))
+    @doc = Nokogiri::XML.parse(File.open("#{__dir__}/DB.xsd", 'rb', &:read))
     @schema = {}
     @doc.xpath('/xs:schema/xs:complexType').each{|ct|
       @schema[ct['name']] = parse_complex_type_node(ct)

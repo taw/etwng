@@ -1,0 +1,162 @@
+#!/usr/bin/env ruby
+
+require "csv"
+require "pathname"
+require "pry"
+
+class BuildMod
+  # data -> output -> output_packed -> .pack
+
+  def initialize(input, output, output_packed)
+    @input = Pathname(input)
+    @output = Pathname(output)
+    @output_packed = Pathname(output_packed)
+    @data = {}
+  end
+
+  def load(name, path)
+    d = CSV.parse((@input + path).read, col_sep: "\t")
+    @data[name] = {
+      path: path,
+      orig: d,
+      data: d.map(&:dup),
+    }
+  end
+
+  def save_all_db_data
+    @data.each do |name, entry|
+      next if entry[:data] == entry[:orig]
+      output_path = @output + entry[:path]
+      output_data = CSV.generate("", col_sep: "\t"){|csv|
+        entry[:data].each{|r| csv << r}
+      }
+      output_path.parent.mkpath
+      output_path.write(output_data)
+    end
+  end
+
+  def pack_all_dbs
+    system "#{__dir__}/../db/db_pack", @output.to_s, @output_packed.to_s
+  end
+
+  # Actual mod code
+
+  def call
+    load "building_effects", "building_effects_junction_tables/building_effects_junction.tsv"
+    fix_economy
+    save_all_db_data
+    pack_all_dbs
+  end
+
+  GdpFixes = [
+    # Farms don't need a huge buff, they're mostly fine, except 5th level
+    ["corn_peasant_farms", "gdp_farm", "100", "100"],
+    ["corn_tenanted_farms", "gdp_farm", "150", "200"],
+    ["corn_clearances", "gdp_farm", "200", "300"],
+    ["corn_great_estates", "gdp_farm", "250", "400"],
+    ["corn_great_royal_palace", "gdp_farm", "300", "600"],
+
+    ["rice_paddies", "gdp_farm", "100", "100"],
+    ["rice_farms", "gdp_farm", "150", "200"],
+    ["rice_farming_commune", "gdp_farm", "200", "300"],
+
+    ["sheep_peasant_farms", "gdp_farm", "100", "100"],
+    ["sheep_tenanted_farms", "gdp_farm", "150", "200"],
+    ["sheep_clearances", "gdp_farm", "200", "300"],
+    ["sheep_great_estates", "gdp_farm", "250", "400"],
+    ["sheep_great_royal_palace", "gdp_farm", "300", "600"],
+
+    ["wheat_peasant_farms", "gdp_farm", "100", "100"],
+    ["wheat_tenanted_farms", "gdp_farm", "150", "200"],
+    ["wheat_clearances", "gdp_farm", "200", "300"],
+    ["wheat_great_estates", "gdp_farm", "250", "400"],
+    ["wheat_great_royal_palace", "gdp_farm", "300", "600"],
+
+    # Weirdly the weakest building chain
+    ["trading_port", "gdp_port", "200", "200"],
+    ["commercial_port", "gdp_port", "300", "500"],
+    ["commercial_basin", "gdp_port", "400", "1000"],
+    ["trading_company", "gdp_port", "500", "2000"],
+
+    # Way worse than trade companies, just give them a modest buff
+    ["local_fishery", "gdp_port", "200", "200"],
+    ["fishing_fleet", "gdp_port", "300", "400"],
+    ["major_fishery", "gdp_port", "400", "600"],
+
+    # Vineyards need huge buff as they generate unhappiness
+    ["vineyards", "gdp_farm", "300", "300"],
+    ["wineries", "gdp_farm", "400", "600"],
+    ["wine_estates", "gdp_farm", "500", "1000"],
+
+    # Huge buffs start here
+    ["timber_logging_camp", "gdp_industry", "500", "500"],
+    ["timber_lumber_mill", "gdp_industry", "600", "1000"],
+
+    ["open_gem_pit", "gdp_mine", "700", "700"],
+    ["deep_gem_shaft", "gdp_mine", "1000", "1400"],
+
+    ["gold_mine", "gdp_mine", "1200", "1200"],
+    ["steam-pumped_gold_mine", "gdp_mine", "1400", "2400"],
+    ["industrial_gold_mining_complex", "gdp_mine", "1600", "3600"],
+
+    ["iron_mine", "gdp_mine", "700", "700"],
+    ["steam-pumped_iron_mine", "gdp_mine", "800", "1400"],
+    ["industrial_iron_mining_complex", "gdp_mine", "900", "2100"],
+
+    ["silver_mine", "gdp_mine", "1000", "1000"],
+    ["steam-pumped_silver_mine", "gdp_mine", "1200", "2000"],
+    ["industrial_silver_mining_complex", "gdp_mine", "1400", "3000"],
+
+    ["craft_workshops_metal", "gdp_industry", "400", "400"],
+    ["iron_workshops", "gdp_industry", "600", "800"],
+    ["ironmasters_works", "gdp_industry", "800", "1600"],
+    ["steam_engine_factory", "gdp_industry", "1000", "2400"],
+
+    ["craft_workshops_pottery", "gdp_industry", "300", "300"],
+    ["pottery_workshops", "gdp_industry", "500", "600"],
+    ["kilns", "gdp_industry", "700", "1200"],
+    ["ceramics_factory", "gdp_industry", "900", "1800"],
+
+    ["craft_workshops_textiles", "gdp_industry", "300", "300"],
+    ["weavers_cottages", "gdp_industry", "450", "600"],
+    ["water-powered_cloth_mill", "gdp_industry", "600", "1200"],
+    ["steam-powered_cloth_mill", "gdp_industry", "750", "1800"],
+
+    # Roads
+    ["basic_roads", "tw_growth_roads", "3", "3"],
+    ["improved_roads", "tw_growth_roads", "4", "6"],
+    ["tarmac_roads", "tw_growth_roads", "5", "9"],
+  ]
+
+  TaxFixes = [
+    ["governors_mansion", "tax_bonus_building", "6", "10"],
+    ["governors_palace", "tax_bonus_building", "9", "15"],
+    ["governors_residence", "tax_bonus_building", "3", "5"],
+    ["imperial_palace", "tax_bonus_building", "15", "25"],
+    ["minor_governors_barracks", "tax_bonus_building", "3", "5"],
+    ["minor_governors_encampment", "tax_bonus_building", "3", "5"],
+    ["minor_governors_mansion", "tax_bonus_building", "6", "10"],
+    ["minor_governors_palace", "tax_bonus_building", "9", "15"],
+    ["minor_governors_residence", "tax_bonus_building", "3", "5"],
+    ["minor_royal_palace", "tax_bonus_building", "12", "20"],
+    ["prest_austria_hofburg", "tax_bonus_building", "15", "25"],
+    ["prest_britain_somerset_house", "tax_bonus_building", "15", "25"],
+    ["prest_france_palais_bourbon", "tax_bonus_building", "15", "25"],
+    ["prest_maratha_shaniwarwada", "tax_bonus_building", "15", "25"],
+    ["prest_russia_winter_palace", "tax_bonus_building", "15", "25"],
+    ["prest_spain_palacio_real_de_madrid", "tax_bonus_building", "15", "25"],
+    ["prest_sweden_slott", "tax_bonus_building", "15", "25"],
+    ["prest_usa_independence_hall", "tax_bonus_building", "15", "25"],
+    ["royal_palace", "tax_bonus_building", "12", "20"],
+  ]
+
+  def fix_economy
+    effects = @data["building_effects"][:data]
+    [*TaxFixes, *GdpFixes].each do |name, effect, old_value, new_value|
+      row = effects.find{|row| row == [name, effect, old_value]} or raise "Cannot find"
+      row[2] = new_value
+    end
+  end
+end
+
+BuildMod.new("data", "output", "output_packed").call

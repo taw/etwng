@@ -84,7 +84,11 @@ class DbTsvFile
     when "short"
       [field_value.gsub('"', '').to_i].pack("v")
     when "string"
-      str = eval(field_value).unpack("U*")
+      if field_value =~ /\A".*"\z/
+        str = eval(field_value).unpack("U*")
+      else
+        str = field_value.unpack("U*")
+      end
       [str.size].pack("v") + str.pack("v*")
     when "optstring"
       str = eval(field_value)
