@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
+
 import struct, os, sys
+import argparse
+import re
 
 # For easy file reading and writing interactions
 def read_long(fhandle):
@@ -40,7 +43,6 @@ def copy_data(source, dest, offset, length):
 
 
 def saveFile(handle, outputdir, path, length, offset):
-  path = path.replace("\\", "/")
   print('Exporting '+path+', length: '+str(length)+', at offset: '+str(offset))
 
   # create output directory
@@ -48,11 +50,11 @@ def saveFile(handle, outputdir, path, length, offset):
   if not os.path.isdir(dir):
     os.makedirs(dir)
 
-  output = open(os.path.join(outputdir,path),'wb')
+  output = open(os.path.join(outputdir, path), 'wb')
   copy_data(handle, output, offset, length)
   output.close()
 
-def unpackPackArchive(pack_path, outputdir):
+def unpackPackArchive(pack_path, outputdir, args):
   handle      = open(pack_path,"rb")
   magic       = handle.read(4)
   mod_type    = read_long(handle)
@@ -89,13 +91,23 @@ def unpackPackArchive(pack_path, outputdir):
     files.append((fn, data_len, offset))
     offset += data_len
 
-  for (path,length,offset) in files:
+  # fnmatch is basically broken
+  for (path, length, offset) in files:
+    path = path.replace("\\", "/")
+    if args.glob:
+      if not re.match(args.glob, path):
+        continue
     saveFile(handle, outputdir, path, length, offset)
 
+parser = argparse.ArgumentParser(description="Unpack Total War *.pack archives")
+parser.add_argument('-g', '--glob', help='only extract files matching regexp', type=str)
+parser.add_argument('files', type=argparse.FileType('r'), nargs='+')
+
+args = parser.parse_args()
+
 # main
-for fn in sys.argv[1:]:
-  dn = "unpacked/"+fn.split("/")[-1].replace(".pack", "")
+for fn in args.files:
+  dn = "unpacked/" + fn.name.split("/")[-1].replace(".pack", "")
   if dn:
     removeDir(dn)
-  os.makedirs(dn)
-  unpackPackArchive(fn, dn)
+  unpackPackArchive(fn.name, dn, args)
