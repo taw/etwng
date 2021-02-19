@@ -1,0 +1,4 @@
+version 1, schema building_level_required_technology_junctions_tables
+Building_IDRef(string)	Tech_IDRef(string)
+"settlement_fortifications"	"industry_textile_mass_production"
+"improved_settlement_fortifications"	"industry_textile_mass_production"

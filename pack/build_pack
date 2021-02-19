@@ -10,11 +10,11 @@ class PackFile
     @deps      = []
     @files     = []
   end
-  
+
   def add_file(fs_path, pack_path)
     @files << [fs_path, pack_path, fs_path.size]
   end
-  
+
   def add(path)
     path = Pathname(path)
     if path.directory?
@@ -31,22 +31,22 @@ class PackFile
     rv = ht[@pack_type]
     return rv if rv
     raise "Unknown pack type #{@pack_type}, known types are: #{ht.keys.sort.join(", ")}"
-  end  
-  
+  end
+
   def build_deps_header
     @deps.map{|dep| dep + "\x00"}.join("")
   end
-  
+
   def build_files_header
     @files.map{|fs_path, pack_path, size|
-      [size].pack("V") + pack_path + "\x00"
+      [size].pack("V") + pack_path.to_s + "\x00"
     }.join("")
   end
-  
+
   def build_header
     deps_header  = build_deps_header
     files_header = build_files_header
-    
+
     header = "PFH0"
     header << [pack_type_code].pack("V")
     header << [@deps.size].pack("V")
@@ -54,10 +54,10 @@ class PackFile
     header << [@files.size].pack("V")
     header << [files_header.size].pack("V")
     header << files_header
-    
+
     header
   end
-  
+
   def save(fh)
     fh.write build_header
     @files.each do |fs_path, pack_path, size|

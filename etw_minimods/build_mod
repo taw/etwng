@@ -7,10 +7,9 @@ require "pry"
 class BuildMod
   # data -> output -> output_packed -> .pack
 
-  def initialize(input, output, output_packed)
+  def initialize(input, output)
     @input = Pathname(input)
-    @output = Pathname(output)
-    @output_packed = Pathname(output_packed)
+    @output = output
     @data = {}
   end
 
@@ -25,8 +24,9 @@ class BuildMod
 
   def save_all_db_data
     @data.each do |name, entry|
-      next if entry[:data] == entry[:orig]
-      output_path = @output + entry[:path]
+      # This check might be useful later
+      # next if entry[:data] == entry[:orig]
+      output_path = Pathname("tmp/unpacked/db") + entry[:path]
       output_data = CSV.generate("", col_sep: "\t"){|csv|
         entry[:data].each{|r| csv << r}
       }
@@ -36,16 +36,25 @@ class BuildMod
   end
 
   def pack_all_dbs
-    system "#{__dir__}/../db/db_pack", @output.to_s, @output_packed.to_s
+    system "#{__dir__}/../db/db_pack", "tmp/unpacked", "tmp/packed"
+  end
+
+  def create_pack
+    Dir.chdir("tmp") do
+      system "#{__dir__}/../pack/build_pack", "#{__dir__}/#{@output}", "mod", "packed"
+    end
   end
 
   # Actual mod code
 
   def call
     load "building_effects", "building_effects_junction_tables/building_effects_junction.tsv"
+    load "nowall-1", "building_levels_tables/no_walls.tsv"
+    load "nowall-2", "building_level_required_technology_junctions_tables/no_walls.tsv"
     fix_economy
     save_all_db_data
     pack_all_dbs
+    create_pack
   end
 
   GdpFixes = [
@@ -159,4 +168,7 @@ class BuildMod
   end
 end
 
-BuildMod.new("data", "output", "output_packed").call
+BuildMod.new(
+  "data",
+  "mod_economy.pack",
+).call
