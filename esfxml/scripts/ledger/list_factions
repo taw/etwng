@@ -6,9 +6,15 @@ class ListFactions < EsfScript
   def call
     factions = []
     each_faction do |faction, faction_name|
-      factions << faction_name
+      factions << [
+        faction_name,
+        faction_active?(faction_name) ? "active" : nil,
+        faction_playable?(faction_name) ? "playable" : nil,
+      ].compact
     end
-    puts factions.sort
+    factions.sort.each do |name, *flags|
+      puts "#{name} - #{flags.join(", ")}"
+    end
   end
 end
 

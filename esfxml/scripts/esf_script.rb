@@ -1,6 +1,7 @@
 require "rubygems"
 require "nokogiri"
 require "pp"
+require "set"
 
 class EsfScript
   attr_reader :xmldir
@@ -209,6 +210,31 @@ class EsfScript
 
   def faction_active?(name)
     !!regions_by_faction[name]
+  end
+
+  def faction_playable?(name)
+    playable_factions.include?(name)
+  end
+
+  def playable_factions
+    unless @playable_factions
+      @playable_factions = Set[]
+      # startpos
+      each_xml("preopen_map_info/info*.xml", "//rec[@type='CAMPAIGN_PLAYER_SETUP']") do |pa|
+        name = pa.xpath("s")[0].content
+        if pa.xpath('yes|no')[1].name == 'yes'
+          @playable_factions << name
+        end
+      end
+      # save game
+      each_xml("campaign_env/*.xml", "//rec[@type='CAMPAIGN_PLAYER_SETUP']") do |pa|
+        name = pa.xpath("s")[0].content
+        if pa.xpath('yes|no')[1].name == 'yes'
+          @playable_factions << name
+        end
+      end
+    end
+    @playable_factions
   end
 
   def each_faction_diplomatic_relation
