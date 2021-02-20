@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require_relative "./db_schemata"
+require "pry"
 
 class DbTsvFile
   attr_reader :schema
@@ -92,11 +93,15 @@ class DbTsvFile
       end
       [str.size].pack("v") + str.pack("v*")
     when "optstring"
-      str = eval(field_value)
-      if str.nil?
+      # this is really stupid
+      if field_value == "nil"
         "\x00"
       else
-        str = str.unpack("U*")
+        if field_value =~ /\A".*"\z/
+          str = eval(field_value).unpack("U*")
+        else
+          str = field_value.unpack("U*")
+        end
         "\x01" + [str.size].pack("v") + str.pack("v*")
       end
     when /\Ablob:(\d+)/
