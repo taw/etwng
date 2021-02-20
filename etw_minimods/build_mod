@@ -4,6 +4,30 @@ require "csv"
 require "pathname"
 require "pry"
 
+# What we do is nowhere close to spec
+module FakeCSV
+  def self.load(path)
+    lines = open(path).readlines
+    lines[0,2].map{|row| row.chomp.split("\t") } +
+    lines[2..-1].map{|row|
+      row.chomp.split("\t").map{|e|
+        eval(e)
+      }
+    }
+  end
+
+  def self.save(path, data)
+    Pathname(path).write(
+      data[0,2].map{|row|
+        row.join("\t") + "\n"
+      }.join +
+      data[2..-1].map{|row|
+        row.map(&:inspect).join("\t") + "\n"
+      }.join
+    )
+  end
+end
+
 class EmpireMod
   # data -> output -> output_packed -> .pack
 
@@ -14,7 +38,8 @@ class EmpireMod
   end
 
   def load(name, path)
-    d = CSV.parse((@input + path).read, col_sep: "\t")
+    # d = CSV.parse((@input + path).read, col_sep: "\t")
+    d = FakeCSV.load(@input + path)
     @data[name] = {
       path: path,
       orig: d,
@@ -27,11 +52,12 @@ class EmpireMod
       # This check might be useful later
       # next if entry[:data] == entry[:orig]
       output_path = Pathname("tmp/unpacked/db") + entry[:path]
-      output_data = CSV.generate("", col_sep: "\t"){|csv|
-        entry[:data].each{|r| csv << r}
-      }
+      # output_data = CSV.generate("", col_sep: "\t"){|csv|
+      #   entry[:data].each{|r| csv << r}
+      # }
       output_path.parent.mkpath
-      output_path.write(output_data)
+      # output_path.write(output_data)
+      FakeCSV.save(output_path, entry[:data])
     end
   end
 
@@ -58,112 +84,116 @@ class EmpireMod::Economy < EmpireMod
   def build_mod
     load "building_effects", "building_effects_junction_tables/building_effects_junction.tsv"
     load "tech", "technology_effects_junction_tables/technology_effects_junction.tsv"
+    load "units", "units_tables/units.tsv"
+    load "unit_stats", "unit_stats_land_tables/unit_stats_land.tsv"
     load "nowall-1", "building_levels_tables/no_walls.tsv"
     load "nowall-2", "building_level_required_technology_junctions_tables/no_walls.tsv"
     fix_economy
     rebalance_artillery
+    rebalance_action_points
+    improve_garrisons
   end
 
   GdpFixes = [
     # Farms don't need a huge buff, they're mostly fine, except 5th level
-    ["corn_peasant_farms", "gdp_farm", "100", "100"],
-    ["corn_tenanted_farms", "gdp_farm", "150", "200"],
-    ["corn_clearances", "gdp_farm", "200", "300"],
-    ["corn_great_estates", "gdp_farm", "250", "400"],
-    ["corn_great_royal_palace", "gdp_farm", "300", "600"],
+    ["corn_peasant_farms", "gdp_farm", 100, 100],
+    ["corn_tenanted_farms", "gdp_farm", 150, 200],
+    ["corn_clearances", "gdp_farm", 200, 300],
+    ["corn_great_estates", "gdp_farm", 250, 400],
+    ["corn_great_royal_palace", "gdp_farm", 300, 600],
 
-    ["rice_paddies", "gdp_farm", "100", "100"],
-    ["rice_farms", "gdp_farm", "150", "200"],
-    ["rice_farming_commune", "gdp_farm", "200", "300"],
+    ["rice_paddies", "gdp_farm", 100, 100],
+    ["rice_farms", "gdp_farm", 150, 200],
+    ["rice_farming_commune", "gdp_farm", 200, 300],
 
-    ["sheep_peasant_farms", "gdp_farm", "100", "100"],
-    ["sheep_tenanted_farms", "gdp_farm", "150", "200"],
-    ["sheep_clearances", "gdp_farm", "200", "300"],
-    ["sheep_great_estates", "gdp_farm", "250", "400"],
-    ["sheep_great_royal_palace", "gdp_farm", "300", "600"],
+    ["sheep_peasant_farms", "gdp_farm", 100, 100],
+    ["sheep_tenanted_farms", "gdp_farm", 150, 200],
+    ["sheep_clearances", "gdp_farm", 200, 300],
+    ["sheep_great_estates", "gdp_farm", 250, 400],
+    ["sheep_great_royal_palace", "gdp_farm", 300, 600],
 
-    ["wheat_peasant_farms", "gdp_farm", "100", "100"],
-    ["wheat_tenanted_farms", "gdp_farm", "150", "200"],
-    ["wheat_clearances", "gdp_farm", "200", "300"],
-    ["wheat_great_estates", "gdp_farm", "250", "400"],
-    ["wheat_great_royal_palace", "gdp_farm", "300", "600"],
+    ["wheat_peasant_farms", "gdp_farm", 100, 100],
+    ["wheat_tenanted_farms", "gdp_farm", 150, 200],
+    ["wheat_clearances", "gdp_farm", 200, 300],
+    ["wheat_great_estates", "gdp_farm", 250, 400],
+    ["wheat_great_royal_palace", "gdp_farm", 300, 600],
 
     # Weirdly the weakest building chain
-    ["trading_port", "gdp_port", "200", "200"],
-    ["commercial_port", "gdp_port", "300", "500"],
-    ["commercial_basin", "gdp_port", "400", "1000"],
-    ["trading_company", "gdp_port", "500", "2000"],
+    ["trading_port", "gdp_port", 200, 200],
+    ["commercial_port", "gdp_port", 300, 500],
+    ["commercial_basin", "gdp_port", 400, 1000],
+    ["trading_company", "gdp_port", 500, 2000],
 
     # Way worse than trade companies, just give them a modest buff
-    ["local_fishery", "gdp_port", "200", "200"],
-    ["fishing_fleet", "gdp_port", "300", "400"],
-    ["major_fishery", "gdp_port", "400", "600"],
+    ["local_fishery", "gdp_port", 200, 200],
+    ["fishing_fleet", "gdp_port", 300, 400],
+    ["major_fishery", "gdp_port", 400, 600],
 
     # Vineyards need huge buff as they generate unhappiness
-    ["vineyards", "gdp_farm", "300", "300"],
-    ["wineries", "gdp_farm", "400", "600"],
-    ["wine_estates", "gdp_farm", "500", "1000"],
+    ["vineyards", "gdp_farm", 300, 300],
+    ["wineries", "gdp_farm", 400, 600],
+    ["wine_estates", "gdp_farm", 500, 1000],
 
     # Huge buffs start here
-    ["timber_logging_camp", "gdp_industry", "500", "500"],
-    ["timber_lumber_mill", "gdp_industry", "600", "1000"],
+    ["timber_logging_camp", "gdp_industry", 500, 500],
+    ["timber_lumber_mill", "gdp_industry", 600, 1000],
 
-    ["open_gem_pit", "gdp_mine", "700", "700"],
-    ["deep_gem_shaft", "gdp_mine", "1000", "1400"],
+    ["open_gem_pit", "gdp_mine", 700, 700],
+    ["deep_gem_shaft", "gdp_mine", 1000, 1400],
 
-    ["gold_mine", "gdp_mine", "1200", "1200"],
-    ["steam-pumped_gold_mine", "gdp_mine", "1400", "2400"],
-    ["industrial_gold_mining_complex", "gdp_mine", "1600", "3600"],
+    ["gold_mine", "gdp_mine", 1200, 1200],
+    ["steam-pumped_gold_mine", "gdp_mine", 1400, 2400],
+    ["industrial_gold_mining_complex", "gdp_mine", 1600, 3600],
 
-    ["iron_mine", "gdp_mine", "700", "700"],
-    ["steam-pumped_iron_mine", "gdp_mine", "800", "1400"],
-    ["industrial_iron_mining_complex", "gdp_mine", "900", "2100"],
+    ["iron_mine", "gdp_mine", 700, 700],
+    ["steam-pumped_iron_mine", "gdp_mine", 800, 1400],
+    ["industrial_iron_mining_complex", "gdp_mine", 900, 2100],
 
-    ["silver_mine", "gdp_mine", "1000", "1000"],
-    ["steam-pumped_silver_mine", "gdp_mine", "1200", "2000"],
-    ["industrial_silver_mining_complex", "gdp_mine", "1400", "3000"],
+    ["silver_mine", "gdp_mine", 1000, 1000],
+    ["steam-pumped_silver_mine", "gdp_mine", 1200, 2000],
+    ["industrial_silver_mining_complex", "gdp_mine", 1400, 3000],
 
-    ["craft_workshops_metal", "gdp_industry", "400", "400"],
-    ["iron_workshops", "gdp_industry", "600", "800"],
-    ["ironmasters_works", "gdp_industry", "800", "1600"],
-    ["steam_engine_factory", "gdp_industry", "1000", "2400"],
+    ["craft_workshops_metal", "gdp_industry", 400, 400],
+    ["iron_workshops", "gdp_industry", 600, 800],
+    ["ironmasters_works", "gdp_industry", 800, 1600],
+    ["steam_engine_factory", "gdp_industry", 1000, 2400],
 
-    ["craft_workshops_pottery", "gdp_industry", "300", "300"],
-    ["pottery_workshops", "gdp_industry", "500", "600"],
-    ["kilns", "gdp_industry", "700", "1200"],
-    ["ceramics_factory", "gdp_industry", "900", "1800"],
+    ["craft_workshops_pottery", "gdp_industry", 300, 300],
+    ["pottery_workshops", "gdp_industry", 500, 600],
+    ["kilns", "gdp_industry", 700, 1200],
+    ["ceramics_factory", "gdp_industry", 900, 1800],
 
-    ["craft_workshops_textiles", "gdp_industry", "300", "300"],
-    ["weavers_cottages", "gdp_industry", "450", "600"],
-    ["water-powered_cloth_mill", "gdp_industry", "600", "1200"],
-    ["steam-powered_cloth_mill", "gdp_industry", "750", "1800"],
+    ["craft_workshops_textiles", "gdp_industry", 300, 300],
+    ["weavers_cottages", "gdp_industry", 450, 600],
+    ["water-powered_cloth_mill", "gdp_industry", 600, 1200],
+    ["steam-powered_cloth_mill", "gdp_industry", 750, 1800],
 
     # Roads
-    ["basic_roads", "tw_growth_roads", "3", "3"],
-    ["improved_roads", "tw_growth_roads", "4", "6"],
-    ["tarmac_roads", "tw_growth_roads", "5", "9"],
+    ["basic_roads", "tw_growth_roads", 3, 3],
+    ["improved_roads", "tw_growth_roads", 4, 6],
+    ["tarmac_roads", "tw_growth_roads", 5, 9],
   ]
 
   TaxFixes = [
-    ["governors_mansion", "tax_bonus_building", "6", "10"],
-    ["governors_palace", "tax_bonus_building", "9", "15"],
-    ["governors_residence", "tax_bonus_building", "3", "5"],
-    ["imperial_palace", "tax_bonus_building", "15", "25"],
-    ["minor_governors_barracks", "tax_bonus_building", "3", "5"],
-    ["minor_governors_encampment", "tax_bonus_building", "3", "5"],
-    ["minor_governors_mansion", "tax_bonus_building", "6", "10"],
-    ["minor_governors_palace", "tax_bonus_building", "9", "15"],
-    ["minor_governors_residence", "tax_bonus_building", "3", "5"],
-    ["minor_royal_palace", "tax_bonus_building", "12", "20"],
-    ["prest_austria_hofburg", "tax_bonus_building", "15", "25"],
-    ["prest_britain_somerset_house", "tax_bonus_building", "15", "25"],
-    ["prest_france_palais_bourbon", "tax_bonus_building", "15", "25"],
-    ["prest_maratha_shaniwarwada", "tax_bonus_building", "15", "25"],
-    ["prest_russia_winter_palace", "tax_bonus_building", "15", "25"],
-    ["prest_spain_palacio_real_de_madrid", "tax_bonus_building", "15", "25"],
-    ["prest_sweden_slott", "tax_bonus_building", "15", "25"],
-    ["prest_usa_independence_hall", "tax_bonus_building", "15", "25"],
-    ["royal_palace", "tax_bonus_building", "12", "20"],
+    ["governors_mansion", "tax_bonus_building", 6, 10],
+    ["governors_palace", "tax_bonus_building", 9, 15],
+    ["governors_residence", "tax_bonus_building", 3, 5],
+    ["imperial_palace", "tax_bonus_building", 15, 25],
+    ["minor_governors_barracks", "tax_bonus_building", 3, 5],
+    ["minor_governors_encampment", "tax_bonus_building", 3, 5],
+    ["minor_governors_mansion", "tax_bonus_building", 6, 10],
+    ["minor_governors_palace", "tax_bonus_building", 9, 15],
+    ["minor_governors_residence", "tax_bonus_building", 3, 5],
+    ["minor_royal_palace", "tax_bonus_building", 12, 20],
+    ["prest_austria_hofburg", "tax_bonus_building", 15, 25],
+    ["prest_britain_somerset_house", "tax_bonus_building", 15, 25],
+    ["prest_france_palais_bourbon", "tax_bonus_building", 15, 25],
+    ["prest_maratha_shaniwarwada", "tax_bonus_building", 15, 25],
+    ["prest_russia_winter_palace", "tax_bonus_building", 15, 25],
+    ["prest_spain_palacio_real_de_madrid", "tax_bonus_building", 15, 25],
+    ["prest_sweden_slott", "tax_bonus_building", 15, 25],
+    ["prest_usa_independence_hall", "tax_bonus_building", 15, 25],
+    ["royal_palace", "tax_bonus_building", 12, 20],
   ]
 
   def fix_economy
@@ -177,10 +207,29 @@ class EmpireMod::Economy < EmpireMod
   # swap canister and shrapnel effects
   def rebalance_artillery
     tech = @data["tech"][:data]
-    tech.delete ["military_ordnance_canister_shot", "enable_canister_shot", "1"]
-    tech.delete ["military_ordnance_shrapnel_shot", "enable_shrapnel_shot", "1"]
-    tech << ["military_ordnance_canister_shot", "enable_shrapnel_shot", "1"]
-    tech << ["military_ordnance_shrapnel_shot", "enable_canister_shot", "1"]
+    tech.delete ["military_ordnance_canister_shot", "enable_canister_shot", 1]
+    tech.delete ["military_ordnance_shrapnel_shot", "enable_shrapnel_shot", 1]
+    tech << ["military_ordnance_canister_shot", "enable_shrapnel_shot", 1]
+    tech << ["military_ordnance_shrapnel_shot", "enable_canister_shot", 1]
+  end
+
+  def rebalance_action_points
+    units = @data["units"][:data]
+    units[2..-1].each do |row|
+      if (20..30).include?(row[9].to_i)
+        row[9] = 25
+      end
+    end
+  end
+
+  def improve_garrisons
+    units = @data["units"][:data]
+    unit_stats = @data["unit_stats"][:data]
+    garrison_troops = units.select{|x| x[22] == true }.map{|x| x[0] }
+    unit_stats.each do |row|
+      next unless garrison_troops.include? row[0]
+      row[1] = 160
+    end
   end
 end
 
