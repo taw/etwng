@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+require_relative "../esf_script"
+
+class ListFactionWealth < EsfScript
+  def wealth_by_region
+    unless @wealth_by_region
+      @wealth_by_region = {}
+      each_region do |region|
+        industry_wealth = region.xpath("u")[2].text.to_i
+        town_wealth = region.xpath("u")[4].text.to_i
+        wealth = industry_wealth + town_wealth
+        name = region.xpath("s")[0].text
+        @wealth_by_region[name] = wealth
+      end
+    end
+    @wealth_by_region
+  end
+
+  def wealth_by_faction
+    unless @wealth_by_faction
+      @wealth_by_faction = regions_by_faction.map{|n,rs| [n, rs.map{|r| wealth_by_region[r]}.sum] }.to_h
+    end
+    @wealth_by_faction
+  end
+
+  def call
+    wealth_by_faction.sort_by{|n,v| [-v,n]}.each do |faction_name, total|
+      puts "* #{faction_name} - #{total}"
+      regions_by_faction[faction_name].map{|n| [wealth_by_region[n], n]}.sort_by{|v,n| [-v,n]}.each do |wealth, name|
+        puts "  * #{name} - #{wealth}"
+      end
+    end
+  end
+end
+
+ListFactionWealth.new

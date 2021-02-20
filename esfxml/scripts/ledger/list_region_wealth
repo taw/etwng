@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require_relative "../esf_script"
-require "pry"
 
 class ListRegionWealth < EsfScript
   def call
@@ -14,7 +13,7 @@ class ListRegionWealth < EsfScript
       faction_name = faction_ids[region.xpath("u")[9].text]
       results << [wealth, name, faction_name]
     end
-    results.sort.reverse.each do |wealth, name, owner|
+    results.sort_by{|w,n| [-w,n]}.each do |wealth, name, owner|
       puts "#{wealth} #{name} #{owner}"
     end
   end

@@ -18,10 +18,11 @@ class CreateLedger
   def ledger_scripts
     {
       alliance_clusters: "list_alliance_clusters",
-      buildings: "list_buildings",
       building_upgrades: "list_building_upgrades",
+      buildings: "list_buildings",
       diplomacy: "list_diplomacy",
       faction_ids: "list_faction_ids",
+      faction_wealth: "list_faction_wealth",
       factions: "list_factions",
       government: "analyze_government",
       military: "list_military",
