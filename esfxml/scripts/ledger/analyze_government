@@ -57,7 +57,7 @@ class AnalyzeGovernment < EsfScript
   end
 
   def cleanup_name(name)
-    name.sub(/\Anames_name_names_(dutch|)/, "")
+    name.sub(/\Anames_name_names_(dutch|polish)/, "")
   end
 
   def characters
@@ -106,7 +106,7 @@ class AnalyzeGovernment < EsfScript
 
       (char[:anc] + char[:traits]).each do |t|
         # There is another mwhole level here :-/
-        if trait_effects[t] 
+        if trait_effects[t]
           trait_effects[t].each do |b,v|
             bonus[b] += v
           end

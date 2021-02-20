@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+require_relative "../esf_script"
+require "pry"
+
+class ListRegionWealth < EsfScript
+  def call
+    results = []
+    each_region do |region|
+      industry_wealth = region.xpath("u")[2].text.to_i
+      town_wealth = region.xpath("u")[4].text.to_i
+      wealth = industry_wealth + town_wealth
+      name = region.xpath("s")[0].text
+      faction_name = faction_ids[region.xpath("u")[9].text]
+      results << [wealth, name, faction_name]
+    end
+    results.sort.reverse.each do |wealth, name, owner|
+      puts "#{wealth} #{name} #{owner}"
+    end
+  end
+end
+
+ListRegionWealth.new

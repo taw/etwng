@@ -28,6 +28,7 @@ class CreateLedger
       navy: "list_navy",
       region_ids: "list_region_ids",
       region_ownership: "list_region_ownership",
+      region_wealth: "list_region_wealth",
       research: "list_research",
       resistance: "list_resistance",
       treasury: "list_treasury",
