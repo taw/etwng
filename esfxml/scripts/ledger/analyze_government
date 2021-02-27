@@ -69,7 +69,7 @@ class AnalyzeGovernment < EsfScript
   end
 
   def cleanup_name(name)
-    name.sub(/\Anames_name_names_(dutch|polish|french)?/, "")
+    name.sub(/\Anames_name_names_(dutch|english|french|german_catholic|greek|indian_hindu|italian|mughal|muslim_general|native_american|ottoman|persian|pirates|polish|portuguese|prussian|slavonic_general|spanish|swedish)?/, "")
   end
 
   def characters
