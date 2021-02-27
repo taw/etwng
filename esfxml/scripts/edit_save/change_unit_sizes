@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+
+require_relative "../esf_script"
+
+class ChangeUnitSizes < EsfScript
+  # just the ones from startpos
+  Changes = [
+    ["24_lber_land_cannon_(demi_cannon)_east", "24/24", "36/36"],
+    ["24_lber_land_cannon_(demi_cannon)_indian", "24/24", "36/36"],
+    ["24_lber_land_cannon_(demi_cannon)", "24/24", "36/36"],
+    ["east_light_cavalry_qizilbashi", "60/60", "80/80"],
+    ["east_missile_cavalry_zamindari", "60/60", "80/80"],
+    ["viborniye_streltsy", "60/60", "80/80"],
+    ["deli_scouts", "60/60", "80/80"],
+    ["east_desert_nomad_camelry", "60/60", "80/80"],
+    ["cossack_cavalry", "60/60", "80/80"],
+    ["native_american_generals_bodyguard", "60/60", "80/80"],
+    ["hakkapeliitat", "60/60", "80/80"],
+    ["euro_regiment_of_horse", "60/60", "80/80"],
+    ["euro_provincial_cavalry_yeomanry", "60/60", "80/80"],
+    ["euro_provincial_cavalry_gendarmerie", "60/60", "80/80"],
+    ["euro_provincial_cavalry", "60/60", "80/80"],
+    ["euro_lancers_chevau_legers", "60/60", "80/80"],
+    ["east_lancers_silladar", "60/60", "80/80"],
+    ["euro_rangers", "80/80", "120/120"],
+    ["armed_peasantry_bhumiya", "80/80", "120/120"],
+    ["armed_peasantry_semenys", "80/80", "120/120"],
+    ["armed_peasantry_tufangis", "80/80", "120/120"],
+    ["azzars", "80/80", "120/120"],
+    ["bashibazouks", "80/80", "120/120"],
+    ["east_ethnic_hillmen_musketeers", "80/80", "120/120"],
+    ["east_ethnic_hillmen_musketeers_afghan", "80/80", "120/120"],
+    ["east_ethnic_hillmen_musketeers_kurdish", "80/80", "120/120"],
+    ["euro_dragoons", "80/80", "100/100"],
+    ["euro_dragoons_colonial", "80/80", "100/100"],
+    ["euro_light_infantry", "80/80", "120/120"],
+    ["euro_rangers_courers_de_bois", "80/80", "120/120"],
+    ["euro_regiment_of_horse_sweden", "80/80", "100/100"],
+    ["native_american_archers", "80/80", "120/120"],
+    ["native_american_musketeers_auxiliary", "80/80", "120/120"],
+    ["pandours", "80/80", "120/120"],
+  ].map{|a,b,c| [a,c]}.to_h
+
+  def call
+    update_each_xml("army/*.xml", "//land_unit") do |unit|
+      type = unit["type"]
+      size = unit["size"]
+      if Changes[type]
+        unit["size"] = Changes[type]
+        true
+      else
+        false
+      end
+    end
+  end
+end
+
+ChangeUnitSizes.new
+
