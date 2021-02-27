@@ -3,6 +3,18 @@
 require_relative "../esf_script"
 require "csv"
 
+# AR polyfill; Ruby 3+ has it
+class Hash
+  def except!(*keys)
+    keys.each { |key| delete(key) }
+    self
+  end
+
+  def except(*keys)
+    dup.except!(*keys)
+  end
+end
+
 class AnalyzeGovernment < EsfScript
   def load_tsv(path)
     CSV.read("#{__dir__}/data/#{path}", { col_sep: "\t" })
@@ -57,7 +69,7 @@ class AnalyzeGovernment < EsfScript
   end
 
   def cleanup_name(name)
-    name.sub(/\Anames_name_names_(dutch|polish)/, "")
+    name.sub(/\Anames_name_names_(dutch|polish|french)?/, "")
   end
 
   def characters
@@ -93,37 +105,95 @@ class AnalyzeGovernment < EsfScript
     end
   end
 
+  def calculate_bonus(char)
+    bonus = Hash.new(0)
+    (char[:anc] + char[:traits]).each do |t|
+      # There is another whole level here :-/
+      if trait_effects[t]
+        trait_effects[t].each do |b,v|
+          bonus[b] += v
+        end
+        # warn "Found bonuses for #{t} - #{trait_effects[t] }"
+      else
+        warn "Cannot find bonuses for: #{t}"
+      end
+    end
+    bonus.each do |k,v|
+      bonus.delete(k) if v == 0
+      # bonus.delete("happy_character_upper") if @gov_type == "gov_republic"
+      # bonus.delete("happy_character_middle") if @gov_type == "gov_absolute_monarchy"
+      # bonus.delete("happy_character_lower") if @gov_type == "gov_constitutional_monarchy"
+    end
+    bonus
+  end
+
+  def format_bonus(num)
+    if num == 0
+      "0"
+    else
+      "%+d" % num
+    end	
+  end
+
+  def summarize_happiness(bonus)
+    u = format_bonus bonus["happy_character_upper"]
+    m = format_bonus bonus["happy_character_middle"]
+    l = format_bonus bonus["happy_character_lower"]
+    if @gov_type == "gov_republic"
+      "[#{m}/#{l}]"
+    elsif @gov_type == "gov_absolute_monarchy"
+      "[#{u}/#{l}]"
+    elsif @gov_type == "gov_constitutional_monarchy"
+      "[#{u}/#{m}]"
+    else # I don't think this could ever happen
+      "[#{u}/#{m}/#{l}]"
+    end
+  end
+
   def call
     find_minister_ids
     trait_effects
 
+    # Match in-game order (not sure about governors)
+    # Home theater governor_XXX is fake and shouldn't be actually used, but not sure how to filter that
+    order = %W[
+      faction_leader
+      head_of_government
+      finance
+      justice
+      army
+      navy
+      governor_europe
+      governor_america
+      governor_india
+    ]
+
+     # really not sure what that even is
+    @minister_ids.delete_if{|pos,i| pos == "accident"}
+    @minister_ids.sort_by!{|pos, i| order.index(pos) || 999999}
+
     @minister_ids.each do |pos,i|
+      next if pos == "accident"
+
       char = characters[i]
-      name = char[:names].join(" ")
-      bonus = Hash.new(0)
+      name = char[:names].select{|n| n!=""}.join(" ")
+      bonus = calculate_bonus(char)
 
-      puts "#{name} - #{pos}"
-
-      (char[:anc] + char[:traits]).each do |t|
-        # There is another mwhole level here :-/
-        if trait_effects[t]
-          trait_effects[t].each do |b,v|
-            bonus[b] += v
-          end
-          # warn "Found bonuses for #{t} - #{trait_effects[t] }"
-        else
-          warn "Cannot find bonuses for: #{t}"
-        end
+      if @gov_type == "gov_absolute_monarchy" and pos == "faction_leader"
+        # bonuses counts as double
+        bonus.each{|k,v| bonus[k] = 2*v}
+      end
+      if pos == "faction_leader"
+        # leaders cannot be reassigned, so this is pointless
+        bonus.except!("management", "management_finance", "management_justice", "management_army", "management_navy")
       end
 
-      bonus.each do |k,v|
-        bonus.delete(k) if v == 0
-        bonus.delete("happy_character_upper") if @gov_type == "gov_republic"
-        bonus.delete("happy_character_middle") if @gov_type == "gov_absolute_monarchy"
-        bonus.delete("happy_character_lower") if @gov_type == "gov_constitutional_monarchy"
-      end
+      happy = summarize_happiness(bonus)
+      bonus = bonus.except("happy_character_upper", "happy_character_middle", "happy_character_lower")
 
-      p bonus
+      puts "#{name} - #{pos} - #{happy}"
+      puts "  #{bonus.sort.to_h}" unless bonus.empty?
+
       puts ""
     end
   end
