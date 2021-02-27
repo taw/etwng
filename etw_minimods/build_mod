@@ -92,6 +92,7 @@ class EmpireMod::Economy < EmpireMod
     rebalance_artillery
     rebalance_action_points
     improve_garrisons
+    rebalance_unit_sizes
   end
 
   GdpFixes = [
@@ -229,6 +230,45 @@ class EmpireMod::Economy < EmpireMod
     unit_stats.each do |row|
       next unless garrison_troops.include? row[0]
       row[1] = 160
+    end
+  end
+
+  # to be run after garrison
+  def rebalance_unit_sizes
+    units = @data["units"][:data]
+    unit_stats = @data["unit_stats"][:data]
+    by_composion = unit_stats[2..-1].group_by{|row| row[1,3] }
+    by_composion.each do |comp, units|
+      replace = case comp
+      when [24, 0, 4] # art
+        [36, 0, 6]
+      when [80, 80, 0] # dragoon
+        [100, 100, 0]
+      when [100, 100, 0] # swedish dragoons
+        [120, 120, 0]
+      when [60, 60, 0] # cav
+        [80, 80, 0]
+      when [40, 20, 0] # elephant cav
+        [60, 30, 0]
+      when [60, 0, 0] # airguns
+        [80, 0, 0]
+      when [80, 0, 0] # light inf, grenadiers, and such
+        [120, 0, 0]
+      when [120, 0, 0] # mostly NAN, but also a few elite units
+        [140, 0, 0]
+      # No upgrades
+      when [50, 0, 1] # ottoman great cannon
+      when [160, 0, 0], [200, 0, 0] # line inf
+      when [32, 32, 0], [32, 16, 0] # generals and elephant generals
+      when [48, 0, 4], [30, 30, 0], [100, 0, 0], [180, 0, 0], [1, 0, 0], [10, 0, 0], [20, 0, 4] # episodic and test
+      when [24, 0, 6] # 12_lber_ship_fort_cannon / 18_lber_ship_fort_cannon ???
+      else
+        binding.pry
+      end
+      next unless replace
+      units.each do |row|
+        row[1,3] = replace
+      end
     end
   end
 end
