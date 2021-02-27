@@ -14,8 +14,9 @@ if File.exist?(target)
 end
 
 system *%W[cp -r #{orig} #{target}]
-system *%W[./scripts/make_more_vanilla_factions_playable #{target}]
 system *%W[./scripts/remove_all_fortifications #{target}]
+
+#system *%W[./scripts/make_more_vanilla_factions_playable #{target}]
 #system *%W[./scripts/remove_resistance_to_occupation #{target}]
 #system *%W[./scripts/reset_diplomacy #{target}]
 #system *%W[./scripts/make_faction_major #{target} portugal]
@@ -26,4 +27,5 @@ system *%W[./scripts/remove_all_fortifications #{target}]
 #system *%W[./scripts/give_all_techs #{target} *]
 #system *%W[./scripts/give_tech #{target} * industry_* e* military_navy*]
 #system *%W[./scripts/rescale_populations #{target} 2500 250000]
+
 system *%W[./xml2esf #{target} #{target}.esf]
