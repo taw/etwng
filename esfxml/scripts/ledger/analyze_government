@@ -168,7 +168,7 @@ class AnalyzeGovernment < EsfScript
       governor_india
     ]
 
-     # really not sure what that even is
+    # really not sure what that even is
     @minister_ids.delete_if{|pos,i| pos == "accident"}
     @minister_ids.sort_by!{|pos, i| order.index(pos) || 999999}
 
