@@ -2,23 +2,23 @@
 
 # Example how to use EsfTransform, do not use
 
-require "esf_transform"
+require_relative "./lib/esf_transform"
 
-# faction = 'papal_states'
+# faction = "papal_states"
 
-source_file_name = 'samples/startpos.esf'
-target_file_name = 'tmp/startpos_papal_playable.esf'
+source_file_name = "samples/startpos.esf"
+target_file_name = "tmp/startpos_papal_playable.esf"
 
-# source_file_name = 'samples/regions.esf'
-# target_file_name = 'tmp/regions.esf'
+# source_file_name = "samples/regions.esf"
+# target_file_name = "tmp/regions.esf"
 
-# source_file_name = 'samples/pathfinding.esf'
-# target_file_name = 'tmp/pathfinding.esf'
+# source_file_name = "samples/pathfinding.esf"
+# target_file_name = "tmp/pathfinding.esf"
 
-in_file = File.open(source_file_name, 'rb')
+in_file = File.open(source_file_name, "rb")
 esft = EsfTransform.new(in_file)
 
 esft.transform!
 
-out_file = File.open(target_file_name, 'wb')
+out_file = File.open(target_file_name, "wb")
 out_file.write esft.esfout.data

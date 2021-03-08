@@ -1,5 +1,5 @@
-require "esf_parser"
-require "esf_builder"
+require_relative "./esf_parser"
+require_relative "./esf_builder"
 
 class EsfTransform < EsfParser
   attr_reader :esfout

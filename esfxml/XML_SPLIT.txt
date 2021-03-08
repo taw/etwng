@@ -2,7 +2,7 @@ Unpacking large esf (especially startpos.esf) can result in over 300MB of xml da
 and that would be very difficult to view or edit, so it's split into multiple files instead.
 
 The root file is always called esf.xml, and binary files currently have hardcoded names.
-Everything else is controlled from xml_split.rb, which should be very easy to understand and edit.
+Everything else is controlled from lib/xml_split.rb, which should be very easy to understand and edit.
 
 === Rules ===
 

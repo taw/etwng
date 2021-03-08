@@ -1,7 +1,7 @@
-require "sea_grids"
-require "poi"
-require "commander_details"
-require "etw_region_names"
+require_relative "./sea_grids"
+require_relative "./poi"
+require_relative "./commander_details"
+require_relative "./etw_region_names"
 
 module EsfSemanticConverter
   ConvertSemanticAry = Hash.new{|ht,k| ht[k]={}}

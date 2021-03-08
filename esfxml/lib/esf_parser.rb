@@ -591,6 +591,7 @@ module EsfParserSemantic
       raise SemanticFail.new unless t == expect_types.shift
       data << d
     end
+    raise SemanticFail.new unless expect_types.empty?
     data
   end
 

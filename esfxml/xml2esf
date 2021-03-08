@@ -1,12 +1,9 @@
 #!/usr/bin/env ruby
 
-$: << "."
-require "rubygems"
 require "nokogiri"
-require "esf_builder"
-require "pp"
-require "pgm"
-require "commander_details"
+require_relative "./lib/esf_builder"
+require_relative "./lib/pgm"
+require_relative "./lib/commander_details"
 
 class String
   def unpack1(*args)

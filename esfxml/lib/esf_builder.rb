@@ -1,4 +1,4 @@
-require "default_versions"
+require_relative "./default_versions"
 
 class EsfBuilder
   attr_reader :data

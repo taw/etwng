@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby
 
-$: << "."
 require "fileutils"
-require "pp"
-require "esf_converter"
+require_relative "./lib/esf_converter"
 
 class String
   def unpack1(*args)
