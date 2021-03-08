@@ -1133,7 +1133,7 @@ module XmlTagHandlers
     @esf.add_type_code attributes[:name]
   end
   def on_text_node_str_index(attributes, buf, ctx)
-    @esf.add_str_index buf, attributes[:idx].to_i
+    @esf.add_str_index buf, attributes[:idx].to_i, attributes[:idx2] && attributes[:idx2].to_i
   end
   def on_text_node_asc_index(attributes, buf, ctx)
     @esf.add_asc_index buf, attributes[:idx].to_i

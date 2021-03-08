@@ -398,8 +398,12 @@ class EsfConverter < EsfParser
         out!("<node_type name=\"#{n.to_s.xml_escape}\"/>")
       end
       if @abcf
-        @str_table.each do |str, idx|
-          out!(%Q[<str_index idx="#{idx}">#{str.xml_escape}</str_index>])
+        @str_table.each do |str, idx, idx2|
+          if idx2
+            out!(%Q[<str_index idx="#{idx}" idx2="#{idx2}">#{str.xml_escape}</str_index>])
+          else
+            out!(%Q[<str_index idx="#{idx}">#{str.xml_escape}</str_index>])
+          end
         end
         @asc_table.each do |str, idx|
           out!(%Q[<asc_index idx="#{idx}">#{str.xml_escape}</asc_index>])

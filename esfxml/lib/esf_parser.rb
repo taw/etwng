@@ -304,8 +304,15 @@ module EsfBasicBinaryOps
         if @str_lookup[i]
           raise "Duplicated Unicode string index #{i} matches #{s.inspect} and #{@str_lookup[i].inspect}"
         end
-        @str_lookup[i] = s
-        @str_table << [s,i]
+        # No idea what's this, but XML won't let me have such characters
+        if s[0,2] == "\x021".b
+          @str_lookup[i] = s[2..-1]
+          i2 = s[0,2].unpack1("v")
+          @str_table << [s[2..-1], i, i2]
+        else
+          @str_lookup[i] = s
+          @str_table << [s, i]
+        end
       end
       @asc_table  = []
       @asc_lookup = {}

@@ -15,8 +15,13 @@ class EsfBuilder
     }
     @node_types       = []
   end
-  def add_str_index(str, idx)
-    @str_table << [str, idx]
+  def add_str_index(str, idx, idx2)
+    if idx2
+      tstr = [idx2].pack("v") + str
+      @str_table << [tstr, idx]
+    else
+      @str_table << [str, idx]
+    end
     if @str_lookup[str]
       raise "Duplicated Unicode string #{str.inspect} matches #{idx} and #{@str_lookup[str]}"
     end
