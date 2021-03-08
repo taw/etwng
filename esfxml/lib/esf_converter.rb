@@ -123,6 +123,10 @@ module EsfConvertBasic
   def convert_25!
     out!("<x25>#{get_u}</x25>")
   end
+  def convert_26!
+    data = get_bytes(get_u1)
+    out!("<x26>#{data.to_hex_dump}</x26>")
+  end
   def convert_4x!(tag)
     data = get_ofs_bytes
     if data.empty?

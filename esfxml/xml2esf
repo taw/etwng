@@ -1229,6 +1229,11 @@ module XmlTagHandlers
   def on_text_node_x25(attributes, buf, ctx)
     @esf.put [0x25, buf.to_i].pack("CV")
   end
+  def on_text_node_x26(attributes, buf, ctx)
+    data = buf.strip.split(/[;,\s]+/).map{|x| x.to_i(16)}.pack("C*")
+    @esf.put [0x26, data.size].pack("CC")
+    @esf.put data
+  end
   def on_text_node_u4_ary(attributes, buf, ctx)
     @esf.put_u4_ary buf.strip.split(/\s+/).map(&:to_i)
   end
