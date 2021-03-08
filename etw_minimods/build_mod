@@ -259,7 +259,10 @@ class EmpireMod::Economy < EmpireMod
       # No upgrades
       when [50, 0, 1] # ottoman great cannon
       when [160, 0, 0], [200, 0, 0] # line inf
-      when [32, 32, 0], [32, 16, 0] # generals and elephant generals
+      when [32, 32, 0] # generals
+        [60, 60, 0]
+      when [32, 16, 0] #  elephant generals
+        [60, 30, 0]
       when [48, 0, 4], [30, 30, 0], [100, 0, 0], [180, 0, 0], [1, 0, 0], [10, 0, 0], [20, 0, 4] # episodic and test
       when [24, 0, 6] # 12_lber_ship_fort_cannon / 18_lber_ship_fort_cannon ???
       else
@@ -267,6 +270,11 @@ class EmpireMod::Economy < EmpireMod
       end
       next unless replace
       units.each do |row|
+        unless row[1,3] == replace
+          a = row[1,3][0]
+          b = replace[0]
+          p ["#{row[0]}", "#{a}/#{a}", "#{b}/#{b}"]
+        end
         row[1,3] = replace
       end
     end

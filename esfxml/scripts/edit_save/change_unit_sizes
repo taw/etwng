@@ -39,6 +39,10 @@ class ChangeUnitSizes < EsfScript
     ["native_american_archers", "80/80", "120/120"],
     ["native_american_musketeers_auxiliary", "80/80", "120/120"],
     ["pandours", "80/80", "120/120"],
+    ["east_generals_bodyguard", "32/32", "60/60"],
+    ["euro_generals_bodyguard", "32/32", "60/60"],
+    ["ottoman_generals_bodyguard", "32/32", "60/60"],
+    ["indian_generals_bodyguard", "32/32", "60/60"],
   ].map{|a,b,c| [a,c]}.to_h
 
   def call
