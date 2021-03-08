@@ -8,6 +8,9 @@ import re
 def read_long(fhandle):
   return struct.unpack('<l', fhandle.read(4))[0]
 
+def read_byte(fhandle):
+  return struct.unpack('B', fhandle.read(1))[0]
+
 def read_cstr(handle):
   char = ''
   filename = b''
@@ -67,16 +70,20 @@ def unpackPackArchive(pack_path, outputdir, args):
   file_extra_len = 8
   mod_type = mod_type & 0x3F
 
-  if magic == b"PFH2" or magic == b"PFH3":
+  if magic == b"PFH0" or magic == b"PFH1":
+    header_len = 24 + deps_len + files_len
+    handle.seek(24 + deps_len)
+  elif magic == b"PFH2" or magic == b"PFH3":
     header_len = 32 + deps_len + files_len
     handle.seek(32 + deps_len)
   elif magic == b"PFH4": # Rome 2
     header_len = 28 + deps_len + files_len
     handle.seek(28 + deps_len)
     file_extra_len = 4
-  elif magic == b"PFH1" or magic == b"PFH0":
-    header_len = 24 + deps_len + files_len
-    handle.seek(24 + deps_len)
+  elif magic == b"PFH5": # Three Kingdoms
+    header_len = 28 + deps_len + files_len
+    handle.seek(28 + deps_len)
+    file_extra_len = 4
   else:
     raise Exception("Unknown magic number %s" % magic)
 
@@ -85,6 +92,10 @@ def unpackPackArchive(pack_path, outputdir, args):
   for i in range(files_count):
     # read length of file
     data_len = read_long(handle)
+    if magic == b"PFH5":
+      mystery_byte = read_byte(handle)
+      if mystery_byte != 0:
+        raise Exception(f"Expected 0, no idea what to do here with {mystery_byte} at {handle.tell()-1}")
     if file_extra:
       handle.read(file_extra_len)
     fn, fn_len = read_cstr(handle)
