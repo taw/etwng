@@ -24,7 +24,7 @@ end
 if File.exist?("#{in_dir}/compressed_data.esf")
   if windows?
     # No idea what -a0 -d18 are...
-    system "lzma", "e", "#{in_dir}/compressed_data.esf", "#{in_dir}/compressed_data.esf.xz", "-a0", "-d18"
+    system "./lzma", "e", "#{in_dir}/compressed_data.esf", "#{in_dir}/compressed_data.esf.xz", "-a0", "-d18"
   else
     system "lzma", "-kf", "-S", ".xz", "#{in_dir}/compressed_data.esf"
   end
