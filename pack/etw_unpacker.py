@@ -93,9 +93,11 @@ def unpackPackArchive(pack_path, outputdir, args):
     # read length of file
     data_len = read_long(handle)
     if magic == b"PFH5":
-      mystery_byte = read_byte(handle)
-      if mystery_byte != 0:
-        raise Exception(f"Expected 0, no idea what to do here with {mystery_byte} at {handle.tell()-1}")
+      # I think this is checksum cstring, either "\x00" or 4 bytes then "\x00" ???
+      maybe_checksum = read_cstr(handle)
+      # mystery_byte = read_byte(handle)
+      # if mystery_byte != 0:
+      #   raise Exception(f"Expected 0, no idea what to do here with {mystery_byte} at {handle.tell()-1}")
     if file_extra:
       handle.read(file_extra_len)
     fn, fn_len = read_cstr(handle)
