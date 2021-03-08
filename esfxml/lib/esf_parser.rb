@@ -392,6 +392,9 @@ module EsfGetData
   def get_04!
     [:i, get_i]
   end
+  def get_05!
+    [:i8, get_i8]
+  end
   def get_06!
     [:byte, get_byte]
   end

@@ -4,7 +4,7 @@ class DirBuilder
   # Semanitc names extras
   attr_accessor :faction_name
   attr_accessor :region_data_num
-  
+
   def initialize(out_dir)
     @out_dir = out_dir
     @path_allocator = Hash.new
@@ -19,7 +19,7 @@ class DirBuilder
     File.open(path, 'wb'){|fh| fh.write data}
     rel_path
   end
-  
+
   def open_xml(new_xml_printer)
     @xml_printer.flush! if @xml_printer
     prev_printer = @xml_printer
@@ -30,7 +30,7 @@ class DirBuilder
     @xml_printer = prev_printer
     new_xml_printer.rel_path
   end
-  
+
   def open_main_xml(&blk)
     open_xml(XMLPrinter.new(File.join(@out_dir, 'esf.xml'), 'esf.xml'), &blk)
   end

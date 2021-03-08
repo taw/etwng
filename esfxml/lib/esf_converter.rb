@@ -19,7 +19,7 @@ module EsfConvertBasic
     out!("<i>#{get_i}</i>")
   end
   def convert_05!
-    out!("<int64>#{get_u8}</int64>")
+    out!("<int64>#{get_i8}</int64>")
   end
   def convert_06!
     out!("<byte>#{get_byte}</byte>")
