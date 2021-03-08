@@ -36,7 +36,8 @@ module EsfConvertBasic
   def convert_0a!
     val = get_flt
     if val.nan?
-      out!("<fltnan>%08X</fltnan>" % [val].pack("f").unpack("V"))
+      ival = get_fltnan_fallback
+      out!("<fltnan>%08X</fltnan>" % ival)
     else
       out!("<flt>#{val}</flt>")
     end

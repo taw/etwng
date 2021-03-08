@@ -95,6 +95,10 @@ module EsfBasicBinaryOps
     @ofs += 4
     rv
   end
+  def get_fltnan_fallback
+    # Only use after get_flt returned a nan
+    @data[@ofs-4,4].unpack1("V")
+  end
   def get_u2
     rv = @data[@ofs,2].unpack1("v")
     @ofs += 2
