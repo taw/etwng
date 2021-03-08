@@ -301,6 +301,9 @@ module EsfBasicBinaryOps
       get_u.times do
         s = get_s
         i = get_u
+        if @str_lookup[i]
+          raise "Duplicated Unicode string index #{i} matches #{s.inspect} and #{@str_lookup[i].inspect}"
+        end
         @str_lookup[i] = s
         @str_table << [s,i]
       end
@@ -309,6 +312,9 @@ module EsfBasicBinaryOps
       get_u.times do
         s = get_ascii
         i = get_u
+        if @asc_lookup[i]
+          raise "Duplicated ASCII string index #{i} matches #{s.inspect} and #{@asc_lookup[i].inspect}"
+        end
         @asc_lookup[i] = s
         @asc_table << [s,i]
       end

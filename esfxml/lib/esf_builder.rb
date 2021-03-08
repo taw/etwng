@@ -17,11 +17,17 @@ class EsfBuilder
   end
   def add_str_index(str, idx)
     @str_table << [str, idx]
+    if @str_lookup[str]
+      raise "Duplicated Unicode string #{str.inspect} matches #{idx} and #{@str_lookup[str]}"
+    end
     @str_lookup[str] = idx
     @str_max = [@str_max, idx].max
   end
   def add_asc_index(str, idx)
     @asc_table << [str, idx]
+    if @asc_lookup[str]
+      raise "Duplicated ASCII string #{str.inspect} matches #{idx} and #{@asc_lookup[str]}"
+    end
     @asc_lookup[str] = idx
     @asc_max = [@asc_max, idx].max
   end
