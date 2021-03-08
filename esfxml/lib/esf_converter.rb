@@ -124,7 +124,15 @@ module EsfConvertBasic
     out!("<x25>#{get_u}</x25>")
   end
   def convert_26!
-    data = get_bytes(get_u1)
+    # I have no idea what's going on
+    # so based on investigations in Type26.cs
+    first_byte = get_u1
+    @ofs -= 1
+    if first_byte != 0 and first_byte % 8 == 0
+      data = get_bytes(first_byte + 1)
+    else
+      data = get_bytes(8)
+    end
     out!("<x26>#{data.to_hex_dump}</x26>")
   end
   def convert_4x!(tag)
