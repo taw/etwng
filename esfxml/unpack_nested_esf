@@ -2,12 +2,37 @@
 
 ruby = RUBY_PLATFORM == 'java' ? "jruby" : "ruby"
 
-def windows?
+def platform # should probably use a library to detect os
   if RUBY_PLATFORM == 'java'
     require "java"
-    java.lang.System.getProperty("os.name") =~ /\bwin/i
-  else # not /darwin/
-    RUBY_PLATFORM =~ /\bwin/i
+    case java.lang.System.getProperty("os.name")
+    when /\bmac/i
+      :mac
+    when /\bwin/i
+      :windows
+    else
+      :other
+    end
+  else
+    case RUBY_PLATFORM
+    when /\bdarwin/i
+      :mac
+    when /\bwin/i
+      :windows
+    else
+     :other 
+    end
+  end
+end
+
+def lzma
+  return ENV["LZMA_DECOMPRESS"] if ENV["LZMA_DECOMPRESS"]
+  return ENV["LZMA"] if ENV["LZMA"]
+  case platform
+  when :windows
+    "./lzma"
+  else
+    "lzma"
   end
 end
 
@@ -22,6 +47,7 @@ Usage:
   #{$0} input.esf output_dir
 To hide progress bar:
   #{$0} --quiet input.esf output_dir
+Environment variable LZMA or LZMA_DECOMPRESS may be used to point to specific executables
 EOF
   exit 1
 end
@@ -33,14 +59,20 @@ if File.exist?(out_dir)
   exit 1
 end
 
-system *[ruby, "esf2xml", quiet, in_file, out_dir].compact
+puts(File.join(File.dirname(__FILE__), "esf2xml"))
+system *[ruby, File.join(File.dirname(__FILE__), "esf2xml"), quiet, in_file, out_dir].compact
 if File.exist?("#{out_dir}/compressed_data.esf.xz")
-  if windows?
-    system "./lzma", "d", "#{out_dir}/compressed_data.esf.xz", "#{out_dir}/compressed_data.esf"
+  case platform
+  when :windows
+    unless system lzma, "d", "#{out_dir}/compressed_data.esf.xz", "#{out_dir}/compressed_data.esf"
+      abort("Error running lzma")
+    end
   else
-    system "lzma", "-dk", "#{out_dir}/compressed_data.esf.xz"
+    unless system lzma, "-dk", "#{out_dir}/compressed_data.esf.xz"
+      abort("Error running lzma")
+    end
   end
 end
 if File.exist?("#{out_dir}/compressed_data.esf")
-  system *[ruby, "esf2xml", quiet, "#{out_dir}/compressed_data.esf", "#{out_dir}/compressed_data"].compact
+  system *[ruby, File.join(File.dirname(__FILE__), "esf2xml"), quiet, "#{out_dir}/compressed_data.esf", "#{out_dir}/compressed_data"].compact
 end
