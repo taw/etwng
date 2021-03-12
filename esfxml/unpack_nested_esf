@@ -42,5 +42,5 @@ if File.exist?("#{out_dir}/compressed_data.esf.xz")
   end
 end
 if File.exist?("#{out_dir}/compressed_data.esf")
-  system *[ruby, "esf2xml", quiet, "#{out_dir}/compressed_data.esf", "#{out_dir}/compressed_data"].compact
+  system *[ruby, "./esf2xml", quiet, "#{out_dir}/compressed_data.esf", "#{out_dir}/compressed_data"].compact
 end
