@@ -81,12 +81,17 @@ class ListFactionTaxIncome < EsfScript
     wealth_by_faction.sort_by{|n,v| [-v,n]}.each do |faction_name, total|
       faction_base_income = base_income_by_faction[faction_name]
       puts "* #{faction_name} [#{total}]: #{faction_base_income} => #{income_by_faction[faction_name].round(2)}"
+      partial_base_income = 0
       regions_by_faction[faction_name].map{|n| [wealth_by_region[n], n]}.sort_by{|v,n| [-v,n]}.each_with_index do |(wealth, name), i|
         base_income = base_income_by_region[name]
-        marginal_cost = (-additional_admin_costs(i+1) * faction_base_income).round(2)
+        self_cost = -admin_costs(i+1) * base_income # How much it costs itself
+        marginal_previous_cost = (-additional_admin_costs(i+1) * partial_base_income).round(2)
+        marginal_cost = (marginal_previous_cost + self_cost).round(2)
         marginal_cost = 0 if marginal_cost == 0
         net_income = (base_income - marginal_cost).round(2)
         puts "  * #{name} [#{wealth}]: #{base_income} - #{marginal_cost} = #{net_income}"
+        # For next one
+        partial_base_income += base_income
       end
       regions = region_count_by_faction[faction_name]
       an1 = additional_admin_costs(regions + 1)
