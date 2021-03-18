@@ -49,9 +49,50 @@ class ListFactionTaxIncome < EsfScript
     @wealth_by_faction
   end
 
+  def tax_level_by_region
+    unless @tax_level_by_region
+      # 15% upper + 15% lower + 1% ministers + government building bonus
+      @tax_level_by_region = Hash.new(31)
+      each_building_slot do |data|
+        region_name = data[:loc].split(":")[0]
+        building_name = data[:building]
+        # There's also tribal stuff
+        next unless building_name =~ /government/
+        building_bonus = {
+          "government (1)" => 0,
+          "government (2)" => 3,
+          "government (3)" => 6,
+          "government (4)" => 9,
+          "government (5)" => 12,
+          "government (6)" => 15,
+          "government minor (1)" => 0,
+          "government minor (2)" => 3,
+          "government minor (3; military)" => 3,
+          "government minor (4; military)" => 3,
+          "government minor (3; civ)" => 6,
+          "government minor (4; civ)" => 9,
+          # minors' capitals
+          "government minor (5; civ)" => 12,
+          # didn't verify them all, seems like they just +1 happiness and add flavor
+          "government (7; austria)" => 15,
+          "government (7; britain)" => 15,
+          "government (7; france)" => 15,
+          "government (7; maratha)" => 15,
+          "government (7; russia)" => 15,
+          "government (7; spain)" => 15,
+          "government (7; sweden)" => 15,
+          "government (7; usa)" => 15,
+        }.fetch(building_name)
+
+        @tax_level_by_region[region_name] += building_bonus
+      end
+    end
+    @tax_level_by_region
+  end
+
   def base_income_by_region
     unless @base_income_by_region
-      @base_income_by_region = wealth_by_region.map{|k,v| [k, (v * 33.0 / 100.0)]}.to_h
+      @base_income_by_region = wealth_by_region.map{|k,v| [k, (v * tax_level_by_region[k] / 100.0)]}.to_h
     end
     @base_income_by_region
   end
