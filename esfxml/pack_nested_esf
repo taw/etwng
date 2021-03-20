@@ -31,6 +31,8 @@ def lzma
   case platform
   when :windows
     "./lzma"
+  when :mac
+    "#{in_dir}/lzma.mac"
   else
     "lzma"
   end
@@ -52,6 +54,10 @@ if File.exist?("#{in_dir}/compressed_data.esf")
   when :windows
     # No idea what -a0 -d18 are...
     unless system lzma, "e", "#{in_dir}/compressed_data.esf", "#{in_dir}/compressed_data.esf.xz", "-a0", "-d18"
+      abort("Error running lzma")
+    end
+  when :mac
+    unless system lzma, "-kf", "-S", ".xz", "#{in_dir}/compressed_data.esf"
       abort("Error running lzma")
     end
   else
