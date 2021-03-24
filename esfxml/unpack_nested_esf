@@ -32,7 +32,7 @@ def lzma
   when :windows
     "./lzma"
   when :mac
-    "#{in_dir}/lzma.mac"
+    "#{File.dirname(__FILE__)}/lzma.mac"
   else
     "lzma"
   end
