@@ -22,6 +22,7 @@ class CreateLedger
       buildings: "list_buildings",
       diplomacy: "list_diplomacy",
       faction_ids: "list_faction_ids",
+      faction_tax_income: "list_faction_tax_income",
       faction_wealth: "list_faction_wealth",
       factions: "list_factions",
       government: "analyze_government",

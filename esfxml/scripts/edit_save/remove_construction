@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+require_relative "../esf_script"
+
+# This changes relevant files, but game crashes anyway
+# I think it needs to change some CAI stuff too
+
+class RemoveConstruction < EsfScript
+  def call(type)
+    type = type.downcase
+    update_each_xml("region_slot/*.xml", "//rec[@type='BUILDING_MANAGER']") do |building|
+      has_construction = (building.xpath("yes|no")[1].name == "yes")
+      next unless has_construction
+      name = building.xpath("rec/s").text
+      next unless name == type
+
+      elems = building.xpath("*")
+      raise unless elems.size == 3
+
+      elems[1].name = "no"
+      elems[2].remove
+      true
+    end
+  end
+
+  def args
+    %W[type]
+  end
+end
+
+RemoveConstruction.new

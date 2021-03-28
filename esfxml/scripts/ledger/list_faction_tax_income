@@ -1,0 +1,145 @@
+#!/usr/bin/env ruby
+
+require_relative "../esf_script"
+require "pry"
+
+# I cannot find each region's tax income, but estimate base rate (33%) will do
+
+class ListFactionTaxIncome < EsfScript
+  # Based on some forum posts; fixed to work with later patches
+  def admin_costs(regions)
+    # First get your effective region number. This is, in contrast to what it says in the dev document
+    excess = [0, regions - 4].max
+    total = 136.0 # actually 137, but db table says 136
+
+    # Now calculate the fraction of regions/total regions
+    part_of_total = excess / total.to_f
+
+    # log_base = 1.25 # according to post
+    log_base = 1.4 # according to db tables in patch.pack
+    # multiplier = -4.5 / 10.0 # according to post
+    multiplier = -4.0 / 10.0 # according to db tables in patch.pack
+
+    # Ok that was the easy part, now get your calculator (or use the windoze one) and calculate
+    multiplier * Math.sqrt( Math.log(1 + part_of_total) / Math.log(log_base) )
+  end
+
+  def additional_admin_costs(regions)
+    admin_costs(regions) - admin_costs(regions-1)
+  end
+
+  def wealth_by_region
+    unless @wealth_by_region
+      @wealth_by_region = {}
+      each_region do |region|
+        industry_wealth = region.xpath("u")[2].text.to_i
+        town_wealth = region.xpath("u")[4].text.to_i
+        wealth = industry_wealth + town_wealth
+        name = region.xpath("s")[0].text
+        @wealth_by_region[name] = wealth
+      end
+    end
+    @wealth_by_region
+  end
+
+  def wealth_by_faction
+    unless @wealth_by_faction
+      @wealth_by_faction = regions_by_faction.map{|n,rs| [n, rs.map{|r| wealth_by_region[r]}.sum] }.to_h
+    end
+    @wealth_by_faction
+  end
+
+  def tax_level_by_region
+    unless @tax_level_by_region
+      # 15% upper + 15% lower + 1% ministers + government building bonus
+      @tax_level_by_region = Hash.new(31)
+      each_building_slot do |data|
+        region_name = data[:loc].split(":")[0]
+        building_name = data[:building]
+        # There's also tribal stuff
+        next unless building_name =~ /government/
+        building_bonus = {
+          "government (1)" => 0,
+          "government (2)" => 3,
+          "government (3)" => 6,
+          "government (4)" => 9,
+          "government (5)" => 12,
+          "government (6)" => 15,
+          "government minor (1)" => 0,
+          "government minor (2)" => 3,
+          "government minor (3; military)" => 3,
+          "government minor (4; military)" => 3,
+          "government minor (3; civ)" => 6,
+          "government minor (4; civ)" => 9,
+          # minors' capitals
+          "government minor (5; civ)" => 12,
+          # didn't verify them all, seems like they just +1 happiness and add flavor
+          "government (7; austria)" => 15,
+          "government (7; britain)" => 15,
+          "government (7; france)" => 15,
+          "government (7; maratha)" => 15,
+          "government (7; russia)" => 15,
+          "government (7; spain)" => 15,
+          "government (7; sweden)" => 15,
+          "government (7; usa)" => 15,
+        }.fetch(building_name)
+
+        @tax_level_by_region[region_name] += building_bonus
+      end
+    end
+    @tax_level_by_region
+  end
+
+  def base_income_by_region
+    unless @base_income_by_region
+      @base_income_by_region = wealth_by_region.map{|k,v| [k, (v * tax_level_by_region[k] / 100.0)]}.to_h
+    end
+    @base_income_by_region
+  end
+
+  def base_income_by_faction
+    unless @base_income_by_faction
+      @base_income_by_faction = regions_by_faction.map{|n,rs| [n, rs.map{|r| base_income_by_region[r]}.sum.round(2)] }.to_h
+    end
+    @base_income_by_faction
+  end
+
+  def region_count_by_faction
+    unless @region_count_by_faction
+      @region_count_by_faction = regions_by_faction.map{|k,v| [k, v.size]}.to_h
+    end
+    @region_count_by_faction
+  end
+
+  def income_by_faction
+    unless @income_by_faction
+      @income_by_faction = base_income_by_faction.map{|k,v| [k, v * (1 + admin_costs(region_count_by_faction.fetch(k)))]}.to_h
+    end
+    @income_by_faction
+  end
+
+  def call
+    wealth_by_faction.sort_by{|n,v| [-v,n]}.each do |faction_name, total|
+      faction_base_income = base_income_by_faction[faction_name]
+      puts "* #{faction_name} [#{total}]: #{faction_base_income} => #{income_by_faction[faction_name].round(2)}"
+      partial_base_income = 0
+      regions_by_faction[faction_name].map{|n| [wealth_by_region[n], n]}.sort_by{|v,n| [-v,n]}.each_with_index do |(wealth, name), i|
+        base_income = base_income_by_region[name]
+        self_cost = -admin_costs(i+1) * base_income # How much it costs itself
+        marginal_previous_cost = (-additional_admin_costs(i+1) * partial_base_income).round(2)
+        marginal_cost = (marginal_previous_cost + self_cost).round(2)
+        marginal_cost = 0 if marginal_cost == 0
+        net_income = (base_income - marginal_cost).round(2)
+        puts "  * #{name} [#{wealth}]: #{base_income} - #{marginal_cost} = #{net_income}"
+        # For next one
+        partial_base_income += base_income
+      end
+      regions = region_count_by_faction[faction_name]
+      an1 = additional_admin_costs(regions + 1)
+      loss_due_to_next_region = an1 * faction_base_income
+      puts "  * extra cost for next conquest: #{loss_due_to_next_region.round(2)}"
+    end
+  end
+end
+
+ListFactionTaxIncome.new
