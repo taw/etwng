@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+require_relative "../tw3k_script"
+
+class ListAllFactions < Tw3kScript
+  def call()
+    update_each_faction do |faction, faction_name|
+      puts(faction_name)
+      false
+    end
+  end
+end
+
+ListAllFactions.new

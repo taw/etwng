@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+require_relative "../tw3k_script"
+
+class SetAllTreasuries < Tw3kScript
+  def call(treasury)
+    update_each_faction do |faction, faction_name|
+      faction.xpath("//rec[@type='FACTION_ECONOMICS']/i")[0].content = treasury
+      true
+    end
+  end
+
+  def args
+    %W[treasury]
+  end
+
+  def check_args(treasury)
+    treasury =~ /\A\d+\z/
+  end
+end
+
+SetAllTreasuries.new

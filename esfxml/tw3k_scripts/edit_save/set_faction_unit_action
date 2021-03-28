@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+require_relative "../tw3k_script"
+
+class SetFactionUnitHealth < Tw3kScript
+  def call(faction_to_change, percentage)
+    update_armies(faction_to_change) do |army|
+      units = army.xpath("//rec[@type='UNIT']")
+      units.each do |unit|
+        maxaction = unit.xpath("rec[@type='UNIT_ACTION_POINTS']/i")[1].content.to_i
+        newaction = (percentage.to_i / 100.0 * maxaction).floor
+        unit.xpath("rec[@type='UNIT_ACTION_POINTS']/i")[0].content = newaction
+      end
+    end
+    true
+  end
+
+  def args
+    %W[faction percentage]
+  end
+
+  def check_args(faction, percentage)
+    percentage =~ /\A\d+\z/
+  end
+end
+
+SetFactionUnitHealth.new
