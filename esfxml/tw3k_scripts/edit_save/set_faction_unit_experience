@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+require_relative "../tw3k_script"
+
+class SetFactionUnitExperience < Tw3kScript
+  def initialize
+    @levels = {0  => 0,
+               1  => 449,
+               2  => 1069,
+               3  => 1775,
+               4  => 2545,
+               5  => 3363,
+               6  => 4225,
+               7  => 5123,
+               8  => 6053,
+               9  => 7013
+           }
+    @levels.default = 7015
+    super
+  end
+
+  def call(faction_to_change, level)
+    update_armies(faction_to_change) do |army|
+      units = army.xpath("//rec[@type='UNIT']")
+      units.each do |unit|
+        name = unit.xpath("asc")[0].content
+        puts(name)
+        if name !~ /hero|captain/
+          puts(unit.xpath("rec[@type='EXPERIENCE_DATA']/u")[0].content)
+          puts(unit)
+          unit.xpath("rec[@type='EXPERIENCE_DATA']/u")[0].content = @levels[level]
+          unit.xpath("rec[@type='EXPERIENCE_DATA']/byte")[0].content = [10,level.to_i].min
+
+        end
+      end
+    end
+    true
+  end
+
+  def args
+    %W[faction level]
+  end
+
+  def check_args(faction, level)
+    level =~ /\A\d+\z/
+  end
+end
+
+SetFactionUnitExperience.new
