@@ -2,11 +2,39 @@
 
 ruby = RUBY_PLATFORM == 'java' ? "jruby" : "ruby"
 
-def windows?
+def platform # should probably use a library to detect os
   if RUBY_PLATFORM == 'java'
-    java.lang.System.getProperty("os.name") =~ /win/i
+    require "java"
+    case java.lang.System.getProperty("os.name")
+    when /\bmac/i
+      :mac
+    when /\bwin/i
+      :windows
+    else
+      :other
+    end
   else
-    RUBY_PLATFORM =~ /win/i
+    case RUBY_PLATFORM
+    when /\bdarwin/i
+      :mac
+    when /\bwin/i
+      :windows
+    else
+     :other
+    end
+  end
+end
+
+def lzma
+  return ENV["LZMA_COMPRESS"] if ENV["LZMA_COMPRESS"]
+  return ENV["LZMA"] if ENV["LZMA"]
+  case platform
+  when :windows
+    "./lzma"
+  when :mac
+    "#{File.dirname(__FILE__)}/lzma.mac"
+  else
+    "lzma"
   end
 end
 
@@ -19,14 +47,24 @@ in_dir = ARGV[0]
 out_file = ARGV[1]
 
 if File.exist?("#{in_dir}/compressed_data")
-  system ruby, "xml2esf", "#{in_dir}/compressed_data", "#{in_dir}/compressed_data.esf"
+  system ruby, File.join(File.dirname(__FILE__), "xml2esf"), "#{in_dir}/compressed_data", "#{in_dir}/compressed_data.esf"
 end
 if File.exist?("#{in_dir}/compressed_data.esf")
-  if windows?
+  case platform
+  when :windows
     # No idea what -a0 -d18 are...
-    system "./lzma", "e", "#{in_dir}/compressed_data.esf", "#{in_dir}/compressed_data.esf.xz", "-a0", "-d18"
+    unless system lzma, "e", "#{in_dir}/compressed_data.esf", "#{in_dir}/compressed_data.esf.xz", "-a0", "-d18"
+      abort("Error running lzma")
+    end
+  when :mac
+    unless system lzma, "-kf", "-S", ".xz", "#{in_dir}/compressed_data.esf"
+      abort("Error running lzma")
+    end
   else
-    system "lzma", "-kf", "-S", ".xz", "#{in_dir}/compressed_data.esf"
+    unless system lzma, "-kf", "-S", ".xz", "#{in_dir}/compressed_data.esf"
+      abort("Error running lzma")
+    end
   end
 end
+
 system ruby, "./xml2esf", in_dir, out_file
