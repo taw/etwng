@@ -32,7 +32,7 @@ def lzma
   when :windows
     "./lzma"
   when :mac
-    "#{File.dirname(__FILE__)}/lzma.mac"
+    "./lzma.mac"
   else
     "lzma"
   end
@@ -61,8 +61,8 @@ if File.exist?(out_dir)
   exit 1
 end
 
-puts(File.join(File.dirname(__FILE__), "esf2xml"))
-system *[ruby, File.join(File.dirname(__FILE__), "esf2xml"), quiet, in_file, out_dir].compact
+system *[ruby, "./esf2xml", quiet, in_file, out_dir].compact
+
 if File.exist?("#{out_dir}/compressed_data.esf.xz")
   case platform
   when :windows
