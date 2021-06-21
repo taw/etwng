@@ -551,7 +551,7 @@ class Effect(DebuggableConverter):
         Reads from a TypeCastReader handle
         """
         self.name = handle.readASCII()
-        self.flag = handle.readShort()
+        self.flag = handle.readShort() # I think there are two booleans
         phase_count = handle.readInt()
 
         for i in range(phase_count):
@@ -1096,10 +1096,10 @@ class Transition(DebuggableConverter):
     def __init__(self, version, indent):
         self.version = version
         self.indent = indent
-        self.short1 = 0
+        self.str1 = ""
         self.int1 = 0
         self.int2 = 0
-        self.short2 = 0
+        self.str2 = ""
         self.int3 = 0
 
     def readFrom(self, handle):
@@ -1109,11 +1109,11 @@ class Transition(DebuggableConverter):
         self.type = handle.readInt()
         self.id = handle.readInt()
         if self.version >= 39:
-          self.short1 = handle.readShort()
+          self.str1 = handle.readASCII()
           self.int1 = handle.readInt()
           self.int2 = handle.readInt()
         if self.version >= 43:
-          self.short2 = handle.readShort()
+          self.str2 = handle.readASCII()
           self.int3 = handle.readInt()
 
     def writeTo(self, handle):
@@ -1123,11 +1123,11 @@ class Transition(DebuggableConverter):
         handle.writeInt(self.type)
         handle.writeInt(self.id)
         if self.version >= 39:
-          handle.writeShort(self.short1)
+          handle.writeASCII(self.str1)
           handle.writeInt(self.int1)
           handle.writeInt(self.int2)
         if self.version >= 43:
-          handle.writeShort(self.short2)
+          handle.writeASCII(self.str2)
           handle.writeInt(self.int3)
 
     def writeToXML(self, handle):
@@ -1138,13 +1138,13 @@ class Transition(DebuggableConverter):
 """%(indent)s<transition>
 %(indent+1)s<type>%(type)i</type>
 %(indent+1)s<stateIDRef>%(id)i</stateIDRef>
-%(indent+1)s<short1>%(short1)i</short1>
+%(indent+1)s<str1>%(str1)s</str1>
 %(indent+1)s<int1>%(int1)i</int1>
 %(indent+1)s<int2>%(int2)i</int2>
-%(indent+1)s<short2>%(short2)i</short2>
+%(indent+1)s<str2>%(str2)s</str2>
 %(indent+1)s<int3>%(int3)i</int3>
 %(indent)s</transition>
-"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "type": self.type, "id": self.id, "short1": self.short1, "short2": self.short2, "int1": self.int1, "int2": self.int2, "int3": self.int3})
+"""%{"indent": "  "*self.indent, "indent+1": "  "*(self.indent+1), "type": self.type, "id": self.id, "str1": self.str1, "str2": self.str2, "int1": self.int1, "int2": self.int2, "int3": self.int3})
 
     def constructFromNode(self, node):
         """
@@ -1158,10 +1158,12 @@ class Transition(DebuggableConverter):
                 self.type = int(child.firstChild.data)
             elif child.nodeName == "stateIDRef":
                 self.id = int(child.firstChild.data)
-            elif child.nodeName == "short1":
-                self.short1 = int(child.firstChild.data)
-            elif child.nodeName == "short2":
-                self.short2 = int(child.firstChild.data)
+            elif child.nodeName == "str1":
+                if len(child.childNodes) > 0:
+                    self.str1 = child.firstChild.data
+            elif child.nodeName == "str2":
+                if len(child.childNodes) > 0:
+                    self.str2 = child.firstChild.data
             elif child.nodeName == "int1":
                 self.int1 = int(child.firstChild.data)
             elif child.nodeName == "int2":
