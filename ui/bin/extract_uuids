@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+require "pry"
+require "pathname"
+
+unpacked_dir = Pathname(__dir__) + "../unpacked"
+
+# Not totally sure if these even are UUIDs
+
+uuids = []
+
+unpacked_dir.glob("12[6-9]*/*").each do |path|
+  lines = path.readlines
+  # puts path
+  lines.each_with_index do |line, i|
+    if line.b =~ /uuid/
+      uuids << lines[i+2].strip
+    end
+  end
+end
+
+formatted = uuids.map do |u|
+  z = u.split(" ").join
+  [z[0,8], z[8,4], z[12,4], z[16, 4], z[20, 12]].join("-")
+end
+
+formatted.each do |u|
+  if u == "00000000-0000-0000-0000-000000000000"
+    p [u, true, nil]
+    next
+  end
+  a = u.split("-")[3][0].to_i(16)
+  b = u.split("-")[2][0].to_i(16)
+
+  is_uuid = (a & 12 == 8)
+  p [u, is_uuid, b, "A=#{a & 12}"] # expected a
+end
+
+all = (formatted.uniq - ["00000000-0000-0000-0000-000000000000"]).map{|x| x.tr("-", "").to_i(16) }
+
+128.times do |i|
+  ui = 2 ** i
+  vs = all.map{|a| a[i] }.uniq
+  if vs.size == 1
+    puts "#{i} #{vs}"
+  end
+end

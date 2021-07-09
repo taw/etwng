@@ -1,3 +1,7 @@
+This is the old UI converter. Do not use this one. Use the newer one in `ui` folder.
+
+###  Description
+
 Converter for Total War UI files to and from XML.
 
 It requires Python 3.

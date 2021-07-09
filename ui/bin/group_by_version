@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/task_set"
+
+task_set = TaskSet.new(*ARGV)
+
+task_set.todo.each do |todo|
+  path = Pathname("tmp/by_version/%03d-%s-%s" % [todo.version, todo.game, todo.basename])
+
+  path.parent.mkpath
+  path.write todo.data_path.read
+end

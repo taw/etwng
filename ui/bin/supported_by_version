@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/task_set"
+
+task_set = TaskSet.new(*ARGV)
+
+totals = Hash.new(0)
+supported = Hash.new(0)
+
+task_set.todo.each do |todo|
+  totals[todo.full_version] += 1
+  supported[todo.full_version] += 1 if todo.unpacked_path.exist?
+end
+
+totals.keys.map{|v|
+  s = supported[v]
+  t = totals[v]
+  if s == t
+    [v, "#{v}: ✅ DONE"]
+  elsif s == 0
+    [v, "#{v}: ❌ TODO"]
+  else
+    pct = (s*100.0/t).round
+    [v, "#{v}: PARTIAL (#{s}/#{t} - #{pct}%)"]
+  end
+}.sort_by{|v, msg| [v, msg]}.each{|v, msg|
+  puts msg
+}

@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/task_set"
+
+task_set = TaskSet.new(*ARGV)
+
+totals = Hash.new(0)
+supported = Hash.new(0)
+
+task_set.todo.each do |todo|
+  totals[todo.game] += 1
+  supported[todo.game] += 1 if todo.unpacked_path.exist?
+end
+
+games = [
+  ["empire", "Empire"],
+  ["napoleon", "Napoleon"],
+  ["shogun2", "Shogun 2"],
+  ["rome2", "Rome 2"],
+  ["attila", "Attila"],
+  ["thrones", "Thrones of Britannia"],
+  ["warhammer1", "Warhammer 1"],
+  ["warhammer2", "Warhammer 2"],
+  ["troy", "Troy"],
+  ["3kingdoms", "Three Kingdoms"],
+]
+order = games.map(&:first)
+
+totals.keys.map{|game|
+  s = supported[game]
+  t = totals[game]
+  pct = (s*100.0/t).round
+  [game, "* #{games.to_h[game]}: #{s}/#{t} (#{pct}%)"]
+}.sort_by{|game, msg|
+  [order.index(game) || 100000, game, msg]
+}.each{|pct, msg|
+  puts msg
+}
+
+supported_all = supported.values.sum
+total_all = totals.values.sum
+
+pct = (supported_all*100.0/total_all).round
+puts ""
+puts "* Total: #{supported_all}/#{total_all} (#{pct}%)"

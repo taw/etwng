@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/ui_builder"
+require_relative "../lib/xml2ui"
+require "pathname"
+
+$stdout.sync = true
+
+unless ARGV.size == 2
+  STDERR.puts "Usage: #{$0} output.xml input.ui"
+  exit 1
+end
+
+ui = Xml2Ui.new(ARGV[0]).ui
+Pathname(ARGV[1]).parent.mkpath
+ui.save! ARGV[1]

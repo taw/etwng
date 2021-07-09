@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+
+data_dir = Pathname("#{__dir__}") + "../data"
+
+any_bad_found = false
+data_dir.find do |path|
+  next if path.directory?
+  magic = path.read(10)
+  next if magic =~ /\AVersion\d\d\d\z/
+  puts "Not UI file: #{path}"
+  any_bad_found = true
+end
+
+unless any_bad_found
+  puts "All files OK"
+end

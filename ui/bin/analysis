@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+require_relative "../lib/analysis"
+
+if ARGV.empty?
+  STDERR.puts "Usage: #{$0} path"
+  exit 1
+end
+
+ARGV.each do |path|
+  Analysis.new(Pathname(path)).call
+end

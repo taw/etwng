@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/task_set"
+
+task_set = TaskSet.new(*ARGV)
+
+counts = Hash.new{|ht,k| ht[k] = Hash.new(0)}
+
+task_set.todo.each do |todo|
+  counts[todo.game][todo.full_version] += 1
+end
+
+counts.each do |game, versions|
+  summary = versions.sort_by{|k,v| [k.to_i,k]}.map{|k,v| "#{k}:#{v}"}.join(", ")
+  puts "#{game}: #{summary}"
+end

@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/task_set"
+
+task_set = TaskSet.new(*ARGV)
+task_set.todo.select!{|todo| todo.unpacked_path.exist?}
+
+status = Hash.new(0)
+
+task_set.in_parallel do |task, i|
+  task.recreated_path.parent.mkpath
+  status[:total] += 1
+
+  ok = system %Q[#{__dir__}/xml2ui "#{task.unpacked_path}" "#{task.recreated_path}"]
+  if !ok
+    puts "ERR:  #{task.data_path}"
+    status[:err] += 1
+  elsif task.data_path.read == task.recreated_path.read
+    puts "OK:   #{task.data_path}"
+    status[:ok] += 1
+  else
+    puts "DIFF: #{task.data_path} #{task.unpacked_path} #{task.recreated_path}"
+    puts "  vbindiff #{task.data_path} #{task.recreated_path}"
+    status[:diff] += 1
+  end
+end
+
+pp status

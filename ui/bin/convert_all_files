@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/task_set"
+
+task_set = TaskSet.new(*ARGV)
+task_set.todo.select!(&:supported_by_converter?) if ARGV.empty?
+
+task_set.in_parallel do |task, i|
+  task.converted_path.parent.mkpath
+  puts "#{i} #{task.data_path}"
+  ok = system %Q[#{__dir__}/convert_ui.py -u "#{task.data_path}" "#{task.converted_path}"]
+
+  if ok
+    task.converted_fail_path.unlink if task.converted_fail_path.exist?
+  else
+    task.converted_path.unlink
+    task.converted_fail_path.write("")
+  end
+end

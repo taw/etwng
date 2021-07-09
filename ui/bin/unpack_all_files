@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/task_set"
+
+task_set = TaskSet.new(*ARGV)
+task_set.todo.select!(&:supported_by_ui2xml?) if ARGV.empty?
+
+task_set.in_parallel do |task, i|
+  task.unpacked_path.parent.mkpath
+  puts "#{i} #{task.data_path}"
+  ok = system %Q[#{__dir__}/ui2xml "#{task.data_path}" "#{task.unpacked_path}"]
+
+  if ok
+    task.unpacked_fail_path.unlink if task.unpacked_fail_path.exist?
+  else
+    task.unpacked_path.rename task.unpacked_fail_path
+  end
+end

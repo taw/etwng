@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/task_set"
+
+task_set = TaskSet.new(*ARGV)
+
+task_set.todo.each do |task|
+  puts task.paths
+  puts ""
+end

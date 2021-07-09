@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+
+output_dir = Pathname(__dir__) + "../output"
+
+counts = Hash.new(0)
+
+output_dir.glob("*/*.txt").each do |path|
+  strs = path.readlines.grep(/\A\d+-\d+ StringBlock (.*)/).map{|s| s.chomp.split(" ",3).last }
+  strs.each do |s|
+    counts[s] += 1
+  end
+end
+
+counts.sort_by{|k,v| [-v, k]}.each do |k,v|
+  puts "#{v} #{k}"
+end
