@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+require_relative "./binfile"
+
+if ARGV.empty?
+  samples = Pathname("samples").glob("*.bin").sort_by{|fn| fn.size}
+else
+  samples = ARGV.map{|x| Pathname(x) }
+end
+
+Pathname("tmp").mkpath
+samples.each do |path|
+  bn = path.basename.to_s
+  $stdout = File.open("tmp/#{bn}.txt", "w")
+  BinFile.new(path).call
+  $stdout.close
+end
