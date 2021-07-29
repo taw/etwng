@@ -1,5 +1,3 @@
-require "pry"
-
 class Float
   def pretty_single
     rv = (((100_000.0 * self).round / 100_000.0) rescue self)

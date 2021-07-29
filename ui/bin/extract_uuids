@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require "pry"
 require "pathname"
 
 unpacked_dir = Pathname(__dir__) + "../unpacked"
