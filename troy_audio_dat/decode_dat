@@ -1,0 +1,73 @@
+#!/usr/bin/env ruby
+
+require "pathname"
+require "pry"
+
+class Float
+  def pretty_single
+    rv = (((100_000.0 * self).round / 100_000.0) rescue self)
+    return rv if [self].pack("f") == [rv].pack("f")
+    self
+  end
+end
+
+class DatFile
+  def initialize(path)
+    @path = path
+    @data = Pathname(path).read.b
+  end
+
+  def bytes_left
+    @data.size - @ofs
+  end
+
+  def get(sz)
+    raise "Trying to read past end of file at #{@ofs}" if bytes_left < sz
+    ret = @data[@ofs, sz]
+    @ofs += sz
+    ret
+  end
+
+  def get_u4
+    get(4).unpack1("V")
+  end
+
+  def get_flt
+    get(4).unpack1("f").pretty_single
+  end
+
+  def get_s
+    get(get_u4)
+  end
+
+  def call
+    @ofs = 0
+    puts "SECTION ONE at #{@ofs}:"
+    get_u4.times do
+      p [get_s, get_flt]
+    end
+    puts "SECTION TWO at #{@ofs}:"
+    get_u4.times do
+      p [get_s, get_u4.times.map{get_s}]
+    end
+    puts "SECTION THREE at #{@ofs}:"
+    get_u4.times do
+      p [get_s, get_u4.times.map{get_s}]
+    end
+    puts "SECTION FOUR at #{@ofs}:"
+    get_u4.times.map do
+      p [get_s, get_u4.times.map{ "%08x" % get_u4 }]
+    end
+    puts "SECTION FIVE at #{@ofs}:"
+    get_u4.times.map do
+      p [get_s, get_flt, get_flt]
+    end
+    puts "SECTION SIX at #{@ofs}:"
+    get_u4.times.map do
+      p [get_s]
+    end
+    raise unless bytes_left == 0
+  end
+end
+
+DatFile.new("0094fb5f-78c0-43ad-9b2c-a897f78ebebf.dat").call
