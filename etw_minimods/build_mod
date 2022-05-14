@@ -17,7 +17,7 @@ module FakeCSV
   end
 
   def self.save(path, data)
-    Pathname(path).write(
+    Pathname(path).binwrite(
       data[0,2].map{|row|
         row.join("\t") + "\n"
       }.join +

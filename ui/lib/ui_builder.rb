@@ -55,6 +55,6 @@ class UiBuilder
   end
 
   def save!(path)
-    Pathname(path).write(@data)
+    Pathname(path).binwrite(@data)
   end
 end
