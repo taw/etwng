@@ -378,6 +378,7 @@ end
 
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} [--empire] models_naval_dir models_naval_dbtable"
+  exit 1
 end
 
 xmldir = ModelsNavalXmlDir.new(ARGV[0])

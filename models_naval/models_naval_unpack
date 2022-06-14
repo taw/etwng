@@ -480,6 +480,7 @@ end
 
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} [--empire] models_naval_dbtable models_naval_dir"
+  exit 1
 end
 
 model = ModelsNavalDbTable.new(ARGV[0], empire)
