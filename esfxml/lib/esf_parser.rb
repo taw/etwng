@@ -19,8 +19,17 @@ end
 class String
   # Escape characters for output as XML attribute values (< > & ' ")
   def xml_escape
-    replacements = {"<" => "&lt;", ">" => "&gt;", "&" => "&amp;", "\"" => "&quot;", "'" => "&apos;"}
-    gsub(/([<>&\'\"])/) { replacements[$1] }
+    replacements = {
+      "<" => "&lt;",
+      ">" => "&gt;",
+      "&" => "&amp;",
+      "\"" => "&quot;",
+      "'" => "&apos;",
+      # Nokogiri is XML 1.0 only, we need to do some hacks
+      # This could be a comprehensive list
+      "\x02" => "&#xE002;",
+    }
+    gsub(/([<>&\'\"\x02])/) { replacements[$1] }
   end
   def to_hex_dump
     unpack("H2" * size).join(" ")

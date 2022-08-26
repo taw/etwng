@@ -1449,7 +1449,8 @@ class Xml2Esf < Nokogiri::XML::SAX::Document
 
   def characters(chars)
     if buf = @stack[-1][2]
-      buf << chars
+      # Stupid XML parsers not supporting full UTF8 (as XML 1.1 promised)
+      buf << chars.tr("\uE002", "\x02")
     elsif chars =~ /\S/
       raise "Illegal place for non-whitespace characters: #{@stack.inspect} #{chars.inspect}"
     end
