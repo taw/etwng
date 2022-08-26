@@ -10,17 +10,24 @@ class String
 end
 
 verbose = false
-while ARGV[0] == "--verbose" or ARGV[0] == "--quiet"
-  verbose = (ARGV.shift == "--verbose")
-  ARGV.shift
+semantic = false
+while ARGV[0] == "--verbose" or ARGV[0] == "--quiet" or ARGV[0] == "--semantic"
+  case ARGV.shift
+  when "--verbose"
+    verbose = true
+  when "--quiet"
+    verbose = true
+  when "--semantic"
+    semantic = true
+  end
 end
 
 unless ARGV.size == 2
   STDERR.puts <<EOF
 Usage:
   #{$0} input.esf output_dir
-To hide progress bar:
-  #{$0} --quiet input.esf output_dir
+For progress bar:
+  #{$0} --verbose input.esf output_dir
 EOF
   exit 1
 end
@@ -35,3 +42,4 @@ end
 esf_converter = EsfConverter.new(in_file, out_dir)
 thr = esf_converter.progressbar_thread if verbose
 esf_converter.convert!
+esf_converter.report_semantic_failures! if semantic

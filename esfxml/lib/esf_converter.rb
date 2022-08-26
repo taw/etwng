@@ -436,7 +436,6 @@ class EsfConverter < EsfParser
         send(@esf_type_handlers[get_byte])
       end
     end
-    report_semantic_failures!
     @done = true
   end
 
