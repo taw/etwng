@@ -1455,6 +1455,14 @@ class Xml2Esf < Nokogiri::XML::SAX::Document
     end
   end
 
+  def error(string)
+    STDERR.puts "XML Error: #{string}"
+  end
+
+  def warning(string)
+    STDERR.puts "XML Warning: #{string}"
+  end
+
   ## Everything else
 
   attr_reader :esf, :stack
