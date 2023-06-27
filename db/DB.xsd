@@ -2600,32 +2600,32 @@
     <xs:attribute msprop:Optional='true' name='Trail' type='xs:string' />
     <xs:attribute name='Spin' type='xs:string' use='required' />
     <xs:attribute name='Number_of_Pellets' type='xs:int' use='required' />
-    <xs:attribute msprop:Optional='true' name='unknown4' type='xs:string' />
-    <xs:attribute name='unknown5' type='xs:string' use='required' />
+    <xs:attribute msprop:Optional='true' name='In_x0020_Flight_x0020_Transition' type='xs:string' />
+    <xs:attribute name='Trajectory_x0020_Sight' type='xs:string' use='required' />
     <xs:attribute name='Range' type='xs:int' use='required' />
     <xs:attribute name='Minimum_x0020_Range' type='xs:int' use='required' />
-    <xs:attribute name='unknown7' type='xs:int' use='required' />
+    <xs:attribute name='Max_x0020_Elevation' type='xs:int' use='required' />
     <xs:attribute name='Velocity' type='xs:float' use='required' />
-    <xs:attribute name='unknown8' type='xs:float' use='required' />
+    <xs:attribute name='Marksmanship_x0020_Bonus' type='xs:float' use='required' />
     <xs:attribute name='Maximum_deviance_x0020_from_0_to_360' type='xs:float' use='required' />
     <xs:attribute name='Damage' type='xs:float' use='required' />
     <xs:attribute msprop:Optional='true' name='Damage_x0020_Range_effectiveness' type='xs:string' />
-    <xs:attribute msprop:Optional='true' name='unknown11' type='xs:string' />
-    <xs:attribute msprop:Optional='true' name='unknown12' type='xs:string' />
-    <xs:attribute name='unknown13' type='xs:boolean' use='required' />
-    <xs:attribute name='unknown14' type='xs:boolean' use='required' />
-    <xs:attribute name='unknown15' type='xs:float' use='required' />
+    <xs:attribute msprop:Optional='true' name='Incendiary' type='xs:string' />
+    <xs:attribute msprop:Optional='true' name='Blast_x0020_Effect' type='xs:string' />
+    <xs:attribute name='Can_x0020_Bounce' type='xs:boolean' use='required' />
+    <xs:attribute name='High_x0020_Air_x0020_Resistance' type='xs:boolean' use='required' />
+    <xs:attribute name='Collision_x0020_Radius' type='xs:float' use='required' />
     <xs:attribute name='Base_Reload__x0020_Time_x0020__x0023_Added_to_animation' type='xs:int' use='required' />
-    <xs:attribute name='unknown16' type='xs:int' use='required' />
-    <xs:attribute msprop:Optional='true' name='unknown17' type='xs:string' />
-    <xs:attribute name='unknown18' type='xs:float' use='required' />
-    <xs:attribute name='unknown19' type='xs:float' use='required' />
-    <xs:attribute name='unknown20' type='xs:string' use='required' />
-    <xs:attribute name='unknown21' type='xs:string' use='required' />
-    <xs:attribute msprop:Optional='true' name='unknown22' type='xs:string' />
-    <xs:attribute msprop:Optional='true' name='unknown23' type='xs:string' />
+    <xs:attribute name='Base_x0020_Misfire_x0020_Chance' type='xs:int' use='required' />
+    <xs:attribute msprop:Optional='true' name='Weather_x0020_Effect' type='xs:string' />
+    <xs:attribute name='Sail_x0020_Damage_x0020_Modifier' type='xs:float' use='required' />
+    <xs:attribute name='Below_x0020_Waterline_x0020_Damage_x0020_Modifier' type='xs:float' use='required' />
+    <xs:attribute name='Launch_x0020_Audio' type='xs:string' use='required' />
+    <xs:attribute name='Hit_x0020_Audio' type='xs:string' use='required' />
+    <xs:attribute msprop:Optional='true' name='Launch_x0020_Particle_x0020_Effect' type='xs:string' />
+    <xs:attribute msprop:Optional='true' name='Projectile_x0020_Trail_x0020_Particle_x0020_Effect' type='xs:string' />
     <xs:attribute msprop:Optional='true' name='Impact' type='xs:string' />
-    <xs:attribute msprop:Optional='true' msprop:VersionStart='2' name='unknown24' type='xs:string' />
+    <xs:attribute msprop:Optional='true' msprop:VersionStart='2' name='Gun_x0020_Type' type='xs:string' />
   </xs:complexType>
   <xs:complexType name="public_order_factors_tables">
     <xs:attribute name='Factor_ID' type='xs:string' use='required' />
