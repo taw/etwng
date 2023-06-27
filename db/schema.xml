@@ -2600,32 +2600,32 @@
     <field fkey='projectile_trails_tables.Projectile_Trail' name='Trail' type='optstring'/>
     <field name='Spin' type='string'/>
     <field name='Number_of_Pellets' type='int'/>
-    <field name='unknown4' type='optstring'/>
-    <field name='unknown5' type='string'/>
+    <field name='In_x0020_Flight_x0020_Transition' type='optstring'/>
+    <field name='Trajectory_x0020_Sight' type='string'/>
     <field name='Range' type='int'/>
     <field name='Minimum_x0020_Range' type='int'/>
-    <field name='unknown7' type='int'/>
+    <field name='Max_x0020_Elevation' type='int'/>
     <field name='Velocity' type='float'/>
-    <field name='unknown8' type='float'/>
+    <field name='Marksmanship_x0020_Bonus' type='float'/>
     <field name='Maximum_deviance_x0020_from_0_to_360' type='float'/>
     <field name='Damage' type='float'/>
     <field name='Damage_x0020_Range_effectiveness' type='optstring'/>
-    <field name='unknown11' type='optstring'/>
-    <field name='unknown12' type='optstring'/>
-    <field name='unknown13' type='boolean'/>
-    <field name='unknown14' type='boolean'/>
-    <field name='unknown15' type='float'/>
+    <field name='Incendiary' type='optstring'/>
+    <field name='Blast_x0020_Effect' type='optstring'/>
+    <field name='Can_x0020_Bounce' type='boolean'/>
+    <field name='High_x0020_Air_x0020_Resistance' type='boolean'/>
+    <field name='Collision_x0020_Radius' type='float'/>
     <field name='Base_Reload__x0020_Time_x0020__x0023_Added_to_animation' type='int'/>
-    <field name='unknown16' type='int'/>
-    <field name='unknown17' type='optstring'/>
-    <field name='unknown18' type='float'/>
-    <field name='unknown19' type='float'/>
-    <field name='unknown20' type='string'/>
-    <field name='unknown21' type='string'/>
-    <field name='unknown22' type='optstring'/>
-    <field name='unknown23' type='optstring'/>
+    <field name='Base_x0020_Misfire_x0020_Chance' type='int'/>
+    <field name='Weather_x0020_Effect' type='optstring'/>
+    <field name='Sail_x0020_Damage_x0020_Modifier' type='float'/>
+    <field name='Below_x0020_Waterline_x0020_Damage_x0020_Modifier' type='float'/>
+    <field name='Launch_x0020_Audio' type='string'/>
+    <field name='Hit_x0020_Audio' type='string'/>
+    <field name='Launch_x0020_Particle_x0020_Effect' type='optstring'/>
+    <field name='Projectile_x0020_Trail_x0020_Particle_x0020_Effect' type='optstring'/>
     <field fkey='projectile_impacts_tables.Projectile_IDRef' name='Impact' type='optstring'/>
-    <field name='unknown24' type='optstring' version_start='2'/>
+    <field name='Gun_x0020_Type' type='optstring' version_start='2'/>
   </table>
   <table name='public_order_factors_tables'>
     <field name='Factor_ID' pk='true' type='string'/>
