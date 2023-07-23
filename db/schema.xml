@@ -3131,12 +3131,12 @@
     <field name='Warscape_Equipment_Theme_IDRef' type='string'/>
     <field name='Armor_Value' type='int'/>
     <field name='Armor_Audio' type='string'/>
-    <field name='Unused1' type='int'/>
+    <field name='Man_x0020_Health' type='int'/>
     <field fkey='mounts_tables.Mount_ID' name='Mount_x0020_Model' type='optstring'/>
     <field fkey='battle_entities_tables.Battle_x0020_Entity_x0020_ID' name='Cavalry_x0020_Battle_x0020_Entity' type='optstring'/>
     <field name='Mount_x0020_Animations_x0020_Table' type='optstring'/>
-    <field name='Unused2' type='string'/>
-    <field name='Unused3' type='string'/>
+    <field name='Mount_x0020_Armour_x0020_Value' type='string'/>
+    <field name='Mount_x0020_Health' type='string'/>
     <field fkey='battle_entities_tables.Battle_x0020_Entity_x0020_ID' name='Carriage_x0020_Battle_x0020_Entity' type='optstring'/>
     <field fkey='battle_entities_tables.Battle_x0020_Entity_x0020_ID' name='Ammo_x0020_Train_x0020_Battle_x0020_Entity' type='optstring'/>
     <field name='Ammo_x0020_Caisson_x0020_Model' type='optstring'/>
@@ -3146,29 +3146,29 @@
     <field name='Primary_x0020_Missile_x0020_Weapon' type='optstring'/>
     <field name='Accuracy' type='int'/>
     <field name='Reloading_x0020_Skill' type='int'/>
-    <field name='Unused4' type='string'/>
+    <field name='Primary_x0020_Missile_x0020_Attack' type='string'/>
     <field name='Firing_x0020_Mechanism' type='string'/>
     <field fkey='projectiles_tables.Projectile_ID' name='Projectile' type='optstring'/>
     <field name='Ammo' type='int'/>
-    <field name='Unused5' type='optstring'/>
+    <field name='Skeleton_x0020_Missile' type='optstring'/>
     <field name='Melee_x0020_Weapon_x0020_Type' type='string'/>
     <field name='Melee_x0020_Attack_x0020_Skill' type='int'/>
     <field name='Charge_x0020_Bonus' type='int'/>
     <field name='Defense_x0020_Skill' type='int'/>
     <field name='Shield_x0020_Bonus' type='int'/>
-    <field name='Unused6' type='string'/>
-    <field name='Unknown_x0020__x0023_Most_x0020_Likely_x0020_Unused_x0023_' type='string'/>
-    <field name='Unused7' type='string'/>
+    <field name='Skeleton_x0020_Melee' type='string'/>
+    <field name='Pistols' type='string'/>
+    <field name='Unit_x0020_Drill_x0020_Set' type='string'/>
     <field name='Training' type='string'/>
     <field name='Morale' type='int'/>
     <field name='Deployed_x0020_Ranks' type='int'/>
     <field name='File_x0020_Spacing' type='float'/>
     <field name='Rank_x0020_Spacing' type='float'/>
-    <field name='Unused8' type='float'/>
-    <field name='Unused9' type='float'/>
+    <field name='File_x0020_Spacing_x0020_Loose_x0020_Formation' type='float'/>
+    <field name='Rank_x0020_Spacing_x0020_Loose_x0020_Formation' type='float'/>
     <field name='File_x0020_Spacing_x0020_Dismounted' type='float'/>
     <field name='Rank_x0020_Spacing_x0020_Dismounted' type='float'/>
-    <field name='Unused10' type='float'/>
+    <field name='Base_x0020_Density' type='float'/>
     <field name='Anti_Cavalry_Bonus' type='int'/>
     <field name='Can_x0020_Throw_x0020_Grenades' type='boolean'/>
     <field name='Can_x0020_Skirmish' type='boolean'/>
@@ -3201,12 +3201,12 @@
     <field name='Can_x0020_Do_x0020_Formed_x0020_Attack' type='boolean'/>
     <field name='Can_x0020_Use_x0020_Pike_x0020_Wall' type='boolean'/>
     <field name='Can_x0020_Use_x0020_Pike_x0020_Square' type='boolean'/>
-    <field name='Can_x0020_Shoot_x0020_While_x0020_Moving' type='boolean' version_start='2'/>
-    <field name='Unknown_1' type='boolean' version_start='5'/>
+    <field name='Can_x0020_Shoot_x0020_While_x0020_Moving_x0020__x0023_Is_x0020_Immune_x0020_to_x0020_Attrition_x0020_in_x0020_Napoleon' type='boolean' version_start='2'/>
+    <field name='Can_x0020_Shoot_x0020_While_x0020_Moving' type='boolean' version_start='5'/>
     <field name='Flutist' type='optstring' version_start='5'/>
     <field name='Limber_Destructed_Model' type='optstring' version_start='5'/>
     <field name='Limber_Destruction_Model' type='optstring' version_start='5'/>
-    <field name='Unknown_2' type='boolean' version_start='6'/>
+    <field name='Guerilla_Deployment' type='boolean' version_start='6'/>
   </table>
   <table name='unit_stats_naval_crew_tables'>
     <field name='Crew_ID' pk='true' type='string'/>
