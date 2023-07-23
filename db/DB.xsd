@@ -3131,12 +3131,12 @@
     <xs:attribute name='Warscape_Equipment_Theme_IDRef' type='xs:string' use='required' />
     <xs:attribute name='Armor_Value' type='xs:int' use='required' />
     <xs:attribute name='Armor_Audio' type='xs:string' use='required' />
-    <xs:attribute name='Unused1' type='xs:int' use='required' />
+    <xs:attribute name='Man_x0020_Health' type='xs:int' use='required' />
     <xs:attribute msprop:Optional='true' name='Mount_x0020_Model' type='xs:string' />
     <xs:attribute msprop:Optional='true' name='Cavalry_x0020_Battle_x0020_Entity' type='xs:string' />
     <xs:attribute msprop:Optional='true' name='Mount_x0020_Animations_x0020_Table' type='xs:string' />
-    <xs:attribute name='Unused2' type='xs:string' use='required' />
-    <xs:attribute name='Unused3' type='xs:string' use='required' />
+    <xs:attribute name='Mount_x0020_Armour_x0020_Value' type='xs:string' use='required' />
+    <xs:attribute name='Mount_x0020_Health' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' name='Carriage_x0020_Battle_x0020_Entity' type='xs:string' />
     <xs:attribute msprop:Optional='true' name='Ammo_x0020_Train_x0020_Battle_x0020_Entity' type='xs:string' />
     <xs:attribute msprop:Optional='true' name='Ammo_x0020_Caisson_x0020_Model' type='xs:string' />
@@ -3146,29 +3146,29 @@
     <xs:attribute msprop:Optional='true' name='Primary_x0020_Missile_x0020_Weapon' type='xs:string' />
     <xs:attribute name='Accuracy' type='xs:int' use='required' />
     <xs:attribute name='Reloading_x0020_Skill' type='xs:int' use='required' />
-    <xs:attribute name='Unused4' type='xs:string' use='required' />
+    <xs:attribute name='Primary_x0020_Missile_x0020_Attack' type='xs:string' use='required' />
     <xs:attribute name='Firing_x0020_Mechanism' type='xs:string' use='required' />
     <xs:attribute msprop:Optional='true' name='Projectile' type='xs:string' />
     <xs:attribute name='Ammo' type='xs:int' use='required' />
-    <xs:attribute msprop:Optional='true' name='Unused5' type='xs:string' />
+    <xs:attribute msprop:Optional='true' name='Skeleton_x0020_Missile' type='xs:string' />
     <xs:attribute name='Melee_x0020_Weapon_x0020_Type' type='xs:string' use='required' />
     <xs:attribute name='Melee_x0020_Attack_x0020_Skill' type='xs:int' use='required' />
     <xs:attribute name='Charge_x0020_Bonus' type='xs:int' use='required' />
     <xs:attribute name='Defense_x0020_Skill' type='xs:int' use='required' />
     <xs:attribute name='Shield_x0020_Bonus' type='xs:int' use='required' />
-    <xs:attribute name='Unused6' type='xs:string' use='required' />
-    <xs:attribute name='Unknown_x0020__x0023_Most_x0020_Likely_x0020_Unused_x0023_' type='xs:string' use='required' />
-    <xs:attribute name='Unused7' type='xs:string' use='required' />
+    <xs:attribute name='Skeleton_x0020_Melee' type='xs:string' use='required' />
+    <xs:attribute name='Pistols' type='xs:string' use='required' />
+    <xs:attribute name='Unit_x0020_Drill_x0020_Set' type='xs:string' use='required' />
     <xs:attribute name='Training' type='xs:string' use='required' />
     <xs:attribute name='Morale' type='xs:int' use='required' />
     <xs:attribute name='Deployed_x0020_Ranks' type='xs:int' use='required' />
     <xs:attribute name='File_x0020_Spacing' type='xs:float' use='required' />
     <xs:attribute name='Rank_x0020_Spacing' type='xs:float' use='required' />
-    <xs:attribute name='Unused8' type='xs:float' use='required' />
-    <xs:attribute name='Unused9' type='xs:float' use='required' />
+    <xs:attribute name='File_x0020_Spacing_x0020_Loose_x0020_Formation' type='xs:float' use='required' />
+    <xs:attribute name='Rank_x0020_Spacing_x0020_Loose_x0020_Formation' type='xs:float' use='required' />
     <xs:attribute name='File_x0020_Spacing_x0020_Dismounted' type='xs:float' use='required' />
     <xs:attribute name='Rank_x0020_Spacing_x0020_Dismounted' type='xs:float' use='required' />
-    <xs:attribute name='Unused10' type='xs:float' use='required' />
+    <xs:attribute name='Base_x0020_Density' type='xs:float' use='required' />
     <xs:attribute name='Anti_Cavalry_Bonus' type='xs:int' use='required' />
     <xs:attribute name='Can_x0020_Throw_x0020_Grenades' type='xs:boolean' use='required' />
     <xs:attribute name='Can_x0020_Skirmish' type='xs:boolean' use='required' />
@@ -3201,12 +3201,12 @@
     <xs:attribute name='Can_x0020_Do_x0020_Formed_x0020_Attack' type='xs:boolean' use='required' />
     <xs:attribute name='Can_x0020_Use_x0020_Pike_x0020_Wall' type='xs:boolean' use='required' />
     <xs:attribute name='Can_x0020_Use_x0020_Pike_x0020_Square' type='xs:boolean' use='required' />
-    <xs:attribute msprop:VersionStart='2' name='Can_x0020_Shoot_x0020_While_x0020_Moving' type='xs:boolean' use='required' />
-    <xs:attribute msprop:VersionStart='5' name='Unknown_1' type='xs:boolean' use='required' />
+    <xs:attribute msprop:VersionStart='2' name='Can_x0020_Shoot_x0020_While_x0020_Moving_x0020__x0023_Is_x0020_Immune_x0020_to_x0020_Attrition_x0020_in_x0020_Napoleon' type='xs:boolean' use='required' />
+    <xs:attribute msprop:VersionStart='5' name='Can_x0020_Shoot_x0020_While_x0020_Moving' type='xs:boolean' use='required' />
     <xs:attribute msprop:Optional='true' msprop:VersionStart='5' name='Flutist' type='xs:string' />
     <xs:attribute msprop:Optional='true' msprop:VersionStart='5' name='Limber_Destructed_Model' type='xs:string' />
     <xs:attribute msprop:Optional='true' msprop:VersionStart='5' name='Limber_Destruction_Model' type='xs:string' />
-    <xs:attribute msprop:VersionStart='6' name='Unknown_2' type='xs:boolean' use='required' />
+    <xs:attribute msprop:VersionStart='6' name='Guerilla_Deployment' type='xs:boolean' use='required' />
   </xs:complexType>
   <xs:complexType name="unit_stats_naval_crew_tables">
     <xs:attribute name='Crew_ID' type='xs:string' use='required' />
