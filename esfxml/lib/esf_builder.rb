@@ -257,8 +257,8 @@ class EsfBuilder
         put_4x("\x5a", pack_i1)
         return
       end
-      pack_i2 = elems.pack("v*")
-      if pack_i2.unpack("v*") == elems
+      pack_i2 = elems.pack("s*")
+      if pack_i2.unpack("s*") == elems
         put_4x("\x5b", pack_i2)
         return
       end
