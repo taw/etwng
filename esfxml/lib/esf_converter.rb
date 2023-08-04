@@ -210,7 +210,7 @@ module EsfConvertBasic
           if str.empty?
             out!(" <s/>")
           else
-            out!(" <s>#{str}</s>")
+            out!(" <s>#{str.xml_escape}</s>")
           end
         end
         out!("</str_ary>")
@@ -230,7 +230,7 @@ module EsfConvertBasic
           if str.empty?
             out!(" <asc/>")
           else
-            out!(" <asc>#{str}</asc>")
+            out!(" <asc>#{str.xml_escape}</asc>")
           end
         end
         out!("</asc_ary>")
