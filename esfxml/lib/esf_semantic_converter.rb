@@ -1486,7 +1486,7 @@ end
       [:s, 10] => "Region Name",
       [:u, 11] => "Region ID",
       [:u, 12] => "Governor AI ID",
-      [:u_ary, 13] => "Faction AI IDs"
+      [:u_ary, 13] => "Faction AI IDs Needed For Victory Condition"
     )
   end
 
