@@ -1082,7 +1082,9 @@ end
     end
   end
 
-  def convert_rec_LOCOMOTABLE
+  # This fails in Warhammer 3, but the code looks questionable in general
+  # with lookahead_v2x?(ofs_end)
+  def DISABLED_convert_rec_LOCOMOTABLE
     each_rec_member("LOCOMOTABLE") do |ofs_end, i|
       type = lookahead_type
       # Steps 0/1 take two elements, so steps 6/7 really mean elements 8/9
