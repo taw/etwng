@@ -1206,7 +1206,11 @@ module XmlTagHandlers
     @esf.put_byte buf.to_i
   end
   def on_text_node_flt(attributes, buf, ctx)
-    @esf.put_flt buf.to_f
+    if buf == "Infinity"
+      @esf.put_flt Float::INFINITY
+    else
+      @esf.put_flt buf.to_f
+    end
   end
   def on_text_node_fltnan(attributes, buf, ctx)
     @esf.put_fltnan buf.to_i(16)
