@@ -28,7 +28,7 @@ Some partial information is here:
 	* 1 byte  - 01 - original schema
 	* 9 bytes - fc fd fe ff XX 00 00 00 01 - revised schema version XX
 * uint32 number of rows
-* data for in each row one after another,
+* data for each row one after another,
   without separators, metadata, or padding
 
 To even figure out where rows begin and end we need to know schema.

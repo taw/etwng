@@ -1350,7 +1350,7 @@ end
       [:s, 23] => "Emergent Nation",
       [:s, 24] => "Region Rebels",
       [:s, 25] => "Region Culture For Types Of Buildings",
-      [:s, 37] => "Latest Constuction",
+      [:s, 37] => "Latest Construction",
       [:u, 38] => "One Of These 5/10/15/20/25/30/40 Amount Of Prestige When Conquered",
       [:u, 39] => "Region Array. From Top To Bottom. 1st 62 Regions 881206575. 2nd 15 Regions 1771634741. 3rd 32 Regions 1928099569. 4th 28 Regions 688200897. Why????"
     )
@@ -1367,7 +1367,7 @@ end
         when [:s, 3]
           annotate_value! "Building Slot Name"
         when [:i, 7]
-          annotate_value! "1=Meagre 2=Low 3=Average 4=High 5=Abundant Yeilds For Commodities"
+          annotate_value! "1=Meagre 2=Low 3=Average 4=High 5=Abundant Yields For Commodities"
         when [:i, 8]
           annotate_value! "1=Very Poor 2=Poor 3=Growing 4=Prosperous 5=Wealthy For Town/Port/Road/Wall"
         when [:bool, 9]
@@ -1421,7 +1421,7 @@ end
     annotate_rec("ARMY",
       [:i, 4] => "Army ID",
       [:u, 5] => "Army In Building Slot ID",
-      [:bool, 6] => "Under Seige",
+      [:bool, 6] => "Under Siege",
       [:u, 7] => "Army ID Of Ship Escorting"
     )
   end
@@ -1598,7 +1598,7 @@ end
   def convert_rec_CAI_BUILDING_SLOT
     annotate_rec("CAI_BUILDING_SLOT",
       [:u, 0] => "Building Slot ID",
-      [:u, 1] => "Bulding type: 0 = Settlement, 1 = Wall/Road, 2 = Town, 3 = Port, 4 = Mine, 5 = Farm, 6 = Trade Resource, 7 = Multiple Trade Resources",
+      [:u, 1] => "Building type: 0 = Settlement, 1 = Wall/Road, 2 = Town, 3 = Port, 4 = Mine, 5 = Farm, 6 = Trade Resource, 7 = Multiple Trade Resources",
       [:u, 2] => "Settlement AI ID OR Region Slot AI ID If Not Part Of The Settlement"
     )
   end
@@ -2123,7 +2123,7 @@ end
         out!("<!-- Lengths Of Sub-segments -->")
         # pass through
       elsif @data[@ofs].ord == 0x4a and j == 1
-        out!("<!-- Cummulative Lengths Of Sub-segments -->")
+        out!("<!-- Cumulative Lengths Of Sub-segments -->")
         # pass through
       elsif @data[@ofs].ord == 0x48 and j == 0
         out!("<!-- Domestic Trade Route IDs -->")

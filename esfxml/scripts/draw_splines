@@ -71,7 +71,7 @@ def draw_splines!(xml_path, svg_path)
   # * min y (y coordinate is flipped)
   # * max x
   # * max y (y coordinate is flipped)
-  # * pixel size of wider dimention (narrower dimension proportional)
+  # * pixel size of wider dimension (narrower dimension proportional)
   svg.set_view(-1280.0, -640.0, 1280.0, 640.0, 1000)
   parse_splines(xml_path).each{|coords, is_land|
     style = is_land ? land_style : sea_style

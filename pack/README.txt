@@ -36,7 +36,7 @@ each entry is:
 * NUL-terminated ASCII string as file name, for example "patch2.pack\x00"
   dependency in patch3.pack file.
 
-File list section	 has size and entries count as specified above,
+File list section has size and entries count as specified above,
 each entry is:
 * uint32 file size
 * NUL-terminated ASCII string as full file path.

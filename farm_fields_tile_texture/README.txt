@@ -25,5 +25,5 @@ The most common is filepair, both files being jpegs:
 First of the pair seems to depend on kind of file - that is in which directory it was found
 Second of the pair looks like a heightmap always.
 
-There are also other objects type.
+There are also other object types.
 Details will follow later.

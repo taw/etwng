@@ -17,7 +17,7 @@ There might be other files as well, xml, bitmap, or anything else.
 ### System Requirements - OSX/Linux
 It should now work on every system (by every I mean OSX, Linux, and Windows) both ways.
 
-For OSX) and Linux esf2xml should work out of the box, for xml2esf you only need to run this command, or install nokogiri some other way:
+For OSX and Linux esf2xml should work out of the box, for xml2esf you only need to run this command, or install nokogiri some other way:
 $ sudo gem install nokogiri
 
 ### System Requirements - Windows

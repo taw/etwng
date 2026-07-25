@@ -30,7 +30,7 @@ third foo-0002.xml etc.
 foo-0001.xml, second foo-0002.xml and so on.
 
 If only directory is given and no file name converter checks
-if records starts with a string, and if so appends it as if
+if record starts with a string, and if so appends it as if
 pattern was "directory/%s", otherwise it just starts with a number.
 
 If some part of the path is empty converter may delete "-" character

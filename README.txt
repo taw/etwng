@@ -33,7 +33,7 @@ Usually there are multiple layers of data, and figuring out one layer
 isn't success yet.
 
 For example if we find an image and it looks like something directly
-displayed on screen - like an unit card, or an icon - our work is done.
+displayed on screen - like a unit card, or an icon - our work is done.
 If it looks like a texture, we probably need to figure out UV coordinates,
 and similar minor points.
 
@@ -48,7 +48,7 @@ equivalent of XML, so we're down one layer. But what's the
 meaning of different nodes, and different arguments?
 
 And embedded inside such ESF might be binary data,
-in which case we're have to dig even deeper.
+in which case we have to dig even deeper.
 
 It is similar with DB tables - their low-level schemas are usually known,
 their meaning not always.

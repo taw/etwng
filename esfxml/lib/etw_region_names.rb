@@ -1,5 +1,5 @@
 # Names in this file are used only for annotations (XML comments) for pathfinding.esf
-# If you want correct annotations for a map other than Empire Totat War's main map,
+# If you want correct annotations for a map other than Empire Total War's main map,
 # you may need to change these values.
 
 EtwRegionNames = Hash[[

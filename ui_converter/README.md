@@ -21,7 +21,7 @@ About 2% of files don't convert, most likely due to converter bugs.
 
 ## CREDITS
 
-The converter was was originally written by alpaca (Stefan Reutter).
+The converter was originally written by alpaca (Stefan Reutter).
 
 What you see in this directory is based on alpaca's NTW UI converter version 1.1 from 25th August 2010.
 

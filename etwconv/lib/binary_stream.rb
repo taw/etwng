@@ -58,7 +58,7 @@ class BinaryStream
 end
 
 # It would be a good idea to move as much as possible into these subclasses,
-# and achieve more reader/writer symetry
+# and achieve more reader/writer symmetry
 
 class BinaryStreamWriter < BinaryStream
   def initialize

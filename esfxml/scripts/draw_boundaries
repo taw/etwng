@@ -98,7 +98,7 @@ class FullMapSVG < SVG
     # * min y (y coordinate is flipped)
     # * max x
     # * max y (y coordinate is flipped)
-    # * pixel size of wider dimention (narrower dimension proportional)
+    # * pixel size of wider dimension (narrower dimension proportional)
     if bbox.nil?
       set_view(-1280.0, -640.0, 1280.0, 640.0, 2560)
     else

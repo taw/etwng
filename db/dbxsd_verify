@@ -76,9 +76,9 @@ class DbxsdVerify
 
   def verify
     only_ct  = complex_types.keys.sort - dbdataset.sort
-    warn "complexTypes defined without correspending DBDataSet entry: #{only_ct.inspect}" unless only_ct.empty?
+    warn "complexTypes defined without corresponding DBDataSet entry: #{only_ct.inspect}" unless only_ct.empty?
     only_dds = dbdataset.sort - complex_types.keys.sort
-    warn "DBDataSet entries defined without correspending complexType: #{only_dds.inspect}" unless only_dds.empty?
+    warn "DBDataSet entries defined without corresponding complexType: #{only_dds.inspect}" unless only_dds.empty?
 
     uniques.each{|name, sel, fields|
       fields.each{|fn|

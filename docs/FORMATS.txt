@@ -35,7 +35,7 @@ All data seems to be in following formats:
 * .dds - [LAYER DONE]
 
 .tga and .jpg are universally supported.
-.dds (Microsoft DirectDraw Surface format) is not common, but has a lot of converters, including ImageMagic
+.dds (Microsoft DirectDraw Surface format) is not common, but has a lot of converters, including ImageMagick
 
 Also seen. All at least [LAYER DONE], and most likely only used for testing etc.:
 * .tga_old = .tga
@@ -79,7 +79,7 @@ Existing tools are usable, but lack a few important capabilities.
 Range is:
 * [TOOLS NEEDED]/[DONE]       - about half of the tables
 * [TOOLS NEEDED]/[LAYER DONE] - for most tables we know number and type of columns, not their meaning
-* [UNKWOWN] - 1
+* [UNKNOWN] - 1
 
 == ESF ==
 

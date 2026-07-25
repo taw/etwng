@@ -21,7 +21,7 @@ you can download it from http://www.7-zip.org/sdk.html
 
 == Linux and OSX ==
 
-Converters work with either JRuby on standard Ruby.
+Converters work with either JRuby or standard Ruby.
 
 Whichever you installed you need to install gem nokogiri, with either:
 # Ruby

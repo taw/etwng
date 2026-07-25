@@ -4,7 +4,7 @@ If that doesn't work for you, there are 2 .luac decompilers here.
 
 I'd generally recommend using unluac.jar, as it can handle wider range of .luac files, and doesn't require compilation.
 
-The older luadec is a hacked lua 5.0 decompiler, and since Total War games use lua 5.1, it can sadly can only handle simpler .luac files.
+The older luadec is a hacked lua 5.0 decompiler, and since Total War games use lua 5.1, it can sadly only handle simpler .luac files.
 
 ## Usage of unluac.jar
 
@@ -22,7 +22,7 @@ There are problems in both luadec and in my quick hacks to make lua use single p
 
 Build script works on OSX and Linux. It should be possible to adapt it to other platforms supported by lua without too much effort.
 
-Total War lua engine is 32-bit, while all operating system nowadays are 64-bit, so build scripts passes appropriate flags to the compiler.
+Total War lua engine is 32-bit, while all operating systems nowadays are 64-bit, so build script passes appropriate flags to the compiler.
 
 ## Requirements for building luadec
 
