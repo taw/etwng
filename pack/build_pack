@@ -2,7 +2,6 @@
 
 require "find"
 require "pathname"
-require "pp"
 
 class PackFile
   def initialize(pack_type)

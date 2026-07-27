@@ -2,7 +2,6 @@
 
 require "pathname"
 require "fileutils"
-require "pp"
 
 def round_trip_test!(source)
   Pathname("tmp").mkpath

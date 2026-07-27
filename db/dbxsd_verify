@@ -1,10 +1,8 @@
-#!/usr/bin/env ruby1.9
+#!/usr/bin/env ruby
 # This utility validates DB.xsd for semantic errors (broken links etc.)
 # It's only useful for automatically generated DB.xsd files
 
-require "rubygems"
 require "nokogiri"
-require "pp"
 
 class DbxsdVerify
   def initialize(doc)

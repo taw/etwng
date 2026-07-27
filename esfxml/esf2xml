@@ -3,12 +3,6 @@
 require "fileutils"
 require_relative "./lib/esf_converter"
 
-class String
-  def unpack1(*args)
-    unpack(*args).first
-  end unless method_defined? :unpack1
-end
-
 verbose = false
 semantic = false
 while ARGV[0] == "--verbose" or ARGV[0] == "--quiet" or ARGV[0] == "--semantic"

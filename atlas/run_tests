@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require "pp"
 
 Dir["samples/*"].each do |sample|
   tsv = "tmp/" + File.basename(sample, ".atlas") + ".tsv"

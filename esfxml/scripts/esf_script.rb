@@ -1,6 +1,4 @@
-require "rubygems"
 require "nokogiri"
-require "pp"
 require "set"
 
 class EsfScript

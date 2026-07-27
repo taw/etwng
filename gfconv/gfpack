@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require "pp"
 
 class File
   def self.save_as_new(base, ext, content)
@@ -8,7 +7,7 @@ class File
     fn    = "#{base}#{ext}"
     while true
       begin
-        File.open(fn, (IO::BINARY rescue 0)|IO::CREAT|IO::EXCL|IO::WRONLY){|fh| fh.write content}
+        File.open(fn, IO::BINARY|IO::CREAT|IO::EXCL|IO::WRONLY){|fh| fh.write content}
         return
       rescue Errno::EEXIST
         extra += 1

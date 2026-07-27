@@ -6,17 +6,7 @@ require 'net/http'
 
 # FIXME: Make comment formatting RDoc-friendly. It's not always so now.
 
-# In Ruby 2 Symbol will be a subclass of String, and
-# this won't be needed any more. Before then...
 class Symbol
-    if RUBY_VERSION < "2"
-        include Comparable
-        def <=>(other)
-            raise ArgumentError.new("comparison of #{self.class} with #{other.class} failed") unless other.is_a? Symbol
-            to_s <=> other.to_s
-        end
-    end
-
     alias_method :eqeqeq_before_magic_xml, :===
     def ===(*args, &blk)
         if args.size >= 1 and args[0].is_a? XML

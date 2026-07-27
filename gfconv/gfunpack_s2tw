@@ -9,7 +9,7 @@ class File
     fn    = "#{base}#{ext}"
     while true
       begin
-        File.open(fn, (IO::BINARY rescue 0)|IO::CREAT|IO::EXCL|IO::WRONLY){|fh| fh.write content}
+        File.open(fn, IO::BINARY|IO::CREAT|IO::EXCL|IO::WRONLY){|fh| fh.write content}
         return fn
       rescue Errno::EEXIST
         extra += 1

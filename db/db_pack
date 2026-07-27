@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require_relative "./db_schemata"
-require "pry"
 
 class DbTsvFile
   attr_reader :schema
@@ -49,9 +48,8 @@ class DbTsvFile
 
     if @strict
       @data = []
-      require "rubygems"
-      require "fastercsv"
-      FCSV.new(@fh, :col_sep => ",").each{|row| @data << row}
+      require "csv"
+      CSV.new(@fh, :col_sep => ",").each{|row| @data << row}
     else
       @data = @fh.readlines.map{|line|
         line.sub(/\r?\n?\z/, "").split(/\t/)

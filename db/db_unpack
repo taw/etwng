@@ -145,7 +145,7 @@ class DbFile
 
     if $strict
       rv = ""
-      csv = FCSV.new(rv, :col_sep => ",")
+      csv = CSV.new(rv, :col_sep => ",")
       csv << [header]
       csv << schema_line
       data.each{|row| csv << row}
@@ -207,8 +207,7 @@ def parse_argv
 
   loop do
     if ARGV[0] == '--strict'
-      require "rubygems"
-      require "fastercsv"
+      require "csv"
       strict = true
       ARGV.shift
       redo

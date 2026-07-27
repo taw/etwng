@@ -1,4 +1,3 @@
-require "pp"
 require "fileutils"
 require "find"
 

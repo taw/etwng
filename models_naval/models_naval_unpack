@@ -471,13 +471,6 @@ if ARGV[0] == "--empire"
   ARGV.shift
 end
 
-unless RUBY_VERSION >= '2.0'
-  STDERR.puts "You're trying to run this with ruby #{RUBY_VERSION}, it requires 2.0 or newer"
-  STDERR.puts "If you're using old jruby version pass --2.0 argument, like:"
-  STDERR.puts "jruby --2.0 #{$0} #{ARGV.join(' ')}"
-  exit 1
-end
-
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} [--empire] models_naval_dbtable models_naval_dir"
   exit 1

@@ -2,7 +2,6 @@
 
 require 'pathname'
 require 'find'
-require 'pp'
 
 def contents(path)
   out = []

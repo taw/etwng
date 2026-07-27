@@ -5,12 +5,6 @@ require_relative "./lib/esf_builder"
 require_relative "./lib/pgm"
 require_relative "./lib/commander_details"
 
-class String
-  def unpack1(*args)
-    unpack(*args).first
-  end unless method_defined? :unpack1
-end
-
 module XmlTagHandlers
   ## Semantic data types - bmd.dat
   def on_start_node_bmd_textures(attributes)

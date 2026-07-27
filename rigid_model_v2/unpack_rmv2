@@ -2,7 +2,6 @@
 
 # THIS IS JUST EXPERIMENTAL CODE, IT DECODES NOTHING
 
-require "pp"
 
 class Float
   def pretty_single

@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 
-require "rubygems"
 require "nokogiri"
-require "pp"
 require "pathname"
 require "fileutils"
 

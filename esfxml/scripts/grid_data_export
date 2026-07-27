@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 
-require "rubygems"
 require "nokogiri"
-require "pp"
 
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} grid_data_in.xml output.tsv"

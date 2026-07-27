@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require "pathname"
-require "pp"
 
 unless ARGV.size == 2
   STDERR.puts "Usage: #{$0} input_dir output.farm_fields_tile_texture"

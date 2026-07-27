@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 
-require "rubygems"
 require "fileutils"
-require "pp"
 
 class SVG
   attr_accessor :width, :height, :transform

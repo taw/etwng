@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby
 
-require "rubygems"
 require "fileutils"
 require "pathname"
-require "pp"
 
 def parse_pgm(path_in)
   File.open(path_in, 'rb'){|fh_in|

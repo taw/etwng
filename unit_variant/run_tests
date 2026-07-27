@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require "fileutils"
-require "pp"
 
 def cleanup_dir(dir)
   FileUtils.rm_rf dir

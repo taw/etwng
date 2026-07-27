@@ -3,15 +3,11 @@
 require_relative "../esf_script"
 require "csv"
 
-# AR polyfill; Ruby 3+ has it
+# ActiveSupport extension; Ruby only has the non-destructive Hash#except
 class Hash
   def except!(*keys)
     keys.each { |key| delete(key) }
     self
-  end
-
-  def except(*keys)
-    dup.except!(*keys)
   end
 end
 

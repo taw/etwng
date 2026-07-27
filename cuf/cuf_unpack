@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require "fileutils"
-require "pp"
 
 class CUF
   attr_reader :data, :ofs, :path
